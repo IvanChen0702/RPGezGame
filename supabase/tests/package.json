@@ -1,0 +1,11 @@
+{
+  "name": "rpgezgame-database-regressions",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node permissions438.mjs && node presence439.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.16"
+  }
+}

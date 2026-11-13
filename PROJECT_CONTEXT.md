@@ -35,7 +35,7 @@
 
 截至本次交接，本對話的工具清單仍未提供 Supabase 管理工具，因此沒有從此處執行新的正式 SQL 或 Edge Function 部署。此為當次狀態，後續應重新檢查。
 
-城鎮其他玩家寵物功能的前端與更新 SQL 已在 GitHub；SQL 位於 `supabase/migrations/202611130001_town_companions436.sql`。正式執行狀態尚未由本對話驗證；取得連線後先查現有函式與資料結構，再決定是否套用，避免重複部署或覆蓋更新版本。
+使用者於 2026/11/13 提供線上唯讀盤點：確認 19 張表及新表預設 TRUNCATE 過廣、game_inventory_action 的 PUBLIC／anon EXECUTE 過廣，以及 436 的 ID 關聯錯誤。18:16 的補充確認 presence_id → auth_user_id → legacy_account_id → PlayerSaves.account_id。已準備 438 權限與 439 寵物修正及隔離測試，操作見 `supabase/README.md`；本對話尚未部署。歷史 `202611130001_town_companions436.sql` 不應單獨套用。取得連線後先比對線上定義、備份及驗證，再套用新更新，避免覆蓋其他更新。
 
 ## 本次 Excel 參考版本
 

@@ -43,6 +43,6 @@ python3 -m http.server 8000 --bind 127.0.0.1 --directory _site
 
 可用 `SITE_URL=https://實際正式站網域 python3 tools/package_site.py` 檢查分享資訊；本機素材仍使用相對資源路徑，分享資訊預設指向正式站。所有檔案均檢查 Cloudflare Pages 的單檔 25 MiB 上限。後端白名單仍需允許本機 origin 才能測試登入。
 
-## 城鎮同行寵物更新（436）
+## 城鎮同行寵物及權限更新（438／439）
 
-前端部署後，另需在 Supabase SQL Editor 執行 [同行寵物更新 SQL](supabase/migrations/202611130001_town_companions436.sql)。操作與驗收方式見 [更新說明](supabase/README.md)。尚未執行時沿用原在線名單，正式站的其他玩家寵物會在後端更新後開始顯示。這些 SQL 與說明不會打包至公開網站。
+原 436 的 presence ID 關聯已由線上盤點確認有誤；應依 [更新說明](supabase/README.md) 套用新的 439 寵物修正及 438 授權修正，不要重新執行歷史 436。這些 SQL 必須由已連線的 Supabase 管理工具執行；GitHub／Cloudflare 部署不會自動套用。SQL、測試與說明不會打包至公開網站。

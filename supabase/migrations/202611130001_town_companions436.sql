@@ -1,4 +1,6 @@
--- Run once in Supabase SQL Editor. Keeps game_town_presence420 and old clients intact.
+-- HISTORICAL: contains the incorrect account-ID assumption discovered in the live review.
+-- Do not apply this file alone. Use 202611130003_fix_presence_identity439.sql instead.
+-- Original implementation retained for history and regression reproduction.
 -- Only the server-selected, already-public roster can supply companion snapshots.
 begin;
 
