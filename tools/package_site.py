@@ -7,7 +7,8 @@ import shutil
 
 root = Path(__file__).resolve().parents[1]
 out = root / "_site"
-site_url = (os.environ.get("SITE_URL") or os.environ.get("CF_PAGES_URL") or "").strip()
+# Use the stable production domain rather than a deployment-specific preview URL.
+site_url = (os.environ.get("SITE_URL") or "https://rpgezgame.pages.dev/").strip()
 if site_url:
     parsed = urlparse(site_url)
     if (parsed.scheme not in {"http", "https"} or not parsed.hostname
