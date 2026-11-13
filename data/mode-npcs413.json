@@ -1,0 +1,120 @@
+{
+  "version": 413,
+  "atlasColumns": 6,
+  "npcs": [
+    {
+      "id": "hub_worldboss_413",
+      "name": "討伐軍需官",
+      "mode": "worldboss",
+      "role": "軍需",
+      "column": 0,
+      "art": "assets/images/npcs/mode-npcs413.webp",
+      "frame": {
+        "x": 0,
+        "y": 145,
+        "width": 362,
+        "height": 452
+      },
+      "interactionEnabled": false,
+      "dialogueEnabled": false,
+      "questEnabled": false,
+      "dialogueId": null,
+      "questIds": []
+    },
+    {
+      "id": "hub_extreme_413",
+      "name": "試煉監察員",
+      "mode": "extreme",
+      "role": "試煉",
+      "column": 1,
+      "art": "assets/images/npcs/mode-npcs413.webp",
+      "frame": {
+        "x": 362,
+        "y": 145,
+        "width": 362,
+        "height": 452
+      },
+      "interactionEnabled": false,
+      "dialogueEnabled": false,
+      "questEnabled": false,
+      "dialogueId": null,
+      "questIds": []
+    },
+    {
+      "id": "hub_dungeon_413",
+      "name": "副本接待員",
+      "mode": "dungeon",
+      "role": "接待",
+      "column": 2,
+      "art": "assets/images/npcs/mode-npcs413.webp",
+      "frame": {
+        "x": 724,
+        "y": 145,
+        "width": 362,
+        "height": 452
+      },
+      "interactionEnabled": false,
+      "dialogueEnabled": false,
+      "questEnabled": false,
+      "dialogueId": null,
+      "questIds": []
+    },
+    {
+      "id": "hub_relic_413",
+      "name": "遺跡考古員",
+      "mode": "relic",
+      "role": "考古",
+      "column": 3,
+      "art": "assets/images/npcs/mode-npcs413.webp",
+      "frame": {
+        "x": 1086,
+        "y": 145,
+        "width": 362,
+        "height": 452
+      },
+      "interactionEnabled": false,
+      "dialogueEnabled": false,
+      "questEnabled": false,
+      "dialogueId": null,
+      "questIds": []
+    },
+    {
+      "id": "hub_arena_413",
+      "name": "競技技師",
+      "mode": "arena",
+      "role": "維護",
+      "column": 4,
+      "art": "assets/images/npcs/mode-npcs413.webp",
+      "frame": {
+        "x": 1448,
+        "y": 145,
+        "width": 362,
+        "height": 452
+      },
+      "interactionEnabled": false,
+      "dialogueEnabled": false,
+      "questEnabled": false,
+      "dialogueId": null,
+      "questIds": []
+    },
+    {
+      "id": "hub_boxing_413",
+      "name": "擂台教練",
+      "mode": "boxing",
+      "role": "訓練",
+      "column": 5,
+      "art": "assets/images/npcs/mode-npcs413.webp",
+      "frame": {
+        "x": 1810,
+        "y": 145,
+        "width": 362,
+        "height": 452
+      },
+      "interactionEnabled": false,
+      "dialogueEnabled": false,
+      "questEnabled": false,
+      "dialogueId": null,
+      "questIds": []
+    }
+  ]
+}
