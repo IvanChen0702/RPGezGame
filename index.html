@@ -12494,10 +12494,15 @@ function characterScheduleSave_(){
  },2000);
 }
 function characterInteractionLocked_(){return characterResumePending_||!!characterStartupPromise_||characterLogoutBusy_||serverMutationLock_||accountSubmitPending_}
-document.addEventListener('keydown',e=>{if(characterInteractionLocked_()&&['Enter',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();}},true);
+// Skipping presentation never releases the transaction lock or confirms a reward.
+function giftSkipInteractionAllowed442_(target){
+ const button=target?.closest?.('.gift-ui431 .g431-skip'),el=button?.closest('.gift-ui431'),run=el?.giftRun431;
+ return !!(serverMutationLock_&&!characterResumePending_&&!characterStartupPromise_&&!characterLogoutBusy_&&!accountSubmitPending_&&button&&!button.disabled&&!button.hidden&&el.isConnected&&run&&run.owner===questOwnerKey368());
+}
+document.addEventListener('keydown',e=>{if(characterInteractionLocked_()&&['Enter',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)&&!giftSkipInteractionAllowed442_(e.target)){e.preventDefault();e.stopImmediatePropagation();}},true);
 document.addEventListener('click',e=>{
  if(enhanceRushId_&&e.target.closest?.('[onclick*="toggleEnhanceRush_"]')){e.preventDefault();e.stopImmediatePropagation();enhanceRushStop_=true;enhanceRushButtons_(enhanceRushId_);return;}
- if(characterInteractionLocked_()&&!e.target.closest?.('#uiAlertOverlay')){e.preventDefault();e.stopImmediatePropagation();}
+ if(characterInteractionLocked_()&&!e.target.closest?.('#uiAlertOverlay')&&!giftSkipInteractionAllowed442_(e.target)){e.preventDefault();e.stopImmediatePropagation();}
 },true);
 
 function transactionCatalog78_(c){
