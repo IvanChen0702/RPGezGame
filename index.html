@@ -11009,7 +11009,7 @@ async function relicAction149_(button,action){
  catch(e){relicModal144_('操作尚未完成',`<p>${escapeHtml(e.message||String(e))}</p>`,'<button onclick="relicRecover144_()">重新讀取</button>');return false;}
  finally{await waitMs(Math.max(0,350-(Date.now()-token.started)));if(relicUiBusy149_===token){relicUiBusy149_=null;button.classList.remove('relic-selected149');button.removeAttribute('aria-pressed');if(status?.isConnected)status.hidden=true;relicSyncButtons149_();}}
 }
-function relicIcon149_(o){if(String(o.type).toUpperCase()==='GOLD')return coinArt208_();if(o.type==='BOX')return chestArt206_('curse');if(o.type==='STONE'||o.type==='STONES')return artTag202_('item_stonePack10');const art202=objectArt202_(o.item||o.id,o.type==='GEM'||o.type==='STONE'?'gem':o.type==='EQUIPMENT'?'equipment':'item');if(art202)return art202;
+function relicIcon149_(o){if(String(o.type).toUpperCase()==='EXP')return '<img src="assets/images/settlement400/exp.svg" alt="">';if(String(o.type).toUpperCase()==='GOLD')return coinArt208_();if(o.type==='BOX')return relicCursedArt429_();if(o.type==='STONE'||o.type==='STONES')return artTag202_('item_stonePack10');const art202=objectArt202_(o.item||o.id,o.type==='GEM'||o.type==='STONE'?'gem':o.type==='EQUIPMENT'?'equipment':'item');if(art202)return art202;
  if(o.type==='GEM'&&o.item)return `<span class="relic-gem149"><span class="gem-diamond" style="${gemVisualStyle_(o.item)}"></span></span>`;
  if(o.type==='BOX'||['luckyBox','wargodBox'].includes(o.id))return giftboxArt101_();
  return giftboxIcon101_(o);
@@ -11051,10 +11051,35 @@ function relicCurse144_(id,b=state.currentBattle){return !!b?.relic144&&b.relicC
 function relicCurseDescription154_(curse){return curse?.CurseID==='crit'?'現有爆擊率-80%':String(curse?.Description||'');}
 function relicCurseInfo144_(id){const c=relicRun144_?.curseCatalog?.find(c=>c.CurseID===id)||{CurseID:id,Name:id,Description:id};return {...c,Description:relicCurseDescription154_(c)};}
 function relicLabels144_(ids){return (ids||[]).map(id=>{const x=relicCurseInfo144_(id);return compactStatusTag_(x.Name,'寶庫詛咒','debuff',x.Description+'；只能由安全據點解除。').replace('<span class=', '<span data-effect-key398="'+escapeAttr('debuff_relic_'+id)+'" class=');}).join('');}
-function relicLootHtml144_(loot){return (loot||[]).filter(Boolean).map(o=>{
- const item=o.item,label=o.type==='EQUIPMENT'&&item?`<span class="rarity-${rarityClass[equipmentRarity280_(item)]||'common'}">${escapeHtml(item.name||o.name)}</span>${enhancementHtml(item.enhance||0)}`:o.type==='GEM'?`<b style="${item?gemNameStyle_(item):''}">寶石：${escapeHtml(o.name||item?.name||'未命名寶石')}</b>`:`<b>${escapeHtml(o.name)}</b>`;
- return `<div class="relic-loot144 ${o.type==='EQUIPMENT'?'item-card':'relic-loot-'+String(o.type).toLowerCase()+'149'}"><span class="relic-loot-icon149">${relicIcon149_(o)}</span><div class="relic-loot-name149">${label}${o.type==='EQUIPMENT'?`<small>${escapeHtml(item?.rarity||'裝備')}｜${item?.sockets||0}洞</small>`:''}</div><strong class="relic-quantity149">×${Number(o.quantity||1).toLocaleString()}</strong></div>`;
- }).join('')||'<p class="small relic-empty149">本趟尚無戰利品</p>';}
+document.addEventListener('visibilitychange',()=>document.documentElement.toggleAttribute('data-relic-hidden429',document.hidden));
+function relicCursedArt429_(){return '<img class="relic-cursed-art429" src="assets/images/relic-ui429/cursed-chest.webp" alt="詛咒寶箱" width="160" height="160" decoding="async">';}
+function relicLootTile429_(o){
+ const type=String(o.type||'').toUpperCase(),item=o.item;
+ const raw=type==='EQUIPMENT'?equipmentRarity280_(item):type==='GEM'?(gemResolved_(item||{template:o.id})?.rarity||item?.rarity||gemTemplates?.[o.id]?.rarity||o.rarity):'一般';
+ const fx=itemBorderProfile_(rarityClass[raw]||raw||'common',type==='EQUIPMENT'?Number(item?.enhance||0):0);
+ const name=String(item?.name||o.name||itemTemplates?.[o.id]?.name||gemTemplates?.[o.id]?.name||o.id||(type==='GOLD'?'金幣':/STONES?/.test(type)?'強化石':'戰利品'));
+ const sockets=type==='EQUIPMENT'?Math.max(0,Number(item?.sockets)||0):0,quantity=Number(o.quantity??1);
+ const label=name+(sockets?' ('+sockets+'洞)':'')+(type==='EQUIPMENT'&&item?.enhance?' +'+Number(item.enhance):'');
+ return `<div class="r429-loot-item" data-loot-kind429="${escapeAttr(type)}" data-loot-rarity429="${fx.rarity}" style="--r429-color:${fx.color};--r429-edge:${fx.base};--r429-speed:${fx.speed}s"><div class="r429-tile" title="${escapeAttr(label)} ×${quantity.toLocaleString()}" aria-label="${escapeAttr(label)}，數量 ${quantity.toLocaleString()}"><span class="r429-icon">${relicIcon149_(o)}</span><strong class="r429-qty">×${quantity.toLocaleString()}</strong></div><div class="r429-name">${escapeHtml(label)}</div></div>`;
+}
+function relicSkin429_(root){
+ root.classList.add('relic-ui429');
+ const card=root.querySelector('.relic-card144'),head=card?.querySelector(':scope>header');if(!head)return;
+ const title=head.querySelector('h2')?.textContent||'',floor=Number(relicRun144_?.floor||0);
+ // Release only the presentation properties written by the old desktop skin.
+ [card,head,...root.querySelectorAll('.relic-actions144,.relic-actions144>button')].forEach(n=>n?.removeAttribute('style'));
+ head.innerHTML=`<img class="r429-header-art" src="assets/images/mode-entries422/relic.webp" alt="" width="64" height="64"><div class="r429-header-copy"><small>遺物探險 · 深層寶庫</small><h2>${escapeHtml(title)}</h2></div>${floor?`<div class="r429-floor"><b>${floor}</b><small>FLOOR</small></div>`:''}<button type="button" class="r429-close" aria-label="收起探險視窗" onclick="relicClose144_()">×</button>`;
+ relicSyncButtons149_();
+}
+function relicCampBody429_(){
+ const r=relicRun144_,can=!!r.curses.length,max=Math.max(1,totalStats().hp),hp=Math.max(0,Math.min(max,Number(r.hp)||0)),noHeal=r.curses.includes('noheal');
+ const supply=(kind,eyebrow,name,art,effect,note,action,disabled=false)=>`<button type="button" class="r429-supply r429-${kind}" onclick="${action}" ${disabled?'disabled':''}><small class="r429-service">${eyebrow}</small><span class="r429-medallion">${art}</span><b class="r429-supply-name">${name}</b><strong class="r429-effect">${effect}</strong><span class="r429-note">${note}</span><span class="r429-cta">${disabled?'目前無法使用':name==='淨化詛咒'?'選擇要解除的詛咒 →':'選擇'+name+' →'}</span></button>`;
+ return `<p class="r429-lead">在繼續深入之前，選擇一項補給。</p><div class="r429-hp"><div><small>剩餘生命</small><div><strong>${Math.floor(hp).toLocaleString()}</strong><span> / ${max.toLocaleString()}</span></div></div><div class="r429-meter-wrap"><progress value="${hp}" max="${max}" aria-label="剩餘生命"></progress><small>${hp/max<.3?'生命偏低 · ':''}補給僅能擇一</small></div></div><div class="r429-supplies">${supply('heal','恢復 · 生命','生命補給','<img src="assets/images/icons/items/item_redPotion.webp" alt="">','恢復最大 HP 的 30%',noHeal?'詛咒影響：無法恢復 HP':r.curses.includes('healing')?'枯竭咒印：回復量 −80%':'恢復生命，繼續冒險',"relicSupply144_('heal')",noHeal)}${supply('cooldown','整備 · 技能','技能整備','<img src="assets/images/icons/skills/manaSenseII.webp" alt="">','所有技能 CD −2','包含暫時換下的技能',"relicSupply144_('cooldown')")}${supply('cleanse','淨化 · 詛咒','淨化詛咒','<img src="assets/images/icons/items/item_eyeDrops.webp" alt="">','解除 1 個詛咒',can?'自行選擇要解除的詛咒':'目前沒有寶庫詛咒','relicCleanseModal144_()',!can)}</div><div class="r429-curses"><span>目前詛咒</span>${r.curses.length?r.curses.map(id=>{const c=relicCurseInfo144_(id);return `<span class="r429-curse-chip"><b>${escapeHtml(c.Name)}</b>${escapeHtml(c.Description)}</span>`}).join(''):'<span class="r429-note">目前沒有寶庫詛咒</span>'}</div>${relicAccum144_()}`;
+}
+function relicLootHtml144_(loot){
+ const items=(loot||[]).filter(Boolean);
+ return items.length?'<div class="r429-loot-grid">'+items.map(relicLootTile429_).join('')+'</div>':'<p class="small relic-empty149">本趟尚無戰利品</p>';
+}
 
 function relicBattleLocked159_(){return relicRun144_?.phase==='battle'||!!state.currentBattle?.relic144;}
 function relicArrangeActions152_(root){
@@ -11075,7 +11100,7 @@ function relicModal144_(title,body,actions=''){
 }
 
 function relicClose144_(){document.getElementById('relicOverlay144')?.remove();relicOverlay144_=null;}
-function relicAccum144_(){return `<details><summary>查看本趟累積戰利品（${relicRun144_?.loot?.length||0}項）</summary>${relicLootHtml144_(relicRun144_?.loot)}</details>`;}
+function relicAccum144_(){return `<details class="r429-accum"><summary>查看本趟累積戰利品（${relicRun144_?.loot?.length||0}項）</summary>${relicLootHtml144_(relicRun144_?.loot)}</details>`;}
 async function relicRequest144_(action,payload={}){
  if(relicFlight144_)return false;const session=characterSessionContext_(),account=cloudMeta.accountId;if(relicAccount144_!==account){relicRun144_=null;relicAccount144_=account;}const locked=action!=='progress';if(locked&&!beginServerMutation_('遺物探險')){planningUpdateNotice143_('資料同步中，請稍候再試。');return false;}
  const run=relicRun144_,pending={action,payload,runId:run?.id,sequence:run?.seq,requestId:crypto.randomUUID()};
@@ -11127,16 +11152,66 @@ function relicLockReady144_(){const root=document.getElementById('readyContent24
  root.insertAdjacentHTML('afterbegin','<p class="small relic-ready-hint144">可自由調整能力、技能、裝備與寶石；戰鬥內禁止使用消耗品。剩餘HP：'+Math.floor(relicRun144_.hp)+'，HP不補滿；換下技能仍保留CD。</p>');
 }
 async function relicBattle144_(){const out=await relicRequest144_('battle',{hp:relicRun144_.hp});if(out)await relicContinue144_();}
-function relicOfferModal144_(){const r=relicRun144_;relicModal144_(`第${r.floor}層勝利｜選擇戰利品`,`<p class="relic-lead149">選擇一項帶入本趟戰利品</p><div class="relic-options144">${r.offers.map((o,i)=>`<button class="relic-option144 ${o.type==='BOX'?'gift-card104 gift-fx-second104 relic-box149':'relic-currency149'}" onclick="relicChoose144_(${i})">${o.type==='BOX'?giftboxFxHtml104_('second'):''}<span class="relic-offer-icon149">${relicIcon149_(o)}</span><b class="relic-offer-name249">${escapeHtml(o.name)}</b>${o.type==='BOX'?`<span class="relic-offer-note249">開箱後揭曉獎勵</span>${o.curse?`<span class="relic-curse144"><strong>附帶詛咒｜${escapeHtml(o.curse.Name)}</strong><br>${escapeHtml(relicCurseDescription154_(o.curse))}</span>`:'<span class="relic-good149">不附加詛咒</span>'}`:`<strong class="relic-quantity149">×${o.quantity.toLocaleString()}</strong><span class="relic-offer-note249">直接獲得</span>`}<small class="relic-select149">選擇此獎勵 →</small></button>`).join('')}</div>${relicAccum144_()}`);document.getElementById('relicOverlay144')?.classList.add('relic-offer249');}
+function relicOfferModal144_(){
+ const r=relicRun144_;
+ relicModal144_(`第${r.floor}層勝利｜選擇戰利品`,`<p class="r429-lead">選擇一項獎勵，收入本趟戰利品。</p><div class="r429-choices">${r.offers.map((o,i)=>{const box=o.type==='BOX';return `<button type="button" class="r429-choice ${box?'r429-purple':'r429-gold'}" onclick="relicChoose144_(${i})"><small class="r429-kicker">${box?'神秘寶藏 · '+(o.curse?'附帶詛咒':'不附加詛咒'):'直接獲得 · 不附加詛咒'}</small><span class="r429-choice-art">${box?relicCursedArt429_():relicIcon149_(o)}</span><b class="r429-choice-name">${escapeHtml(o.name)}</b>${box?'<span class="r429-note">開啟後揭曉獎勵</span>':`<strong class="r429-amount">×${Number(o.quantity??1).toLocaleString()}</strong>`}<span class="r429-choice-note">${box?(o.curse?`<b>✧ ${escapeHtml(o.curse.Name)}</b><span>${escapeHtml(relicCurseDescription154_(o.curse))} · 可於安全據點解除</span>`:'<b>不附加詛咒</b><span>開啟後隨機獲得一項獎勵。</span>'):'<b>確定的收穫</b><span>收入本趟戰利品，結算時一併帶走。</span>'}</span><span class="r429-cta">${box?(o.curse?'接受詛咒，開啟寶箱 →':'選擇寶箱 →'):'選擇此獎勵 →'}</span></button>`}).join('')}${r.offers.length===2?'<span class="r429-or" aria-hidden="true"><span>或</span></span>':''}</div>${relicAccum144_()}`);
+ document.getElementById('relicOverlay144')?.classList.add('relic-offer429');
+}
 
 async function relicChoose144_(choice){const out=await relicRequest144_('choose',{choice});if(out)await relicContinue144_();}
-async function relicChest144_(){const run=relicRun144_;relicModal144_('寶箱開啟中',`<div class="relic-reveal149 gift-card104 gift-fx-jackpot104">${giftboxFxHtml104_('jackpot')}<div class="relic-chest144 opening206">${chestArt206_(run.floor===10?'boss':'curse')}</div><p class="relic-lead149">寶藏即將揭曉…</p></div>`);playSfx('buff');await waitMs(1000);if(relicRun144_!==run||!document.getElementById('relicOverlay144'))return;const out=await relicRequest144_('reveal');if(out)relicBetween144_();}
+let relicRevealFlight430_=null;
+function cursedChestMarkup430_(){return `<div class="c430-stage" aria-label="詛咒寶箱開啟動畫"><div class="c430-halo"></div><div class="c430-ground"></div><div class="c430-seal"></div><div class="c430-box"><img class="c430-closed" src="assets/images/relic-ui429/cursed-chest.webp" alt="封印的詛咒寶箱"><img class="c430-half" src="assets/images/relic-ui429/cursed-chest-half.webp" alt=""><img class="c430-opened" src="assets/images/relic-ui429/cursed-chest-open.webp" alt="開啟的詛咒寶箱"></div><div class="c430-beam"></div><div class="c430-flare"></div><div class="c430-ripple"></div><div class="c430-particles"></div></div><p class="c430-caption" role="status">封印正在解除…</p>`;}
+async function playCursedChest430_(root){
+ const el=s=>root.querySelector(s),duration=3200,clips=[];
+ await Promise.race([Promise.allSettled([...root.querySelectorAll('.c430-stage img')].map(img=>img.decode())),waitMs(1800)]);
+ if(!root.isConnected)return false;
+ function clip(target,frames){const a=target.animate(frames,{duration,fill:'both',easing:'linear'});a.pause();a.currentTime=0;clips.push(a);}
+clip(el('.c430-box'),[{offset:0,transform:'translateX(-50%) rotate(0deg) scale(1)'},{offset:.17,transform:'translateX(-50%) rotate(0deg) scale(1)'},{offset:.20,transform:'translateX(-50%) rotate(-1deg) scale(1.015)'},{offset:.23,transform:'translateX(-50%) rotate(1.2deg) scale(1.015)'},{offset:.26,transform:'translateX(-50%) rotate(-1deg) scale(1.02)'},{offset:.29,transform:'translateX(-50%) rotate(1deg) scale(1.02)'},{offset:.32,transform:'translateX(-50%) rotate(0deg) scale(1.025)'},{offset:.43,transform:'translateX(-50%) rotate(0deg) scale(1.015)'},{offset:.6,transform:'translateX(-50%) rotate(0deg) scale(1)'},{offset:1,transform:'translateX(-50%) rotate(0deg) scale(1)'}]);
+clip(el('.c430-closed'),[{offset:0,opacity:1},{offset:.28,opacity:1},{offset:.36,opacity:0},{offset:1,opacity:0}]);
+clip(el('.c430-half'),[{offset:0,opacity:0},{offset:.28,opacity:0},{offset:.36,opacity:1},{offset:.41,opacity:1},{offset:.53,opacity:0},{offset:1,opacity:0}]);
+clip(el('.c430-opened'),[{offset:0,opacity:0,transform:'translateY(8px) scaleY(.97)'},{offset:.41,opacity:0,transform:'translateY(8px) scaleY(.97)'},{offset:.54,opacity:1,transform:'translateY(-2px) scaleY(1.005)'},{offset:.65,opacity:1,transform:'translateY(0) scaleY(1)'},{offset:1,opacity:1,transform:'translateY(0) scaleY(1)'}]);
+clip(el('.c430-halo'),[{offset:0,opacity:.1},{offset:.25,opacity:.8},{offset:.43,opacity:1},{offset:.7,opacity:.55},{offset:1,opacity:.3}]);
+clip(el('.c430-seal'),[{offset:0,opacity:.2,scale:'1'},{offset:.3,opacity:.75,scale:'1.06'},{offset:.47,opacity:1,scale:'1.12'},{offset:.75,opacity:.4,scale:'1.03'},{offset:1,opacity:.28,scale:'1'}]);
+clip(el('.c430-flare'),[{offset:0,opacity:0,scale:'.25'},{offset:.27,opacity:0,scale:'.25'},{offset:.35,opacity:.8,scale:'1'},{offset:.42,opacity:.4,scale:'.8'},{offset:.51,opacity:.6,scale:'1.3'},{offset:.64,opacity:.18,scale:'1'},{offset:.88,opacity:0,scale:'.8'},{offset:1,opacity:0,scale:'.8'}]);
+clip(el('.c430-beam'),[{offset:0,opacity:0,scale:'.5 .3'},{offset:.35,opacity:0,scale:'.5 .3'},{offset:.52,opacity:.85,scale:'1 1'},{offset:.72,opacity:.45,scale:'1.1 1.1'},{offset:1,opacity:0,scale:'1.3 1.2'}]);
+clip(el('.c430-ripple'),[{offset:0,opacity:0,scale:'.25'},{offset:.3,opacity:0,scale:'.25'},{offset:.36,opacity:.65,scale:'1'},{offset:.6,opacity:0,scale:'3.2'},{offset:1,opacity:0,scale:'3.2'}]);
+for(let i=0;i<26;i++){const s=document.createElement('i');s.className='c430-spark';el('.c430-particles').append(s);const a=i*2.399963,dist=70+(i%5)*27,x=Math.cos(a)*dist,y=-50-Math.abs(Math.sin(a))*150,delay=.32+(i%7)*.028;clip(s,[{offset:0,opacity:0,transform:'translate(0,0) scale(.2)'},{offset:delay,opacity:0,transform:'translate(0,0) scale(.2)'},{offset:delay+.07,opacity:.85,transform:`translate(${x*.22}px,${y*.22}px) scale(1)`},{offset:Math.min(.97,delay+.43),opacity:0,transform:`translate(${x}px,${y}px) scale(.3)`},{offset:1,opacity:0,transform:`translate(${x}px,${y}px) scale(.3)`}])}
+
+ return new Promise(resolve=>{
+  let done=false;const motion=matchMedia('(prefers-reduced-motion: reduce)');
+  const cleanup=()=>{observer.disconnect();document.removeEventListener('visibilitychange',visibility);motion.removeEventListener('change',reduce);};
+  const finish=ok=>{if(done)return;done=true;cleanup();if(!ok)clips.forEach(a=>a.cancel());else if(el('.c430-caption'))el('.c430-caption').textContent='寶箱已開啟，正在確認獎勵…';resolve(ok);};
+  const visibility=()=>clips.forEach(a=>document.hidden?a.pause():a.play());
+  const reduce=()=>{if(motion.matches){clips.forEach(a=>a.finish());finish(true);}};
+  const observer=new MutationObserver(()=>{if(!root.isConnected)finish(false);});observer.observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('visibilitychange',visibility);motion.addEventListener('change',reduce);
+  Promise.all(clips.map(a=>a.finished.catch(()=>null))).then(()=>finish(root.isConnected));
+  visibility();reduce();
+ });
+}
+async function relicChest144_(){
+ const run=relicRun144_;if(!run)return;
+ if(relicRevealFlight430_?.run===run)return relicRevealFlight430_.promise;
+ const task={run,promise:null};relicRevealFlight430_=task;
+ task.promise=(async()=>{
+  const boss=run.floor===10;
+  relicModal144_('寶箱開啟中',boss?`<div class="relic-reveal149"><div class="relic-chest144 opening206">${chestArt206_('boss')}</div><p class="relic-lead149">寶藏即將揭曉…</p></div>`:cursedChestMarkup430_());
+  const root=document.getElementById('relicOverlay144');playSfx('buff');
+  const played=boss?(await waitMs(matchMedia('(prefers-reduced-motion: reduce)').matches?120:1000),true):await playCursedChest430_(root);
+  if(!played||relicRun144_!==run||!root.isConnected)return;
+  const out=await relicRequest144_('reveal');if(out&&root.isConnected)relicBetween144_();
+ })();
+ try{return await task.promise;}finally{if(relicRevealFlight430_===task)relicRevealFlight430_=null;}
+}
 
 function relicScale272_(cleared,depth){return RPG411.relicScale(bootstrapDataCache||{},cleared,depth);}
 function relicEnemySkill271_(enemy){const skill=String(enemy?.skill||'');return enemy?.id==='dragon'?skill.replace(/免疫所有異常(?:狀態)?/g,'免疫無法行動'):skill;}
 function relicBetween144_(){const r=relicRun144_;relicModal144_(`第${r.floor}層｜本關戰利品`,`${relicLootHtml144_([r.lastLoot])}<div>${relicLabels144_(r.curses)}</div>${relicAccum144_()}`,r.floor===10?'<button class="primary" onclick="relicRetreat144_()">領取全部獎勵並完成</button>':'<button onclick="relicRetreat144_()">帶走戰利品並撤離</button><button class="primary" onclick="relicAdvance144_()">繼續深入</button><button onclick="relicSaveLeave144_()">保存並離開</button>');if(r.floor===10)setTimeout(()=>{if(relicRun144_===r&&!relicFlight144_)void relicRetreat144_();},600);}
 async function relicAdvance144_(){const out=await relicRequest144_('advance');if(out)await relicContinue144_();}
-function relicCamp144_(){const r=relicRun144_,can=r.curses.length>0;relicModal144_(`第${r.floor}層｜安全據點`,`<p class="relic-lead149">選擇一項補給</p><div class="relic-hp149">剩餘生命 <strong>${Math.floor(r.hp).toLocaleString()}</strong><span> / ${totalStats().hp.toLocaleString()}</span></div><div class="relic-supplies149"><button class="relic-supply149 relic-heal149" onclick="relicSupply144_('heal')" ${r.curses.includes('noheal')?'disabled title="無法恢復HP"':''}><span class="relic-supply-icon149">✚</span><b>生命補給</b><strong>最大HP +30%</strong><small>${r.curses.includes('noheal')?'無法恢復HP':r.curses.includes('healing')?'受回復量－80%影響':'恢復生命，繼續冒險'}</small></button><button class="relic-supply149 relic-cd149" onclick="relicSupply144_('cooldown')"><span class="relic-supply-icon149">◷</span><b>技能整備</b><strong>所有技能 CD－2</strong><small>包含暫時換下的技能</small></button><button class="relic-supply149 relic-cleanse149" ${can?'':'disabled title="目前沒有可解除的寶庫詛咒"'} onclick="relicCleanseModal144_()"><span class="relic-supply-icon149">✧</span><b>淨化詛咒</b><strong>解除 1 個詛咒</strong><small>${can?'自行選擇要解除的詛咒':'目前沒有寶庫詛咒'}</small></button></div>${relicCampCurses232_()}${relicAccum144_()}`,`<button onclick="relicRetreat144_()">撤離結算</button><button onclick="relicSaveLeave144_()">保存並離開</button>`);document.getElementById('relicOverlay144')?.classList.add('relic-camp232');}
+function relicCamp144_(){
+ relicModal144_(`第${relicRun144_.floor}層｜安全據點`,relicCampBody429_(),'<button onclick="relicRetreat144_()">撤離結算</button><button onclick="relicSaveLeave144_()">保存並離開</button>');
+ document.getElementById('relicOverlay144')?.classList.add('relic-camp429');
+}
 
 function relicCleanseModal144_(){if(!relicRun144_?.curses.length)return;relicModal144_('選擇要解除的詛咒','<p class="relic-lead149">選定後立即消耗本次補給，解除該詛咒</p><div class="relic-cleanse-list149">'+relicRun144_.curses.map(id=>{const c=relicCurseInfo144_(id);return `<button class="relic-option144 relic-cleanse149" onclick="relicSupply144_('cleanse','${id}')"><b>${escapeHtml(c.Name)}</b><span>${escapeHtml(c.Description)}</span><small>解除此詛咒 →</small></button>`}).join('')+'</div>','<button onclick="relicCamp144_()">返回補給選擇</button>');}
 
@@ -20919,7 +20994,7 @@ async function recoverCloud79_(options={}){
  })();recoveryFlight79_=promise;try{return await promise}finally{recoveryFlight79_=null;}
 }
 async function cancelBattle79_(ask=true,automatic=false,expectedActiveId=null){
- const returnPage82=state.page;
+ const exitPage430=state.page==='battle'||state.page==='prepare'?characterEntryPage45_():state.page;
  if(cloudMeta.authProvider!=='supabase')return false;
  const session=characterSessionContext_();
  const local=state.currentBattle&&!state.currentBattle.settled78
@@ -20933,13 +21008,13 @@ async function cancelBattle79_(ask=true,automatic=false,expectedActiveId=null){
   const current=state.currentBattle;
   if(current?.ticket78?.battleId===expectedActiveId && !current.recoveryInterrupted79)return false;
  }
- if(!active&&local?.battleId){if(state.currentBattle){state.currentBattle.lost=true;state.currentBattle.settled78=true;}await applyServerSave79_(r,null,true);clearBattleTicket79_(local);state.currentBattle=null;state.page='prepare';save();render();return true;}
+ if(!active&&local?.battleId){if(state.currentBattle){state.currentBattle.lost=true;state.currentBattle.settled78=true;}await applyServerSave79_(r,null,true);clearBattleTicket79_(local);state.currentBattle=null;state.page=exitPage430;save();render();return true;}
  if(!active){if(battlePending78_()||consumePending79_())await recoverCloud79_();if(consumePending79_()&&!consumeFlight79_)await resolvePendingConsume79_();return true;}
  if(ask&&!await gameConfirm_('結束這場未完成戰鬥？它可能正在其他裝置進行；確認後該戰鬥也會結束。未結算的勝利獎勵將放棄，已使用的道具不會退還。','結束未完成戰鬥','確認結束'))return false;
  const out=await apiPost('battle/cancel',{battleId:active.battleId},{silentLoading:true,maxRetry:0});assertCharacterSession_(session);const b=state.currentBattle;if(b){b.lost=true;b.settled78=true;}
  await applyServerSave79_(out,null,true);clearBattleTicket79_(local||{requestId:active.requestId});localStorage.removeItem(consumeKey79_());
  if(consumeFlight79_){const f=consumeFlight79_;consumeFlight79_=null;f.resolve(false);}
- recoveryStatus79_=null;state.currentBattle=null;state.pendingBattleFloor=null;state.page=automatic&&returnPage82!=='battle'?returnPage82:'prepare';state.battleVisual={phase:'等待玩家操作',detail:'選擇一個技能開始行動。',busy:false,actor:'player'};save();render();if(automatic&&!out.alreadyFinished){const acknowledgement82=gameAlert_('有未完成戰鬥，已強制結束。','提示');const overlay82=document.getElementById('uiAlertOverlay');if(overlay82){overlay82.style.setProperty('z-index','2147483647','important');overlay82.querySelector('button').textContent='確定';}await acknowledgement82;}else if(!automatic)toast(out.alreadyFinished?'已確認雲端戰鬥結果。':'未完成戰鬥已結束。');return true;
+ recoveryStatus79_=null;state.currentBattle=null;state.pendingBattleFloor=null;state.page=exitPage430;state.battleVisual={phase:'等待玩家操作',detail:'選擇一個技能開始行動。',busy:false,actor:'player'};save();render();if(automatic&&!out.alreadyFinished){const acknowledgement82=gameAlert_('有未完成戰鬥，已強制結束。','提示');const overlay82=document.getElementById('uiAlertOverlay');if(overlay82){overlay82.style.setProperty('z-index','2147483647','important');overlay82.querySelector('button').textContent='確定';}await acknowledgement82;}else if(!automatic)toast(out.alreadyFinished?'已確認雲端戰鬥結果。':'未完成戰鬥已結束。');return true;
 }
 async function resolvePendingConsume79_(){
  const p=consumePending79_();if(!p)return true;if(consumeFlight79_)return retryConsumable79_();const session=characterSessionContext_(),q=await queryRecovery79_(null,p);let r=q;
@@ -22092,7 +22167,7 @@ function openRetreatConfirm_(){
   el.className='account-overlay';
   const wbNote=b.worldBoss
     ?'撤退後會立即結算目前造成的世界 BOSS 傷害，本次挑戰次數仍視為已使用。'
-    :'撤退後會放棄本次戰鬥並回到準備畫面。';
+    :'撤退後會放棄本次戰鬥並返回城鎮。';
   el.innerHTML=`<div class="account-card" style="max-width:440px">
     <h2>確認撤退？</h2>
     <div class="small" style="margin-top:10px;line-height:1.7">${wbNote}</div>
@@ -22114,7 +22189,7 @@ async function confirmRetreat_(){
     save();render();
     await settleWorldBossChallenge_('retreat');
     if(!state.currentBattle){
-      state.page='prepare';
+      state.page=characterEntryPage45_();
       save();render();
     }
     return;
@@ -22123,10 +22198,10 @@ async function confirmRetreat_(){
   log('你選擇撤退，本次戰鬥結束。');
   state.currentBattle=null;
   state.battleVisual=null;
-  state.page='prepare';
+  state.page=characterEntryPage45_();
   save();
   render();
-  toast('已撤退並返回整備。');
+  toast('已撤退並返回城鎮。');
 }
 
 async function skipPlayerTurn(){
@@ -26658,6 +26733,7 @@ function coinArt208_(extra=''){return `<svg class="pixel-art202 coin-art208 ${ex
 
 function rewardArt206_(kind,id){if(String(kind).toLowerCase()==='gold')return coinArt208_();if(kind==='stone'||kind==='stones')return artTag202_('item_stonePack10');return objectArt202_(id,kind==='gem'?'gem':kind==='equipment'?'equipment':'item');}
 function chestArt206_(kind='fortune'){
+ if(kind==='curse')return relicCursedArt429_();
  const chaos=kind==='chaos',curse=kind==='curse',color=chaos?'#c19aff':curse?'#b18aff':kind==='world'?'#7ecfff':kind==='glory'?'#ffb477':'#ffda7b';
  return `<svg class="chest-art206 ${curse?'chest-curse206':''}" viewBox="0 0 160 160" role="img" aria-label="${chaos?'渾沌寶箱':curse?'詛咒寶箱':'寶箱'}" style="--chest-glow:${color}"><ellipse class="chest-aura206" cx="80" cy="130" rx="57" ry="12" fill="${color}" opacity=".18"/><g class="chest-rays206" stroke="${color}" stroke-width="3"><path d="M80 72V15M60 72 37 27M100 72l23-45M50 87 15 65M110 87l35-22"/></g><path d="M29 77h102v55l-12 9H41l-12-9Z" fill="#172039" stroke="${color}" stroke-width="3"/><path d="M39 86h82v43H39Z" fill="${chaos?'#28153d':curse?'#382551':'#30446a'}"/><path d="M49 79v59M111 79v59" stroke="${color}" stroke-width="8"/><g class="chest-lid206"><path d="M26 79V57l16-18h76l16 18v22Z" fill="${chaos?'#593575':curse?'#513467':'#3a527a'}" stroke="${color}" stroke-width="3"/><path d="M29 60h102M49 41v36M111 41v36" stroke="${color}" stroke-width="5"/><path d="m60 44 20 17 20-17" fill="none" stroke="${color}" stroke-width="2"/>${chaos?'<path d="m64 67-3-15 12 7 7-13 7 13 12-7-3 15Z" fill="#eed59b" stroke="#22132e" stroke-width="2"/><path d="m77 56 3-5 3 5-3 5Z" fill="#bc7aff"/>':''}</g><path d="M70 76h20v27H70Z" fill="${color}" stroke="#131b2a" stroke-width="3"/><circle cx="80" cy="86" r="3" fill="#152137"/><path d="M80 87v8" stroke="#152137" stroke-width="3"/>${curse?'<path d="m41 108 7-7 7 7-7 7Zm64 0 7-7 7 7-7 7Z" fill="#d7b7ff"/><path d="m70 119 10-6 10 6-10 7Z" fill="#bd91fa"/>':''}</svg>`;
 }
@@ -29219,15 +29295,16 @@ const autoToggleBase391_=toggleAutoBattle262_;
 function seriesAuto391_(enabled){if(autoBattle262_!==enabled)autoToggleBase391_();else if(enabled)scheduleAutoBattle262_();}
 function stopBattleSeries391_(message='',disableAuto=true){
  const run=battleSeries391_;if(!run)return;
+ captureSeriesRewards430_(run,run.battle);
  battleSeries391_=null;clearTimeout(battleSeriesTimer391_);battleSeriesTimer391_=0;
  if(disableAuto)seriesAuto391_(false);updateBattleSeriesBadge391_();
  if(!state.currentBattle&&['prepare','dungeon'].includes(state.page))render();
- if(message&&run.account===cloudMeta.accountId)toast(message);
+ if(message&&run.account===cloudMeta.accountId&&!queueSeriesSummary430_(run,message))toast(message);
 }
 function beginBattleSeries391_(kind){
  stopBattleSeries391_();
  const run={kind,session:cloudMeta.sessionToken,account:cloudMeta.accountId,generation:characterSessionGeneration_,attempts:0,completed:0,battle:null,busy:false};
- battleSeries391_=run;seriesAuto391_(true);return run;
+ startSeriesLedger430_(run);seriesResult430_=null;document.getElementById('seriesResult430')?.remove();battleSeries391_=run;seriesAuto391_(true);return run;
 }
 function seriesBattleMatches391_(run,b){
  if(!b||b.worldBoss||b.boxingMachine||b.relic144||b.extreme130)return false;
@@ -29237,7 +29314,7 @@ function attachBattleSeries391_(run){
  if(!battleSeriesLive391_(run))return false;
  const b=state.currentBattle;
  if(!seriesBattleMatches391_(run,b)||b===run.battle||state.page!=='battle'){stopBattleSeries391_('連續戰鬥未能開始，請確認關卡狀態。');return false;}
- run.battle=b;run.floor=Number(b.floor);run.boss=b.dungeonBossId;run.difficulty=b.dungeonDifficulty;run.attempts++;
+ run.battle=b;run.floor=Number(b.floor);run.boss=b.dungeonBossId;run.difficulty=b.dungeonDifficulty;run.attempts++;rememberSeriesBattle430_(run,b);
  log(`10次連續戰鬥：第 ${run.attempts}/10 場。`);updateBattleSeriesBadge391_();scheduleBattleSeries391_(run);return true;
 }
 function scheduleBattleSeries391_(run,delay=300){
@@ -29252,7 +29329,7 @@ async function tickBattleSeries391_(run){
  if(document.hidden||!b?.won||state.battleVisual?.busy||b.settling78||b.ticket78&&!b.settled78){scheduleBattleSeries391_(run);return;}
  run.busy=true;
  try{
-  run.completed++;
+  captureSeriesRewards430_(run,b);run.completed++;
   if(run.attempts>=10){stopBattleSeries391_('10次連續戰鬥已完成。');return;}
   // Clear only an already-settled win, preserving the original per-round rewards.
   if(run.kind==='dungeon'){
@@ -29761,13 +29838,13 @@ relicModal144_=function(title,body,actions=''){
  const desktop=viewMode_==='desktop';
  if(desktop){hubClose413_(false);hubKeys413_.clear();}
  relicModalBase413_(title,body,actions);
- const el=document.getElementById('relicOverlay144');if(!desktop||!el)return;
+ const el=document.getElementById('relicOverlay144');if(!el)return;if(!desktop){relicSkin429_(el);return;}
  el.classList.add('relic-ui413');const header=el.querySelector('header');header.querySelector('.relic-eyebrow149')?.remove();
  el.querySelector('.relic-card144').id='relicCard413';
  hubKit413_(el);
  header.insertAdjacentHTML('beforeend','<button type="button" class="relic-close413" aria-label="收起探險視窗" onclick="relicClose144_()">✕</button>');
  const world=document.querySelector('.hub-world413');if(world)world.inert=true;
- const btn=el.querySelector('button');btn?.focus({preventScroll:true});
+ relicSkin429_(el);const btn=el.querySelector('button');btn?.focus({preventScroll:true});
 };
 const relicCloseBase413_=relicClose144_;
 relicClose144_=function(){relicCloseBase413_();const world=document.querySelector('.hub-world413');if(world)world.inert=!!hubUI413_.facility;};
@@ -29944,5 +30021,234 @@ html.desktop-ui .result-layer400 .st-loot425 .st-item425 .st-loot-name425{min-wi
 :is(.extreme-mode131,.hub-content413.extreme) :is([data-art-key="item_wargodBox"],[data-art-key="item_luckyBox"]){image-rendering:auto!important}
 }
 </style>
+<style id="relic-ui429">
+@layer desktopViewport421{
+/* Relic UI: reusable inventory tiles, illuminated choice cards and supply station. */
+#relicOverlay144.relic-ui429{padding:20px!important;background:#02091299!important;backdrop-filter:blur(5px)!important;overflow:hidden!important}
+#relicOverlay144.relic-ui429 .relic-card144{padding:0!important;width:min(1100px,calc(100vw - 40px))!important;max-width:1100px!important;max-height:calc(100dvh - 40px)!important;min-height:0!important;margin:auto!important;display:flex!important;flex-direction:column!important;position:relative!important;overflow:hidden!important;border:1px solid #9c804e!important;border-radius:9px!important;background:linear-gradient(115deg,#24303cf2,#0d1722f5 65%)!important;box-shadow:0 25px 80px #000b!important;color:#eee6d6!important}
+#relicOverlay144.relic-ui429 .relic-card144:before{display:none!important}
+#relicOverlay144.relic-ui429 .relic-card144:after{display:block!important;content:""!important;position:absolute!important;inset:6px!important;z-index:3!important;border:10px solid transparent!important;border-image:url("assets/images/leaderboard405/frame.svg") 31 stretch!important;pointer-events:none!important;opacity:.6!important}
+#relicOverlay144.relic-ui429 header{position:relative!important;display:flex!important;align-items:center!important;gap:18px!important;flex:none!important;min-height:110px!important;padding:20px 32px!important;border:0!important;border-bottom:1px solid #aa8b4e66!important;margin:0!important;background:linear-gradient(90deg,#101c28ee 15%,#172435a6 65%,#0b152037),url("assets/images/mode-hubs413/relic.webp") center 52%/cover!important}
+#relicOverlay144.relic-ui429 header .r429-header-art{display:block!important;width:64px!important;height:64px!important;flex:none!important;object-fit:contain!important;filter:drop-shadow(0 4px 7px #000)!important}
+#relicOverlay144.relic-ui429 header h2{font-size:25px!important;line-height:1.4!important;letter-spacing:1px!important;color:#f7ddb0!important;margin:4px 0 0!important;font-family:"Noto Serif CJK TC","Microsoft JhengHei",serif!important}
+.r429-header-copy{min-width:0!important}.r429-header-copy>small{color:#c0a57a!important;font-size:10px!important;letter-spacing:3px!important}
+.r429-floor{margin-left:auto!important;margin-right:18px!important;width:58px!important;height:58px!important;flex:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;border:1px solid #c6a96970!important;border-radius:50%!important;background:#0a1321aa!important;color:#e6c895!important}
+.r429-floor b{font:26px/1.1 Georgia,serif!important}.r429-floor small{font-size:9px!important;letter-spacing:2px!important}
+#relicOverlay144.relic-ui429 .r429-close{position:absolute!important;right:14px!important;top:14px!important;display:grid!important;place-items:center!important;width:29px!important;height:29px!important;min-width:0!important;min-height:0!important;padding:0!important;border:1px solid #9e815b77!important;border-radius:4px!important;background:#111b27bd!important;color:#d8c39e!important;font:22px/1 sans-serif!important;box-shadow:none!important}
+#relicOverlay144.relic-ui429 .relic-scroll144{padding:22px 30px!important;overflow:auto!important;overscroll-behavior:contain!important;min-height:0!important;flex:1 1 auto!important;max-height:none!important;background:none!important;scrollbar-gutter:stable!important}
+#relicOverlay144.relic-ui429 .relic-feedback149:not([hidden]){display:block!important;flex:none!important;margin:0!important;padding:9px 25px!important;background:#122638!important;border-top:1px solid #8c784348!important;color:#f4d59d!important;font-size:12px!important}
+#relicOverlay144.relic-ui429 .relic-actions144{display:flex!important;gap:10px!important;justify-content:flex-end!important;flex-wrap:wrap!important;flex:none!important;padding:15px 30px!important;margin:0!important;border:0!important;border-top:1px solid #a48c5d38!important;background:#0e1924aa!important}
+#relicOverlay144.relic-ui429 .relic-actions144>button{width:auto!important;flex:0 1 auto!important;min-width:130px!important;min-height:42px!important;border:1px solid #967c4c!important;border-radius:4px!important;background:linear-gradient(#314052,#171f2a)!important;color:#eee3cd!important;padding:9px 20px!important;font:700 13px/1.4 "Microsoft JhengHei","Noto Sans CJK TC",sans-serif!important;box-shadow:inset 0 1px #ffffff15!important}
+#relicOverlay144.relic-ui429 .relic-actions144>button.primary{color:#2e2414!important;background:linear-gradient(#edcf91,#b29257)!important;border-color:#f1d59a!important}
+#relicOverlay144.relic-ui429 button:focus-visible{outline:2px solid #ffdb86!important;outline-offset:3px!important}
+#relicOverlay144.relic-ui429 button:disabled{opacity:.48!important;cursor:not-allowed!important}
+.r429-lead{margin:0 0 18px!important;color:#b6c2d1!important;font-size:13px!important}
+/* Same 3px conic highlight and rarity palette as preparation equipment. */
+.r429-loot-grid{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:22px 18px!important;width:100%!important;padding:20px!important;margin:0!important;border:1px solid #748b9d26!important;background:linear-gradient(135deg,#09121acc,#0e1925b3)!important;border-radius:8px!important;box-shadow:inset 0 3px 20px #0004!important;box-sizing:border-box!important}
+.r429-loot-item{min-width:0!important;max-width:none!important;text-align:center!important;background:none!important;border:0!important;padding:0!important;margin:0!important}
+.r429-tile{position:relative!important;display:grid!important;place-items:center!important;aspect-ratio:1!important;width:100%!important;max-width:110px!important;margin:0 auto!important;border:3px solid transparent!important;border-radius:8px!important;background:linear-gradient(135deg,#203041,#0a101a 75%) padding-box,conic-gradient(from var(--item-light-angle),var(--r429-edge) 0deg 220deg,var(--r429-color) 270deg,#fff2d9 292deg,var(--r429-color) 310deg,var(--r429-edge) 345deg 360deg) border-box!important;animation:itemBorderFlow var(--r429-speed,8s) linear infinite!important;box-shadow:0 4px 12px #0005!important;box-sizing:border-box!important;isolation:isolate!important}
+.r429-loot-item:nth-child(even) .r429-tile{background-image:linear-gradient(135deg,#182332,#09111c 75%),conic-gradient(from var(--item-light-angle),var(--r429-edge) 0deg 220deg,var(--r429-color) 270deg,#fff2d9 292deg,var(--r429-color) 310deg,var(--r429-edge) 345deg 360deg)!important}
+.r429-icon{display:grid!important;place-items:center!important;position:absolute!important;inset:8px!important;width:auto!important;height:auto!important;overflow:hidden!important}
+.r429-icon>:is(img,svg){display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;margin:0!important;image-rendering:auto!important}
+.r429-icon svg.art-square206>svg{width:120px!important;height:120px!important;max-width:none!important;max-height:none!important}
+.r429-icon :is(svg,image){image-rendering:auto!important}
+.r429-qty{position:absolute!important;z-index:2!important;right:1px!important;bottom:1px!important;min-width:30px!important;padding:1px 6px!important;background:linear-gradient(90deg,#070b10bb,#05080af2)!important;border-radius:5px 0 4px 0!important;color:#fff4d6!important;font:900 19px/1.35 "Microsoft JhengHei","Noto Sans CJK TC",sans-serif!important;text-shadow:0 2px 2px #000!important;white-space:nowrap!important;letter-spacing:.1px!important}
+.r429-name{font:700 12px/1.5 "Microsoft JhengHei","Noto Sans CJK TC",sans-serif!important;color:var(--r429-color)!important;margin-top:8px!important;overflow-wrap:anywhere!important}
+#relicOverlay144.relic-ui429 details,.relic-accum413:has(.r429-loot-grid){margin:20px 0 0!important;padding:0!important;border:1px solid #66819c3b!important;border-radius:7px!important;background:#0d1825a6!important}
+#relicOverlay144.relic-ui429 summary,.relic-accum413:has(.r429-loot-grid)>summary{padding:14px 18px!important;font-size:12px!important;color:#d4c6ac!important;font-weight:700!important;cursor:pointer!important}
+#relicOverlay144.relic-ui429 details .r429-loot-grid{grid-template-columns:repeat(8,minmax(0,1fr))!important;padding:6px 18px 18px!important;border:0!important;background:none!important;box-shadow:none!important;gap:16px!important}
+#relicOverlay144.relic-ui429 details .r429-tile{max-width:85px!important}
+#relicOverlay144.relic-ui429 details .r429-qty{font-size:16px!important}
+html.desktop-ui #relicOverlay144.relic-ui429 #relicCard413{overflow:hidden!important}
+/* Choice cards are real buttons: the same request/busy guard handles selection. */
+.r429-choices{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:22px!important;position:relative!important}
+#relicOverlay144.relic-ui429 .r429-choice{position:relative!important;overflow:hidden!important;border:1px solid var(--r429-accent)!important;border-radius:8px!important;background:linear-gradient(180deg,#171b2ac2,#101722f7),url("assets/images/mode-hubs413/relic.webp") center/cover!important;padding:22px 26px!important;text-align:center!important;box-shadow:inset 0 0 60px var(--r429-haze),0 8px 24px #0004!important;display:flex!important;align-items:center!important;flex-direction:column!important;width:100%!important;height:auto!important;min-height:365px!important;white-space:normal!important;transform:none!important;transition:filter .2s,border-color .2s!important}
+.r429-purple{--r429-accent:#a782d48c!important;--r429-haze:#9e50ef24!important;--r429-color:#d2acf7!important}.r429-gold{--r429-accent:#b5995d8c!important;--r429-haze:#e6ad3a24!important;--r429-color:#efd196!important}
+.r429-kicker{font-size:10px!important;letter-spacing:3px!important;color:var(--r429-color)!important}
+.r429-choice-art{position:relative!important;width:180px!important;height:145px!important;margin:8px 0!important;display:grid!important;place-items:center!important;isolation:isolate!important}
+.r429-choice-art:before{content:""!important;position:absolute!important;width:160px!important;height:105px!important;bottom:-15px!important;border:1px solid var(--r429-accent)!important;border-radius:50%!important;transform:rotateX(58deg)!important;box-shadow:0 0 32px var(--r429-haze),inset 0 0 25px var(--r429-haze)!important;animation:relicAura429 3s ease-in-out infinite alternate!important;z-index:-1!important}
+.r429-choice-art:after{content:""!important;position:absolute!important;inset:12px!important;background:radial-gradient(ellipse,var(--r429-haze),transparent 70%)!important;border-radius:50%!important;filter:blur(8px)!important;z-index:-1!important}
+.r429-choice-art>:is(img,svg){position:relative!important;width:140px!important;height:140px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;image-rendering:auto!important;margin:0!important;filter:drop-shadow(0 5px 12px #0006)!important;animation:relicFloat429 4s ease-in-out infinite!important}
+.r429-choice-art>svg.coin-art208{width:110px!important;height:110px!important}
+.r429-choice-name{font:700 22px/1.4 "Microsoft JhengHei","Noto Sans CJK TC",sans-serif!important;color:var(--r429-color)!important;margin:6px 0 3px!important;letter-spacing:2px!important}
+.r429-note{font-size:12px!important;color:#adbbca!important;line-height:1.6!important}
+.r429-amount{font:900 28px/1.3 "Microsoft JhengHei","Noto Sans CJK TC",sans-serif!important;color:#ffde9e!important;margin:8px 0 0!important}
+.r429-choice-note{display:flex!important;flex-direction:column!important;gap:4px!important;font-size:12px!important;text-align:left!important;min-height:64px!important;width:100%!important;margin:16px 0!important;padding:10px 14px!important;background:#080d17a3!important;border-left:2px solid var(--r429-accent)!important;color:#c5bdcd!important;border-radius:0 5px 5px 0!important}
+.r429-choice-note b{color:var(--r429-color)!important;font-size:12px!important}
+.r429-cta{display:block!important;width:100%!important;min-height:40px!important;margin-top:auto!important;padding:10px 12px!important;border:1px solid var(--r429-accent)!important;border-radius:4px!important;background:linear-gradient(var(--r429-haze),#182331)!important;color:#eee4d7!important;font:700 12px/1.5 "Microsoft JhengHei","Noto Sans CJK TC",sans-serif!important;text-align:center!important}
+.r429-purple .r429-cta{background:linear-gradient(#71558e,#39294e)!important;color:#f4e8ff!important;border-color:#b896db!important}
+.r429-gold .r429-cta{background:linear-gradient(#d8b979,#9d7b43)!important;color:#241b10!important;border-color:#d9bd80!important}
+.r429-or{position:absolute!important;z-index:2!important;left:50%!important;top:46%!important;transform:translate(-50%,-50%) rotate(45deg)!important;width:32px!important;height:32px!important;display:grid!important;place-items:center!important;background:#172231!important;border:1px solid #9d8355!important;box-shadow:0 0 0 5px #111b24!important;pointer-events:none!important}
+.r429-or span{transform:rotate(-45deg)!important;font-size:11px!important;color:#dbc391!important}
+/* Supply medallions, life meter and compact curse tags. */
+.r429-hp{display:flex!important;align-items:center!important;gap:24px!important;padding:14px 18px!important;margin-bottom:20px!important;background:linear-gradient(90deg,#1c3b354d,#0c1827a6)!important;border:1px solid #6b9e8c40!important;border-radius:6px!important}
+.r429-hp>div:first-child{min-width:140px!important}.r429-hp small{font-size:10px!important;color:#9ebfb3!important;letter-spacing:1px!important}.r429-hp strong{font-size:23px!important;color:#9aebbf!important}.r429-hp span{font-size:12px!important;color:#99acae!important}
+.r429-meter-wrap{flex:1!important}.r429-meter-wrap progress{width:100%!important;height:8px!important;border:0!important;border-radius:5px!important;background:#050e17!important;overflow:hidden!important;appearance:none!important}.r429-meter-wrap progress::-webkit-progress-bar{background:#050e17!important}.r429-meter-wrap progress::-webkit-progress-value{background:linear-gradient(90deg,#448c72,#b0e4b7)!important;box-shadow:0 0 12px #69d7ab!important}.r429-meter-wrap progress::-moz-progress-bar{background:linear-gradient(90deg,#448c72,#b0e4b7)!important}.r429-meter-wrap small{display:block!important;text-align:right!important;color:#c8ab82!important;margin-top:5px!important}
+.r429-supplies{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important}
+#relicOverlay144.relic-ui429 .r429-supply{position:relative!important;overflow:hidden!important;border:1px solid var(--r429-accent)!important;border-radius:7px!important;background:linear-gradient(0deg,#101925f2,#10192580),url("assets/images/mode-hubs413/relic.webp") center/cover!important;box-shadow:inset 0 0 50px var(--r429-haze)!important;padding:20px!important;text-align:center!important;display:flex!important;flex-direction:column!important;align-items:center!important;white-space:normal!important;min-height:280px!important;height:auto!important;width:100%!important;transform:none!important}
+.r429-heal{--r429-accent:#75a48b88!important;--r429-haze:#43b89522!important;--r429-color:#a4e5c2!important}.r429-cooldown{--r429-accent:#6ca3d088!important;--r429-haze:#4ca8e522!important;--r429-color:#9cd4ff!important}.r429-cleanse{--r429-accent:#ae88ce88!important;--r429-haze:#a56bea22!important;--r429-color:#d6afff!important}
+.r429-service{color:var(--r429-color)!important;font-size:10px!important;letter-spacing:3px!important}.r429-medallion{width:100px!important;height:100px!important;display:grid!important;place-items:center!important;margin:14px auto 12px!important;border:1px solid var(--r429-accent)!important;border-radius:50%!important;background:radial-gradient(var(--r429-haze),#081421aa)!important;box-shadow:0 0 30px var(--r429-haze),inset 0 0 0 6px #0e1a2388!important;animation:relicAura429 3.5s ease-in-out infinite alternate!important}
+.r429-medallion img{width:65px!important;height:65px!important;object-fit:contain!important;image-rendering:auto!important;filter:drop-shadow(0 4px 6px #0008)!important;border-radius:4px!important}
+.r429-supply-name{color:var(--r429-color)!important;margin:0 0 7px!important;font-size:19px!important;letter-spacing:2px!important}.r429-effect{font-size:12px!important;color:var(--r429-color)!important}.r429-supply .r429-note{font-size:11px!important;min-height:30px!important;margin:8px 0 16px!important}
+.r429-curses{display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important;margin-top:18px!important;color:#bda987!important;font-size:11px!important}
+.r429-curse-chip{border:1px solid #936e9c5c!important;border-radius:4px!important;background:#30213970!important;padding:7px 12px!important;color:#c9b2d6!important}.r429-curse-chip b{color:#e1c9ec!important;margin-right:7px!important}
+.relic-cursed-art429{object-fit:contain!important;image-rendering:auto!important}
+.relic-chest144>.relic-cursed-art429{width:180px!important;height:180px!important;filter:drop-shadow(0 0 20px #af76ff66)!important;animation:relicAura429 .7s ease-in-out infinite alternate!important}
+#relicOverlay144.relic-ui429 :is(.r429-choice,.r429-supply):hover:not(:disabled){filter:brightness(1.12)!important;border-color:var(--r429-color)!important}
+#relicOverlay144.relic-ui429 :is(.r429-choice,.r429-supply).relic-selected149{outline:2px solid #f0d194!important;outline-offset:-4px!important;opacity:1!important;filter:brightness(1.12)!important}
+@keyframes relicAura429{from{opacity:.65}to{opacity:1}}
+@keyframes relicFloat429{0%,100%{translate:0 0}50%{translate:0 -5px}}
+@media(max-width:700px){
+ #relicOverlay144.relic-ui429{padding:8px!important}
+ #relicOverlay144.relic-ui429 .relic-card144{width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important}
+ #relicOverlay144.relic-ui429 header{padding:18px 15px!important;min-height:90px!important;gap:10px!important}
+ #relicOverlay144.relic-ui429 header .r429-header-art{width:42px!important;height:42px!important}
+ #relicOverlay144.relic-ui429 header h2{font-size:18px!important;letter-spacing:0!important}
+ .r429-header-copy>small{font-size:9px!important;letter-spacing:1px!important}.r429-floor{width:42px!important;height:42px!important;margin-right:15px!important}.r429-floor b{font-size:20px!important}
+ #relicOverlay144.relic-ui429 .r429-close{right:8px!important;top:8px!important;width:23px!important;height:23px!important;font-size:19px!important}
+ #relicOverlay144.relic-ui429 .relic-scroll144{padding:16px 12px!important}
+ .r429-loot-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px 10px!important;padding:12px!important}
+ .r429-qty{font-size:16px!important;padding:1px 4px!important}.r429-name{font-size:11px!important}
+ #relicOverlay144.relic-ui429 details .r429-loot-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;padding:4px 12px 12px!important;gap:14px 10px!important}
+ .r429-choices{gap:12px!important}
+ #relicOverlay144.relic-ui429 .r429-choice{padding:16px 10px!important;min-height:0!important}
+ .r429-kicker{font-size:9px!important;letter-spacing:1px!important}.r429-choice-art{width:110px!important;height:110px!important;margin:10px 0!important}.r429-choice-art>:is(img,svg){width:105px!important;height:105px!important}.r429-choice-art>svg.coin-art208{width:85px!important;height:85px!important}.r429-choice-art:before{width:100px!important;height:90px!important}
+ .r429-choice-name{font-size:17px!important;letter-spacing:1px!important}.r429-choice-note{padding:9px 8px!important;font-size:11px!important;min-height:80px!important}.r429-choice-note b{font-size:11px!important}.r429-amount{font-size:23px!important}.r429-cta{font-size:11px!important;padding:9px 4px!important}.r429-or{width:25px!important;height:25px!important}.r429-note{font-size:11px!important}
+ .r429-supplies{grid-template-columns:1fr!important;gap:12px!important}
+ #relicOverlay144.relic-ui429 .r429-supply{display:grid!important;grid-template-columns:76px minmax(0,1fr)!important;text-align:left!important;padding:14px!important;column-gap:14px!important;min-height:0!important}
+ .r429-service{grid-column:2!important}.r429-medallion{grid-row:1/6!important;grid-column:1!important;width:76px!important;height:76px!important;margin:0!important}.r429-medallion img{width:50px!important;height:50px!important}.r429-supply-name{grid-column:2!important;font-size:17px!important;margin:4px 0!important}.r429-effect,.r429-supply .r429-note,.r429-supply .r429-cta{grid-column:2!important}.r429-supply .r429-note{min-height:0!important;margin:5px 0 10px!important}.r429-hp{padding:12px!important;gap:12px!important}.r429-hp>div:first-child{min-width:120px!important}
+ #relicOverlay144.relic-ui429 .relic-actions144{padding:12px!important;gap:8px!important}
+ #relicOverlay144.relic-ui429 .relic-actions144>button{flex:1 1 100px!important;min-width:0!important;font-size:12px!important;padding:9px 8px!important;min-height:42px!important}
+}
+@media(prefers-reduced-motion:reduce){.r429-tile,.r429-choice-art>:is(img,svg),.r429-choice-art:before,.r429-medallion,.relic-chest144>.relic-cursed-art429{animation:none!important}}
+html[data-relic-hidden429] .r429-tile,html[data-relic-hidden429] .r429-choice-art>:is(img,svg),html[data-relic-hidden429] .r429-choice-art:before,html[data-relic-hidden429] .r429-medallion{animation-play-state:paused!important}
+
+}
+</style>
+<script id="series-summary430">
+// Session-only receipts: collect confirmed wins, never compute rewards from the net wallet balance.
+let seriesResult430_=null,seriesResultQueued430_=false;
+function seriesOwner430_(r){return !!r&&r.account===cloudMeta.accountId&&r.session===cloudMeta.sessionToken&&r.generation===characterSessionGeneration_;}
+function startSeriesLedger430_(run){run.ledger430={seen:new WeakSet(),items:[],resources:{exp:0,gold:0,stones:0},stacks:new Map(),wins:0};}
+function rememberSeriesBattle430_(run,b){run.baseline430={battle:b,equipment:new Set((state.inventory||[]).map(x=>String(x.id))),gem:new Set((state.gems||[]).map(x=>String(x.id)))};}
+function captureSeriesRewards430_(run,b){
+ const l=run?.ledger430,base=run?.baseline430;
+ if(!l||!seriesOwner430_(run)||!b?.won||b.settling78||b.ticket78&&!b.settled78||!b.rewards400||l.seen.has(b))return;
+ l.seen.add(b);l.wins++;const r=b.rewards400;
+ for(const k of ['exp','gold','stones'])l.resources[k]+=Math.max(0,Number(r[k])||0);
+ const acquired={equipment:[],gem:[]};
+ if(base?.battle===b)for(const [kind,list]of [['equipment',state.inventory||[]],['gem',state.gems||[]]])acquired[kind]=list.filter(x=>!base[kind].has(String(x.id)));
+ for(const d of r.drops||[]){
+  if(d.kind==='equipment'||d.kind==='gem'){
+   const pool=acquired[d.kind],i=pool.findIndex(x=>String(x.template)===String(d.id)),item=i>=0?pool.splice(i,1)[0]:null;
+   l.items.push({type:d.kind==='equipment'?'EQUIPMENT':'GEM',id:d.id,name:d.name,item:clone(item||{template:d.id,name:d.name,rarity:d.rarity,sockets:d.sockets||0}),instanceId:item?String(item.id):null,quantity:1});
+  }else{const key=String(d.kind)+':'+String(d.id),entry=l.stacks.get(key)||{type:'CONSUMABLE',id:d.id,name:d.name||skillTemplates[d.id]?.name||d.id,quantity:0};entry.quantity+=Math.max(0,Number(d.count??1)||0);l.stacks.set(key,entry);}
+ }
+ // Some legacy receipts omit individual drops; retain actual new instances from this round.
+ for(const kind of ['equipment','gem'])for(const item of acquired[kind])l.items.push({type:kind==='equipment'?'EQUIPMENT':'GEM',id:item.template,name:item.name,item:clone(item),instanceId:String(item.id),quantity:1});
+}
+function queueSeriesSummary430_(run,message){
+ if(!message||!seriesOwner430_(run)||!run.attempts)return false;
+ seriesResult430_={...run,reason:message,pending:true,selection:new Set(),sold:new Set(),busy:false,status:''};
+ scheduleSeriesSummary430_();return true;
+}
+function scheduleSeriesSummary430_(){
+ if(seriesResultQueued430_)return;seriesResultQueued430_=true;
+ queueMicrotask(()=>{seriesResultQueued430_=false;const r=seriesResult430_;if(!r?.pending||!seriesOwner430_(r)||battleSeries391_||activeBattleNow()||state.battleVisual?.busy||document.querySelector('#uiAlertOverlay,#uiConfirmOverlay'))return;r.pending=false;showSeriesSummary430_();});
+}
+function seriesSaleItem430_(record){
+ if(!record?.instanceId)return null;
+ const gem=record.type==='GEM',item=(gem?state.gems:state.inventory)?.find(x=>String(x.id)===record.instanceId);
+ if(!item||questProtected368(state,item)||(!gem&&(forgeDraft172_(item)||(item.gems||[]).some(Boolean)))||gem&&(state.inventory||[]).some(x=>(x.gems||[]).some(g=>g&&String(g.id)===record.instanceId)))return null;
+ return item;
+}
+function seriesRecords430_(r){
+ const l=r.ledger430,out=[];for(const [key,type,name]of [['exp','EXP','經驗值'],['gold','GOLD','金幣'],['stones','STONES','強化石']])if(l.resources[key]>0)out.push({type,name,quantity:l.resources[key]});
+ return [...out,...l.stacks.values(),...l.items];
+}
+function closeSeriesSummary430_(){if(seriesResult430_?.busy)return;document.getElementById('seriesResult430')?.remove();}
+function showSeriesSummary430_(){
+ const r=seriesResult430_;if(!seriesOwner430_(r)){document.getElementById('seriesResult430')?.remove();return;}
+ let root=document.getElementById('seriesResult430');const scroll=root?.querySelector('.series-scroll430')?.scrollTop||0;
+ if(!root){root=document.createElement('div');root.id='seriesResult430';root.className='account-overlay series-overlay430';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','seriesTitle430');document.body.appendChild(root);}
+ const records=seriesRecords430_(r),sellable=r.ledger430.items.map((o,i)=>({o,i,item:seriesSaleItem430_(o)})).filter(x=>x.item&&!r.sold.has(x.i));
+ for(const i of r.selection)if(!sellable.some(x=>x.i===i))r.selection.delete(i);
+ const total=sellable.filter(x=>r.selection.has(x.i)).reduce((n,x)=>n+(x.o.type==='GEM'?estimatedGemSellPrice(x.item):estimatedSellPrice(x.item)),0);
+ root.innerHTML=`<section class="series-card430"><header><div><small>本次遠征 · 戰利品結算</small><h2 id="seriesTitle430">連續戰鬥結束</h2><p>已完成 ${r.ledger430.wins} 場勝利／${r.attempts} 場挑戰</p></div><button aria-label="關閉連戰結算" onclick="closeSeriesSummary430_()" ${r.busy?'disabled':''}>×</button></header><div class="series-scroll430"><p class="series-reason430">${escapeHtml(r.reason)}</p>${records.length?'<div class="r429-loot-grid">'+records.map(o=>{const i=r.ledger430.items.indexOf(o),sold=r.sold.has(i),can=i>=0&&!sold&&!!seriesSaleItem430_(o);return `<div class="series-loot430 ${r.selection.has(i)?'selected':''} ${sold?'sold':''}" style="--series-digits430:${('×'+Number(o.quantity??1).toLocaleString()).length}">${relicLootTile429_(o)}${i>=0?`<label class="series-pick430"><input type="checkbox" aria-label="選取出售 ${escapeAttr(o.name||o.item?.name||'物品')}" ${r.selection.has(i)?'checked':''} ${!can||r.busy?'disabled':''} onchange="selectSeriesSale430_(${i},this.checked)"><span>${sold?'已售出':can?'選取出售':o.instanceId?'已裝備／受保護或已移出背包':'僅顯示獎勵紀錄'}</span></label>`:''}</div>`}).join('')+'</div>':'<p class="series-reason430">本次尚未取得已確認的戰利品。</p>'}<div class="series-sale-tools430"><button onclick="selectSeriesLow430_()" ${r.busy||!sellable.length?'disabled':''}>選取一般／特殊</button><button onclick="clearSeriesSale430_()" ${r.busy||!r.selection.size?'disabled':''}>清除選取</button><small>僅出售本次獲得的裝備與寶石；最愛、鎖定、已裝備及已鑲寶石的裝備不會列入。</small></div><p class="series-sale-status430" role="status">${escapeHtml(r.status||'')}</p></div><footer><span>已選 ${r.selection.size} 件 · 預估 ${total.toLocaleString()} 金幣</span><button class="series-sell430" onclick="sellSeriesSelected430_()" ${r.busy||!r.selection.size?'disabled':''}>${r.busy?'出售處理中…':'快速售出'}</button><button onclick="closeSeriesSummary430_()" ${r.busy?'disabled':''}>關閉</button></footer></section>`;
+ root.querySelector('.series-scroll430').scrollTop=scroll;
+}
+function selectSeriesSale430_(i,on){const r=seriesResult430_;if(!seriesOwner430_(r)||r.busy||!seriesSaleItem430_(r.ledger430.items[i]))return;on?r.selection.add(i):r.selection.delete(i);showSeriesSummary430_();}
+function selectSeriesLow430_(){const r=seriesResult430_;if(!seriesOwner430_(r)||r.busy)return;r.ledger430.items.forEach((o,i)=>{const item=seriesSaleItem430_(o),rarity=o.type==='GEM'?gemResolved_(item)?.rarity:equipmentRarity280_(item);if(item&&['一般','特殊','common','special'].includes(rarity||'一般')&&!r.sold.has(i))r.selection.add(i)});showSeriesSummary430_();}
+function clearSeriesSale430_(){if(seriesResult430_?.busy)return;seriesResult430_?.selection.clear();showSeriesSummary430_();}
+async function sellSeriesSelected430_(){
+ const r=seriesResult430_;if(!seriesOwner430_(r)||r.busy||activeBattleNow())return;
+ const chosen=[...r.selection].map(i=>({i,record:r.ledger430.items[i],item:seriesSaleItem430_(r.ledger430.items[i])})).filter(x=>x.item);
+ if(!chosen.length)return;r.busy=true;showSeriesSummary430_();
+ try{
+  const amount=chosen.reduce((n,x)=>n+(x.record.type==='GEM'?estimatedGemSellPrice(x.item):estimatedSellPrice(x.item)),0);
+  if(!await gameConfirm_(`確定出售這次連戰取得的 ${chosen.length} 件物品？\n預計獲得 ${amount.toLocaleString()} 金幣。\n${chosen.map(x=>(x.item.name||x.record.name)+'（'+(x.item.rarity||'一般')+'）').join('\n')}\n出售後無法復原。`,'快速售出','確認出售'))return;
+  if(!seriesOwner430_(r)||seriesResult430_!==r||activeBattleNow())return;
+  // Revalidate after confirmation and before every request. Never retry an uncertain transaction here.
+  const gear=chosen.filter(x=>x.record.type==='EQUIPMENT'),gems=chosen.filter(x=>x.record.type==='GEM'),batches=[];
+  for(let i=0;i<gear.length;i+=100)batches.push({action:'sellEquipment',entries:gear.slice(i,i+100)});
+  for(const x of gems)batches.push({action:'sellGem',entries:[x]});
+  let sold=0,gold=0;
+  for(const batch of batches){
+   if(!seriesOwner430_(r)||seriesResult430_!==r||activeBattleNow())break;
+   const entries=batch.entries.filter(x=>seriesSaleItem430_(x.record));if(!entries.length)continue;
+   const before=Number(state.gold)||0,ids=entries.map(x=>x.record.instanceId);
+   if(cloudMeta.authProvider==='supabase'){
+    const ok=await runInventoryAction_({action:batch.action,ids},'連戰戰利品出售',{silentSuccess:true});
+    if(!seriesOwner430_(r))break;
+    if(!ok){r.status=`已確認售出 ${sold} 件，其餘尚未售出或待確認；請先確認未完成操作。`;return;}
+   }else{
+    const set=new Set(ids),list=batch.action==='sellGem'?'gems':'inventory';
+    const value=entries.reduce((n,x)=>{const item=seriesSaleItem430_(x.record);return n+(item?(list==='gems'?estimatedGemSellPrice(item):estimatedSellPrice(item)):0)},0);
+    state[list]=state[list].filter(x=>!set.has(String(x.id)));state.gold=(Number(state.gold)||0)+value;save();render();
+   }
+   for(const x of entries)if(!(x.record.type==='GEM'?state.gems:state.inventory).some(item=>String(item.id)===x.record.instanceId)){r.sold.add(x.i);r.selection.delete(x.i);sold++;}
+   gold+=(Number(state.gold)||0)-before;r.status=`已確認售出 ${sold} 件，獲得 ${gold.toLocaleString()} 金幣。`;showSeriesSummary430_();
+  }
+  if(sold)playSfx('coin');
+ }catch(e){if(seriesOwner430_(r))r.status='出售尚未完成：'+(e?.message||String(e));}
+ finally{r.busy=false;if(seriesResult430_===r){if(seriesOwner430_(r))showSeriesSummary430_();else document.getElementById('seriesResult430')?.remove();}}
+}
+const renderResultBase430_=render;
+render=function(){const out=renderResultBase430_();if(seriesResult430_&&!seriesOwner430_(seriesResult430_)){document.getElementById('seriesResult430')?.remove();seriesResult430_=null;}scheduleSeriesSummary430_();return out;};
+
+</script>
+<style id="release430">@layer desktopViewport421{
+.c430-stage{position:relative!important;height:490px!important;overflow:hidden!important;background:radial-gradient(ellipse at 50% 65%,#12434d55,transparent 58%)!important;isolation:isolate!important}.c430-stage:before{content:""!important;position:absolute!important;inset:0!important;background:linear-gradient(#101d2be0,#111827e8),url("assets/images/mode-hubs413/relic.webp") center/cover!important;z-index:-2!important}.c430-halo{position:absolute!important;width:360px!important;height:360px!important;left:50%!important;top:48%!important;transform:translate(-50%,-50%);background:radial-gradient(#9c67d64d,#3ce5d91a 40%,transparent 70%)!important;opacity:0;filter:blur(15px)!important;z-index:-1!important}.c430-ground{position:absolute!important;width:330px!important;height:68px!important;bottom:39px!important;left:50%!important;transform:translateX(-50%);background:radial-gradient(#000c,transparent 70%)!important;border-radius:50%!important}.c430-seal{position:absolute!important;left:50%!important;bottom:53px!important;width:340px!important;height:95px!important;margin-left:-170px!important;border:1px solid #76e7dc80!important;border-radius:50%!important;box-shadow:0 0 18px #51d9cd40,inset 0 0 26px #8962cd40!important;opacity:.2}.c430-seal:after{content:""!important;position:absolute!important;inset:9px!important;border:1px dashed #ceb4ff66!important;border-radius:50%!important}.c430-box{position:absolute!important;left:50%!important;bottom:32px!important;transform:translateX(-50%);width:400px!important;height:400px!important;transform-origin:50% 88%!important}.c430-box img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;filter:drop-shadow(0 12px 10px #0008)!important;user-select:none!important;-webkit-user-drag:none!important}.c430-half,.c430-opened{opacity:0}.c430-beam{position:absolute!important;left:50%!important;bottom:165px!important;margin-left:-150px!important;width:300px!important;height:300px!important;transform-origin:50% 100%!important;background:conic-gradient(from -26deg at 50% 100%,transparent 0deg,#ae87ff18 10deg,#83fff94d 24deg,#f1ffff66 26deg,#83fff94d 28deg,#ae87ff18 42deg,transparent 52deg)!important;mask-image:linear-gradient(transparent,#000 40%,#000)!important;opacity:0;filter:blur(6px)!important;mix-blend-mode:screen!important;z-index:1!important;pointer-events:none!important}.c430-flare{position:absolute!important;left:50%!important;top:56%!important;width:300px!important;height:120px!important;margin:-60px 0 0 -150px!important;background:radial-gradient(ellipse,#e2fffa99,#86f9e955 25%,#bb81ed22 50%,transparent 72%)!important;opacity:0;mix-blend-mode:screen!important;filter:blur(7px)!important;z-index:2!important;pointer-events:none!important}.c430-ripple{position:absolute!important;left:50%!important;top:57%!important;width:160px!important;height:60px!important;margin:-30px 0 0 -80px!important;border:2px solid #a8fcef!important;border-radius:50%!important;opacity:0;box-shadow:0 0 12px #b2dff5!important;z-index:2!important}.c430-spark{position:absolute!important;width:4px!important;height:4px!important;background:#c4fff2!important;border-radius:50%!important;left:50%!important;top:58%!important;opacity:0;box-shadow:0 0 8px #74f5e4!important;z-index:3!important;pointer-events:none!important}.c430-spark:nth-child(3n){background:#d7b8ff!important;box-shadow:0 0 8px #b47bff!important}
+.c430-caption{text-align:center!important;color:#d9c0ef!important;letter-spacing:2px!important;font-weight:700!important;margin:0 0 10px!important}
+@media(max-width:700px),(max-height:750px){.c430-stage{height:340px!important}.c430-box{width:290px!important;height:290px!important;bottom:16px!important}.c430-ground{width:240px!important;bottom:20px!important}.c430-seal{width:260px!important;height:70px!important;margin-left:-130px!important;bottom:30px!important}.c430-beam{bottom:115px!important;width:220px!important;height:220px!important;margin-left:-110px!important}.c430-halo{width:250px!important;height:250px!important}}
+body:has(#seriesResult430) :is(#uiConfirmOverlay,#uiAlertOverlay){z-index:100050!important}
+#seriesResult430{padding:20px!important;background:#020912aa!important;backdrop-filter:blur(5px)!important;z-index:100040!important;display:grid!important;place-items:center!important}
+#seriesResult430 .series-card430{width:min(1060px,calc(100vw - 40px))!important;max-height:calc(100dvh - 40px)!important;display:flex!important;flex-direction:column!important;min-height:0!important;overflow:hidden!important;border:1px solid #9c804e!important;border-radius:8px!important;background:linear-gradient(120deg,#24303cfa,#0d1722fa 70%)!important;box-shadow:0 25px 80px #000b!important;color:#eee6d6!important}
+#seriesResult430 header{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:18px!important;flex:none!important;padding:20px 26px!important;border-bottom:1px solid #9e815a55!important;background:linear-gradient(90deg,#111d2beb,#111d2b99),url("assets/images/mode-hubs413/relic.webp") center/cover!important}
+#seriesResult430 header small{color:#bda27a!important;letter-spacing:2px!important;font-size:10px!important}
+#seriesResult430 h2{color:#f7ddb0!important;font-size:25px!important;line-height:1.4!important;margin:4px 0!important;letter-spacing:2px!important}
+#seriesResult430 header p{margin:0!important;color:#b3c3d3!important;font-size:12px!important}
+#seriesResult430 button{min-height:40px!important;padding:8px 15px!important;border:1px solid #8f7954!important;background:linear-gradient(#304153,#16212e)!important;border-radius:4px!important;color:#ead9b9!important;font:700 12px/1.4 "Microsoft JhengHei",sans-serif!important;cursor:pointer!important;box-shadow:none!important}
+#seriesResult430 header>button{min-width:32px!important;min-height:32px!important;padding:4px 8px!important;font-size:20px!important}
+#seriesResult430 button:disabled{opacity:.45;cursor:not-allowed!important}
+#seriesResult430 :is(button,input):focus-visible{outline:2px solid #8cded7!important;outline-offset:3px!important}
+#seriesResult430 .series-scroll430{overflow:auto!important;min-height:0!important;padding:20px 24px!important;overscroll-behavior:contain!important;flex:1 1 auto!important}
+.series-reason430{font-size:12px!important;color:#b8c7d5!important;margin:0 0 16px!important}
+.series-loot430{min-width:0!important;position:relative!important;padding:4px!important;border-radius:6px!important}
+.series-loot430.selected{background:#b4dff018!important;outline:1px solid #a4d8df!important}
+.series-loot430.sold .r429-icon{opacity:.35}
+.series-pick430{display:flex!important;align-items:flex-start!important;justify-content:center!important;gap:5px!important;margin-top:9px!important;color:#bacbd8!important;font-size:11px!important;line-height:1.4!important;cursor:pointer!important}
+.series-pick430 input{width:16px!important;height:16px!important;margin:0!important;accent-color:#d8b574!important;flex:none!important}
+.series-sale-tools430{display:flex!important;flex-wrap:wrap!important;gap:8px!important;align-items:center!important;margin-top:18px!important}
+.series-sale-tools430 small{flex:1 1 260px!important;font-size:11px!important;color:#9fadb9!important;line-height:1.6!important}
+.series-sale-status430{font-size:12px!important;color:#badbc9!important;min-height:18px!important;margin:12px 0 0!important}
+#seriesResult430 footer{display:flex!important;gap:10px!important;align-items:center!important;flex-wrap:wrap!important;padding:16px 24px!important;border-top:1px solid #9d81594d!important;background:#0e1924dd!important;flex:none!important}
+#seriesResult430 footer>span{margin-right:auto!important;color:#d6c399!important;font-size:12px!important}
+#seriesResult430 .series-sell430{color:#2e2414!important;background:linear-gradient(#edcf91,#b29257)!important;border-color:#f1d59a!important}
+#seriesResult430 .r429-qty{max-width:100%!important;font-size:clamp(10px,calc(130cqi / var(--series-digits430,5)),19px)!important}
+#seriesResult430 .r429-tile{container-type:inline-size!important}
+@media(max-width:700px){#seriesResult430{padding:8px!important}#seriesResult430 .series-card430{width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important}#seriesResult430 header{padding:16px!important}#seriesResult430 h2{font-size:21px!important}#seriesResult430 .series-scroll430{padding:14px 10px!important}#seriesResult430 .r429-loot-grid{padding:10px!important;gap:16px 8px!important}#seriesResult430 footer{padding:12px!important;gap:8px!important}#seriesResult430 footer>span{flex:1 1 100%!important}.series-pick430{font-size:10px!important}}
+
+}</style>
 </body>
 </html>
