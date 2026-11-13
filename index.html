@@ -20600,12 +20600,12 @@ async function openGiftbox101_(boxId){
  const v=giftboxView101_={boxId:String(boxId),busy:false,catalog:null,focus:document.activeElement};
  const el=document.createElement('div');el.id='giftbox101';el.className='gift-overlay101';
  el.innerHTML=`<div class="gift-window101" role="dialog" aria-modal="true" aria-labelledby="gift-title101" tabindex="-1"><header><div><small>FORTUNE TREASURY</small><h2 id="gift-title101">${escapeHtml(row?.Name||'神運寶盒')}</h2></div><button data-close aria-label="關閉禮盒" onclick="closeGiftbox101_()">✕</button></header><div class="gift-scroll101"><div class="gift-stage101">${giftboxArt101_()}<p>剩餘 <b data-remaining>0</b> 個</p></div><div class="gift-actions101"><button data-draw="1" onclick="drawGiftbox101_(1)">1 抽</button><button data-draw="10" onclick="drawGiftbox101_(10)">10 連抽</button><button data-retry onclick="drawGiftbox101_(0)" hidden>確認上次抽獎結果</button></div><div class="gift-message101" role="status" aria-live="polite">正在載入寶箱內容…</div><div class="gift-results101" aria-live="polite"></div><details class="gift-contents101" open><summary>寶箱內容與機率</summary><div data-pool></div></details></div></div>`;
- document.body.appendChild(el);giftboxButtons101_();el.querySelector('[role=dialog]').focus();
+ document.body.appendChild(el);giftCeremony431_(el,v.boxId);giftboxButtons101_();el.querySelector('[role=dialog]').focus({preventScroll:true});
  el.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeGiftbox101_();}if(e.key==='Tab'){const nodes=[...el.querySelectorAll('button:not(:disabled),summary')].filter(x=>!x.hidden);const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&(document.activeElement===first||document.activeElement===el.querySelector('[role=dialog]'))){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});
  try{
   if(cloudMeta.authProvider!=='supabase')throw new Error('請先登入帳號以開啟禮盒。');
   const token=await ensureSupabaseAccess_();const catalog=v.boxId==='chaosBox'?await apiPost('chaos/catalog',{boxId:v.boxId},{silentLoading:true,maxRetry:0}):await supabaseJson_('/rest/v1/rpc/game_giftbox_catalog101',{p_box_id:v.boxId},token);
-  if(giftboxView101_!==v)return;v.catalog=catalog;el.querySelector('[data-pool]').innerHTML=giftboxPoolHtml101_(catalog);
+  if(giftboxView101_!==v)return;v.catalog=catalog;el.querySelector('[data-pool]').innerHTML=giftboxPoolHtml101_(catalog);giftCatalogPreview431_(el,catalog);
   el.querySelector('.gift-message101').textContent=pending?'有一筆抽獎尚未確認，請確認上次結果。':'每次抽獎消耗 1 個寶盒。';
  }catch(err){if(giftboxView101_===v)el.querySelector('.gift-message101').textContent='寶箱內容暫時無法載入，請關閉後再開啟。';}
  giftboxButtons101_();
@@ -20614,7 +20614,7 @@ async function drawGiftbox101_(quantity){
  const v=giftboxView101_,el=document.getElementById('giftbox101');if(!v||!el||v.busy)return;
  let pending=giftboxPending101_();if(pending&&quantity!==0)return;if(!pending&&(!v.catalog||![1,10].includes(quantity)||Number(state.consumables?.[v.boxId]||0)<quantity))return;
  if(!beginServerMutation_('開啟禮盒'))return toast('其他操作仍在處理中，請稍候。');
- v.busy=true;giftboxButtons101_();el.classList.remove('opened101');el.classList.add('opening101');el.querySelector('.gift-results101').innerHTML='';el.querySelector('.gift-contents101').open=false;
+ v.busy=true;giftboxButtons101_();giftBegin431_(el);el.classList.remove('opened101');el.classList.add('opening101');el.querySelector('.gift-results101').innerHTML='';el.querySelector('.gift-contents101').open=false;
  const message=el.querySelector('.gift-message101');message.textContent=pending?'正在確認抽獎結果…':'寶盒開啟中…';playSfx('giftOpen');
  const session=characterSessionContext_(),accountId=cloudMeta.accountId,key=giftboxPendingKey101_();let sent=false,committed=false;
  try{
@@ -20625,10 +20625,10 @@ async function drawGiftbox101_(quantity){
   committed=true;assertCharacterSession_(session);
   if(result.accountId!==accountId||!result.save||!Number.isSafeInteger(Number(result.revision))||Number(result.revision)<Number(cloudMeta.revision||0)||!Array.isArray(result.results)||result.results.length!==pending.quantity)throw new Error('抽獎結果需重新確認。');
   validateTransactionResultSave_(state,result.save,'開啟禮盒');await applyServerSave79_(result,null);save();render();
-  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)await wait(Math.max(0,900-(performance.now()-started)));
+  await giftReveal431_(el,result.results);
   assertCharacterSession_(session);if(giftboxView101_!==v)return;
   el.classList.remove('opening101');el.classList.add('opened101');
-  el.querySelector('.gift-results101').innerHTML=giftboxResultsHtml104_(result.results);
+  el.querySelector('.gift-results101').innerHTML=giftboxResultsHtml104_(result.results);giftComplete431_(el,result.results);
   message.textContent=result.duplicate?'已找回上次的抽獎結果。':'獎品已加入背包！';
   localStorage.removeItem(key);playSfx(result.results.some(r=>r.jackpot)?'giftJackpot':'reward');
  }catch(err){
@@ -20636,7 +20636,7 @@ async function drawGiftbox101_(quantity){
   if(err.code==='REQUEST_RETIRED_RELOAD_REQUIRED'){retiredNotice348_();return;}
   message.textContent=giftboxPending101_()?'抽獎結果尚未確認，請按「確認上次抽獎結果」。':String(err.code||err.message).includes('GIFTBOX_EMPTY')?'寶盒數量不足。':String(err.code||err.message).includes('SAVE_REVISION_CONFLICT')?'資料已更新，請同步後重新開啟禮盒。':'開盒未完成，請稍後再試。';
   if(!giftboxPending101_()&&String(err.code||err.message).includes('GIFTBOX_PLANNING_CHANGED')){v.catalog=null;message.textContent='寶箱內容已更新，請關閉後重新開啟。';}
- }finally{v.busy=false;el.classList.remove('opening101');endServerMutation_();giftboxButtons101_();}
+ }finally{giftEnd431_(el);v.busy=false;el.classList.remove('opening101');endServerMutation_();giftboxButtons101_();}
 }
 
 // v172 Equipment forging. Inventory RPC owns all costs, rolls and receipts.
@@ -27104,7 +27104,7 @@ openPetEgg297=function(boxId='petEgg'){
  el.innerHTML=`<section class="gift-window101 pet-window-egg298">${petSparks298_()}<header><div><small>COMPANION TREASURY</small><h2 id="petEggTitle298">${eggName333}</h2></div><button data-petclose298 aria-label="關閉${eggName333}">✕</button></header><div class="gift-scroll101"><div class="pet-hatch-stage298"><div class="pet-hatch-rays298"></div><div class="pet-hatch-ring298"></div><div class="pet-hatch-egg298"><span class="pet-shell-top298">${eggArt333}</span><span class="pet-shell-bottom298">${eggArt333}</span></div><div class="pet-hatch-flash298"></div></div><p class="pet-owned298">持有 <b id="petEggCount297">0</b> 顆</p><div class="gift-actions101"><button data-petdraw297="1" onclick="petAction297('pet/open',{quantity:1,boxId:'${boxId}'})">1 抽</button><button data-petdraw297="10" onclick="petAction297('pet/open',{quantity:10,boxId:'${boxId}'})">10 連抽</button><button data-petretry298 onclick="petAction297()" ${petPending297()?'':'hidden'}>確認上次結果</button></div><div id="petEggStatus298" class="gift-message101" role="status" aria-live="polite">${petBoxReady298_(boxId)?'每次消耗1顆'+eggName333+'，獲得1項獎勵。':'寵物蛋獎池尚未就緒，請先更新企劃資料。'}</div><div id="petEggResults297" class="gift-results101 pet-result298"></div><details class="gift-contents101"><summary>內容與機率</summary>${petPoolHtml333_(boxId)}</details></div></section>`;
  const close=()=>{if(!petBusy297)el.remove();};el.querySelector('[data-petclose298]').onclick=close;el.onclick=e=>{if(e.target===el)close();};
  el.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();close();}if(e.key==='Tab')petTrap298_(el,e);};
- document.body.appendChild(el);petUpdateBox298_();el.querySelector('button')?.focus();
+ document.body.appendChild(el);giftCeremony431_(el,boxId);petUpdateBox298_();el.querySelector('button')?.focus({preventScroll:true});
 };
 function petTrap298_(el,e){const nodes=[...el.querySelectorAll('button:not(:disabled):not([hidden]),input:not(:disabled),summary')],first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}
 function petStatus298_(text){
@@ -27155,9 +27155,9 @@ petAction297=async function(action,payload={}){
    request={action,...payload,requestId:crypto.randomUUID(),expectedSaveRevision:pre.revision};characterStorageWrite44_(key,JSON.stringify(request));}
   if(operation==='pet/train')petTrainingStart336_(request.petId,trainingIndices324);
   sent=true;const r=await apiPost(request.action,request,{silentLoading:true,maxRetry:0});assertCharacterSession_(session);
-  if(!r?.ok||!r.save||r.accountId!==session.accountId)throw Error(r?.error||'PET_RESPONSE_INVALID');confirmed=true;
+  if(!r?.ok||!r.save||r.accountId!==session.accountId||operation==='pet/open'&&(!Array.isArray(r.results)||r.results.length!==Number(request.quantity)))throw Error(r?.error||'PET_RESPONSE_INVALID');confirmed=true;
   await applyServerSave79_(r,null);assertCharacterSession_(session);localStorage.removeItem(key);save();render();
-  if(operation==='pet/open'){await waitMs(Math.max(0,1200-(performance.now()-started)));assertCharacterSession_(session);petShowRewards297(r.results||[]);petStatus298_(r.duplicate?'已找回上次開蛋結果。':'獎勵已加入背包。');await waitMs(550);}
+  if(operation==='pet/open'){await giftReveal431_(document.getElementById('petEggDialog297'),r.results||[]);assertCharacterSession_(session);petShowRewards297(r.results||[]);petStatus298_(r.duplicate?'已找回上次開蛋結果。':'獎勵已加入背包。');await waitMs(550);}
   else if(operation==='pet/train'){
    await petTrainingWait336_();assertCharacterSession_(session);
    if(petModal297){petModal297.emotion='happy';petModal297.status298=r.duplicate?'已確認上次訓練結果。':'訓練完成，潛能已更新。';petTrainingReveal336_();petPaint297();}
@@ -27172,7 +27172,7 @@ petAction297=async function(action,payload={}){
   const message=Object.entries(PET_ERRORS297).find(([k])=>code.includes(k))?.[1]||(code.includes('PET_QUANTITY_INVALID')?'請輸入有效的整數數量。':code.includes('SAVE_TOO_LARGE')?'存檔容量不足，本次操作未完成。':'操作結果等待確認，請按「確認上次結果」，不會重複消耗。');
   if(petModal297){petModal297.emotion='sad';petModal297.status298=message;}petStatus298_(message);
  }finally{
-  petTrainingEnd336_();petBusy297=false;endServerMutation_();document.getElementById('petDialog297')?.classList.remove('pet-training-active298');if(petModal297)petPaint297();petCollectionFinish336_();
+  giftEnd431_(document.getElementById('petEggDialog297'));petTrainingEnd336_();petBusy297=false;endServerMutation_();document.getElementById('petDialog297')?.classList.remove('pet-training-active298');if(petModal297)petPaint297();petCollectionFinish336_();
   document.getElementById('petEggDialog297')?.classList.remove('pet-opening298');const retry=document.querySelector('#petEggDialog297 [data-petretry298]');if(retry)retry.hidden=!petPending297();petUpdateBox298_();
  }
 };
@@ -28496,7 +28496,7 @@ const questRewardConfirmBase381=questRewardConfirm369;questRewardConfirm369=asyn
 // Named chicken/deer/ragdoll eggs use the verified returned pet, never an inferred inventory increase.
 const questMutationBase381=questMutation368;questMutation368=async function(action,payload){
  const owner=questOwnerKey368(),result=await questMutationBase381(action,payload);
- if(action==='quest/openEgg'&&owner===questOwnerKey368()&&result?.pet&&state.pets297?.some(p=>p.id===result.pet.id)){
+ if(action==='quest/openEgg'&&owner===questOwnerKey368()&&result?.pet&&state.pets297?.some(p=>p.id===result.pet.id)&&!giftOwnsNamed431_(payload?.eggId,owner)){
   rewardShow381([{Type:'PET',ContentID:result.pet.species,Quantity:1,Item:result.pet}],'named-egg',owner+':egg:'+result.pet.id);
  }
  return result;
@@ -30250,5 +30250,176 @@ body:has(#seriesResult430) :is(#uiConfirmOverlay,#uiAlertOverlay){z-index:100050
 @media(max-width:700px){#seriesResult430{padding:8px!important}#seriesResult430 .series-card430{width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important}#seriesResult430 header{padding:16px!important}#seriesResult430 h2{font-size:21px!important}#seriesResult430 .series-scroll430{padding:14px 10px!important}#seriesResult430 .r429-loot-grid{padding:10px!important;gap:16px 8px!important}#seriesResult430 footer{padding:12px!important;gap:8px!important}#seriesResult430 footer>span{flex:1 1 100%!important}.series-pick430{font-size:10px!important}}
 
 }</style>
+<style id="gift-viewport431">@layer desktopViewport421{
+html.mobile-ui,html.mobile-ui body{min-height:0!important;height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
+html.mobile-ui #app{position:fixed!important;left:0!important;right:0!important;top:var(--mobile-top431,0px)!important;bottom:auto!important;height:var(--mobile-height431,100dvh)!important;max-height:var(--mobile-height431,100dvh)!important;min-height:0!important;margin:0 auto!important}
+.gift-ui431.gift-overlay101{z-index:24000!important;padding:16px!important;background:#030811c9!important;backdrop-filter:blur(7px)!important}
+html.desktop-ui .gift-ui431.gift-overlay101{padding-top:var(--window-top421)!important;padding-bottom:8px!important}
+.gift-ui431 .gift-window101{width:min(1120px,100%)!important;max-width:1120px!important;max-height:calc(100dvh - 32px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important;border:1px solid var(--g431-accent)!important;border-radius:16px!important;background:var(--g431-bg)!important;color:#eee8dc!important;box-shadow:0 20px 70px #0009!important;font-family:'Microsoft JhengHei','PingFang TC',sans-serif!important}
+.gift-ui431 .gift-window101>header{flex:none!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:20px 27px!important;border-bottom:1px solid #b8a77844!important;background:linear-gradient(120deg,#ffffff0c,transparent)!important;gap:12px!important}
+.gift-ui431 header h2{font-size:25px!important;color:#f5e9cf!important;margin:5px 0 0!important;letter-spacing:2px!important;font-weight:800!important}.gift-ui431 header small{font-size:10px!important;letter-spacing:3px!important;color:var(--g431-accent)!important}
+.gift-ui431 button{font-size:14px!important;font-weight:800!important;min-height:40px!important;border:1px solid #9b8554!important;border-radius:6px!important;background:#131c25!important;color:#eee6d5!important;padding:10px 17px!important;transform:none!important}.gift-ui431 button:focus-visible{outline:3px solid var(--g431-accent)!important;outline-offset:2px!important}.gift-ui431 button:disabled{opacity:.45!important}.gift-ui431 button.g431-primary{background:linear-gradient(135deg,#f8e9c5,var(--g431-accent))!important;color:#251e14!important;border-color:var(--g431-accent)!important}
+.gift-ui431 [hidden]{display:none!important}.gift-ui431 .gift-scroll101{flex:1!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:0!important;-webkit-overflow-scrolling:touch!important}
+.gift-ui431 .g431-stage{display:grid!important;grid-template-columns:minmax(0,1fr) 270px!important;position:relative!important;isolation:isolate!important;background:linear-gradient(90deg,#09111b33,var(--g431-bg)),var(--g431-scene) center/cover!important}
+.gift-ui431 .g431-hero{min-height:380px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;position:relative!important;padding:24px 16px!important;overflow:hidden!important;background:radial-gradient(ellipse at center,rgba(var(--g431-rgb),.12),transparent 65%)!important}
+.gift-ui431 .g431-kicker{font-size:12px!important;letter-spacing:4px!important;color:var(--g431-accent)!important;text-align:center!important}.gift-ui431 .g431-pedestal{position:relative!important;width:310px!important;height:260px!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:none!important;isolation:isolate!important}
+.gift-ui431 .g431-floor{position:absolute!important;bottom:18px!important;left:8px!important;right:8px!important;height:75px!important;border:1px solid rgba(var(--g431-rgb),.6)!important;border-radius:50%!important;box-shadow:inset 0 0 20px rgba(var(--g431-rgb),.13),0 0 20px rgba(var(--g431-rgb),.13)!important}.gift-ui431 .g431-floor:after{content:''!important;position:absolute!important;inset:10px 25px!important;border:1px dashed rgba(var(--g431-rgb),.6)!important;border-radius:50%!important}
+.gift-ui431 .g431-chest{width:260px!important;height:260px!important;position:relative!important;filter:drop-shadow(0 8px 12px #0008)!important;z-index:2!important;transition:opacity .45s!important}.gift-ui431 .g431-pose{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:0!important;transition:opacity .38s ease!important;overflow:hidden!important}.gift-ui431 .g431-pose0{opacity:1!important}.gift-ui431.g431-half .g431-pose0{opacity:0!important}.gift-ui431.g431-half .g431-pose1{opacity:1!important}.gift-ui431.g431-open .g431-pose1{opacity:0!important}.gift-ui431.g431-open .g431-pose2{opacity:1!important}
+.gift-ui431 .g431-mouth{position:absolute!important;left:20%!important;right:18%!important;top:47%!important;height:14%!important;background:radial-gradient(ellipse,#fff2c977,rgba(var(--g431-rgb),.1) 55%,transparent 75%)!important;border-radius:50%!important;opacity:0!important;filter:blur(3px)!important;transition:opacity .6s!important}.gift-ui431.g431-open .g431-mouth{opacity:1!important}
+.gift-ui431 .g431-egg{width:225px!important;height:225px!important;position:relative!important;z-index:2!important;transition:opacity .5s!important}.gift-ui431 .g431-egg>img{width:100%!important;height:100%!important;object-fit:contain!important;filter:drop-shadow(0 0 14px rgba(var(--g431-rgb),.3))!important}.gift-ui431 .g431-crack{position:absolute!important;width:65px!important;height:120px!important;left:82px!important;top:58px!important;opacity:0!important;filter:drop-shadow(0 0 5px #fff)!important;transition:opacity .5s!important}.gift-ui431.g431-half .g431-crack{opacity:1!important}.gift-ui431.g431-half .g431-egg{animation:g431-wobble .3s 3!important}
+.gift-ui431 .g431-phase{font-size:16px!important;color:#f3e4c4!important;letter-spacing:1px!important;margin:0!important;text-align:center!important}.gift-ui431 .g431-hint{font-size:12px!important;color:#c2cbd1!important;margin-top:8px!important;text-align:center!important}.gift-ui431 .g431-skip{position:absolute!important;right:10px!important;bottom:8px!important;font-size:11px!important;min-height:30px!important;padding:5px 8px!important;z-index:10!important}
+.gift-ui431 .g431-reveal-art{position:absolute!important;width:190px!important;height:180px!important;left:60px!important;top:30px!important;display:grid!important;place-items:center!important;opacity:0!important;transform:translateY(15px) scale(.65)!important;transition:opacity .5s,transform .6s!important;z-index:5!important;filter:drop-shadow(0 0 25px rgba(var(--g431-rgb),.5))!important}.gift-ui431 .g431-reveal-art>:is(img,svg,canvas){width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important}.gift-ui431.g431-reveal .g431-reveal-art{opacity:1!important;transform:translateY(0) scale(1)!important}.gift-ui431.g431-reveal .g431-chest{opacity:.15!important}.gift-ui431.g431-reveal .g431-egg{opacity:0!important}
+.gift-ui431 .g431-aside{padding:25px 20px!important;border-left:1px solid #b7a16a33!important;display:flex!important;flex-direction:column!important;gap:13px!important;background:#09111b44!important}.gift-ui431 .g431-aside>span{font-size:13px!important;color:#c1cbd1!important}.gift-ui431 .g431-aside>small{font-size:11px!important;color:#b0bcc5!important;margin-top:auto!important}.gift-ui431 .g431-preview{display:flex!important;flex-wrap:wrap!important;gap:9px!important;justify-content:center!important}.gift-ui431 .g431-preview-item{min-width:0!important;width:calc(50% - 5px)!important;text-align:center!important;padding:9px 5px!important;border:1px solid rgba(var(--g431-rgb),.3)!important;border-radius:9px!important;background:linear-gradient(140deg,rgba(var(--g431-rgb),.1),#08121b99)!important}.gift-ui431 .g431-preview-item:first-child{width:100%!important}.gift-ui431 .g431-preview-item>div{height:65px!important;display:grid!important;place-items:center!important}.gift-ui431 .g431-preview-item:first-child>div{height:100px!important}.gift-ui431 .g431-preview-item :is(img,svg,canvas){height:100%!important;max-width:100%!important;width:100%!important;object-fit:contain!important}.gift-ui431 .g431-preview-item b{font-size:11px!important;display:block!important;color:var(--g431-accent)!important;margin-top:7px!important}.gift-ui431 .g431-preview>p{font-size:12px!important}
+.gift-ui431 .g431-stock{text-align:center!important;margin:12px 0 10px!important;font-size:13px!important;color:#bfc7cc!important}.gift-ui431 .g431-stock b{color:var(--g431-accent)!important;font-size:19px!important}.gift-ui431 .gift-actions101{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:10px!important;padding:0 18px!important;margin:0!important}.gift-ui431 .gift-actions101 button{min-width:155px!important;flex:0 1 auto!important}.gift-ui431 .gift-message101{font-size:12px!important;line-height:1.6!important;padding:10px 18px!important;margin:0!important;text-align:center!important;color:#d7c5a3!important;min-height:36px!important}
+.gift-ui431 .gift-contents101{padding:12px 20px 20px!important;margin:0!important;border-top:1px solid #b8a77833!important;font-size:13px!important}.gift-ui431 .gift-contents101 summary{cursor:pointer!important;color:#c4cdd3!important;min-height:30px!important;padding:6px 0!important}.gift-ui431 .gift-contents101 .gift-pool101{grid-template-columns:repeat(2,minmax(0,1fr))!important}.gift-ui431 .gift-contents101 .gift-pool-item101{min-width:0!important;font-size:12px!important}.gift-ui431 .gift-contents101 .gift-pool-item101 small{font-size:11px!important}.gift-ui431 .gift-contents101 .gift-tier101{margin:12px 0 0!important}
+.gift-ui431 .g431-result-panel{padding:12px 24px 25px!important}.gift-ui431 .g431-result-panel h3{font-size:21px!important;text-align:center!important;color:#f3e4c4!important;margin:0 0 18px!important}.gift-ui431 .gift-results101{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:13px!important;margin:0!important;padding:0!important}.gift-ui431 .gift-results101:has(>.g431-tile:only-child){grid-template-columns:minmax(0,280px)!important;justify-content:center!important}.gift-ui431 .g431-tile{position:relative!important;text-align:center!important;min-width:0!important;border:3px solid var(--reward-edge)!important;border-radius:9px!important;background:linear-gradient(135deg,#ffffff0e,#08131dcc)!important;padding:10px 8px!important;animation:g431-appear .4s both!important;animation-delay:var(--reveal-delay)!important;overflow:hidden!important}.gift-ui431 .g431-tile:after{content:''!important;position:absolute!important;inset:-3px!important;border:3px solid transparent!important;border-top-color:var(--reward-color)!important;border-right-color:var(--reward-color)!important;border-radius:9px!important;clip-path:polygon(0 0,60% 0,100% 100%,70% 100%)!important;animation:g431-flow var(--reward-speed) ease-in-out infinite!important;pointer-events:none!important}.gift-ui431 .g431-icon{position:relative!important;height:90px!important;display:grid!important;place-items:center!important}.gift-ui431 .g431-icon>:is(img,svg,canvas){width:80px!important;height:80px!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;image-rendering:auto!important}.gift-ui431 .g431-icon>canvas{width:110px!important;height:90px!important}.gift-ui431 .g431-quantity{position:absolute!important;right:0!important;bottom:0!important;font:900 19px/1.35 'Microsoft JhengHei',sans-serif!important;padding:0 5px!important;color:#fff!important;background:#07101ce6!important;border-radius:3px!important;text-shadow:0 2px 2px #000!important;max-width:100%!important;overflow-wrap:anywhere!important}.gift-ui431 .g431-name{display:block!important;color:var(--reward-color)!important;font-size:12px!important;line-height:1.5!important;margin-top:10px!important;min-height:36px!important;overflow-wrap:anywhere!important}.gift-ui431 .g431-tile>small{font-size:10px!important;color:#b3c0cb!important}.gift-ui431 .g431-tile:only-child .g431-icon{height:180px!important}.gift-ui431 .g431-tile:only-child .g431-icon>:is(img,svg,canvas){width:170px!important;height:170px!important}.gift-ui431 .g431-tile:only-child .g431-name{font-size:17px!important}
+.gift-ui431 .g431-fx{position:absolute!important;inset:0!important;pointer-events:none!important;z-index:0!important}.gift-ui431 .g431-ring{position:absolute!important;inset:25px 55px!important;border:1px dashed var(--g431-accent)!important;border-radius:50%!important;opacity:0!important;box-shadow:0 0 25px rgba(var(--g431-rgb),.3)!important}.gift-ui431.g431-open .g431-ring{opacity:.6!important;animation:g431-turn 5s linear infinite!important}.gift-ui431 .g431-rift{position:absolute!important;inset:15px 93px!important;border:2px solid #dcc1ff!important;border-radius:50%!important;background:#170729!important;box-shadow:0 0 25px #be83eb,inset 0 0 20px #bd95ff!important;opacity:0!important;transform:scaleX(.1)!important;transition:transform .8s,opacity .8s!important}.gift-ui431.g431-open .g431-rift{opacity:.7!important;transform:scaleX(1) rotate(15deg)!important}
+.gift-ui431 .g431-wing{position:absolute!important;left:15px!important;top:50px!important;width:120px!important;height:100px!important;clip-path:polygon(0 0,100% 90%,45% 100%,15% 60%,45% 70%,8% 25%,50% 48%)!important;background:linear-gradient(100deg,transparent,var(--g431-accent))!important;opacity:0!important;transition:opacity .8s!important}.gift-ui431 .g431-wing-right{left:auto!important;right:15px!important;transform:scaleX(-1)!important}.gift-ui431.g431-open .g431-wing{opacity:.6!important}
+.gift-ui431 .g431-particle{position:absolute!important;left:50%!important;top:45%!important;width:10px!important;height:12px!important;background:var(--g431-accent)!important;opacity:0!important}.gift-ui431 .g431-star{clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)!important}.gift-ui431 .g431-leaf,.gift-ui431 .g431-feather{border-radius:90% 0 90% 0!important;height:20px!important}.gift-ui431 .g431-paw{border-radius:50% 50% 40% 40%!important;box-shadow:7px -9px 0 -2px var(--g431-accent),-7px -9px 0 -2px var(--g431-accent),0 -13px 0 -2px var(--g431-accent)!important}.gift-ui431.g431-reveal .g431-particle{animation:g431-scatter 1.4s var(--gd) ease-out both!important}
+html body .gift-ui431.gift-overlay101 [hidden]{display:none!important}
+.gift-ui431.gift-overlay101 .g431-preview-item :is(img,svg,canvas){width:60px!important;height:60px!important;min-width:0!important;min-height:0!important;max-width:100%!important;max-height:100%!important;aspect-ratio:auto!important}
+.gift-ui431.gift-overlay101 .g431-preview-item:first-child :is(img,svg,canvas){width:100px!important;height:100px!important}
+.gift-ui431.gift-overlay101 .g431-preview-item>div{overflow:hidden!important}
+@media(max-width:700px){
+ .gift-ui431.gift-overlay101{padding:8px!important;top:var(--mobile-top431,0px)!important;height:var(--mobile-height431,100dvh)!important;bottom:auto!important}.gift-ui431 .gift-window101{max-height:calc(var(--mobile-height431,100dvh) - 16px)!important;border-radius:11px!important}.gift-ui431 .gift-window101>header{padding:14px 17px!important}.gift-ui431 header h2{font-size:22px!important}.gift-ui431 header small{font-size:9px!important}.gift-ui431 .g431-stage{grid-template-columns:1fr!important}.gift-ui431 .g431-hero{min-height:320px!important;padding:15px 10px 20px!important}.gift-ui431 .g431-pedestal{height:230px!important;transform:scale(.9)!important;margin:-7px 0!important}.gift-ui431 .g431-kicker{font-size:11px!important;letter-spacing:2px!important}.gift-ui431 .g431-phase{font-size:14px!important}.gift-ui431 .g431-hint{font-size:11px!important}.gift-ui431 .g431-aside{display:none!important}.gift-ui431 .gift-actions101{gap:8px!important;padding:0 13px!important}.gift-ui431 .gift-actions101 button{min-width:0!important;flex:1 1 40%!important;font-size:13px!important}.gift-ui431 .g431-result-panel{padding:12px 13px 20px!important}.gift-ui431 .gift-results101{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}.gift-ui431 .gift-contents101{padding:10px 14px 16px!important}.gift-ui431 .gift-contents101 .gift-pool101{grid-template-columns:1fr!important}.gift-ui431 .g431-name{font-size:12px!important}
+}
+@media(prefers-reduced-motion:reduce){html body .gift-ui431.gift-overlay101 *,html body .gift-ui431.gift-overlay101 *:after{animation:none!important;transition:none!important}.gift-ui431 .g431-particle{display:none!important}}
+}
+@keyframes g431-wobble{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}@keyframes g431-turn{to{transform:rotate(360deg)}}@keyframes g431-flow{50%{opacity:.3}}@keyframes g431-appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes g431-scatter{0%{opacity:0;transform:translate(0,0)}20%{opacity:.9}100%{opacity:0;transform:translate(var(--gx),var(--gy)) rotate(var(--gr))}}
+</style>
+<script id="gift-viewport431-script">// Presentation only. Existing gift, pet and quest transactions own draws, receipts and saves.
+const GIFT_THEMES431_={
+ luckyBox:['神運寶盒','FORTUNE SANCTUARY','#e8c678','232,198,120','#111b29','leaderboard405/hall.webp','塵封秘寶 · 星芒甦醒','star'],
+ wargodBox:['榮耀寶盒','HALL OF GLORY','#edb168','237,177,104','#261b20','leaderboard405/hall.webp','榮耀之證 · 戰翼展開','wing'],
+ chaosBox:['渾沌寶箱','CHAOS VAULT','#c598f4','197,152,244','#201629','backgrounds/chaos-zone.webp','虛空低語 · 裂隙開啟','rift'],
+ petEgg:['寵物蛋','COMPANION GARDEN','#a3d9bc','163,217,188','#142620','mode-hubs413/relic.webp','微光萌動 · 等待相遇','star'],
+ chaosPetEgg:['混沌寵物蛋','VOID COMPANION','#c6a1f2','198,161,242','#20172c','backgrounds/chaos-zone.webp','混沌共鳴 · 夥伴甦醒','rift'],
+ chickEgg368:['小雞寵物蛋','LITTLE SUNRISE','#f0cb77','240,203,119','#292319','leaderboard405/hall.webp','暖陽初生 · 第一聲啾鳴','feather'],
+ spiritDeerEgg368:['靈鹿寵物蛋','SPIRIT OF THE GROVE','#9bd8c8','155,216,200','#142925','mode-hubs413/relic.webp','翠葉輕旋 · 靈鹿現身','leaf'],
+ ragdollEgg368:['布偶貓寵物蛋','A GENTLE COMPANION','#c6d9ed','198,217,237','#23232d','leaderboard405/hall.webp','奶霜微光 · 溫柔相遇','paw']
+};
+function giftIsEgg431_(id){return !['luckyBox','wargodBox','chaosBox'].includes(id);}
+function giftEggSrc431_(id){return id==='petEgg'||id==='chaosPetEgg'?'assets/images/fixed382/'+id+'382.q85.webp':'assets/images/icons/items/'+id+'.q85.webp';}
+function giftHeroArt431_(id){
+ if(giftIsEgg431_(id))return `<div class="g431-egg"><img src="${giftEggSrc431_(id)}" alt="${escapeAttr(GIFT_THEMES431_[id][0])}"><svg class="g431-crack" viewBox="0 0 100 160" aria-hidden="true"><path d="M50 0L39 33 58 48 37 72 62 95 48 115 57 160M37 72L16 80 5 98M62 95L88 86 96 61" fill="none" stroke="#faffeb" stroke-width="3"/></svg></div>`;
+ const row={luckyBox:-8,wargodBox:386,chaosBox:782}[id],height={luckyBox:390,wargodBox:384,chaosBox:418}[id];
+ return `<div class="g431-chest" role="img" aria-label="${escapeAttr(GIFT_THEMES431_[id][0])}">${[6,418,836].map((x,i)=>`<svg class="g431-pose g431-pose${i}" viewBox="${x} ${row} 418 ${height}" aria-hidden="true"><image href="assets/images/giftbox431/hinged-chests.webp" width="1254" height="1254"/></svg>`).join('')}<i class="g431-mouth"></i></div>`;
+}
+function giftFx431_(kind){
+ let html=kind==='rift'?'<i class="g431-rift"></i>':'<i class="g431-ring"></i>';
+ if(kind==='wing')html+='<i class="g431-wing"></i><i class="g431-wing g431-wing-right"></i>';
+ return html+Array.from({length:14},(_,i)=>`<i class="g431-particle g431-${['leaf','feather','paw'].includes(kind)?kind:'star'}" style="--gx:${Math.cos(i/14*Math.PI*2)*(75+i%3*25)}px;--gy:${Math.sin(i/14*Math.PI*2)*90-25}px;--gr:${i*51}deg;--gd:${i%4*90}ms"></i>`).join('');
+}
+function giftRewardArt431_(r){
+ if(r.type==='PET')return petImage297(r.item)||`<span class="g431-fallback">${escapeHtml(r.name||'寵物')}</span>`;
+ return giftboxIcon101_(r);
+}
+function giftRewards431_(rows){
+ return (rows||[]).map((r,i)=>{
+  const item=r.item,type=String(r.type||'').toUpperCase(),raw=type==='PET'?(item?petQuality336_(item):'common'):type==='EQUIPMENT'?equipmentRarity280_(item||{}):type==='GEM'?(item?.rarity||gemTemplates?.[r.id]?.rarity||'一般'):'一般';
+  const profile=itemBorderProfile_(rarityClass[raw]||raw||'common',type==='EQUIPMENT'?Number(item?.enhance||0):0),sockets=type==='EQUIPMENT'?Math.max(0,Number(item?.sockets??r.sockets)||0):0;
+  const name=(r.name||item?.name||r.id||'獎勵')+(sockets?' ('+sockets+'洞)':''),quantity=Math.max(1,Number(r.quantity)||1);
+  return `<article class="g431-tile" style="--reward-color:${profile.color};--reward-edge:${profile.base};--reward-speed:${profile.speed}s;--reveal-delay:${i*60}ms"><div class="g431-icon" aria-label="${escapeAttr(name)}，數量 ${quantity.toLocaleString()}">${giftRewardArt431_(r)}<b class="g431-quantity">×${quantity.toLocaleString()}</b></div><b class="g431-name">${escapeHtml(name)}</b><small>${escapeHtml(type==='PET'?'已加入寵物分類':r.tierName||'已加入背包')}</small></article>`;
+ }).join('');
+}
+function giftPreview431_(el,rows){
+ const aside=el.querySelector('.g431-aside');if(!aside)return;
+ const content=rows.slice(0,3).map(r=>`<div class="g431-preview-item"><div>${giftRewardArt431_(r)}</div><b>${escapeHtml(r.name||r.id||'獎勵')}</b></div>`).join('');
+ aside.querySelector('.g431-preview').innerHTML=content||'<p>展開下方內容與機率，查看完整獎池。</p>';
+}
+function giftCatalogPreview431_(el,catalog){
+ const rows=(catalog?.tiers||[]).flatMap(t=>(t.rewards||[]).flatMap(r=>(r.choices||[]).map(c=>({...r,id:c.id,name:c.name}))));giftPreview431_(el,rows);
+}
+function giftPetPreview431_(el,id){
+ const fixed=QUEST_EGGS368[id],data=petData297(),ids=fixed?[fixed]:petRows297(data,'GiftBoxRewards').filter(r=>r.BoxID===id&&r.ContentType==='PET').flatMap(r=>String(r.ContentIDs||'').split(','));
+ giftPreview431_(el,petRows297(data,'PetSpecies').filter(p=>ids.includes(p.PetID)).slice(0,3).map(p=>({type:'PET',id:p.PetID,name:p.Name,item:{species:p.PetID}})));
+}
+function giftCeremony431_(el,id){
+ const theme=GIFT_THEMES431_[id];if(!el||!theme)return;
+ el.classList.add('gift-ui431');el.classList.remove('pet-ceremony298');el.dataset.boxId=id;el.dataset.egg431=String(giftIsEgg431_(id));
+ el.style.setProperty('--g431-accent',theme[2]);el.style.setProperty('--g431-rgb',theme[3]);el.style.setProperty('--g431-bg',theme[4]);el.style.setProperty('--g431-scene',`url("assets/images/${theme[5]}")`);
+ const scroll=el.querySelector('.gift-scroll101'),actions=scroll.querySelector('.gift-actions101'),status=scroll.querySelector('.gift-message101'),results=scroll.querySelector('.gift-results101'),details=scroll.querySelector('.gift-contents101');
+ el.querySelector('header small').textContent=theme[1];el.querySelector('header h2').textContent=theme[0];details.open=false;
+ const count=el.id==='petEggDialog297'?'id="petEggCount297"':'data-remaining';
+ scroll.innerHTML=`<div class="g431-stage"><div class="g431-hero"><div class="g431-kicker">${theme[6]}</div><div class="g431-pedestal"><div class="g431-fx" aria-hidden="true">${giftFx431_(theme[7])}</div><i class="g431-floor"></i>${giftHeroArt431_(id)}<div class="g431-reveal-art"></div></div><b class="g431-phase" aria-live="polite">${giftIsEgg431_(id)?'孵化準備就緒':'寶盒已就緒'}</b><span class="g431-hint">${QUEST_EGGS368[id]?'固定獲得指定寵物，品質與詞條沿用目前規則':id==='petEgg'?'可能獲得寵物或素材獎勵':'每次開啟獲得 1 項獎勵'}</span><button type="button" class="g431-skip" hidden>略過動畫 ›</button></div><aside class="g431-aside"><span>${giftIsEgg431_(id)?QUEST_EGGS368[id]?'指定夥伴':'夥伴一覽':'可能獲得的珍藏'}</span><div class="g431-preview"></div><small>完整內容與機率請見下方說明</small></aside></div><p class="g431-stock">持有 <b ${count}>${Number(state.consumables?.[id]||0).toLocaleString()}</b> ${giftIsEgg431_(id)?'顆':'個'}</p>`;
+ scroll.append(actions,status);const resultPanel=document.createElement('section');resultPanel.className='g431-result-panel';resultPanel.hidden=true;resultPanel.innerHTML='<h3>獎勵揭曉</h3>';resultPanel.append(results);scroll.append(resultPanel,details);
+ actions.querySelectorAll('[data-draw],[data-petdraw297]').forEach(b=>{const n=Number(b.dataset.draw||b.dataset.petdraw297);b.textContent=n===10?(giftIsEgg431_(id)?'十連孵化':'十連開啟'):(giftIsEgg431_(id)?'孵化一次':'開啟一次');b.classList.toggle('g431-primary',n===10)});
+ el.querySelector('.g431-skip').onclick=()=>{const run=el.giftRun431;if(!run)return;run.skip=true;if(run.finish)run.finish();else el.querySelector('.g431-phase').textContent='等待伺服器確認結果…';};
+ if(giftIsEgg431_(id))giftPetPreview431_(el,id);
+}
+function giftBegin431_(el){
+ if(!el?.classList.contains('gift-ui431'))return;
+ giftEnd431_(el);el.giftRun431={skip:false,owner:questOwnerKey368(),timers:[]};
+ el.classList.remove('g431-half','g431-open','g431-reveal','g431-complete');el.classList.add('g431-waiting');
+ el.querySelector('.g431-stage').hidden=false;el.querySelector('.g431-result-panel').hidden=true;el.querySelector('.g431-reveal-art').innerHTML='';el.querySelector('.gift-results101').innerHTML='';
+ el.querySelector('.g431-phase').textContent='正在確認開啟請求…';el.querySelector('.gift-contents101').open=false;
+ const skip=el.querySelector('.g431-skip');skip.hidden=false;skip.disabled=false;skip.removeAttribute('aria-busy');
+}
+function giftEnd431_(el){
+ const run=el?.giftRun431;if(!run)return;run.finish?.();run.timers.forEach(clearTimeout);clearInterval(run.watch);el.giftRun431=null;el.classList.remove('g431-waiting');el.querySelector('.g431-skip').hidden=true;if(run.owner!==questOwnerKey368()){el.remove();if(el.id==='giftbox101'&&giftboxView101_?.boxId===el.dataset.boxId)giftboxView101_=null}
+}
+function giftReveal431_(el,rows){
+ if(!el?.classList.contains('gift-ui431'))return Promise.resolve();
+ const run=el.giftRun431;if(!run||run.skip||matchMedia('(prefers-reduced-motion: reduce)').matches)return Promise.resolve();
+ return new Promise(resolve=>{
+  let finished=false;run.finish=()=>{if(finished)return;finished=true;run.timers.forEach(clearTimeout);clearInterval(run.watch);el.querySelector('.g431-skip').hidden=true;resolve()};
+  run.watch=setInterval(()=>{if(!el.isConnected||run.owner!==questOwnerKey368())run.finish()},150);
+  const egg=giftIsEgg431_(el.dataset.boxId),phase=el.querySelector('.g431-phase');el.classList.remove('g431-waiting');phase.textContent=egg?'蛋殼輕輕晃動…':'封印正在解除…';
+  const later=(fn,ms)=>run.timers.push(setTimeout(()=>{if(!finished)fn()},ms));
+  later(()=>{el.classList.add('g431-half');phase.textContent=egg?'裂紋透出微光…':'箱蓋正在掀開…'},600);
+  later(()=>{el.classList.add('g431-open');phase.textContent=egg?'獎勵即將揭曉':'寶盒已開啟'},1150);
+  later(()=>{el.querySelector('.g431-reveal-art').innerHTML=giftRewardArt431_(rows[0]||{});el.classList.add('g431-reveal');phase.textContent=rows.length>1?'本次獎勵正在揭曉':rows[0]?.type==='PET'?'新的夥伴，與你相遇':'戰利品已揭曉'},egg?1750:2300);
+  later(run.finish,egg?3100:3700);
+ });
+}
+function giftComplete431_(el,rows){
+ if(!el?.classList.contains('gift-ui431'))return;
+ el.querySelector('.g431-stage').hidden=true;el.querySelector('.g431-result-panel').hidden=false;el.querySelector('.g431-result-panel h3').textContent=rows.length===10?'十連獎勵揭曉':'獎勵揭曉';el.classList.add('g431-complete');
+ el.querySelector('.gift-scroll101').scrollTop=0;
+}
+const giftResultsBase431_=giftboxResultsHtml104_;
+giftboxResultsHtml104_=function(rows){return document.querySelector('#giftbox101.gift-ui431')?giftRewards431_(rows):giftResultsBase431_(rows)};
+const petBusyBase431_=petBusyUI298_;
+petBusyUI298_=function(busy,action){petBusyBase431_(busy,action);if(busy&&action==='pet/open')giftBegin431_(document.getElementById('petEggDialog297'))};
+const petRewardsBase431_=petShowRewards297;
+petShowRewards297=function(rows){const el=document.getElementById('petEggDialog297');if(!el?.classList.contains('gift-ui431'))return petRewardsBase431_(rows);el.querySelector('#petEggResults297').innerHTML=giftRewards431_(rows);giftComplete431_(el,rows);playSfx(rows.some(r=>r.item)?'giftJackpot':'reward')};
+function giftOwnsNamed431_(id,owner){const el=document.getElementById('fixedEgg431');return !!(el&&el.dataset.boxId===id&&el.fixedBusy431&&el.fixedOwner431===owner)}
+function giftFixedPending431_(){try{return JSON.parse(localStorage.getItem('quest_pending368:'+cloudMeta.accountId)||'null')}catch(_){return null}}
+function giftFixedButtons431_(el){
+ const pending=giftFixedPending431_(),id=el.dataset.boxId;el.querySelector('[data-remaining]').textContent=Number(state.consumables?.[id]||0).toLocaleString();el.querySelector('.g431-fixed-open').disabled=!!el.fixedBusy431||!!pending||Number(state.consumables?.[id]||0)<1;const retry=el.querySelector('.g431-fixed-retry');retry.hidden=!pending;retry.disabled=!!el.fixedBusy431;el.querySelector('[data-fixed-close431]').disabled=!!el.fixedBusy431;
+}
+async function giftOpenFixed431_(id){
+ const pending=giftFixedPending431_();if(pending?.action==='quest/openEgg'&&QUEST_EGGS368[pending.eggId])id=pending.eggId;
+ if(activeBattleNow())return toast('戰鬥中無法開啟禮盒。');if(document.querySelector('.gift-ui431'))return;
+ const focus=document.activeElement,el=document.createElement('div');el.id='fixedEgg431';el.className='gift-overlay101';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-labelledby','fixedEggTitle431');
+ el.innerHTML=`<section class="gift-window101"><header><div><small>COMPANION</small><h2 id="fixedEggTitle431"></h2></div><button data-fixed-close431 aria-label="關閉寵物蛋">✕</button></header><div class="gift-scroll101"><div class="gift-actions101"><button class="g431-fixed-open g431-primary">孵化一次</button><button class="g431-fixed-retry" hidden>確認上次結果</button></div><p class="gift-message101" role="status">開啟後固定獲得指定寵物。</p><div class="gift-results101"></div><details class="gift-contents101"><summary>內容與規則</summary><p>每次消耗 1 顆，必定獲得${escapeHtml({chick:'小雞',spiritDeer:'靈鹿',ragdoll:'布偶貓'}[QUEST_EGGS368[id]])}。品質與初始詞條沿用目前生成規則。</p></details></div></section>`;
+ giftCeremony431_(el,id);const close=()=>{if(el.fixedBusy431)return;giftEnd431_(el);el.remove();focus?.isConnected&&focus.focus({preventScroll:true})};
+ el.querySelector('[data-fixed-close431]').onclick=close;el.onclick=e=>{if(e.target===el)close()};el.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();close()}if(e.key==='Tab')petTrap298_(el,e)};
+ const draw=async()=>{
+  if(el.fixedBusy431)return;el.fixedBusy431=true;el.fixedOwner431=questOwnerKey368();const session=characterSessionContext_(),status=el.querySelector('.gift-message101');giftFixedButtons431_(el);giftBegin431_(el);status.textContent='正在確認開蛋請求…';
+  try{const r=await questMutation368('quest/openEgg',{eggId:id});assertCharacterSession_(session);if(!r?.pet||!state.pets297?.some(p=>p.id===r.pet.id))throw Error('開蛋結果需重新確認。');const rows=[{type:'PET',item:r.pet,id:r.pet.species,name:petName297(r.pet),quantity:1}];render();await giftReveal431_(el,rows);assertCharacterSession_(session);if(!el.isConnected)return;el.querySelector('.gift-results101').innerHTML=giftRewards431_(rows);giftComplete431_(el,rows);status.textContent='夥伴已加入寵物分類。';playSfx('reward')}
+  catch(e){status.textContent=giftFixedPending431_()?'操作結果尚未確認，請按「確認上次結果」，不會重複消耗。':questError368(e)}
+  finally{giftEnd431_(el);el.fixedBusy431=false;giftFixedButtons431_(el)}
+ };
+ el.querySelector('.g431-fixed-open').onclick=draw;el.querySelector('.g431-fixed-retry').onclick=draw;document.body.appendChild(el);giftFixedButtons431_(el);el.querySelector('[data-fixed-close431]').focus({preventScroll:true});
+}
+const openGiftBase431_=openGiftbox101_;
+openGiftbox101_=function(id){return QUEST_EGGS368[id]?giftOpenFixed431_(id):openGiftBase431_(id)};
+// Keep only the outer app anchored. Nested inventories/dialogs retain their own scroll positions.
+var mobileViewportFrame431_=0;
+function syncMobileViewport431_(){
+ mobileViewportFrame431_=0;if(!document.documentElement.classList.contains('mobile-ui')){document.documentElement.style.removeProperty('--mobile-height431');document.documentElement.style.removeProperty('--mobile-top431');return;}
+ const v=window.visualViewport;if(v&&Math.abs(v.scale-1)>.02)return;
+ const edit=document.activeElement?.matches('input,textarea,select,[contenteditable="true"]');
+ if(!edit&&(window.scrollX||window.scrollY))window.scrollTo({left:0,top:0,behavior:'instant'});
+ const h=Math.max(1,v?.height||window.innerHeight),top=Math.max(0,v?.offsetTop||0);
+ const root=document.documentElement;root.style.setProperty('--mobile-height431',h+'px');root.style.setProperty('--mobile-top431',top+'px');
+}
+function queueMobileViewport431_(){if(!mobileViewportFrame431_)mobileViewportFrame431_=requestAnimationFrame(syncMobileViewport431_)}
+['resize','orientationchange','pageshow','scroll'].forEach(name=>window.addEventListener(name,queueMobileViewport431_,{passive:true}));
+window.visualViewport?.addEventListener('resize',queueMobileViewport431_,{passive:true});window.visualViewport?.addEventListener('scroll',queueMobileViewport431_,{passive:true});
+document.addEventListener('focusout',()=>{queueMobileViewport431_();setTimeout(queueMobileViewport431_,250)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueMobileViewport431_()});
+new MutationObserver(queueMobileViewport431_).observe(document.documentElement,{attributes:true,attributeFilter:['class']});new MutationObserver(queueMobileViewport431_).observe(document.body,{attributes:true,attributeFilter:['class']});queueMobileViewport431_();
+</script>
 </body>
 </html>
