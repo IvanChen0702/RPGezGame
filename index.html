@@ -30166,18 +30166,24 @@ function seriesRecords430_(r){
  const l=r.ledger430,out=[];for(const [key,type,name]of [['exp','EXP','經驗值'],['gold','GOLD','金幣'],['stones','STONES','強化石']])if(l.resources[key]>0)out.push({type,name,quantity:l.resources[key]});
  return [...out,...l.stacks.values(),...l.items];
 }
-function closeSeriesSummary430_(){if(seriesResult430_?.busy)return;document.getElementById('seriesResult430')?.remove();}
+function restoreSeriesPage432_(r){
+ // Inventory receipts clear completed battles. Never leave their now-empty battle route visible.
+ if(!seriesOwner430_(r)||battleSeries391_||state.page!=='battle'||state.currentBattle)return;
+ state.page=characterEntryPage45_();state.pendingBattleFloor=null;save();render();
+}
+function closeSeriesSummary430_(){if(seriesResult430_?.busy)return;document.getElementById('seriesResult430')?.remove();restoreSeriesPage432_(seriesResult430_);}
 function showSeriesSummary430_(){
  const r=seriesResult430_;if(!seriesOwner430_(r)){document.getElementById('seriesResult430')?.remove();return;}
- let root=document.getElementById('seriesResult430');const scroll=root?.querySelector('.series-scroll430')?.scrollTop||0;
+ let root=document.getElementById('seriesResult430');const scroll=root?.querySelector('.series-scroll430')?.scrollTop||0,focusIndex=root?.contains(document.activeElement)?document.activeElement?.dataset.seriesItem432:null;
  if(!root){root=document.createElement('div');root.id='seriesResult430';root.className='account-overlay series-overlay430';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','seriesTitle430');document.body.appendChild(root);}
  const records=seriesRecords430_(r),sellable=r.ledger430.items.map((o,i)=>({o,i,item:seriesSaleItem430_(o)})).filter(x=>x.item&&!r.sold.has(x.i));
  for(const i of r.selection)if(!sellable.some(x=>x.i===i))r.selection.delete(i);
  const total=sellable.filter(x=>r.selection.has(x.i)).reduce((n,x)=>n+(x.o.type==='GEM'?estimatedGemSellPrice(x.item):estimatedSellPrice(x.item)),0);
- root.innerHTML=`<section class="series-card430"><header><div><small>本次遠征 · 戰利品結算</small><h2 id="seriesTitle430">連續戰鬥結束</h2><p>已完成 ${r.ledger430.wins} 場勝利／${r.attempts} 場挑戰</p></div><button aria-label="關閉連戰結算" onclick="closeSeriesSummary430_()" ${r.busy?'disabled':''}>×</button></header><div class="series-scroll430"><p class="series-reason430">${escapeHtml(r.reason)}</p>${records.length?'<div class="r429-loot-grid">'+records.map(o=>{const i=r.ledger430.items.indexOf(o),sold=r.sold.has(i),can=i>=0&&!sold&&!!seriesSaleItem430_(o);return `<div class="series-loot430 ${r.selection.has(i)?'selected':''} ${sold?'sold':''}" style="--series-digits430:${('×'+Number(o.quantity??1).toLocaleString()).length}">${relicLootTile429_(o)}${i>=0?`<label class="series-pick430"><input type="checkbox" aria-label="選取出售 ${escapeAttr(o.name||o.item?.name||'物品')}" ${r.selection.has(i)?'checked':''} ${!can||r.busy?'disabled':''} onchange="selectSeriesSale430_(${i},this.checked)"><span>${sold?'已售出':can?'選取出售':o.instanceId?'已裝備／受保護或已移出背包':'僅顯示獎勵紀錄'}</span></label>`:''}</div>`}).join('')+'</div>':'<p class="series-reason430">本次尚未取得已確認的戰利品。</p>'}<div class="series-sale-tools430"><button onclick="selectSeriesLow430_()" ${r.busy||!sellable.length?'disabled':''}>選取一般／特殊</button><button onclick="clearSeriesSale430_()" ${r.busy||!r.selection.size?'disabled':''}>清除選取</button><small>僅出售本次獲得的裝備與寶石；最愛、鎖定、已裝備及已鑲寶石的裝備不會列入。</small></div><p class="series-sale-status430" role="status">${escapeHtml(r.status||'')}</p></div><footer><span>已選 ${r.selection.size} 件 · 預估 ${total.toLocaleString()} 金幣</span><button class="series-sell430" onclick="sellSeriesSelected430_()" ${r.busy||!r.selection.size?'disabled':''}>${r.busy?'出售處理中…':'快速售出'}</button><button onclick="closeSeriesSummary430_()" ${r.busy?'disabled':''}>關閉</button></footer></section>`;
+ root.innerHTML=`<section class="series-card430"><header><div><small>本次遠征 · 戰利品結算</small><h2 id="seriesTitle430">連續戰鬥結束</h2><p>已完成 ${r.ledger430.wins} 場勝利／${r.attempts} 場挑戰</p></div><button aria-label="關閉連戰結算" onclick="closeSeriesSummary430_()" ${r.busy?'disabled':''}>×</button></header><div class="series-scroll430"><p class="series-reason430">${escapeHtml(r.reason)}</p>${records.length?'<div class="r429-loot-grid">'+records.map(o=>{const i=r.ledger430.items.indexOf(o),sold=r.sold.has(i),can=i>=0&&!sold&&!!seriesSaleItem430_(o);return `<div class="series-loot430 ${r.selection.has(i)?'selected':''} ${sold?'sold':''}" style="--series-digits430:${('×'+Number(o.quantity??1).toLocaleString()).length}" ${i>=0?`data-series-item432="${i}" role="button" tabindex="${can&&!r.busy?0:-1}" aria-label="選取出售 ${escapeAttr(o.name||o.item?.name||'物品')}" aria-pressed="${r.selection.has(i)}" aria-disabled="${!can||r.busy}" onclick="selectSeriesSale430_(${i},!seriesResult430_?.selection.has(${i}))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"`:''}>${relicLootTile429_(o)}${i>=0?`<span class="series-pick430">${sold?'已售出':can?(r.selection.has(i)?'已選取':'點選出售'):o.instanceId?'已裝備／受保護或已移出背包':'僅顯示獎勵紀錄'}</span>`:''}</div>`}).join('')+'</div>':'<p class="series-reason430">本次尚未取得已確認的戰利品。</p>'}<div class="series-sale-tools430"><button onclick="selectSeriesLow430_()" ${r.busy||!sellable.length?'disabled':''}>選取一般／特殊</button><button onclick="clearSeriesSale430_()" ${r.busy||!r.selection.size?'disabled':''}>清除選取</button><small>僅出售本次獲得的裝備與寶石；最愛、鎖定、已裝備及已鑲寶石的裝備不會列入。</small></div><p class="series-sale-status430" role="status">${escapeHtml(r.status||'')}</p></div><footer><span>已選 ${r.selection.size} 件 · 預估 ${total.toLocaleString()} 金幣</span><button class="series-sell430" onclick="sellSeriesSelected430_()" ${r.busy||!r.selection.size?'disabled':''}>${r.busy?'出售處理中…':'快速售出'}</button><button onclick="closeSeriesSummary430_()" ${r.busy?'disabled':''}>關閉</button></footer></section>`;
  root.querySelector('.series-scroll430').scrollTop=scroll;
+ if(focusIndex!=null)root.querySelector('[data-series-item432="'+focusIndex+'"]')?.focus({preventScroll:true});
 }
-function selectSeriesSale430_(i,on){const r=seriesResult430_;if(!seriesOwner430_(r)||r.busy||!seriesSaleItem430_(r.ledger430.items[i]))return;on?r.selection.add(i):r.selection.delete(i);showSeriesSummary430_();}
+function selectSeriesSale430_(i,on){const r=seriesResult430_;if(!seriesOwner430_(r)||r.busy||r.sold.has(i)||!seriesSaleItem430_(r.ledger430.items[i]))return;on?r.selection.add(i):r.selection.delete(i);showSeriesSummary430_();}
 function selectSeriesLow430_(){const r=seriesResult430_;if(!seriesOwner430_(r)||r.busy)return;r.ledger430.items.forEach((o,i)=>{const item=seriesSaleItem430_(o),rarity=o.type==='GEM'?gemResolved_(item)?.rarity:equipmentRarity280_(item);if(item&&['一般','特殊','common','special'].includes(rarity||'一般')&&!r.sold.has(i))r.selection.add(i)});showSeriesSummary430_();}
 function clearSeriesSale430_(){if(seriesResult430_?.busy)return;seriesResult430_?.selection.clear();showSeriesSummary430_();}
 async function sellSeriesSelected430_(){
@@ -30211,7 +30217,7 @@ async function sellSeriesSelected430_(){
   }
   if(sold)playSfx('coin');
  }catch(e){if(seriesOwner430_(r))r.status='出售尚未完成：'+(e?.message||String(e));}
- finally{r.busy=false;if(seriesResult430_===r){if(seriesOwner430_(r))showSeriesSummary430_();else document.getElementById('seriesResult430')?.remove();}}
+ finally{r.busy=false;if(seriesResult430_===r){if(seriesOwner430_(r)){restoreSeriesPage432_(r);showSeriesSummary430_();}else document.getElementById('seriesResult430')?.remove();}}
 }
 const renderResultBase430_=render;
 render=function(){const out=renderResultBase430_();if(seriesResult430_&&!seriesOwner430_(seriesResult430_)){document.getElementById('seriesResult430')?.remove();seriesResult430_=null;}scheduleSeriesSummary430_();return out;};
@@ -30238,7 +30244,9 @@ body:has(#seriesResult430) :is(#uiConfirmOverlay,#uiAlertOverlay){z-index:100050
 .series-loot430.selected{background:#b4dff018!important;outline:1px solid #a4d8df!important}
 .series-loot430.sold .r429-icon{opacity:.35}
 .series-pick430{display:flex!important;align-items:flex-start!important;justify-content:center!important;gap:5px!important;margin-top:9px!important;color:#bacbd8!important;font-size:11px!important;line-height:1.4!important;cursor:pointer!important}
-.series-pick430 input{width:16px!important;height:16px!important;margin:0!important;accent-color:#d8b574!important;flex:none!important}
+#seriesResult430 .series-loot430[aria-disabled="false"]{cursor:pointer!important}
+#seriesResult430 .series-loot430[role="button"]:focus-visible{outline:2px solid #8cded7!important;outline-offset:3px!important}
+#seriesResult430 .series-loot430.selected .series-pick430{color:#c7f2ed!important;font-weight:800!important}
 .series-sale-tools430{display:flex!important;flex-wrap:wrap!important;gap:8px!important;align-items:center!important;margin-top:18px!important}
 .series-sale-tools430 small{flex:1 1 260px!important;font-size:11px!important;color:#9fadb9!important;line-height:1.6!important}
 .series-sale-status430{font-size:12px!important;color:#badbc9!important;min-height:18px!important;margin:12px 0 0!important}
