@@ -30313,10 +30313,45 @@ html body .gift-ui431.gift-overlay101 [hidden]{display:none!important}
 .gift-ui431.gift-overlay101 .g431-preview-item :is(img,svg,canvas){width:60px!important;height:60px!important;min-width:0!important;min-height:0!important;max-width:100%!important;max-height:100%!important;aspect-ratio:auto!important}
 .gift-ui431.gift-overlay101 .g431-preview-item:first-child :is(img,svg,canvas){width:100px!important;height:100px!important}
 .gift-ui431.gift-overlay101 .g431-preview-item>div{overflow:hidden!important}
+/* Result tiers come from the server receipt, independently of item rarity. */
+.gift-ui431 .g431-tile.gift-card104{border-color:var(--gift-glow104)!important;background:radial-gradient(ellipse at 25% 0%,color-mix(in srgb,var(--gift-glow104) 22%,transparent),transparent 70%),linear-gradient(135deg,#222333,#101a29)!important;box-shadow:0 0 10px color-mix(in srgb,var(--gift-glow104) 35%,transparent),inset 0 0 14px color-mix(in srgb,var(--gift-glow104) 12%,transparent)!important}
+.gift-ui431 .g431-tile.gift-card104:after{content:none!important}
+.gift-ui431 .g431-tile.gift-card104>small{color:var(--gift-accent104)!important;font-weight:700!important}
 @media(max-width:700px){
  .gift-ui431.gift-overlay101{padding:8px!important;top:var(--mobile-top431,0px)!important;height:var(--mobile-height431,100dvh)!important;bottom:auto!important}.gift-ui431 .gift-window101{max-height:calc(var(--mobile-height431,100dvh) - 16px)!important;border-radius:11px!important}.gift-ui431 .gift-window101>header{padding:14px 17px!important}.gift-ui431 header h2{font-size:22px!important}.gift-ui431 header small{font-size:9px!important}.gift-ui431 .g431-stage{grid-template-columns:1fr!important}.gift-ui431 .g431-hero{min-height:320px!important;padding:15px 10px 20px!important}.gift-ui431 .g431-pedestal{height:230px!important;transform:scale(.9)!important;margin:-7px 0!important}.gift-ui431 .g431-kicker{font-size:11px!important;letter-spacing:2px!important}.gift-ui431 .g431-phase{font-size:14px!important}.gift-ui431 .g431-hint{font-size:11px!important}.gift-ui431 .g431-aside{display:none!important}.gift-ui431 .gift-actions101{gap:8px!important;padding:0 13px!important}.gift-ui431 .gift-actions101 button{min-width:0!important;flex:1 1 40%!important;font-size:13px!important}.gift-ui431 .g431-result-panel{padding:12px 13px 20px!important}.gift-ui431 .gift-results101{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}.gift-ui431 .gift-contents101{padding:10px 14px 16px!important}.gift-ui431 .gift-contents101 .gift-pool101{grid-template-columns:1fr!important}.gift-ui431 .g431-name{font-size:12px!important}
 }
-@media(prefers-reduced-motion:reduce){html body .gift-ui431.gift-overlay101 *,html body .gift-ui431.gift-overlay101 *:after{animation:none!important;transition:none!important}.gift-ui431 .g431-particle{display:none!important}}
+/* Keep two readable columns; compact art and controls instead of cropping names. */
+@media(max-width:700px),(max-height:500px) and (pointer:coarse){
+ .gift-ui431.gift-overlay101 .gift-window101>header{padding:9px 13px!important}
+ .gift-ui431.gift-overlay101 header h2{font-size:19px!important;margin-top:2px!important}
+ .gift-ui431.gift-overlay101 header>button{min-width:44px!important;min-height:44px!important}
+ .gift-ui431.gift-overlay101 .g431-hero{min-height:260px!important;padding:10px 10px 32px!important}
+ .gift-ui431.gift-overlay101 .g431-pedestal{height:180px!important;transform:scale(.75)!important;margin:-12px 0!important}
+ .gift-ui431.gift-overlay101 .g431-stock{margin:7px 0!important;font-size:12px!important;overflow-wrap:anywhere!important}
+ .gift-ui431.gift-overlay101 .g431-stock b{font-size:16px!important}
+ .gift-ui431.gift-overlay101 .gift-actions101 button{min-height:44px!important;padding:7px 8px!important}
+ .gift-ui431.gift-overlay101 .gift-message101{min-height:0!important;padding:5px 13px!important;font-size:11px!important}
+ .gift-ui431.gift-overlay101 .g431-result-panel{padding:6px 12px 12px!important;min-width:0!important}
+ .gift-ui431.gift-overlay101 .g431-result-panel h3{font-size:16px!important;margin:0 0 8px!important}
+ .gift-ui431.gift-overlay101 .gift-results101{gap:6px!important}
+ .gift-ui431.gift-overlay101 .g431-tile{border-width:2px!important;padding:6px!important}
+ .gift-ui431.gift-overlay101 .g431-icon{height:52px!important}
+ .gift-ui431.gift-overlay101 .g431-icon>:is(img,svg,canvas){width:64px!important;height:52px!important;min-width:0!important;min-height:0!important;object-fit:contain!important;aspect-ratio:auto!important}
+ .gift-ui431.gift-overlay101 .g431-quantity{font-size:14px!important;padding:0 3px!important;box-sizing:border-box!important}
+ .gift-ui431.gift-overlay101 .g431-name{font-size:12px!important;line-height:1.4!important;min-height:0!important;margin-top:4px!important}
+ .gift-ui431.gift-overlay101 .g431-tile>small{display:block!important;font-size:10px!important;line-height:1.4!important;margin-top:2px!important;overflow-wrap:anywhere!important}
+ .gift-ui431.gift-overlay101 .gift-results101:has(>.g431-tile:only-child){grid-template-columns:minmax(0,220px)!important}
+ .gift-ui431.gift-overlay101 .g431-tile:only-child{padding:10px!important}
+ .gift-ui431.gift-overlay101 .g431-tile:only-child .g431-icon{height:112px!important}
+ .gift-ui431.gift-overlay101 .g431-tile:only-child .g431-icon>:is(img,svg,canvas){width:140px!important;height:112px!important}
+ .gift-ui431.gift-overlay101 .g431-tile:only-child .g431-name{font-size:15px!important}
+ .gift-ui431.gift-overlay101 .gift-contents101{padding:6px 13px!important}
+ .gift-ui431.gift-overlay101.g431-complete .gift-scroll101{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,3fr)!important;grid-auto-rows:max-content!important;align-content:start!important;align-items:center!important}
+ .gift-ui431.gift-overlay101.g431-complete .g431-stock{margin:6px 0 0 10px!important}
+ .gift-ui431.gift-overlay101.g431-complete .gift-actions101{padding:6px 12px 0 8px!important;gap:6px!important}
+ .gift-ui431.gift-overlay101.g431-complete :is(.gift-message101,.g431-result-panel,.gift-contents101){grid-column:1 / -1!important}
+}
+@media(prefers-reduced-motion:reduce){html body .gift-ui431.gift-overlay101 *,html body .gift-ui431.gift-overlay101 *:before,html body .gift-ui431.gift-overlay101 *:after{animation:none!important;transition:none!important}.gift-ui431 .g431-particle{display:none!important}}
 }
 @keyframes g431-wobble{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}@keyframes g431-turn{to{transform:rotate(360deg)}}@keyframes g431-flow{50%{opacity:.3}}@keyframes g431-appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes g431-scatter{0%{opacity:0;transform:translate(0,0)}20%{opacity:.9}100%{opacity:0;transform:translate(var(--gx),var(--gy)) rotate(var(--gr))}}
 </style>
@@ -30351,8 +30386,9 @@ function giftRewards431_(rows){
  return (rows||[]).map((r,i)=>{
   const item=r.item,type=String(r.type||'').toUpperCase(),raw=type==='PET'?(item?petQuality336_(item):'common'):type==='EQUIPMENT'?equipmentRarity280_(item||{}):type==='GEM'?(item?.rarity||gemTemplates?.[r.id]?.rarity||'一般'):'一般';
   const profile=itemBorderProfile_(rarityClass[raw]||raw||'common',type==='EQUIPMENT'?Number(item?.enhance||0):0),sockets=type==='EQUIPMENT'?Math.max(0,Number(item?.sockets??r.sockets)||0):0;
-  const name=(r.name||item?.name||r.id||'獎勵')+(sockets?' ('+sockets+'洞)':''),quantity=Math.max(1,Number(r.quantity)||1);
-  return `<article class="g431-tile" style="--reward-color:${profile.color};--reward-edge:${profile.base};--reward-speed:${profile.speed}s;--reveal-delay:${i*60}ms"><div class="g431-icon" aria-label="${escapeAttr(name)}，數量 ${quantity.toLocaleString()}">${giftRewardArt431_(r)}<b class="g431-quantity">×${quantity.toLocaleString()}</b></div><b class="g431-name">${escapeHtml(name)}</b><small>${escapeHtml(type==='PET'?'已加入寵物分類':r.tierName||'已加入背包')}</small></article>`;
+  const name=(r.name||item?.name||r.id||'獎勵')+(sockets?' ('+sockets+'洞)':''),quantity=Math.max(1,Number(r.quantity)||1),fx=giftboxTierFx104_(r);
+  const label=r.tierName||(fx==='jackpot'?'頭獎':fx==='second'?'次獎':type==='PET'?'已加入寵物分類':'已加入背包');
+  return `<article class="g431-tile${fx?' gift-card104 gift-fx-'+fx+'104':''}" style="--reward-color:${profile.color};--reward-edge:${profile.base};--reward-speed:${profile.speed}s;--reveal-delay:${i*60}ms;--gift-phase104:-${(i%7)*.29}s">${giftboxFxHtml104_(fx)}<div class="g431-icon" aria-label="${escapeAttr(name)}，數量 ${quantity.toLocaleString()}">${giftRewardArt431_(r)}<b class="g431-quantity">×${quantity.toLocaleString()}</b></div><b class="g431-name">${escapeHtml(name)}</b><small>${escapeHtml(label)}</small></article>`;
  }).join('');
 }
 function giftPreview431_(el,rows){
