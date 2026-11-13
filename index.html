@@ -16843,7 +16843,7 @@ function rewardCells400_(b){
  const resources=[];
  if(r.exp)resources.push(resultCell400_('經驗值','+'+r.exp.toLocaleString(),'<img alt="" src="assets/images/settlement400/exp.svg">'));
  if(r.gold)resources.push(resultCell400_('金幣','+'+r.gold.toLocaleString(),coinArt208_()));
- if(r.stones)resources.push(resultCell400_('強化石','+'+r.stones.toLocaleString(),rewardArt206_('stone')));
+ if(r.stones)resources.push(resultCell400_('強化石','+'+r.stones.toLocaleString(),'<img class="st-stone426" alt="" src="assets/images/icons/items/item_stonePack10.webp">'));
  const drops=(r.drops||[]).map(resultDrop425_);
  if(!resources.length&&!drops.length)return '<div class="receipt400">本次沒有獎勵。</div>';
  return '<div class="st-rewards425">'+(resources.length?'<div class="st-resources425" aria-label="經驗與貨幣獎勵">'+resources.join('')+'</div>':'')+(drops.length?'<div class="st-loot425" aria-label="獲得物品">'+drops.join('')+'</div>':'')+'</div>';
@@ -29919,8 +29919,12 @@ html.desktop-ui .result-layer400 .st-rewards425 .st-loot425{display:flex;flex-wr
 html.desktop-ui .result-layer400 .st-resources425+.st-loot425{border-top:1px solid #baa37d38;margin-top:9px;padding-top:9px}
 html.desktop-ui .result-layer400 .st-loot425>.st-item425{flex:0 1 calc((100% - 24px)/4)!important;min-width:0!important;min-height:24px!important;gap:4px!important;padding:2px 0!important}
 html.desktop-ui .result-layer400 .st-loot425>.st-item425:before{display:none!important}
-html.desktop-ui .result-layer400 .st-loot425 .rart400{width:20px!important;height:20px!important}
-html.desktop-ui .result-layer400 .st-loot425 .rart400 :is(img,svg){width:18px!important;height:18px!important;max-width:18px!important}
+html.desktop-ui .result-layer400 .st-loot425 .rart400{width:36px!important;height:36px!important}
+html.desktop-ui .result-layer400 .st-loot425 .rart400>:is(img,svg){width:32px!important;height:32px!important;max-width:32px!important}
+/* Preserve the authored inner SVG viewport; only its outer icon is scaled. */
+html.desktop-ui .result-layer400 .st-rewards425 .rart400>svg.art-square206>svg{width:120px!important;height:120px!important;max-width:none!important}
+html.desktop-ui .result-layer400 .st-resources425 .rart400:has(>.st-stone426){width:34px!important;height:34px!important}
+html.desktop-ui .result-layer400 .st-resources425 .rart400>.st-stone426{width:32px!important;height:32px!important;max-width:32px!important;image-rendering:auto!important}
 html.desktop-ui .result-layer400 .st-loot425 .st-item425 .st-loot-name425{min-width:0;font:700 12px/1.35 "Noto Sans CJK TC","Microsoft JhengHei",sans-serif!important;color:var(--reward-rarity425)!important;white-space:normal!important;overflow-wrap:anywhere;text-align:left}
 }
 </style>
