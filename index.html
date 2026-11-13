@@ -30494,11 +30494,13 @@ function ambienceMarkup433_(key,anchored=false){
  return `<div class="scene-ambient433" data-ambient433="${key}" aria-hidden="true" style="--ambient-color433:${theme.color}">${parts}</div>`;
 }
 const ambienceTargets433_='.hub-world413,.route-map349,.mode-scene352,.challenge-lobby288,.lobby402>aside';
+const ambienceMountTargets434_=ambienceTargets433_+',.hub-entry422,.hub-illustration-art424';
 let ambienceFrame433_=0;
 const ambienceLayers433_=new Set();
 const ambienceObserver433_=new IntersectionObserver(entries=>{for(const entry of entries)entry.target.classList.toggle('ambient-paused433',!entry.isIntersecting)},{threshold:0});
 function mountAmbience433_(){
  ambienceFrame433_=0;
+ if(typeof mountEntryMotion434_==='function')mountEntryMotion434_();
  for(const layer of ambienceLayers433_)if(!layer.isConnected){ambienceObserver433_.unobserve(layer);ambienceLayers433_.delete(layer)}
  for(const host of document.querySelectorAll('#page :is('+ambienceTargets433_+')')){
   const hub=host.classList.contains('hub-world413');
@@ -30511,7 +30513,7 @@ function mountAmbience433_(){
 }
 function queueAmbience433_(){if(!ambienceFrame433_)ambienceFrame433_=requestAnimationFrame(mountAmbience433_)}
 // Watch scene mounts only; ignore HUD text, actor transforms and the particles themselves.
-new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.classList.contains('scene-ambient433')&&(n.matches(ambienceTargets433_)||n.querySelector(ambienceTargets433_)))))queueAmbience433_()}).observe(document.getElementById('page'),{childList:true,subtree:true});
+new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.classList.contains('scene-ambient433')&&(n.matches(ambienceMountTargets434_)||n.querySelector(ambienceMountTargets434_)))))queueAmbience433_()}).observe(document.getElementById('page'),{childList:true,subtree:true});
 function ambienceVisibility433_(){document.documentElement.toggleAttribute('data-ambient-paused433',document.hidden)}
 document.addEventListener('visibilitychange',ambienceVisibility433_);ambienceVisibility433_();queueAmbience433_();
 // The existing battle canvas draws atmosphere after its cached background and before actors.
@@ -30535,6 +30537,58 @@ function battleAmbience433_(c,r,t,w,h){
  }
  c.restore();
 }
+</script>
+<style id="entry-motion434">@layer desktopViewport421{
+.hub-illustration-art424{position:relative!important}
+.entry-motion434{position:absolute!important;pointer-events:none!important;user-select:none!important;z-index:1!important;overflow:visible!important}
+.entry-motion434 svg{display:block!important;overflow:visible!important;width:100%!important;height:100%!important;pointer-events:none!important}
+.entry-motion434 .entry-glow434{animation:entry-glow434 4.8s ease-in-out infinite!important}
+.entry-motion434 .entry-horn434{animation:entry-horn434 6s ease-out infinite!important;transform-box:view-box!important}
+.entry-motion434 .entry-scan434{animation:entry-scan434 5s linear infinite!important}
+.entry-motion434 .entry-door434{animation:entry-door434 4.6s ease-out infinite!important;transform-box:view-box!important}
+.entry-motion434 .entry-rise434{animation:entry-rise434 5.1s linear infinite!important}
+.entry-motion434 .entry-gear434{animation:entry-gear434 24s linear infinite!important;transform-box:view-box!important}
+.entry-motion434 .entry-emblem434{animation:entry-emblem434 4.8s ease-in-out infinite!important}
+.entry-motion434 :is(.entry-glow434,.entry-horn434,.entry-rise434){animation-delay:var(--entry-delay434,0s)!important}
+html[data-ambient-paused433] .entry-motion434 *, .entry-motion434.ambient-paused433 *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.entry-motion434{display:none!important}.entry-motion434 *{animation:none!important}}
+}
+@keyframes entry-glow434{0%,100%{opacity:.35}45%{opacity:.95}73%{opacity:.6}}
+@keyframes entry-horn434{0%{opacity:0;transform:scale(.88)}20%{opacity:.65}75%,100%{opacity:0;transform:scale(1.18)}}
+@keyframes entry-scan434{0%{opacity:0;transform:translateY(-45px)}15%,75%{opacity:.7}100%{opacity:0;transform:translateY(225px)}}
+@keyframes entry-door434{0%{opacity:0;transform:scale(.6)}25%{opacity:.65}100%{opacity:0;transform:scale(2.4)}}
+@keyframes entry-rise434{0%{opacity:0;transform:translate(0,0)}30%,70%{opacity:.8}100%{opacity:0;transform:translate(6px,-95px)}}
+@keyframes entry-gear434{to{transform:rotate(360deg)}}
+@keyframes entry-emblem434{0%,100%{opacity:.08}50%{opacity:.65}}
+</style>
+<script id="entry-motion434-script">// Local overlays follow each entry image's box; its original art, alpha hit mask and world position stay intact.
+const entrySizes434_={worldboss:[682,578],arena:[659,502],dungeon:[629,573],relic:[617,664],boxing:[605,469],extreme:[471,423]};
+let entrySerial434_=0;
+const entryLayers434_=new Map();
+function entryMarkup434_(mode){
+ const [w,h]=entrySizes434_[mode],id='entry434-'+(++entrySerial434_),src=hubEntryAsset422_(mode);
+ const glow=(x,y,rx,ry,c='warm',delay=0)=>`<ellipse class="entry-glow434" cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="url(#${id}-${c})" style="--entry-delay434:${delay}s"/>`;
+ const gear=(x,y,r)=>`<defs><clipPath id="${id}-gear"><circle cx="${x}" cy="${y}" r="${r}"/></clipPath></defs><g clip-path="url(#${id}-gear)"><g class="entry-gear434" style="transform-origin:${x}px ${y}px"><image href="${src}" width="${w}" height="${h}"/></g></g>`;
+ let art='';
+ if(mode==='worldboss')art=`<g transform="rotate(-22 607 133)">${glow(607,133,48,119)}${[0,-3].map(d=>`<ellipse class="entry-horn434" cx="607" cy="133" rx="46" ry="116" fill="none" stroke="#ffdf92" stroke-width="2" style="--entry-delay434:${d}s;transform-origin:607px 133px"/>`).join('')}</g>${glow(272,493,55,58,'warm',-2)}`;
+ if(mode==='arena')art=`<defs><clipPath id="${id}-screen"><path d="M78 100Q330 40 582 100L565 282H92Z"/></clipPath><linearGradient id="${id}-scan" x2="0" y2="1"><stop stop-color="#91f8ff" stop-opacity="0"/><stop offset=".8" stop-color="#91f8ff" stop-opacity=".2"/><stop offset="1" stop-color="#e5ffff" stop-opacity=".5"/></linearGradient></defs><g clip-path="url(#${id}-screen)">${glow(328,212,240,100,'cool')}<rect class="entry-scan434" x="65" y="65" width="530" height="45" fill="url(#${id}-scan)"/></g>${glow(236,481,40,15,'violet',-1)}${glow(434,481,40,15,'cool',-3)}`;
+ if(mode==='dungeon')art=`<defs><clipPath id="${id}-door"><path d="M214 495V306Q321 234 429 306V495Z"/></clipPath></defs><g clip-path="url(#${id}-door)">${glow(321,408,95,100,'cool')}<path class="entry-door434" d="M288 441V376Q321 333 353 376V441Z" fill="none" stroke="#9dffff" stroke-width="3" style="transform-origin:321px 407px"/>${[0,1,2].map(i=>`<circle class="entry-rise434" cx="${290+i*30}" cy="451" r="2.5" fill="#d5ffff" style="--entry-delay434:${-i*1.7}s"/>`).join('')}</g>${glow(321,241,48,52,'warm',-2)}`;
+ if(mode==='relic')art=gear(310,114,47)+glow(36,370,52,76)+glow(580,372,52,76,'warm',-2.1)+glow(310,642,110,16,'warm',-1);
+ if(mode==='boxing')art=gear(498,313,29)+glow(537,185,48,78)+glow(365,200,53,53,'warm',-2);
+ if(mode==='extreme')art=`<defs><clipPath id="${id}-seal"><path d="M229 235L245 235V273H267V285H245V329H229V285H193V273H229Z"/></clipPath></defs>${glow(235,285,94,90,'violet')}<g clip-path="url(#${id}-seal)"><rect class="entry-emblem434" x="180" y="225" width="100" height="110" fill="#fff2a0"/></g>${glow(394,37,33,33,'warm',-2)}`;
+ return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" aria-hidden="true"><defs>${[['warm','#ffdc8c'],['cool','#80f6ff'],['violet','#c6a1ff']].map(([name,color])=>`<radialGradient id="${id}-${name}"><stop stop-color="${color}" stop-opacity=".55"/><stop offset=".45" stop-color="${color}" stop-opacity=".2"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></radialGradient>`).join('')}</defs>${art}</svg>`;
+}
+function mountEntryMotion434_(){
+ for(const [img,record]of entryLayers434_)if(!img.isConnected){record.observer.disconnect();ambienceObserver433_.unobserve(record.layer);record.layer.remove();entryLayers434_.delete(img)}
+ for(const img of document.querySelectorAll('#page .hub-entry422,#page .hub-illustration-art424>img')){
+  if(entryLayers434_.has(img))continue;
+  const mode=img.closest('[data-mode413]')?.dataset.mode413;if(!entrySizes434_[mode])continue;
+  const layer=document.createElement('div');layer.className='entry-motion434';layer.dataset.entryMotion434=mode;layer.setAttribute('aria-hidden','true');layer.innerHTML=entryMarkup434_(mode);img.after(layer);
+  const fit=()=>{if(!img.isConnected)return;const style=getComputedStyle(img);Object.assign(layer.style,{left:img.offsetLeft+'px',top:img.offsetTop+'px',width:img.offsetWidth+'px',height:img.offsetHeight+'px',transform:style.transform,transformOrigin:style.transformOrigin})};
+  const observer=new ResizeObserver(fit);observer.observe(img);observer.observe(img.parentElement);entryLayers434_.set(img,{layer,observer});ambienceObserver433_.observe(layer);fit();
+ }
+}
+queueAmbience433_();
 </script>
 </body>
 </html>
