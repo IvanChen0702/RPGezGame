@@ -40,6 +40,8 @@ node --check supabase/functions/game-api/lease446.ts
 
 部署同時包含 `index.ts` 與 `lease446.ts`，入口為 `index.ts`，沿用原有 `verify_jwt=false` 及函式內驗證。GitHub／Cloudflare Pages 不會自動部署這個後端。
 
+2026-11-13 22:33（台北時間）已部署為正式 **v55**。重新下載部署內容確認兩個檔案與測試版本完全相符；`health`、`data/version` 均回覆 200／ok，正式站 CORS 與 `X-Game-Trace-Id` 正常，線上可見新的完成紀錄。24 項租約測試、兩條完整引擎讀取檢查及既有 438／440／439 回歸均通過。沒有使用正式玩家帳號執行交易測試。
+
 ## 限制與回復
 
 資料庫仍保留 120 秒租約，未縮短期限或無條件清鎖。`waitUntil` 無法突破平台 CPU、記憶體與 worker 存活上限；程序被強制終止或持續網路故障時，仍可能需要等待租約過期。新紀錄用於辨認這類情況。
