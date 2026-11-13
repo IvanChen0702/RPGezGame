@@ -15355,7 +15355,8 @@ function decorateItemBorders_(scope=document){
   // Empty slots, skill choices and normal consumables keep a quiet border.
   if(!rarityNode&&!enhanceNode){card.classList.remove('item-border-fx');return}
   const fx=itemBorderProfile_(rarity,enhance);
-  card.style.setProperty('border-width','2px','important');card.classList.add('item-border-fx');card.dataset.itemRarity=fx.rarity;card.dataset.itemEnhance=String(fx.enhance);card.dataset.itemFlow=String(fx.flow);
+  const prepareFrame=card.matches('.paperdoll-slot204')&&!!card.closest('.prepare-equip-area');
+  card.style.setProperty('border-width',prepareFrame?'3px':'2px','important');card.classList.add('item-border-fx');card.dataset.itemRarity=fx.rarity;card.dataset.itemEnhance=String(fx.enhance);card.dataset.itemFlow=String(fx.flow);
   card.dataset.itemBgFlow=String(fx.enhance>0);
   card.style.setProperty('--item-fx-color',fx.color);card.style.setProperty('--item-fx-base',fx.base);card.style.setProperty('--item-fx-speed',fx.speed+'s');card.style.setProperty('--item-fx-glow',fx.glow+'px');
   card.style.setProperty('--item-bg-color',fx.bgColor);card.style.setProperty('--item-bg-opacity',fx.bgOpacity+'%');card.style.setProperty('--item-bg-speed',fx.bgSpeed+'s');
@@ -16727,8 +16728,8 @@ function arrangeReady400_(content){
    btn.classList.toggle('item400',!!item);
    if(item){
     const value=btn.querySelector('.quick-slot-value'),name=value?.querySelector('.prepare-skill-name210');
-    const quantity=Array.from(value?.childNodes||[]).find(n=>n.nodeType===3&&n.textContent.trim().startsWith('×'));
-    if(name&&quantity){const count=document.createElement('span');count.className='count400';count.append(quantity);name.append(count);}
+    const quantity=value?.querySelector('.prepare-item-count427')||Array.from(value?.childNodes||[]).find(n=>n.nodeType===3&&n.textContent.trim().startsWith('×'));
+    if(name&&quantity){if(quantity.nodeType===1){quantity.classList.add('count400');name.append(quantity);}else{const count=document.createElement('span');count.className='count400 prepare-item-count427';count.append(quantity);name.append(count);}}
    }
    if(!btn.querySelector('.quick-slot-value img,.quick-slot-value svg,.quick-slot-value .skill-art198')){
     const value=btn.querySelector('.quick-slot-value');if(value)value.insertAdjacentHTML('afterbegin','<span class="empty400" aria-hidden="true">＋</span>');
@@ -19098,7 +19099,7 @@ function prepareSkillSlotButton(kind,index,label){
   return `<button class="quick-slot" onclick="openPrepareSkillPicker('${kind}',${index})"
     onmouseenter="prepareTooltipShow_(event,prepareSkillTooltip_('${id||''}'))" onmousemove="prepareTooltipMove_(event)" onmouseleave="prepareTooltipHide_()">
     <span class="quick-slot-label">${label}</span>
-    <span class="quick-slot-value">${prepareSkillName210_(id)}${kind==='item'&&id?` ×${Number(state.consumables?.[id]||0)}`:''}</span>
+    <span class="quick-slot-value">${prepareSkillName210_(id)}${kind==='item'&&id?` <span class="prepare-item-count427">×${Number(state.consumables?.[id]||0)}</span>`:''}</span>
     <span class="slot-arrow">點擊調整 ›</span>
   </button>`;
 }
@@ -29926,6 +29927,15 @@ html.desktop-ui .result-layer400 .st-rewards425 .rart400>svg.art-square206>svg{w
 html.desktop-ui .result-layer400 .st-resources425 .rart400:has(>.st-stone426){width:34px!important;height:34px!important}
 html.desktop-ui .result-layer400 .st-resources425 .rart400>.st-stone426{width:32px!important;height:32px!important;max-width:32px!important;image-rendering:auto!important}
 html.desktop-ui .result-layer400 .st-loot425 .st-item425 .st-loot-name425{min-width:0;font:700 12px/1.35 "Noto Sans CJK TC","Microsoft JhengHei",sans-serif!important;color:var(--reward-rarity425)!important;white-space:normal!important;overflow-wrap:anywhere;text-align:left}
+}
+</style>
+
+<style id="prepare-frame427">
+@layer desktopViewport421{
+.prepare-equip-area .paperdoll-slot204{border-width:3px!important}
+.prepare-equip-area .paperdoll-slot204.item-border-fx[data-item-flow=true]{background-image:linear-gradient(110deg,transparent 42%,color-mix(in srgb,var(--item-bg-color) var(--item-bg-opacity),transparent) 50%,transparent 58%),linear-gradient(135deg,#181713,#0d0d0c),conic-gradient(from var(--item-light-angle),var(--item-fx-base) 0deg 220deg,var(--item-fx-color) 270deg,#fff2d9 292deg,var(--item-fx-color) 310deg,var(--item-fx-base) 345deg 360deg)!important}
+.prepare-item-count427{font-family:"Microsoft JhengHei","Noto Sans CJK TC",sans-serif!important;font-weight:700!important;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){.prepare-equip-area .paperdoll-slot204.item-border-fx{animation:none!important}}
 }
 </style>
 </body>
