@@ -1,0 +1,417 @@
+{
+  "baselineCommit": "f36f82f",
+  "changes": [
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/gems/gem_hellDemon-cd44664ccf.webp",
+      "replacement": "assets/images/fixed384/gem_hellDemon.svg",
+      "bytes": 30044,
+      "sha256": "cd44664ccf7d5d3f008f0c09dd8ab00b19aabcf2bd8cab92b471de47ac58a9a5",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/gems/gem_eclipseObserver-371b4d5add.webp",
+      "replacement": "assets/images/fixed384/gem_eclipseObserver.svg",
+      "bytes": 32856,
+      "sha256": "371b4d5addb06a167e31805225a96d57a55537db3c4189372a4c9ef03fc5c9f1",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/gems/gem_hellHound-5d77f107f1.webp",
+      "replacement": "assets/images/fixed384/gem_hellHound.svg",
+      "bytes": 30190,
+      "sha256": "5d77f107f14704915a9e687a60eac1fe2ac414c5c23395a2b298f3b483c8058f",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_eclipseCharm-384a3c85bf.webp",
+      "replacement": "assets/images/fixed384/equipment_eclipseCharm.svg",
+      "bytes": 28772,
+      "sha256": "384a3c85bf6be0ae72a1004fd636843ada60a4f1fe433219a0a486aef3fde1ce",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_leatherHat-7fa2f804ff.webp",
+      "replacement": "assets/images/fixed384/equipment_leatherHat.svg",
+      "bytes": 20432,
+      "sha256": "7fa2f804ff9104b042e278ab83746c054e4e28cdab5849f7275c5fb91b25aca2",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_naturalRing-e0c1c17b64.webp",
+      "replacement": "assets/images/fixed384/equipment_naturalRing.svg",
+      "bytes": 25576,
+      "sha256": "e0c1c17b64bea26c459018f702e2aba286ca796a3ccdece8681ee909573405f9",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_riftBracelet-a3fe6d3fd2.webp",
+      "replacement": "assets/images/fixed384/equipment_riftBracelet.svg",
+      "bytes": 31676,
+      "sha256": "a3fe6d3fd2bf3554a71eaa262ea49685a1145032d459307ac3e3ac3cd3ca2d92",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_thalessiahead-ab92386ba6.webp",
+      "replacement": "assets/images/fixed384/equipment_thalessiahead.svg",
+      "bytes": 32472,
+      "sha256": "ab92386ba62c4515d6276df628b2352d5dbcff5c1ea163afd075871b23cbb055",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_houndFang-c03a0199e4.webp",
+      "replacement": "assets/images/fixed384/equipment_houndFang.svg",
+      "bytes": 22198,
+      "sha256": "c03a0199e4ba7983322488912e3e5e905af2fc88e6d33cf1adef6a8e39b7e6de",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_celestialObserverCrown-c9c4943a4f.webp",
+      "replacement": "assets/images/fixed384/equipment_celestialObserverCrown.svg",
+      "bytes": 30260,
+      "sha256": "c9c4943a4fa7160de066193a7673cdf71cd415c35fa076c19afe3531cdbb0717",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_longSword-f681ce276a.webp",
+      "replacement": "assets/images/fixed384/equipment_longSword.svg",
+      "bytes": 17792,
+      "sha256": "f681ce276a79d0b06be283ba5e5d0eb9b9039090e24b478301840cd4ac121986",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_starfallSaber-33d67fde8c.webp",
+      "replacement": "assets/images/fixed384/equipment_starfallSaber.svg",
+      "bytes": 25558,
+      "sha256": "33d67fde8cbd975dfa2c36d7ea82d27239e480b36cf82977df0b242b2ce6bb01",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_shuriken-17a63aeac3.webp",
+      "replacement": "assets/images/fixed384/equipment_shuriken.svg",
+      "bytes": 24608,
+      "sha256": "17a63aeac3d5e59db34967d281882112837a8a39bcbd479bf3a19b01951230c9",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_singularityCore-e9cc6e92fb.webp",
+      "replacement": "assets/images/fixed384/equipment_singularityCore.svg",
+      "bytes": 33124,
+      "sha256": "e9cc6e92fb0a0103c104210c41ea51b0f8ff5ff60e55e976baf036f27648fe56",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_eclipseSovereignRing-c4e8fa442a.webp",
+      "replacement": "assets/images/fixed384/equipment_eclipseSovereignRing.svg",
+      "bytes": 28688,
+      "sha256": "c4e8fa442a3b3ec11bf363f79ffe9f1ef75c56251044cca446e7df8a574602a7",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_shadowBracer-9698c5b2c4.webp",
+      "replacement": "assets/images/fixed384/equipment_shadowBracer.svg",
+      "bytes": 28836,
+      "sha256": "9698c5b2c474ccc6692fba60d920dd7130322f8e8bd54c8202c299eb5c232d19",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_imperialRobe-be02c8e768.webp",
+      "replacement": "assets/images/fixed384/equipment_imperialRobe.svg",
+      "bytes": 31110,
+      "sha256": "be02c8e768e15f817f50d0bf413b3beee17f8fae6a2ac7a2923a81077bcaa17b",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_clothArmorA-90c039a400.webp",
+      "replacement": "assets/images/fixed384/equipment_clothArmorA.svg",
+      "bytes": 23596,
+      "sha256": "90c039a400c8164e18847c4e5dbbaaef9cec8b07ef6a5956c09572e3150b3e53",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_naturalBracelet-6d53006f92.webp",
+      "replacement": "assets/images/fixed384/equipment_naturalBracelet.svg",
+      "bytes": 24944,
+      "sha256": "6d53006f92d507007f52b85f50ffc2cc4aae2be90c0a91d4aba340695237d6e3",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_cityCharm-0a4ff77653.webp",
+      "replacement": "assets/images/fixed384/equipment_cityCharm.svg",
+      "bytes": 28424,
+      "sha256": "0a4ff776532597d4779b0a88b197e116013201db32cfe4834532d3d6e6a5d0c0",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_clothArmorB-f5053e1d88.webp",
+      "replacement": "assets/images/fixed384/equipment_clothArmorB.svg",
+      "bytes": 22380,
+      "sha256": "f5053e1d88dfdd8dad4cd528c73d2c06d60259d050d5dfd91fa8de6859db77da",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_gravityPlate-1f4e5c3113.webp",
+      "replacement": "assets/images/fixed384/equipment_gravityPlate.svg",
+      "bytes": 34178,
+      "sha256": "1f4e5c3113fdae2f41edb8c991ba075caffa4817276617368985eca440360ef8",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_astralLance-28c8d41f5f.webp",
+      "replacement": "assets/images/fixed384/equipment_astralLance.svg",
+      "bytes": 27352,
+      "sha256": "28c8d41f5f3b37cb582ed8e67fb54c114cd15e33b9d09a45695ea638859af999",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_voidMageCrown-bf256cd1c1.webp",
+      "replacement": "assets/images/fixed384/equipment_voidMageCrown.svg",
+      "bytes": 29498,
+      "sha256": "bf256cd1c16795de5d473a1cdb7d37326a8a67c859ee7dec25270ebf81b1bcdd",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_ironRingSpecial-a9a50dd27e.webp",
+      "replacement": "assets/images/fixed384/equipment_ironRingSpecial.svg",
+      "bytes": 19382,
+      "sha256": "a9a50dd27ee4360907d586b9637f1aff19945300e513db56f278a6bde9b3ef30",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_nebulaMantle-00678c7e9b.webp",
+      "replacement": "assets/images/fixed384/equipment_nebulaMantle.svg",
+      "bytes": 34006,
+      "sha256": "00678c7e9b9e5a3c349b88d809859f3f375d5523e1c059b8efbb03e6bf2901b1",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_cometRing-03ed65b3be.webp",
+      "replacement": "assets/images/fixed384/equipment_cometRing.svg",
+      "bytes": 27262,
+      "sha256": "03ed65b3be4ef63f2a1f0a78f80f91f8231f0a952436e5e12a1013aef069b8f2",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_mindsEye-66fbee6761.webp",
+      "replacement": "assets/images/fixed384/equipment_mindsEye.svg",
+      "bytes": 30752,
+      "sha256": "66fbee6761ff30a1437722882d8576947f52b0be96f3e626d76ff41876ad6ca9",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_astraGreatsword-d7238b76ed.webp",
+      "replacement": "assets/images/fixed384/equipment_astraGreatsword.svg",
+      "bytes": 30048,
+      "sha256": "d7238b76ed14841d59d62ee9046c7b7d9af5fe1f367b514369a913ba93267473",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_samuraiBlade-2315934530.webp",
+      "replacement": "assets/images/fixed384/equipment_samuraiBlade.svg",
+      "bytes": 22992,
+      "sha256": "2315934530a3f98bdb3cb1deb70b8ed72c29e67d2780cf844126bb99de887e74",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_imperialVisor-4a1d1a4bae.webp",
+      "replacement": "assets/images/fixed384/equipment_imperialVisor.svg",
+      "bytes": 26514,
+      "sha256": "4a1d1a4bae933abb7b9656aae9f0a3df98cd8892b716121cc6e887945bace598",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_dragonSealRing-d8ccb48da4.webp",
+      "replacement": "assets/images/fixed384/equipment_dragonSealRing.svg",
+      "bytes": 28518,
+      "sha256": "d8ccb48da458af3b7f5912ac1e139afa8199bf02a2490d61fa107adcd649d5ed",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_natureStaff-280f3c0d09.webp",
+      "replacement": "assets/images/fixed384/equipment_natureStaff.svg",
+      "bytes": 25758,
+      "sha256": "280f3c0d09401eacd9a44d6cc9d17f922e29db07ff4f202abd0a4f37f82b60d1",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_oracleLens-c75c7099cd.webp",
+      "replacement": "assets/images/fixed384/equipment_oracleLens.svg",
+      "bytes": 32298,
+      "sha256": "c75c7099cdea06f2602482db08cbfe42cecaad090d25f100ef6f89cfd9cec749",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/equipment/equipment_reflectArmor-cbfe8496ff.webp",
+      "replacement": "assets/images/fixed384/equipment_reflectArmor.svg",
+      "bytes": 28892,
+      "sha256": "cbfe8496ff1805ad291fbdfa3f7a66b2435c0255c058d9b89e63f91ff8f69146",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/gems/lilyBlueCrystal368368.svg",
+      "replacement": "assets/images/fixed384/gem_lilyBlueCrystal368.svg",
+      "bytes": 844610,
+      "sha256": "74de7d754eec7c02db9e999a72eb4d3677f1a8517153064f891a242d2b9f0eab",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/gems/chaosBarrierStone368.svg",
+      "replacement": "assets/images/fixed384/gem_chaosBarrierStone.svg",
+      "bytes": 844613,
+      "sha256": "31f2b7dbfe4372359c4e73b1f45a6d9be9b8aa57522a3cdfe69da9e5f2631890",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/gems/chaosMagicStone368.svg",
+      "replacement": "assets/images/fixed384/gem_chaosMagicStone.svg",
+      "bytes": 844613,
+      "sha256": "622a74dc987cf122c546e54aecd6773535fc39c5bf11ab132879a3ee213a1861",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/gems/chaosFateStone368.svg",
+      "replacement": "assets/images/fixed384/gem_chaosFateStone.svg",
+      "bytes": 844616,
+      "sha256": "a6673618d828089f79d068738d2e375ade85c02f9cd9694fc134fc277c458347",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "remove_superseded",
+      "path": "assets/images/pets/animation/pet-exp-potion.q85.webp",
+      "replacement": "assets/images/icons/items/item_petExpPotion.webp",
+      "bytes": 57804,
+      "sha256": "af6b795d362e1303ecd257c823ae1c21597e5b575a05393e31ba5d3fcbd8f01c",
+      "evidence": "No literal reference outside the registry (four gem constructors redirected); final runtime art uses replacement. Legacy aliases preserved."
+    },
+    {
+      "action": "move_source",
+      "path": "assets/images/relics/relic_countdown-6b7b891907.webp",
+      "destination": "tools/source-assets/relics/relic_countdown-6b7b891907.webp",
+      "replacement": "assets/images/relics/relic_countdown-crop436-8fb265bcc9.svg",
+      "bytes": 16694,
+      "sha256": "6b7b891907ac4654c922839905203c82088e943f37527fc56b3b11232dc73e4a"
+    },
+    {
+      "action": "move_source",
+      "path": "assets/images/relics/relic_dragon-6c8fcdb15b.webp",
+      "destination": "tools/source-assets/relics/relic_dragon-6c8fcdb15b.webp",
+      "replacement": "assets/images/relics/relic_dragon-crop436-df40a13e44.svg",
+      "bytes": 23850,
+      "sha256": "6c8fcdb15b87a7df3035eb5702c706229c4368fc65f6530553dfeda00c332af3"
+    },
+    {
+      "action": "move_source",
+      "path": "assets/images/relics/relic_growth-61f100e041.webp",
+      "destination": "tools/source-assets/relics/relic_growth-61f100e041.webp",
+      "replacement": "assets/images/relics/relic_growth-crop436-1c05c7fc7a.svg",
+      "bytes": 20624,
+      "sha256": "61f100e041d151e82ef0246d6b61e2f6517bd96ce21123279967adeaf4b4a3b6"
+    },
+    {
+      "action": "move_source",
+      "path": "assets/images/relics/relic_puppet-f2ee1ed7bc.webp",
+      "destination": "tools/source-assets/relics/relic_puppet-f2ee1ed7bc.webp",
+      "replacement": "assets/images/relics/relic_puppet-crop436-52dbc48f2c.svg",
+      "bytes": 18814,
+      "sha256": "f2ee1ed7bc2f211131d2764458b390a8e726a15695418caa1a5f296a48c9571c"
+    },
+    {
+      "action": "move_source",
+      "path": "assets/images/relics/relic_reflect-a9d52e30c4.webp",
+      "destination": "tools/source-assets/relics/relic_reflect-a9d52e30c4.webp",
+      "replacement": "assets/images/relics/relic_reflect-crop436-2615c27cde.svg",
+      "bytes": 20120,
+      "sha256": "a9d52e30c49078b45b6fa45afd8157fc308f5e98cc605b6671e03136a284fd08"
+    },
+    {
+      "action": "move_source",
+      "path": "assets/images/relics/relic_thief-7e14f53fba.webp",
+      "destination": "tools/source-assets/relics/relic_thief-7e14f53fba.webp",
+      "replacement": "assets/images/relics/relic_thief-crop436-5eb67ee7e7.svg",
+      "bytes": 19096,
+      "sha256": "7e14f53fba89c7909c87706dcac08c4bed28e2a01b8678a04ac31ac0797407f3"
+    },
+    {
+      "action": "move_source",
+      "path": "assets/images/relics/relic_vampire-e4312d0ce4.webp",
+      "destination": "tools/source-assets/relics/relic_vampire-e4312d0ce4.webp",
+      "replacement": "assets/images/relics/relic_vampire-crop436-957bc0330c.svg",
+      "bytes": 18882,
+      "sha256": "e4312d0ce407959f2c438ef90c1522c4a08dfb2f72e3fe1f9f094e35203adb34"
+    },
+    {
+      "action": "move_source",
+      "path": "assets/images/relics/relic_warden-881d44f428.webp",
+      "destination": "tools/source-assets/relics/relic_warden-881d44f428.webp",
+      "replacement": "assets/images/relics/relic_warden-crop436-756ac40e9f.svg",
+      "bytes": 20402,
+      "sha256": "881d44f428c61030c480b629193807d5aff2d71df37ed38c4900574f94e25004"
+    },
+    {
+      "action": "move_metadata",
+      "path": "data/asset-path-migration.json",
+      "destination": "docs/asset-history/asset-path-migration.json",
+      "bytes": 28927,
+      "sha256": "22e0c252aac3af6f6df3ea21014b643a8c28369e186d94bc691b8efc7492beca"
+    },
+    {
+      "action": "move_metadata",
+      "path": "data/asset-review.json",
+      "destination": "docs/asset-history/asset-review.json",
+      "bytes": 44200,
+      "sha256": "b8f98ba53c1e3eea32d7af1e5c7815924f3988b153d347e7e7c37ae1086d3cc2"
+    },
+    {
+      "action": "move_metadata",
+      "path": "data/icon-index.json",
+      "destination": "docs/asset-history/icon-index.json",
+      "bytes": 3594,
+      "sha256": "5f1447c7bca487ffc8948f8a686c621734403d5e6a1da8bed52ee8c1be7bd133"
+    },
+    {
+      "action": "move_metadata",
+      "path": "data/mode-npcs413.json",
+      "destination": "docs/asset-history/mode-npcs413.json",
+      "bytes": 2728,
+      "sha256": "9b62f161f8a01f5998d6baf9e27f681a8d11c116e21f366e3db7bbec20ebd5de"
+    }
+  ]
+}

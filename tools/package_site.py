@@ -4,9 +4,13 @@ from urllib.parse import urlparse, urljoin
 import os
 from html import escape
 import shutil
+from audit_assets import audit
 
 root = Path(__file__).resolve().parents[1]
 out = root / "_site"
+asset_report = audit()
+if asset_report['missing_targets']:
+    raise RuntimeError('Asset reference check failed: ' + str(asset_report['missing_targets']))
 # Use the stable production domain rather than a deployment-specific preview URL.
 site_url = (os.environ.get("SITE_URL") or "https://rpgezgame.pages.dev/").strip()
 if site_url:
@@ -20,8 +24,12 @@ if out.is_symlink():
 if out.exists():
     shutil.rmtree(out)
 out.mkdir()
-for name in ("index.html", "favicon.ico", "assets", "data", "_headers"):
+for name in ("index.html", "favicon.ico", "assets", "data", "_headers", "_redirects"):
     source = root / name
+    # Historical asset inventories live in docs/asset-history. Only create a
+    # public data directory when actual runtime data files are present.
+    if name == "data" and not source.exists():
+        continue
     if source.is_dir():
         shutil.copytree(source, out / name)
     else:

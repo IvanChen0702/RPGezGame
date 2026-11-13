@@ -32,7 +32,7 @@ GitHub `main` 是遊戲原始碼來源；Cloudflare Pages 負責正式站部署�
 
 確認 Cloudflare 部署成功並檢查登入、角色讀取、場景素材、移動、競技場頁籤和出口。驗證後再停用舊 Netlify 站台與 GitHub Pages，並清理不再使用的 Supabase origin。GitHub Pages 若曾啟用，可在 GitHub Settings → Pages 使用 Unpublish site。
 
-之後將更新推送至 `main`，Cloudflare Git integration 會自動部署。公開成品只有遊戲 HTML、圖示、素材、資料及 Cloudflare 支援的 `_headers` 快取規則，沒有後端參考檔或 Git 設定。
+之後將更新推送至 `main`，Cloudflare Git integration 會自動部署。公開成品只有遊戲 HTML、圖示、素材、資料及 Cloudflare 支援的 `_headers` 快取與 `_redirects` 舊圖片轉向規則，沒有後端參考檔或 Git 設定。
 
 ## 本機檢查
 

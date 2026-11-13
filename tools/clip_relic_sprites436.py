@@ -6,6 +6,7 @@ therefore the shared battle foot anchors. These are art assets, not UI templates
 """
 import base64
 import hashlib
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,10 +23,11 @@ CUTOUTS = {
 
 def generate():
     folder = ROOT / 'assets/images/relics'
+    sources = ROOT / 'tools/source-assets/relics'
     html_path = ROOT / 'index.html'
     html = html_path.read_text()
     for name, rects in CUTOUTS.items():
-        source, = folder.glob(f'relic_{name}-*.webp')
+        source, = sources.glob(f'relic_{name}-*.webp')
         cutouts = ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="black"/>' for x,y,w,h in rects)
         raw = base64.b64encode(source.read_bytes()).decode('ascii')
         svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">'
@@ -34,7 +36,10 @@ def generate():
                '<image width="128" height="128" mask="url(#keep)" href="data:image/webp;base64,'+raw+'"/></svg>')
         target = folder / f'relic_{name}-crop436-{hashlib.sha256(svg.encode()).hexdigest()[:10]}.svg'
         target.write_text(svg)
-        html = html.replace('"'+source.relative_to(ROOT).as_posix()+'"', '"'+target.relative_to(ROOT).as_posix()+'"')
+        # These sources are not public assets. Current runtime mappings already
+        # reference generated SVGs; preserve old WebP alias keys for older data.
+        html = re.sub(r'assets/images/relics/relic_' + name + r'-crop436-[a-f0-9]+\.svg',
+                      target.relative_to(ROOT).as_posix(), html)
     html_path.write_text(html)
 
 if __name__ == '__main__':
