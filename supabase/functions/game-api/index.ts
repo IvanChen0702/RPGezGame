@@ -5768,7 +5768,7 @@ async function secureBattle78(body){
  if(won){
   if(selection.mode==='main'){
    const floor=Number(selection.floor),row=details.row,count=Number(save.clearCount?.[floor]||0),m=1;
-   
+
    // Resolve legacy gold effects from the trusted opening snapshot, including template effects.
    let goldPct=0;for(const it of battle.snapshot.equipment){for(const ef of [String((rules.Equipment||[]).find(x=>x.ItemID===it.template)?.EffectKey||it.effect||''),...(it.gems||[]).filter(Boolean).map(g=>g.effect||'')])for(const k of ef.split(/[\n,;|]+/)){const a=k.trim().match(/^gold_gain_percent_(\d+(?:\.\d+)?)$/);if(a)goldPct+=Number(a[1]);}}
    const baseGold=Math.max(1,Math.trunc(Number(row.Gold||0)*m));rewards.gold=baseGold+Math.max(0,Math.floor(baseGold*((1+goldPct/100)*(1+fxTotal('reward_gold')/100)-1)));
@@ -5793,7 +5793,7 @@ async function secureBattle78(body){
  save.currentHp=secureStats78(save,rules).stats.hp;save.currentBattle=null;
  // Only trusted opening equipment/skills/stats are stored; peak combat stats remain explicitly client-reported.
  const record=won&&selection.mode==='main'&&Number(selection.floor)>=40?{peakDamage:peak,peakTurn,turns,peakStats:null}:null;
- 
+
  return secureRpc78('game_battle_commit78',{p_account:auth.accountId,p_battle:body.battleId,p_request:body.requestId,p_expected:revision,p_payload:payload,p_save:save,p_record:record,p_rewards:rewards});
 }
 
@@ -6310,4 +6310,3 @@ globalThis.addEventListener?.('beforeunload',event=>{
  for(const snapshot of activeRequests446.values())console.warn(JSON.stringify({event:'game_api446',kind:'worker_shutdown',reason:allowed.includes(event.detail?.reason)?event.detail.reason:'other',...snapshot()}));
 });
 Deno.serve(retainGameRequest446(makeGameApi(name=>Deno.env.get(name))));
-
