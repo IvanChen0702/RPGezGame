@@ -1,26 +1,42 @@
-# 正式站：GitHub Pages
+# 正式站：Cloudflare Pages
 
-網址：https://ivanchen0702.github.io/RPGezGame/
+GitHub `main` 是遊戲原始碼來源；Cloudflare Pages 負責正式站部署。不再執行 GitHub Pages 工作流程。
 
-## 首次啟用
+## 首次設定
 
-1. 在 GitHub 儲存庫 **Settings → Pages → Build and deployment → Source** 選擇 **GitHub Actions**。
-2. 確認 **Actions → Deploy GitHub Pages** 成功。若設定完成前流程曾失敗，使用 **Run workflow** 重新執行 main。
-3. 在 Supabase 專案 `ynzaotitxntrhubwfinr` 的 Edge Functions secrets 更新 `GAME_ALLOWED_ORIGINS`。保留現有允許來源，新增 `https://ivanchen0702.github.io`；這是 origin，不含 `/RPGezGame/` 或結尾斜線。例如遷移期間可保留 `https://rpgwebezgame.netlify.app,https://ivanchen0702.github.io`。不要將後端 service role key 加入前端或 GitHub Pages。
-4. 若使用 OAuth／郵件登入跳轉，在 Supabase Authentication → URL Configuration 設定新站 Site URL 及允許的 Redirect URLs。現有帳密登入仍需第 3 步的 API 來源白名單。
-5. 驗證新站的登入、角色讀取、素材、戰鬥和返回城鎮，再停用 Netlify 站台及其自動部署，並移除舊 origin。
+在 Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git，連接 `IvanChen0702/RPGezGame`：
 
-雲端帳號仍使用同一個 Supabase 專案。瀏覽器 localStorage 依 origin 分開，舊站的登入狀態、偏好及未綁定訪客存檔不會自動出現在新站；遷移前應在舊站綁定帳號或使用遊戲的訪客進度下載功能保存資料。
+| 欄位 | 值 |
+| --- | --- |
+| Production branch | `main` |
+| Framework preset | `None` |
+| Root directory | 留空（儲存庫根目錄） |
+| Build command | `python3 tools/package_site.py` |
+| Build output directory | `_site` |
 
-## 後續更新
+不要把輸出目錄設為儲存庫根目錄，以免將參考文件及開發工具公開。這是靜態 Pages 專案，不需要 Workers 部署指令、Wrangler 或額外套件。
 
-將遊戲變更推送至 `main`，工作流程會自動部署。公開成品只包含 `index.html`、`favicon.ico`、`assets/`、`data/` 和 `.nojekyll`，後端參考檔、Git 設定及文件不會被打包。
+首次部署會獲得實際的 `https://<專案名稱>.pages.dev` 網址。可再於 Custom domains 綁定自訂網域。取得正式網址後，建議在 Pages 的 Production 環境變數設定非機密的 `SITE_URL`（完整正式網址，含 `https://`），再重新部署，讓分享網址和封面指向穩定的正式站。未設定時，打包程式使用 Cloudflare 提供的 `CF_PAGES_URL`；不會導回 GitHub Pages 或 Netlify。
 
-## 本機驗證
+## Supabase 登入來源
+
+在專案 `ynzaotitxntrhubwfinr` 的 Edge Functions secrets 更新 `GAME_ALLOWED_ORIGINS`：保留現有來源，新增實際正式站的 origin（例如 `https://<專案名稱>.pages.dev`）。此值不含路徑或結尾斜線；多個 origin 用逗號分隔。自訂網域也需明確加入。每個預覽部署是不同的 origin，未列入白名單時不能登入，不應為方便預覽而放寬成任意來源。
+
+這是後端設定，不是 Cloudflare 前端環境變數。不要將 service role key 或其他後端機密放入前端、Git 或 Pages 公開成品。若使用 OAuth／郵件登入跳轉，也要更新 Supabase Authentication → URL Configuration 的 Site URL 與 Redirect URLs。
+
+雲端帳號沿用同一個 Supabase 專案。localStorage 依 origin 分開，舊站登入狀態、偏好及未綁定訪客存檔不會自動轉移；應先在舊站綁定帳號或使用訪客進度下載功能保存資料。
+
+## 驗證與切換
+
+確認 Cloudflare 部署成功並檢查登入、角色讀取、場景素材、移動、競技場頁籤和出口。驗證後再停用舊 Netlify 站台與 GitHub Pages，並清理不再使用的 Supabase origin。GitHub Pages 若曾啟用，可在 GitHub Settings → Pages 使用 Unpublish site。
+
+之後將更新推送至 `main`，Cloudflare Git integration 會自動部署。公開成品只有遊戲 HTML、圖示、素材、資料及 Cloudflare 支援的 `_headers` 快取規則，沒有後端參考檔或 Git 設定。
+
+## 本機檢查
 
 ```sh
-python3 .github/scripts/package_site.py
-python3 -m http.server 8000 --bind 127.0.0.1 --directory /workspace
+python3 tools/package_site.py
+python3 -m http.server 8000 --bind 127.0.0.1 --directory _site
 ```
 
-在瀏覽器以專案子路徑開啟 `/RPGezGame/_site/`，檢查資源不依賴網域根目錄或 Netlify 轉址。登入還需要後端允許本機開發 origin。GitHub Pages 不支援 Netlify `_headers`／`_redirects`；目前遊戲使用內嵌素材解析表與直接素材網址。
+可用 `SITE_URL=https://實際正式站網域 python3 tools/package_site.py` 檢查分享資訊；未設定網址時，本機使用相對資源路徑。所有檔案均檢查 Cloudflare Pages 的單檔 25 MiB 上限。後端白名單仍需允許本機 origin 才能測試登入。

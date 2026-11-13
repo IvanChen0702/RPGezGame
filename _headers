@@ -1,0 +1,10 @@
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/images/*
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/audio/*
+  Cache-Control: public, max-age=86400, must-revalidate
+/data/*
+  Cache-Control: public, max-age=0, must-revalidate
