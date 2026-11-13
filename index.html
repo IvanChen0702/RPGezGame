@@ -29911,16 +29911,17 @@ html.desktop-ui #app #page #hubScene413 .hub-tabs422 button[aria-pressed="true"]
 #hubScene413 .hub-reward-link422{margin:8px 0;float:right}
 </style>
 <style id="desktop-layout421">@layer desktopViewport421{
+ /* NPC dialogue owns its frame and scrollable body; its portrait extends above the frame. */
  html.desktop-ui{
   --window-top421:calc(var(--banner-bottom421,0px) + 8px);
   --window-height421:max(0px,calc(100dvh - var(--window-top421) - 8px));
  }
- html.desktop-ui :is(.town-window-overlay311,.inventory-overlay293,.viewport-overlay,.quick-picker,.account-overlay,.ui-confirm-overlay,.modal.open,.hub-overlay413,.pet-overlay297,.gift-overlay101,.reset-confirm-overlay,.rare-drop-overlay,.purchase-feedback,#questOverlay368,#questJournal369,#questReward369,#relicOverlay144.relic-ui413){
+ html.desktop-ui :is(.town-window-overlay311,.inventory-overlay293,.viewport-overlay,.quick-picker,.account-overlay,.ui-confirm-overlay,.modal.open,.hub-overlay413,.pet-overlay297,.gift-overlay101,.reset-confirm-overlay,.rare-drop-overlay,.purchase-feedback,#questJournal369,#questReward369,#relicOverlay144.relic-ui413){
   box-sizing:border-box!important;inset:0!important;height:100dvh!important;max-height:100dvh!important;
   padding-block:var(--window-top421) 8px!important;
   align-items:center!important;grid-template-rows:minmax(0,1fr)!important;
  }
- html.desktop-ui :is(.town-window-overlay311,.inventory-overlay293,.viewport-overlay,.quick-picker,.account-overlay,.ui-confirm-overlay,.modal.open,.hub-overlay413,.pet-overlay297,.gift-overlay101,.reset-confirm-overlay,.rare-drop-overlay,.purchase-feedback,#questOverlay368,#questJournal369,#questReward369,#relicOverlay144.relic-ui413)>:first-child{
+ html.desktop-ui :is(.town-window-overlay311,.inventory-overlay293,.viewport-overlay,.quick-picker,.account-overlay,.ui-confirm-overlay,.modal.open,.hub-overlay413,.pet-overlay297,.gift-overlay101,.reset-confirm-overlay,.rare-drop-overlay,.purchase-feedback,#questJournal369,#questReward369,#relicOverlay144.relic-ui413)>:first-child{
   box-sizing:border-box!important;min-height:0!important;max-height:var(--window-height421)!important;max-width:100%!important;overflow-y:auto!important;overscroll-behavior:contain;
  }
  html.desktop-ui dialog[open]{box-sizing:border-box!important;top:var(--window-top421)!important;bottom:8px!important;margin-block:auto!important;max-height:var(--window-height421)!important;overflow:auto!important}
@@ -30490,6 +30491,7 @@ function ambienceMarkup433_(key,anchored=false){
  if(theme.ray)parts+='<i class="ambient-ray433"></i>';
  if(theme.scan)parts+='<i class="ambient-scan433"></i>';
  if(theme.seal&&anchored)parts+='<i class="ambient-seal433"></i>';
+ if(anchored&&typeof backgroundDetails435_==='function')parts+=backgroundDetails435_(key);
  for(let i=0;i<12;i++)parts+=`<i class="ambient-mote433 ambient-${theme.kind}433" style="left:${7+(i*23)%87}%;top:${12+(i*17)%65}%;--delay433:${-i*1.83}s;--duration433:${9+i%5*2}s;--dx433:${(i%3-1)*24}px"></i>`;
  return `<div class="scene-ambient433" data-ambient433="${key}" aria-hidden="true" style="--ambient-color433:${theme.color}">${parts}</div>`;
 }
@@ -30589,6 +30591,42 @@ function mountEntryMotion434_(){
  }
 }
 queueAmbience433_();
+</script>
+<style id="background-details435">@layer desktopViewport421{
+.scene-ambient433>.background-detail435{inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;pointer-events:none!important}
+.background-detail435 .bg-cloud435{animation:bg-cloud435 24s ease-in-out infinite alternate!important}
+.background-detail435 .bg-glow435{animation:bg-glow435 5.8s ease-in-out infinite!important}
+.background-detail435 .bg-flame435{animation:bg-flame435 2.3s ease-in-out infinite alternate!important;transform-origin:0 5px!important}
+.background-detail435 .bg-neon435{animation:bg-glow435 8s ease-in-out infinite!important}
+.background-detail435 .bg-drip435{animation:bg-drip435 11s linear infinite!important}
+.background-detail435 .bg-shaft435{animation:bg-glow435 10s ease-in-out infinite!important}
+.background-detail435 .bg-water435{animation:bg-water435 7s ease-in-out infinite alternate!important}
+.background-detail435 :is(.bg-cloud435,.bg-glow435,.bg-flame435,.bg-drip435,.bg-shaft435,.bg-water435){animation-delay:var(--bg-delay435,0s)!important}
+html[data-ambient-paused433] .background-detail435 *, .ambient-paused433 .background-detail435 *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.background-detail435 *{animation:none!important}}
+}
+@keyframes bg-cloud435{from{opacity:.45;transform:translate(-28px,0)}to{opacity:.85;transform:translate(28px,5px)}}
+@keyframes bg-glow435{0%,100%{opacity:.35}50%{opacity:.85}}
+@keyframes bg-flame435{0%{opacity:.35;transform:scale(.85,.87) rotate(-3deg)}40%{opacity:.7;transform:scale(.95,1.1) rotate(2deg)}100%{opacity:.5;transform:scale(1,.96) rotate(-1deg)}}
+@keyframes bg-drip435{0%,55%{opacity:0;transform:translateY(0)}61%{opacity:.5}86%,100%{opacity:0;transform:translateY(250px)}}
+@keyframes bg-water435{from{opacity:.25;transform:translateX(-8px) scaleX(.99)}to{opacity:.7;transform:translateX(8px) scaleX(1.01)}}
+</style>
+<script id="background-details435-script">// Details use the authored 1900 x 828 panorama coordinates, so camera movement keeps them on the scenery.
+function backgroundDetails435_(mode){
+ if(!hubModes413_.includes(mode))return '';
+ const id='backdrop435-'+mode;
+ const glow=(x,y,rx,ry,color='gold',delay=0)=>`<ellipse class="bg-glow435" cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="url(#${id}-${color})" style="--bg-delay435:${delay}s"/>`;
+ const mist=(x,y,rx,ry,delay=0)=>`<ellipse class="bg-cloud435" cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="url(#${id}-mist)" style="--bg-delay435:${delay}s"/>`;
+ const flame=(x,y,delay)=>`<g transform="translate(${x} ${y})"><path class="bg-flame435" d="M-6 5Q-12-5 0-24Q-3-9 6-12Q13 1 5 5Z" fill="#ffc96a" style="--bg-delay435:${delay}s"/><path class="bg-flame435" d="M-2 5Q-6-3 1-12Q0-3 4 0L2 5Z" fill="#fff0b4" style="--bg-delay435:${delay-.6}s"/></g>`;
+ let art='';
+ if(mode==='worldboss')art=mist(1200,430,780,95)+mist(650,655,680,55,-8)+flame(347,478,-1)+flame(1064,493,-2.4);
+ if(mode==='arena')art=[532,1140,1729].map((x,i)=>glow(x,588,115,14,'cyan',-i*1.8)).join('')+glow(1050,206,190,140,'cyan',-3)+`<path class="bg-neon435" d="M420 590H1725" fill="none" stroke="url(#${id}-line)" stroke-width="2"/>`;
+ if(mode==='dungeon')art=mist(1440,365,500,90)+glow(370,155,250,130,'leaf')+glow(790,98,190,95,'leaf',-4);
+ if(mode==='relic')art=mist(1120,730,710,65)+[[68,401,22,35],[674,203,18,26],[1129,290,14,22],[1130,522,14,22]].map(([x,y,rx,ry],i)=>glow(x,y,rx,ry,'gold',-i*1.7)).join('')+[435,692,1055,1216,1660].map((x,i)=>`<path class="bg-drip435" d="M${x} ${70+i%3*22}v11" stroke="#b5e3e9" stroke-width="1.5" style="--bg-delay435:${-i*2.7}s"/>`).join('');
+ if(mode==='boxing')art=glow(655,161,62,73)+glow(1193,161,62,73,'gold',-2.1)+`<path class="bg-shaft435" d="M623 177L677 177 875 620 440 620Z" fill="url(#${id}-shaft)"/><path class="bg-shaft435" d="M1170 177L1212 177 1415 620 975 620Z" fill="url(#${id}-shaft)" style="--bg-delay435:-5s"/>`;
+ if(mode==='extreme')art=[[715,587],[850,543],[1775,548]].map(([x,y],i)=>glow(x,y,38,55,'violet',-i*2)).join('')+[0,1,2,3].map(i=>`<path class="bg-water435" d="M${500+i*125} ${770+i*12}h${850-i*80}" stroke="url(#${id}-water)" stroke-width="${2+i%2}" style="--bg-delay435:${-i*1.6}s"/>`).join('');
+ return `<svg class="background-detail435" viewBox="0 0 1900 828" preserveAspectRatio="none" aria-hidden="true"><defs>${[['gold','#ffd892'],['cyan','#74deff'],['violet','#dc9aff'],['leaf','#ecedbb'],['mist','#d0e1e8']].map(([name,color])=>`<radialGradient id="${id}-${name}"><stop stop-color="${color}" stop-opacity="${name==='mist'?.22:.5}"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></radialGradient>`).join('')}<linearGradient id="${id}-line"><stop stop-color="#80dcff" stop-opacity="0"/><stop offset=".5" stop-color="#80dcff" stop-opacity=".5"/><stop offset="1" stop-color="#80dcff" stop-opacity="0"/></linearGradient><linearGradient id="${id}-water"><stop stop-color="#dc9aff" stop-opacity="0"/><stop offset=".3" stop-color="#dc9aff" stop-opacity=".5"/><stop offset=".6" stop-color="#91e3ff" stop-opacity=".3"/><stop offset="1" stop-color="#dc9aff" stop-opacity="0"/></linearGradient><linearGradient id="${id}-shaft" x2="0" y2="1"><stop stop-color="#f1ce8a" stop-opacity=".16"/><stop offset="1" stop-color="#f1ce8a" stop-opacity="0"/></linearGradient></defs>${art}</svg>`;
+}
 </script>
 </body>
 </html>
