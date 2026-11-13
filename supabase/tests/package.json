@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node permissions438.mjs && node presence439.mjs"
+    "test": "node permissions438.mjs && node permissions440.mjs && node presence439.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.16"

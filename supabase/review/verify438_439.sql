@@ -1,4 +1,4 @@
--- Read-only pre/post deployment report. Never calls a game/presence RPC.
+-- Read-only pre/post deployment report for 439/440 and optional platform follow-up 441. Never calls a game/presence RPC.
 -- Expected pet implementation is matched by prosrc hash, not a name/version guess.
 begin transaction read only;
 set local statement_timeout = '15s';
@@ -42,6 +42,14 @@ with expected_tables(name) as (
          has_function_privilege('authenticated',p.oid,'EXECUTE') as authenticated_execute
     from pg_proc p
    where p.oid=to_regprocedure('public.game_town_presence436(integer,text,boolean,boolean)')
+), readiness as (
+  select (select count(oid)=19 from tables)
+     and not exists(select 1 from table_access where truncate_allowed)
+     and not exists(select 1 from default_access where owner='postgres')
+     and exists(select 1 from inventory)
+     and not exists(select 1 from inventory where anon_execute or public_execute
+                    or not authenticated_execute or not service_execute) as project_ready,
+     not exists(select 1 from default_access where owner='supabase_admin') as platform_ready
 )
 select jsonb_build_object(
   'checked_at',current_timestamp,
@@ -50,6 +58,11 @@ select jsonb_build_object(
   'found_table_count',(select count(oid) from tables),
   'remaining_table_truncate',coalesce((select jsonb_agg(to_jsonb(t)) from table_access t where truncate_allowed),'[]'::jsonb),
   'remaining_default_truncate',coalesce((select jsonb_agg(to_jsonb(d)) from default_access d),'[]'::jsonb),
+  'remaining_project_default_truncate',coalesce((select jsonb_agg(to_jsonb(d)) from default_access d where owner='postgres'),'[]'::jsonb),
+  'remaining_platform_default_truncate',coalesce((select jsonb_agg(to_jsonb(d)) from default_access d where owner='supabase_admin'),'[]'::jsonb),
+  'project_permissions_ready',(select project_ready from readiness),
+  'platform_defaults_ready',(select platform_ready from readiness),
+  'all_permissions_ready',(select project_ready and platform_ready from readiness),
   'default_owner_membership',(select jsonb_agg(jsonb_build_object('owner',r.rolname,'executor_is_superuser',
     (select rolsuper from pg_roles where rolname=current_user),'executor_is_member',pg_has_role(current_user,r.oid,'MEMBER')))
     from pg_roles r where r.rolname in ('postgres','supabase_admin')),

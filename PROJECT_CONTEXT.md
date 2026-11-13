@@ -35,7 +35,9 @@
 
 截至本次交接，本對話的工具清單仍未提供 Supabase 管理工具，因此沒有從此處執行新的正式 SQL 或 Edge Function 部署。此為當次狀態，後續應重新檢查。
 
-使用者於 2026/11/13 提供線上唯讀盤點：確認 19 張表及新表預設 TRUNCATE 過廣、game_inventory_action 的 PUBLIC／anon EXECUTE 過廣，以及 436 的 ID 關聯錯誤。18:16 的補充確認 presence_id → auth_user_id → legacy_account_id → PlayerSaves.account_id。已準備 438 權限與 439 寵物修正及隔離測試，操作見 `supabase/README.md`；本對話尚未部署。歷史 `202611130001_town_companions436.sql` 不應單獨套用。取得連線後先比對線上定義、備份及驗證，再套用新更新，避免覆蓋其他更新。
+使用者於 2026/11/13 提供線上唯讀盤點：確認 19 張表及新表預設 TRUNCATE 過廣、game_inventory_action 的 PUBLIC／anon EXECUTE 過廣，以及 436 的 ID 關聯錯誤。18:16 的補充確認 presence_id → auth_user_id → legacy_account_id → PlayerSaves.account_id。原先準備 438 權限與 439 寵物修正及隔離測試，操作見 `supabase/README.md`；本對話尚未部署。歷史 `202611130001_town_companions436.sql` 不應單獨套用。取得連線後先比對線上定義、備份及驗證，再套用新更新，避免覆蓋其他更新。
+
+使用者之後回報 `438_DEFAULT_ACL_OWNER_PERMISSION_REQUIRED: supabase_admin`。改用 440 獨立處理 19 表、postgres 預設授權及 inventory EXECUTE；439 狀態先以唯讀查詢確認，已獨立提交者不受 438 失敗影響。supabase_admin 預設授權列為平台管理員待處理，441 位於 `supabase/admin/`，不要求一般專案角色執行或提升權限。驗證報告分開 project_permissions_ready／platform_defaults_ready，不能將前者成功當成全部完成。本機測試已加入非 superuser postgres；此處仍未執行正式更新。
 
 ## 本次 Excel 參考版本
 

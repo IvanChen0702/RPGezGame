@@ -1,3 +1,5 @@
+-- HISTORICAL: this combined migration requires supabase_admin owner rights.
+-- Hosted project roles should apply 202611130004_project_privileges440.sql instead.
 -- Scope: the 19 audited tables, postgres/supabase_admin table defaults, and
 -- public.game_inventory_action overloads. No application rows are changed.
 -- Apply as an administrator able to alter the affected owners' default ACLs.

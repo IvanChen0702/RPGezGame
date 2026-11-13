@@ -1,36 +1,9 @@
-import {PGlite} from '@electric-sql/pglite';
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 process.on('uncaughtException',e=>{console.error(e.message,e.where||'');process.exit(1)});
 const migration=readFileSync(new URL('../migrations/202611130002_restrict_public_privileges438.sql',import.meta.url),'utf8');
-const tables=['Accounts','PlayerSaves','AuctionListings','RedeemCodeClaims','WorldBossState','WorldBossAttempts','WorldBossRewards','BoxingAttempts','BoxingRanking','BoxingRewards','GameDataVersions','GameDataCurrent','ArenaPlayers','ArenaDefenseSnapshots','ArenaDailyMatches','ArenaBattles','ArenaRevenge','ArenaBattleReports','ArenaSeasonRewards'];
+import {tables,quote,fixture,bodies,dml} from './permissions-fixture.mjs';
 const verification=readFileSync(new URL('../review/verify438_439.sql',import.meta.url),'utf8');
-const quote=name=>'"'+name.replaceAll('"','""')+'"';
-async function fixture(){
- const db=new PGlite();
- await db.exec(`create role anon;create role authenticated;create role service_role;create role supabase_admin;
- create schema auth;create schema other_schema;
- grant usage on schema public,auth to anon,authenticated,service_role;
- grant usage,create on schema public to supabase_admin;
- create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
- alter default privileges for role postgres grant select,insert,truncate on tables to anon,authenticated;
- alter default privileges for role postgres in schema public grant update,truncate on tables to anon,authenticated;
- alter default privileges for role supabase_admin grant select,truncate on tables to anon,authenticated;
- alter default privileges for role supabase_admin in schema public grant insert,truncate on tables to anon,authenticated;
- create function public.game_inventory_action(p_request_id uuid,p_expected_revision bigint,p_operation jsonb)
- returns jsonb language plpgsql security definer set search_path='' as $$begin
- if auth.uid() is null then raise exception 'AUTH_REQUIRED';end if;
- return jsonb_build_object('ok',true,'operation',p_operation);end;$$;
- create function public.game_inventory_action(p_operation jsonb) returns jsonb language sql security definer set search_path='' as $$select public.game_inventory_action('00000000-0000-0000-0000-000000000001',1,p_operation)$$;
- create function public.game_equipment_bulk387() returns jsonb language sql security definer set search_path='' as $$select public.game_inventory_action('{"bulk":true}'::jsonb)$$;
- grant execute on function public.game_inventory_action(uuid,bigint,jsonb) to anon;
- create table public.unrelated_table(id integer primary key);
- grant all on public.unrelated_table to anon,authenticated,service_role;`);
- for(const t of tables)await db.exec(`create table public.${quote(t)}(id integer primary key,payload text);insert into public.${quote(t)} values (1,'unchanged');grant select,insert,update,delete,references,trigger,truncate on public.${quote(t)} to anon,authenticated,service_role;`);
- return db;
-}
-const bodies=async db=>(await db.query("select pg_get_functiondef(oid) as definition from pg_proc where proname in ('game_inventory_action','game_equipment_bulk387') order by oid")).rows;
-const dml=async db=>(await db.query(`select table_name,grantee,privilege_type,is_grantable from information_schema.table_privileges where table_schema='public' and privilege_type<>'TRUNCATE' order by table_name,grantee,privilege_type`)).rows;
 const db=await fixture();const beforeBodies=await bodies(db),beforeDml=await dml(db);
 await db.exec(migration);await db.exec(migration);
 assert.deepEqual(await bodies(db),beforeBodies,'function bodies must be unchanged');assert.deepEqual(await dml(db),beforeDml,'non-TRUNCATE table privileges must be unchanged');
