@@ -16588,7 +16588,7 @@ function pixelRender192_(t){
   const box=r.host.getBoundingClientRect();r.camera321_={page:state.page,finished:!!(r.battle?.won||r.battle?.lost||r.battle?.finished),vw:innerWidth,vh:innerHeight,dpr:Math.max(1,Math.min(2,Number(window.devicePixelRatio)||1)),hostWidth:box.width,hostHeight:box.height,geometry:geometry309};
   pinBattleFrame321_(r);
  }
- const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,clock=reduce?0:t;pixelBackground203_(c,r,t,w,h);
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,clock=reduce?0:t;pixelBackground203_(c,r,t,w,h);if(typeof battleAmbience433_==='function')battleAmbience433_(c,r,clock,w,h);
  r.events=r.events.filter(e=>t-e.start<e.duration);const anchors={player:pixelAnchor192_('player'),enemy:pixelAnchor192_('enemy')};
  for(const side of ['player','enemy']){
   const a=anchors[side];if(!a)continue;const action=pixelAction386_(r,side,t);
@@ -30428,6 +30428,113 @@ function queueMobileViewport431_(){if(!mobileViewportFrame431_)mobileViewportFra
 window.visualViewport?.addEventListener('resize',queueMobileViewport431_,{passive:true});window.visualViewport?.addEventListener('scroll',queueMobileViewport431_,{passive:true});
 document.addEventListener('focusout',()=>{queueMobileViewport431_();setTimeout(queueMobileViewport431_,250)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueMobileViewport431_()});
 new MutationObserver(queueMobileViewport431_).observe(document.documentElement,{attributes:true,attributeFilter:['class']});new MutationObserver(queueMobileViewport431_).observe(document.body,{attributes:true,attributeFilter:['class']});queueMobileViewport431_();
+</script>
+<style id="scene-ambience433">@layer desktopViewport421{
+.scene-ambient433{position:absolute!important;inset:0!important;overflow:hidden!important;pointer-events:none!important;user-select:none!important;z-index:1!important;contain:layout paint!important}
+.scene-ambient433 *{position:absolute!important;display:block!important;pointer-events:none!important}
+.hub-world413>.scene-ambient433{z-index:1!important}
+.mode-scene352>.scene-ambient433{z-index:0!important}
+.route-map349>.scene-ambient433{z-index:0!important}
+.challenge-lobby288>.scene-ambient433,.lobby402>aside>.scene-ambient433{z-index:-1!important}
+.lobby402>aside{isolation:isolate!important;position:relative!important}
+.ambient-light433{aspect-ratio:1!important;border-radius:50%!important;background:radial-gradient(ellipse,#ffe4ac55,#efaa5026 30%,transparent 68%)!important;transform:translate(-50%,-50%)!important;animation:ambient-lamp433 4.7s var(--delay433,0s) ease-in-out infinite!important}
+[data-ambient433="arena"] .ambient-light433{background:radial-gradient(ellipse,#65d9ff65,#b271f72a 30%,transparent 68%)!important}
+[data-ambient433="extreme"] .ambient-light433:nth-child(3){background:radial-gradient(ellipse,#c28bff44,transparent 68%)!important}
+.ambient-mist433{left:4%!important;top:57%!important;width:90%!important;height:18%!important;border-radius:50%!important;background:radial-gradient(ellipse,color-mix(in srgb,var(--ambient-color433) 12%,transparent),transparent 68%)!important;opacity:.55;animation:ambient-mist433 19s ease-in-out infinite alternate!important}
+.ambient-ray433{left:12%!important;top:-12%!important;width:35%!important;height:75%!important;transform:rotate(-19deg)!important;background:linear-gradient(90deg,transparent,#f5df9c0b 20%,#fff1c91c 48%,transparent 53%,#fff1c90b 66%,transparent)!important;clip-path:polygon(25% 0,53% 0,100% 100%,0 100%)!important;animation:ambient-ray433 11s ease-in-out infinite alternate!important}
+.ambient-scan433{left:10%!important;top:70%!important;width:16%!important;height:1px!important;background:linear-gradient(90deg,transparent,var(--ambient-color433),transparent)!important;opacity:0;animation:ambient-scan433 12s linear infinite!important}
+.ambient-seal433{left:65%!important;top:53%!important;width:19%!important;height:18%!important;border:1px solid #c49aff44!important;border-radius:50%!important;box-shadow:inset 0 0 12px #b279ec16,0 0 15px #b279ec22!important;animation:ambient-seal433 7s ease-in-out infinite!important}
+.ambient-mote433{width:3px!important;height:3px!important;border-radius:50%!important;background:var(--ambient-color433)!important;opacity:0;animation:ambient-rise433 var(--duration433,12s) var(--delay433,0s) linear infinite!important}
+.ambient-leaf433{width:6px!important;height:3px!important;border-radius:80% 0 80% 0!important;animation-name:ambient-fall433!important}
+.ambient-snow433{width:3px!important;height:3px!important;animation-name:ambient-fall433!important}
+.ambient-drip433{width:1px!important;height:9px!important;background:linear-gradient(transparent,#9ed7df88)!important;animation-name:ambient-drip433!important}
+.ambient-bubble433{width:5px!important;height:5px!important;border:1px solid #9edbe27a!important;background:transparent!important}
+.ambient-spark433{box-shadow:0 0 4px var(--ambient-color433)!important;animation-name:ambient-spark433!important}
+.ambient-ember433{width:2px!important;height:3px!important}
+html.mobile-ui .scene-ambient433 .ambient-mote433:nth-last-child(-n+6){display:none!important}
+html[data-ambient-paused433] .scene-ambient433 *,.scene-ambient433.ambient-paused433 *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.scene-ambient433{display:none!important}.scene-ambient433 *{animation:none!important}}
+}
+@keyframes ambient-lamp433{0%,100%{opacity:.45}35%{opacity:.8}67%{opacity:.55}82%{opacity:.7}}
+@keyframes ambient-mist433{from{transform:translate3d(-3%,0,0);opacity:.3}to{transform:translate3d(3%,-5%,0);opacity:.65}}
+@keyframes ambient-ray433{from{opacity:.35}to{opacity:.7}}
+@keyframes ambient-rise433{0%{opacity:0;transform:translate3d(0,20px,0)}25%,70%{opacity:.45}100%{opacity:0;transform:translate3d(var(--dx433),-65px,0)}}
+@keyframes ambient-fall433{0%{opacity:0;transform:translate3d(0,-30px,0) rotate(0)}25%,70%{opacity:.5}100%{opacity:0;transform:translate3d(var(--dx433),65px,0) rotate(75deg)}}
+@keyframes ambient-drip433{0%,65%{opacity:0;transform:translateY(-30px)}70%{opacity:.5}90%,100%{opacity:0;transform:translateY(70px)}}
+@keyframes ambient-spark433{0%,100%{opacity:0;transform:translateY(12px) scale(.6)}45%{opacity:.55;transform:translateY(-12px) scale(1)}80%{opacity:.15;transform:translateY(-25px) scale(.8)}}
+@keyframes ambient-scan433{0%,15%{opacity:0;transform:translateX(0)}30%,70%{opacity:.3}90%,100%{opacity:0;transform:translateX(400%)}}
+@keyframes ambient-seal433{0%,100%{opacity:.3;transform:scale(.97)}50%{opacity:.7;transform:scale(1.03)}}
+</style>
+<script id="scene-ambience433-script">// Decorative scene atmosphere: no independent game loop or changes to actor/layout coordinates.
+const ambienceThemes433_={
+ worldboss:{color:'#cadfed',kind:'dust',mist:true,lights:[[.183,.595,.045],[.56,.615,.04]]},
+ arena:{color:'#70d9ff',kind:'spark',lights:[[.144,.39,.035],[.28,.71,.06],[.60,.71,.06],[.91,.71,.06]],scan:true},
+ dungeon:{color:'#c5dc96',kind:'leaf',mist:true,ray:true},
+ relic:{color:'#a6cfdf',kind:'drip',mist:true,lights:[[.036,.485,.027],[.355,.245,.025],[.594,.35,.018],[.595,.63,.018]]},
+ extreme:{color:'#be85f4',kind:'spark',lights:[[.017,.47,.035],[.25,.415,.04],[.74,.52,.14]],seal:true},
+ boxing:{color:'#efc17c',kind:'dust',ray:true,lights:[[.345,.195,.055],[.628,.195,.055],[.51,.365,.035]]},
+ main01:{color:'#d9e9a6',kind:'leaf',ray:true},main02:{color:'#bfe9bb',kind:'leaf',mist:true},
+ main03:{color:'#ffb269',kind:'ember'},main04:{color:'#c5eaff',kind:'snow',mist:true},
+ main05:{color:'#e9cd90',kind:'dust',ray:true},main06:{color:'#85dce9',kind:'spark',scan:true},
+ main07:{color:'#91dae7',kind:'bubble',mist:true},main08:{color:'#c9b7ff',kind:'spark',mist:true},
+ main09:{color:'#e6cd92',kind:'dust',ray:true},main10:{color:'#bcd6ff',kind:'spark',mist:true},
+ temple:{color:'#d7bd8c',kind:'dust',ray:true},castle:{color:'#c9b7df',kind:'dust',mist:true},
+ chaos:{color:'#d9a5ff',kind:'spark',mist:true,seal:true},default:{color:'#cbdfea',kind:'snow',mist:true}
+};
+const ambienceMotion433_=matchMedia('(prefers-reduced-motion: reduce)');
+function ambienceMarkup433_(key,anchored=false){
+ const theme=ambienceThemes433_[key]||ambienceThemes433_.default;
+ const light=(x,y,size,i)=>`<i class="ambient-light433" style="left:${x*100}%;top:${y*100}%;width:${size*200}%;--delay433:${-i*1.7}s"></i>`;
+ let parts=anchored?(theme.lights||[]).map(([x,y,s],i)=>light(x,y,s,i)).join(''):'';
+ if(theme.mist)parts+='<i class="ambient-mist433"></i>';
+ if(theme.ray)parts+='<i class="ambient-ray433"></i>';
+ if(theme.scan)parts+='<i class="ambient-scan433"></i>';
+ if(theme.seal&&anchored)parts+='<i class="ambient-seal433"></i>';
+ for(let i=0;i<12;i++)parts+=`<i class="ambient-mote433 ambient-${theme.kind}433" style="left:${7+(i*23)%87}%;top:${12+(i*17)%65}%;--delay433:${-i*1.83}s;--duration433:${9+i%5*2}s;--dx433:${(i%3-1)*24}px"></i>`;
+ return `<div class="scene-ambient433" data-ambient433="${key}" aria-hidden="true" style="--ambient-color433:${theme.color}">${parts}</div>`;
+}
+const ambienceTargets433_='.hub-world413,.route-map349,.mode-scene352,.challenge-lobby288,.lobby402>aside';
+let ambienceFrame433_=0;
+const ambienceLayers433_=new Set();
+const ambienceObserver433_=new IntersectionObserver(entries=>{for(const entry of entries)entry.target.classList.toggle('ambient-paused433',!entry.isIntersecting)},{threshold:0});
+function mountAmbience433_(){
+ ambienceFrame433_=0;
+ for(const layer of ambienceLayers433_)if(!layer.isConnected){ambienceObserver433_.unobserve(layer);ambienceLayers433_.delete(layer)}
+ for(const host of document.querySelectorAll('#page :is('+ambienceTargets433_+')')){
+  const hub=host.classList.contains('hub-world413');
+  let key=hub?host.closest('[data-mode413]').dataset.mode413:host.classList.contains('route-map349')?(battleView349_.challenge?battleTheme203_({floor:battleView349_.floor},'battle'):'main'+String(battleView349_.chapter+1).padStart(2,'0')):host.classList.contains('mode-scene352')?host.closest('[data-mode352]').dataset.mode352:host.dataset.lobby288||portalChoice402_;
+  if(key==='story')key='main01';if(key==='challenge')key='temple';if(!ambienceThemes433_[key])key='default';
+  const old=host.querySelector(':scope>.scene-ambient433');if(old?.dataset.ambient433===key)continue;
+  if(old){ambienceObserver433_.unobserve(old);ambienceLayers433_.delete(old);old.remove()}
+  host.insertAdjacentHTML('beforeend',ambienceMarkup433_(key,hub));const layer=host.lastElementChild;ambienceLayers433_.add(layer);ambienceObserver433_.observe(layer);
+ }
+}
+function queueAmbience433_(){if(!ambienceFrame433_)ambienceFrame433_=requestAnimationFrame(mountAmbience433_)}
+// Watch scene mounts only; ignore HUD text, actor transforms and the particles themselves.
+new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.classList.contains('scene-ambient433')&&(n.matches(ambienceTargets433_)||n.querySelector(ambienceTargets433_)))))queueAmbience433_()}).observe(document.getElementById('page'),{childList:true,subtree:true});
+function ambienceVisibility433_(){document.documentElement.toggleAttribute('data-ambient-paused433',document.hidden)}
+document.addEventListener('visibilitychange',ambienceVisibility433_);ambienceVisibility433_();queueAmbience433_();
+// The existing battle canvas draws atmosphere after its cached background and before actors.
+// A tiny cached glow sprite avoids blur filters, full-scene redraw caches and per-frame DOM work.
+const ambienceGlow433_=new Map();
+function ambienceGlowSprite433_(color){
+ if(ambienceGlow433_.has(color))return ambienceGlow433_.get(color);
+ const cv=document.createElement('canvas');cv.width=cv.height=64;const ctx=cv.getContext('2d'),g=ctx.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,color);g.addColorStop(.25,color+'88');g.addColorStop(1,color+'00');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);ambienceGlow433_.set(color,cv);return cv;
+}
+function battleAmbience433_(c,r,t,w,h){
+ if(document.hidden||ambienceMotion433_.matches||!t)return;
+ const key=battleTheme203_(),theme=ambienceThemes433_[key]||ambienceThemes433_.default,ground=Math.min(h,pixelFloor203_()),clock=t/1000,count=viewMode_==='mobile'?9:16;
+ c.save();c.beginPath();c.rect(0,0,w,ground);c.clip();c.fillStyle=theme.color;c.strokeStyle=theme.color;
+ if(theme.mist){const glow=ambienceGlowSprite433_(theme.color);c.globalAlpha=.055;for(let i=0;i<2;i++)c.drawImage(glow,w*(.15+i*.5)+Math.sin(clock/12+i)*w*.035-w*.3,ground*.66,w*.6,ground*.25)}
+ for(let i=0;i<count;i++){
+  const duration=12+i%5*3,p=((clock+i*1.87)%duration)/duration,down=['leaf','snow','drip'].includes(theme.kind),x=w*(.04+(i*.137)% .92)+Math.sin(clock/5+i)*5,y=ground*(down?p:1-p);
+  c.globalAlpha=Math.sin(p*Math.PI)*.38;c.beginPath();
+  if(theme.kind==='bubble'){c.lineWidth=.6;c.arc(x,y,1.2+i%3*.5,0,Math.PI*2);c.stroke()}
+  else if(theme.kind==='leaf'){c.ellipse(x,y,1.8,.65,clock*.3+i,0,Math.PI*2);c.fill()}
+  else{const size=theme.kind==='snow'?1.2:.8;c.fillRect(x,y,size,theme.kind==='drip'?4:size);if(theme.kind==='spark'){c.globalAlpha*=.3;c.fillRect(x-1.5,y+.3,4,.5)}}
+ }
+ c.restore();
+}
 </script>
 </body>
 </html>
