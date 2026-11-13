@@ -6816,7 +6816,7 @@ function townReady401_(){
 function lockItems401_(room){
  const kind=readyRoom24_?.kind,blocked=kind==='arena'||kind==='relic'||kind==='extreme'||kind==='dungeon'&&dungeonBoss_()?.special==='no_consumables';
  if(!blocked)return;
- room.querySelectorAll('.item400').forEach(btn=>{btn.disabled=true;btn.classList.add('locked401');btn.title='本場戰鬥禁止使用消耗品';const label=btn.querySelector('.quick-slot-label');if(label)label.textContent+='・禁用'});
+  room.querySelectorAll('.item400').forEach(btn=>{btn.disabled=true;btn.classList.add('locked401');btn.title='本場戰鬥禁止使用消耗品';const label=btn.querySelector('.quick-slot-label');if(label&&!label.textContent.endsWith('・禁用'))label.textContent+='・禁用'});
 }
 
 const icons402_={"shop": "M3 9l2-6h14l2 6M3 9c0 4 5 4 6 1 1 3 5 3 6 0 1 3 6 3 6-1M5 13v8h14v-8M9 21v-6h6v6", "pack": "M7 7V5c0-3 10-3 10 0v2M5 7h14l1 14H4zM8 12h8v5H8z", "auction": "M4 20h15M6 17l10-10M12 5l3-3 6 6-3 3zM6 13l2 2", "rank": "M3 21h18M4 20v-7h4v7m2 0V8h4v12m2 0V11h4v9M12 2l.7 1.4 1.5.2-1.1 1 .3 1.6-1.4-.8-1.4.8.3-1.5-1.1-1.1 1.5-.2z", "portal": "M3 21V11a9 9 0 0118 0v10M7 21V11a5 5 0 0110 0v10M2 21h5m10 0h5M12 9c-4 4 5 3 0 9", "gear": "M4 20l3-7 10-10 4-1-1 5-10 10-6 3zM5 11l8 8", "gem": "M2 9l5-6h10l5 6-10 12zM2 9h20M7 3l5 18 5-18", "potion": "M9 3h6M10 3v5l-6 9q-2 4 3 4h10q5 0 3-4l-6-9V3M7 15h10", "pet": "M6 15q6-8 12 0c4 6-2 7-6 4-4 3-10 2-6-4zM4 8v2m4-6v3m8-3v3m4 1v2", "scroll": "M5 5q0-3 4-2h10q3 1 2 5h-5V6q0-4 3-3M16 7v11q0 5-5 3H5q-3 0-3-4h8q0 4 4 4M7 5v9", "coin": "M12 2a10 10 0 100 20 10 10 0 000-20zm0 4 4 6-4 6-4-6z", "sell": "M3 12l9-9h7l2 2v7l-9 9zM16 8h.1", "wallet": "M3 6h16v14H3zM3 6l13-4v4M15 11h6v5h-6z", "map": "M2 6l7-3 6 3 7-3v15l-7 3-6-3-7 3zM9 3v15m6-12v15", "boss": "M5 10L2 5l7 2q3-3 6 0l7-2-3 5v7l-7 4-7-4zM8 13l2 1m4 0 2-1", "mount": "M2 20L11 4l4 8 2-4 5 12zM8 10l3 2 2-3", "flame": "M12 2c3 5 1 7 3 9l3-3c6 8 0 14-6 14C4 22 1 16 6 10c0 4 3 4 3 1s1-7 3-9z", "relic": "M12 2l7 7-2 9-5 4-5-4-2-9zM5 9h14M12 2v20", "arena": "M3 3l4 1 13 15-2 2L4 7zM21 3l-4 1-5 7m-4 4-4 5 2 1 5-5M2 18l5 4m10-2 4-5", "box": "M4 12V8l3-1V5l3-1 2 1 2-2 3 2 3 1v8l-3 4H7zM7 18h10v4H7z", "book": "M12 6Q9 2 2 4v15q6-2 10 2 4-4 10-2V4q-7-2-10 2zm0 0v15"};
@@ -11166,7 +11166,6 @@ async function relicReady144_(){
  if(!state.currentBattle&&state.page==='relic'&&relicRun144_?.phase==='ready')relicInfo144_();
 }
 function relicLockReady144_(){const root=document.getElementById('readyContent24');if(readyRoom24_?.kind!=='relic'||!root)return;if(relicRun144_)relicRun144_.hp=Math.min(relicRun144_.hp,totalStats().hp);
- root.insertAdjacentHTML('afterbegin','<p class="small relic-ready-hint144">可自由調整能力、技能、裝備與寶石；戰鬥內禁止使用消耗品。剩餘HP：'+Math.floor(relicRun144_.hp)+'，HP不補滿；換下技能仍保留CD。</p>');
 }
 async function relicBattle144_(){const out=await relicRequest144_('battle',{hp:relicRun144_.hp});if(out)await relicContinue144_();}
 function relicOfferModal144_(){
@@ -16231,7 +16230,8 @@ function fitAvatarChoices229_(){
 window.addEventListener('resize',()=>requestAnimationFrame(fitAvatarChoices229_));
 
 function heroHeadKey220_(g,pose='idle'){const head=!g.head?0:g.hood?2:/冠|神|帝/.test(g.head.name||'')?3:1,weapon=({sword:0,staff:1,bow:2,axe:3}[g.kind]||0);return `hero_${g.sex==='female'?'female':'male'}_${head}_${weapon}_${pose}`;}
-function preloadHero220_(g){if(!g)return [];syncHeroWeapon251_(g);const sex=g.sex==='female'?'female':'male';return [...['idle','attack','cast'].flatMap(pose=>[0,1,2,3].map(s=>artImage202_(`body245_${sex}_${s}_${pose}`))),...[0,1,2,3].map(h=>artImage202_(`head245_${sex}_${h}`)),...(g.kind==='unarmed'?[]:[artImage202_('weapon245_'+g.kind)])];}
+function heroOutfit445_(g){return {sex:g.sex==='female'?'female':'male',suit:!g.armor?0:g.robe?2:/傳說|榮耀|神|秩序|龍/.test(g.armor.name||'')?3:1,head:!g.head?0:g.hood?2:/冠|神|帝/.test(g.head.name||'')?3:1};}
+function preloadHero220_(g){if(!g)return [];syncHeroWeapon251_(g);const {sex,suit,head}=heroOutfit445_(g);return [...['idle','attack','cast'].map(pose=>artImage202_(`body245_${sex}_${suit}_${pose}`)),artImage202_(`head245_${sex}_${head}`),...(g.kind==='unarmed'?[]:[artImage202_('weapon245_'+g.kind)])];}
 
 function heroPose220_(action,t){if(!action)return 'idle';const p=(t-action.start)/action.duration;if(p<.12||p>.86)return 'idle';return action.type==='attack'?'attack':['cast203','magic'].includes(action.type)?'cast':'idle';}
 const HERO_HANDS246_={male:[{idle:[194,158],attack:[221,110],cast:[89,135],palm:[205,95]},{idle:[194,158],attack:[223,110],cast:[92,134],palm:[201,96]},{idle:[180,158],attack:[222,110],cast:[98,132],palm:[202,98]},{idle:[201,158],attack:[220,111],cast:[94,135],palm:[208,102]}],female:[{idle:[190,146],attack:[205,103],cast:[95,134],palm:[204,104]},{idle:[190,146],attack:[205,103],cast:[102,128],palm:[204,103]},{idle:[195,144],attack:[208,102],cast:[106,129],palm:[208,104]},{idle:[194,148],attack:[211,104],cast:[103,131],palm:[208,107]}]};
@@ -16457,8 +16457,8 @@ function drawAttachedWeapon246_(q,weapon,body,g,pose,suit){
 
 function femaleHeroComposite220_(g,pose='idle'){
  syncHeroWeapon251_(g);
- const suit=!g.armor?0:g.robe?2:/傳說|榮耀|神|秩序|龍/.test(g.armor.name||'')?3:1,hs=!g.head?0:g.hood?2:/冠|神|帝/.test(g.head.name||'')?3:1;
- const sex=g.sex==='female'?'female':'male',base=`body245_${sex}_${suit}_${pose}`,head=`head245_${sex}_${hs}`,im=artImage202_(base),hd=artImage202_(head),weapon=g.kind==='unarmed'?null:artImage202_('weapon245_'+g.kind);
+ const {sex,suit,head:hs}=heroOutfit445_(g);
+ const base=`body245_${sex}_${suit}_${pose}`,head=`head245_${sex}_${hs}`,im=artImage202_(base),hd=artImage202_(head),weapon=g.kind==='unarmed'?null:artImage202_('weapon245_'+g.kind);
  if(!im.complete||!im.naturalWidth||!hd.complete||!hd.naturalWidth)return pose==='idle'?null:femaleHeroComposite220_(g,'idle');
  if(weapon&&(!weapon.complete||!weapon.naturalWidth))return null;
  const cacheKey245=[base,head,g.kind,g.armor?.template,g.armorColor,weaponEnhance251_(g.weapon)>=10?'glow:'+weaponGlowColor259_(g):'base'].join(':');if(heroCompositeCache228_.has(cacheKey245))return heroCompositeCache228_.get(cacheKey245);
@@ -17621,7 +17621,10 @@ function requestReadyRoom24_(kind,label,action){
 }
 function refreshReadyRoom24_(){
  const el=document.getElementById('readyContent24');if(!el||!readyRoom24_)return;
- el.innerHTML=preparationContent24_(readyRoom24_.kind==='arena');decorateEquipViews205_(el);relicLockReady144_();el.inert=!!readyRoom24_.busy;
+ const html=preparationContent24_(readyRoom24_.kind==='arena'),{sex,...gear}=pixelGear192_('player'),appearance=JSON.stringify(gear);
+ // Busy/entry updates must not replace the live avatar with an empty canvas.
+ if(el.readyHtml445_!==html||el.readyAppearance445_!==appearance){el.innerHTML=html;decorateEquipViews205_(el);el.readyHtml445_=html;el.readyAppearance445_=appearance;}
+ relicLockReady144_();el.inert=!!readyRoom24_.busy;
  document.querySelectorAll('#readyRoom24 .sheet-heading button,#readyRoom24 .ready-footer button').forEach(x=>x.disabled=!!readyRoom24_.busy);
  syncEntryButtons228_();syncEquipment317_();arrangeReady400_(el);
 }
@@ -17742,7 +17745,7 @@ function dungeonSelect406_(bosses,b){
 }
 function fitReady406_(room){
  const sheet=room.querySelector('.ready-sheet');if(!sheet)return;
- const fit=()=>{if(sheet.isConnected){const z=Math.min(1,(window.innerHeight-20)/Math.max(1,sheet.offsetHeight),(window.innerWidth-16)/Math.max(1,sheet.offsetWidth));sheet.style.setProperty('--ready-fit406',String(z));}};
+ const fit=()=>{if(sheet.isConnected){const style=getComputedStyle(room),width=room.clientWidth-(parseFloat(style.paddingLeft)||0)-(parseFloat(style.paddingRight)||0),height=room.clientHeight-(parseFloat(style.paddingTop)||0)-(parseFloat(style.paddingBottom)||0);const z=Math.min(1,Math.max(1,height)/Math.max(1,sheet.offsetHeight),Math.max(1,width)/Math.max(1,sheet.offsetWidth));if(sheet.style.getPropertyValue('--ready-fit406')!==String(z))sheet.style.setProperty('--ready-fit406',String(z));}};
  if(!sheet.fit406){sheet.fit406=new ResizeObserver(fit);sheet.fit406.observe(sheet);}
  fit();requestAnimationFrame(fit);
 }
@@ -21236,12 +21239,16 @@ function captureBattleFeed408_(){
  if(viewMode_!=='desktop'||!['battle','arenaBattle'].includes(state.page))return null;
  const stage=document.getElementById('battleStage'),box=document.getElementById('actionDetail');
  if(!stage||!box)return null;
- const open=stage.classList.contains('feed-open398'),rows=[...box.children];
- const atEnd=!open||box.scrollHeight-box.clientHeight-box.scrollTop<8;
+ const open=stage.classList.contains('feed-open398');
+ const context={battle:pixelCurrentBattle192_(),page:state.page,open};
+ if(!open)return {...context,atEnd:true};
+ const atEnd=box.scrollHeight-box.clientHeight-box.scrollTop<8;
+ if(atEnd)return {...context,atEnd:true};
+ const rows=[...box.children];
  const top=box.getBoundingClientRect().top;
  const anchor=rows.find(el=>el.getBoundingClientRect().bottom>top);
  return {battle:pixelCurrentBattle192_(),page:state.page,open,atEnd,top:box.scrollTop,
-  distance:box.scrollHeight-box.scrollTop,html:anchor?.innerHTML,offset:anchor?anchor.getBoundingClientRect().top-top:0,
+  distance:box.scrollHeight-box.scrollTop,node:anchor,html:anchor?.innerHTML,offset:anchor?anchor.getBoundingClientRect().top-top:0,
   occurrence:anchor?rows.slice(0,rows.indexOf(anchor)).filter(el=>el.innerHTML===anchor.innerHTML).length:0};
 }
 function restoreBattleFeed408_(snapshot){
@@ -21250,9 +21257,9 @@ function restoreBattleFeed408_(snapshot){
  if(!stage||!box)return;
  stage.classList.toggle('feed-open398',snapshot.open);
  stage.querySelector('.feed-toggle398')?.setAttribute('aria-expanded',String(snapshot.open));
- if(snapshot.atEnd){box.scrollTop=box.scrollHeight;return;}
+ if(snapshot.atEnd){if(snapshot.open)box.scrollTop=box.scrollHeight;return;}
  // Match the visible row even when the 200-line limit removes old entries.
- const anchor=[...box.children].filter(el=>el.innerHTML===snapshot.html)[snapshot.occurrence];
+ const anchor=snapshot.node?.parentNode===box?snapshot.node:[...box.children].filter(el=>el.innerHTML===snapshot.html)[snapshot.occurrence];
  box.scrollTop=snapshot.top;
  if(anchor)box.scrollTop+=anchor.getBoundingClientRect().top-box.getBoundingClientRect().top-snapshot.offset;
  else box.scrollTop=Math.max(0,box.scrollHeight-snapshot.distance);
@@ -21262,11 +21269,30 @@ function battleFeedHtml46_(rows=state.battleLog,plain=false){
  const entries=Array.isArray(rows)?rows:[];if(entries.length>200)entries.splice(0,entries.length-200);
  return (viewMode_==='desktop'?[...entries]:[...entries].reverse()).map(x=>`<div class="battle-feed-entry46">${plain?escapeHtml(x):x}</div>`).join('')||'<div>選擇技能開始行動。</div>';
 }
+// Reuse history rows so each hit only inserts its new messages, including at the 200-row cap.
+const battleFeedRows445_=new WeakMap();
+function syncBattleFeed445_(box,rows,plain){
+ if(!box)return;
+ const entries=(viewMode_==='desktop'?rows:[...rows].reverse()).map(x=>plain?escapeHtml(x):String(x));
+ const old=battleFeedRows445_.get(box)||[...box.children].map(node=>({html:node.innerHTML,node})),pool=new Map();
+ for(const row of old){if(row.node.parentNode!==box)continue;const matches=pool.get(row.html)||[];matches.push(row.node);pool.set(row.html,matches);}
+ const next=[];
+ for(const [i,html] of entries.entries()){
+  let node=pool.get(html)?.shift();
+  if(!node){node=document.createElement('div');node.className='battle-feed-entry46';node.innerHTML=html;}
+  if(box.children[i]!==node)box.insertBefore(node,box.children[i]||null);
+  next.push({html,node});
+ }
+ while(box.children.length>next.length)box.lastChild.remove();
+ if(!next.length)box.innerHTML='<div>選擇技能開始行動。</div>';
+ battleFeedRows445_.set(box,next);
+}
 function refreshBattleFeed46_(){
  const box=document.getElementById('actionDetail');if(!box)return;
  const snapshot=captureBattleFeed408_();
- const arena=state.page==='arenaBattle';box.innerHTML=battleFeedHtml46_(arena?arenaBattle_?.log:state.battleLog,arena);box.scrollTop=0;
- const full=document.getElementById('logBox');if(full){full.innerHTML=box.innerHTML;full.scrollTop=viewMode_==='desktop'?full.scrollHeight:0}
+ const arena=state.page==='arenaBattle',source=arena?arenaBattle_?.log:state.battleLog,rows=Array.isArray(source)?source.slice(-200):[];
+ syncBattleFeed445_(box,rows,arena);if(viewMode_!=='desktop')box.scrollTop=0;
+ const full=document.getElementById('logBox');if(full){syncBattleFeed445_(full,rows,arena);if(viewMode_!=='desktop')full.scrollTop=0;else if(!document.documentElement.classList.contains('battle398'))full.scrollTop=full.scrollHeight;}
  restoreBattleFeed408_(snapshot);
 }
 function log(msg){if(!Array.isArray(state.battleLog))state.battleLog=[];state.battleLog.push(String(msg));if(state.battleLog.length>200)state.battleLog.splice(0,state.battleLog.length-200);if(state.page==='battle')refreshBattleFeed46_();}
@@ -22383,6 +22409,15 @@ function applyTurnStartGemEffects_(){
   }
 }
 
+function beginSkillUi445_(){
+ const stage=document.getElementById('battleStage');
+ if(viewMode_!=='desktop'||!document.documentElement.classList.contains('battle398')||!stage||pixelStage192_?.battle!==state.currentBattle){render();return;}
+ closeCommandTip197_();
+ battleText228_(document.getElementById('turnBanner'),state.battleVisual.phase);
+ document.getElementById('playerCombatant')?.classList.add('active-turn');document.getElementById('enemyCombatant')?.classList.remove('active-turn');
+ document.getElementById('page').querySelectorAll('.battle-command-grid button,.skip-turn-btn,.desktop-consumable58,[onclick*="useBattleItem"],[onclick*="openConsumableChoice34_"],[onclick*="openRetreatConfirm_"]').forEach(button=>button.disabled=true);
+ updateBattleNumbers();
+}
 async function useSkill(i){
  const b=state.currentBattle;
  if(b)b.playerTurnDirectDamage=0;
@@ -22399,7 +22434,7 @@ async function useSkill(i){
  const s=battlePlayerStats();
 
  state.battleVisual={phase:`玩家使用 ${sk.name}`,detail:`你選擇了 <strong>【${sk.name}】</strong>。`,busy:true,actor:'player'};
- render();
+ beginSkillUi445_();
  pixelCast192_('player',sk);
  const btn=document.getElementById(`skillBtn${i}`);if(btn)btn.classList.add('casting');
  await wait(400);
@@ -29948,6 +29983,8 @@ html.desktop-ui #app #page #hubScene413 .hub-tabs422 button[aria-pressed="true"]
  html.desktop-ui :is(.town-window-overlay311,.inventory-overlay293,.viewport-overlay,.quick-picker,.account-overlay,.ui-confirm-overlay,.modal.open,.hub-overlay413,.pet-overlay297,.gift-overlay101,.reset-confirm-overlay,.rare-drop-overlay,.purchase-feedback,#questJournal369,#questReward369,#relicOverlay144.relic-ui413)>:first-child{
   box-sizing:border-box!important;min-height:0!important;max-height:var(--window-height421)!important;max-width:100%!important;overflow-y:auto!important;overscroll-behavior:contain;
  }
+ /* Ready rooms scale as one complete sheet, including the footer, below the resource banner. */
+ html.desktop-ui :is(#readyRoom24,#townWindow311).ready400>.ready-sheet{max-height:none!important;overflow:visible!important;flex:0 0 auto!important}
  html.desktop-ui dialog[open]{box-sizing:border-box!important;top:var(--window-top421)!important;bottom:8px!important;margin-block:auto!important;max-height:var(--window-height421)!important;overflow:auto!important}
  html.desktop-ui :is(#itemTip404,#prepareHoverTip:has(.card404),#presetDetail389.preset-detail-desktop389){
   max-height:var(--window-height421)!important;
