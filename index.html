@@ -19998,7 +19998,7 @@ async function checkWorldBossChests_(btn=null){
 }
 async function refreshWorldBossRanking_(btn=null){
   if(worldBossRankingLoading||!worldBossCache?.boss?.instanceId)return;worldBossRankingLoading=true;if(btn)btn.disabled=true;
-  try{const d=await apiPost('worldboss/ranking',{sessionToken:cloudMeta.sessionToken,bossInstanceId:worldBossCache.boss.instanceId},{silentLoading:true});worldBossCache.ranking=d.ranking;worldBossRankingReady=true;saveWorldBossRankLocal_({bossInstanceId:worldBossCache.boss.instanceId,ranking:d.ranking});toast('世界 BOSS 貢獻排行已更新。');render()}catch(err){toast(`排行更新失敗：${err.message}`)}finally{worldBossRankingLoading=false;if(btn)btn.disabled=false}
+  try{const d=await apiPost('worldboss/ranking',{sessionToken:cloudMeta.sessionToken,bossInstanceId:worldBossCache.boss.instanceId},{silentLoading:true});worldBossCache.ranking=d.ranking;worldBossRankingReady=true;saveWorldBossRankLocal_({bossInstanceId:worldBossCache.boss.instanceId,ranking:d.ranking});toast('世界 BOSS 貢獻排行已更新。')}catch(err){toast(`排行更新失敗：${err.message}`)}finally{worldBossRankingLoading=false;if(btn?.isConnected)btn.disabled=false;if(state.page==='worldboss')render()}
 }
 function startWorldBossConfirmed24_(){
   const p=worldBossPlanningData_(),b=worldBossCache?.boss;if(!p||!b){toast('世界 BOSS 資料尚未準備完成。');return}if(String(b.status)==='DEAD'||Number(b.currentHp)<=0){toast('世界 BOSS 已被擊敗。');return}if(Number(worldBossCache.attemptsLeft||0)<=0){toast('今日世界 BOSS 挑戰次數已用完。');return}
@@ -25740,13 +25740,32 @@ function renderArenaOffensePrep_(){
  <div class="arena-attack-columns"><section class="panel arena-attack-skills"><div class="section-title"><h3>進攻技能</h3><span class="badge">與一般戰鬥共用</span></div>${arenaSharedSkills328_()}</section>
  <section class="panel arena-attack-equipment"><div class="section-title"><h3>裝備配置</h3><span class="badge">與整備頁共用</span></div>${equipmentLoadoutPanel_()}${arenaEquipSlotsHtml_('offense',eq)}</section></div></section>`;
 }
-async function refreshArenaRanking_(btn){
- arenaCache_=arenaCache_||{};if(arenaCache_.rankingBusy)return;arenaCache_.rankingBusy=true;if(btn)setInlineLoading_(btn,true,'更新中...');
- try{const d=await apiPost('arena/ranking',{sessionToken:cloudMeta.sessionToken,limit:100},{maxRetry:1});if(!d?.ok)throw new Error(d?.error||'ARENA_RANKING_FAILED');arenaCache_.ranking=d.rows||[];arenaCache_.myRank=d.myRank||null;arenaCache_.rankingLoaded=true}
- catch(e){toast('競技場排行榜讀取失敗：'+e.message)}
- finally{arenaCache_.rankingBusy=false;if(btn&&btn.isConnected)setInlineLoading_(btn,false);if(state.page==='arena'&&arenaTab_==='ranking')render()}
+// Desktop hub tabs and the legacy/mobile tabs have separate selection state.
+function arenaPaneVisible450_(tab){
+ if(state.page!=='arena')return false;
+ return hubActive413_()?hubUI413_.mode==='arena'&&hubUI413_.facility===(tab==='revenge'?'record':tab):arenaTab_===tab;
 }
-
+function arenaReadCurrent450_(cache,session){
+ const current=characterSessionContext_();
+ return arenaCache_===cache&&session.accountId===current.accountId&&session.generation===current.generation;
+}
+async function refreshArenaRanking_(btn){
+ const cache=arenaCache_||(arenaCache_={}),session=characterSessionContext_();
+ if(cache.rankingBusy)return;cache.rankingBusy=true;if(btn)setInlineLoading_(btn,true,'更新中…');
+ try{
+  const d=await apiPost('arena/ranking',{sessionToken:cloudMeta.sessionToken,limit:100},{maxRetry:1});
+  if(!arenaReadCurrent450_(cache,session))return;
+  if(!d?.ok||!Array.isArray(d.rows))throw new Error(d?.error||'ARENA_RANKING_FAILED');
+  cache.ranking=d.rows;cache.myRank=d.myRank||null;cache.rankingLoaded=true;cache.rankingLoadError='';
+ }catch(e){if(arenaReadCurrent450_(cache,session)){cache.rankingLoadError=String(e.message||e);toast('競技場排行榜讀取失敗：'+e.message);}}
+ finally{
+  cache.rankingBusy=false;
+  if(arenaReadCurrent450_(cache,session)){
+   if(btn?.isConnected)setInlineLoading_(btn,false);
+   if(arenaPaneVisible450_('ranking'))render();
+  }
+ }
+}
 
 // v11.38.101: data-driven season rewards and dungeon-style prize cards.
 const ARENA_HAMMER_REWARDS57_ = [[1,1,10],[2,2,7],[3,3,5],[4,10,3],[11,999999,1]].map(([RankMin,RankMax,ConsumableQuantity])=>({RankMin,RankMax,EquipmentID:'',GemID:'',Gold:0,ConsumableID:'legendaryHammer',ConsumableQuantity,SeasonID:''}));
@@ -25909,7 +25928,7 @@ async function claimArenaReward_(btn){
 }
 function renderArenaRanking_(){
  const rows=arenaCache_?.ranking||[],me=arenaCache_?.myRank;
- return `<div class="panel arena-ranking-panel"><div class="section-title"><div><div class="arena-eyebrow">SEASON RANKING</div><h3 style="margin:1px 0 0">競技場排行榜</h3></div><button id="arenaRankingRefreshBtn" onclick="refreshArenaRanking_(this)">↻ 更新排行</button></div><div class="small">依積分排序；同積分依勝場、累積傷害與較早達成積分時間排序。</div>${me?`<div class="arena-my-rank"><span>我的名次</span><b>#${Number(me.rank||0)}</b><strong>${Number(me.points||0)} 分</strong></div>`:''}${rows.length?`<div class="arena-rank-list">${rows.map(r=>`<div class="arena-rank-row ${r.isSelf?'self':''}"><div class="arena-rank-no">#${Number(r.rank||0)}</div><div class="arena-rank-player"><b>${arenaName324_(r,r.nickname||'冒險者')}</b><span>${Number(r.wins||0)}W / ${Number(r.losses||0)}L / ${Number(r.draws||0)}D</span></div><div class="arena-rank-damage"><span>累積傷害</span><b>${Number(r.totalDamage||0).toLocaleString()}</b></div><div class="arena-rank-points">${Number(r.points||0)}<span>PTS</span></div></div>`).join('')}</div>`:`<div class="empty">${arenaCache_?.rankingBusy?'排行榜讀取中…':'目前尚無排行資料'}</div>`}</div>`;
+ return `<div class="panel arena-ranking-panel"><div class="section-title"><div><div class="arena-eyebrow">SEASON RANKING</div><h3 style="margin:1px 0 0">競技場排行榜</h3></div><button id="arenaRankingRefreshBtn" onclick="refreshArenaRanking_(this)" ${arenaCache_?.rankingBusy?'disabled aria-busy="true"':''}>${arenaCache_?.rankingBusy?'更新中…':'↻ 更新排行'}</button></div><div class="small">依積分排序；同積分依勝場、累積傷害與較早達成積分時間排序。</div>${me?`<div class="arena-my-rank"><span>我的名次</span><b>#${Number(me.rank||0)}</b><strong>${Number(me.points||0)} 分</strong></div>`:''}${rows.length?`<div class="arena-rank-list">${rows.map(r=>`<div class="arena-rank-row ${r.isSelf?'self':''}"><div class="arena-rank-no">#${Number(r.rank||0)}</div><div class="arena-rank-player"><b>${arenaName324_(r,r.nickname||'冒險者')}</b><span>${Number(r.wins||0)}W / ${Number(r.losses||0)}L / ${Number(r.draws||0)}D</span></div><div class="arena-rank-damage"><span>累積傷害</span><b>${Number(r.totalDamage||0).toLocaleString()}</b></div><div class="arena-rank-points">${Number(r.points||0)}<span>PTS</span></div></div>`).join('')}</div>`:`<div class="empty">${arenaCache_?.rankingBusy?'排行榜讀取中…':arenaCache_?.rankingLoadError?'排行榜讀取失敗，請重新整理。':arenaCache_?.rankingLoaded?'目前尚無排行資料':'尚未讀取排行，請按更新排行。'}</div>`}</div>`;
 }
 const ARENA_CONFIG_DEFAULT126_={SeasonDays:7,StartPoints:10,MinPoints:0,DailyOpponentCount:5,MaxTurns:20,PlayerWinDelta:2,PlayerLoseDelta:-2,DefenderWinDelta:2,DefenderLoseDelta:-2,NpcWinDelta:1,NpcLoseDelta:-1,DrawDelta:0,RevengeWinDelta:2,RevengeLoseDelta:0,DailyResetTimezone:'Asia/Taipei',ArenaLevel:250,RankingTopReward:0,RetryWinDelta:1,RetryLoseDelta:-1,RetryDefenderWinDelta:1,RetryDefenderLoseDelta:-1};
 function arenaParseConfig126_(rows){
@@ -25939,8 +25958,9 @@ function renderArenaChallenge_(){
 }
 function renderArenaRevenge_(){
  const rows=arenaCache_?.revenge||[];
- return `<div class="panel arena-revenge-panel214"><div class="section-title"><h3>復仇名單</h3><button onclick="refreshArenaRevenge_(this)">重新整理</button></div>
- <div class="arena-revenge-list214" tabindex="0" aria-label="復仇名單">${rows.length?rows.map(r=>`<div class="between" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${arenaName324_(r,r.targetNickname||'未知玩家')}</b><div class="small">此復仇權保留至賽季結束</div><div class="small arena-points179"><span>勝利 +${Number(r.winDelta??2)}</span><span>失敗 0</span></div></div><button class="danger" onclick="arenaStartRevenge_('${escapeAttr(r.revengeId)}',this)">復仇</button></div>`).join(''):'<div class="empty">目前沒有可復仇的玩家。</div>'}</div></div>`;
+ return `<div class="panel arena-revenge-panel214"><div class="section-title"><h3>復仇名單</h3><button onclick="refreshArenaRevenge_(this)" ${arenaCache_?.revengeBusy?'disabled aria-busy="true"':''}>${arenaCache_?.revengeBusy?'更新中…':'重新整理'}</button></div>
+ ${arenaCache_?.revengeLoadError&&rows.length?'<div class="notice" role="status">更新失敗，目前顯示上次的名單，請重新整理。</div>':''}
+ <div class="arena-revenge-list214" tabindex="0" aria-label="復仇名單">${rows.length?rows.map(r=>`<div class="between" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${arenaName324_(r,r.targetNickname||'未知玩家')}</b><div class="small">此復仇權保留至賽季結束</div><div class="small arena-points179"><span>勝利 +${Number(r.winDelta??2)}</span><span>失敗 0</span></div></div><button class="danger" onclick="arenaStartRevenge_('${escapeAttr(r.revengeId)}',this)">復仇</button></div>`).join(''):`<div class="empty">${arenaCache_?.revengeBusy?'復仇名單讀取中…':arenaCache_?.revengeLoadError?'復仇名單讀取失敗，請重新整理。':arenaCache_?.revengeLoaded?'目前沒有可復仇的玩家。':'尚未讀取復仇名單，請按重新整理。'}</div>`}</div></div>`;
 }
 function renderArenaDefenseLegacy27_(){
  if(arenaDefenseTab_==='stats')arenaDefenseTab_='equipment';const d=arenaDraft_(),eq=arenaCache_?.defenseEquipment||arenaEquipmentSnapshot_(),snap=arenaSnapshot_();
@@ -26018,7 +26038,7 @@ async function refreshArena_(btn=null){
   try{
    const rv=await apiPost('arena/revenge/list',{sessionToken:cloudMeta.sessionToken},{silentLoading:true,maxRetry:1});
    if(!rv?.ok)throw new Error(rv?.error||'ARENA_REVENGE_FAILED');
-   arenaCache_.revenge=rv.rows||[];arenaCache_.revengeLoaded=true;
+   arenaCache_.revenge=rv.rows||[];arenaCache_.revengeLoaded=true;arenaCache_.revengeLoadError='';
   }catch(re){arenaCache_.revengeLoadError=String(re?.message||re);console.warn('Arena revenge refresh failed',re)}
  entryPhase228_('arena','ready');}catch(e){entryPhase228_('arena','error');toast('競技場讀取失敗：'+e.message)}
  finally{
@@ -26028,15 +26048,22 @@ async function refreshArena_(btn=null){
  }
 }
 async function refreshArenaRevenge_(btn=null){
- arenaCache_=arenaCache_||{};if(arenaCache_.revengeBusy)return;arenaCache_.revengeBusy=true;
+ const cache=arenaCache_||(arenaCache_={}),session=characterSessionContext_();
+ if(cache.revengeBusy)return;cache.revengeBusy=true;
  try{
-  if(btn){btn.disabled=true;btn.textContent='更新中...'}
+  if(btn)setInlineLoading_(btn,true,'更新中…');
   const d=await apiPost('arena/revenge/list',{sessionToken:cloudMeta.sessionToken},{silentLoading:true,maxRetry:1});
-  if(!d?.ok)throw new Error(d?.error||'ARENA_REVENGE_FAILED');
-  arenaCache_.revenge=d.rows||[];arenaCache_.revengeLoaded=true;
-  if(state.page==='arena')render();
- }catch(e){toast('復仇名單讀取失敗：'+e.message)}
- finally{arenaCache_.revengeBusy=false;if(btn&&btn.isConnected)btn.disabled=false;if(state.page==='arena'&&arenaTab_==='revenge')render()}
+  if(!arenaReadCurrent450_(cache,session))return;
+  if(!d?.ok||!Array.isArray(d.rows))throw new Error(d?.error||'ARENA_REVENGE_FAILED');
+  cache.revenge=d.rows;cache.revengeLoaded=true;cache.revengeLoadError='';
+ }catch(e){if(arenaReadCurrent450_(cache,session)){cache.revengeLoadError=String(e.message||e);toast('復仇名單讀取失敗：'+e.message);}}
+ finally{
+  cache.revengeBusy=false;
+  if(arenaReadCurrent450_(cache,session)){
+   if(btn?.isConnected)setInlineLoading_(btn,false);
+   if(arenaPaneVisible450_('revenge'))render();
+  }
+ }
 }
 function arenaSetAiCondition_(i,v){arenaCache_.defenseDirty=true;const d=arenaDraft_();d.ai=d.ai||[];d.ai[i]={...(d.ai[i]||{}),condition:v};}
 async function arenaUploadDefense_(btn){
@@ -29806,6 +29833,10 @@ function hubKit413_(root){
   list?.querySelectorAll('.commission326').forEach(n=>style(n,{'min-height':'220px','grid-template-rows':'20px minmax(64px,auto) 30px 44px'}));
   list?.querySelectorAll('.arena-challenge-btn').forEach(n=>style(n,{height:'44px','min-height':'44px','font-size':'15px'}));
   list?.querySelectorAll('.arena-opponent-name').forEach(n=>style(n,{'font-size':'16px'}));
+  // The old full-screen flex rule gives this list a zero basis inside an
+  // auto-height desktop dialog. Let the dialog content own vertical scrolling.
+  for(const node of content.querySelectorAll('.arena-revenge-panel214,.arena-revenge-list214'))
+   style(node,{display:'block',flex:'none',height:'auto','max-height':'none','overflow':'visible'});
   content.querySelectorAll('.hub-mission424 button.primary,.hub-mission424 button.danger').forEach(n=>style(n,{'min-height':'44px',padding:'10px 18px','font-size':'14px'}));
   content.querySelectorAll('.hub-mission424 .boxing-kpis').forEach(n=>style(n,{display:'grid','grid-template-columns':'repeat(3,minmax(0,1fr))',gap:'12px'}));
  }
@@ -29822,6 +29853,11 @@ function hubOpen413_(id){
  if(!Object.hasOwn(hubLayout413_[mode].tabs,id))return;
  const switching=!!hubUI413_.facility;
  hubFocus413_='challenge';hubUI413_.facility=id;hubKeys413_.clear();
+ // Desktop navigation does not call setArenaTab_ (the mobile/legacy entry).
+ if(mode==='arena'){
+  if(id==='ranking'&&!arenaCache_?.rankingLoaded)void refreshArenaRanking_();
+  if(id==='record'&&!arenaCache_?.revengeLoaded&&!arenaBusy_)void refreshArenaRevenge_();
+ }
  const current=document.querySelector('#hubScene413 .hub-overlay413');
  if(switching&&current){
   current.outerHTML=hubDialog413_(mode,id);
@@ -30846,6 +30882,194 @@ for(const name of ['useSkill','skipPlayerTurn','useBattleItem']){
   return original.apply(this,args);
  };
 }
+</script>
+<style data-ui449="worldboss-desktop">
+html.desktop-ui body #app #page #hubScene413 .wb449{position:relative!important;width:min(1220px,calc(100vw - 48px))!important;height:min(760px,var(--window-height421,calc(100dvh - 96px)))!important;max-height:var(--window-height421,calc(100dvh - 96px))!important;border:1px solid #a28b5e!important;border-radius:8px!important;background:#202329!important;box-shadow:0 24px 100px #000b,inset 0 0 0 3px #d9bd7a0a!important;display:grid!important;grid-template-rows:76px minmax(0,1fr) 82px!important;overflow:hidden!important;color:#ede3ce!important;font-family:'Microsoft JhengHei',sans-serif!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 *{box-sizing:border-box}
+html.desktop-ui body #app #page #hubScene413 .wb449 :is(h1,h2,h3,h4,p){margin:0!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 button{border:1px solid #87734d!important;border-radius:4px!important;color:#eadfc7!important;background:linear-gradient(#33353b,#25282e)!important;min-height:36px!important;padding:7px 15px!important;font:inherit!important;font-size:13px!important;line-height:1.4!important;cursor:pointer;box-shadow:inset 0 1px #fff1!important;transition:background .15s,border-color .15s!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 button:hover:not(:disabled){border-color:#e8c785!important;background:linear-gradient(#48423a,#322e29)!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 button:focus-visible{outline:2px solid #f0cc83!important;outline-offset:-4px!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 button.primary{background:linear-gradient(#cdb17a,#a18550)!important;color:#282219!important;border-color:#e5c78e!important;font-weight:700!important;text-shadow:0 1px #f3dda344!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 button:disabled{opacity:.46!important;cursor:default}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-header449{display:flex!important;align-items:center!important;gap:13px!important;margin:0!important;padding:12px 22px!important;border-bottom:1px solid #806e49!important;background:linear-gradient(105deg,#32343b,#24272d)!important;height:76px!important;min-height:0!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-heading-icon449{display:grid;place-items:center;width:45px;height:45px;color:#d5b779;border:1px solid #857246;border-radius:5px;background:#1d2025}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-heading-icon449 svg{width:29px;height:29px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-header449 small{display:block;font-size:11px;color:#b4a48c;letter-spacing:3px;margin-bottom:2px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-header449 h2{display:block!important;font-size:24px!important;font-weight:800!important;letter-spacing:2px;color:#eddbb4!important;line-height:1.2!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-header449>button{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;font-size:19px!important;margin-left:8px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-status449{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:#d4c19b}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-status449 i{width:6px;height:6px;border-radius:50%;background:#e0bd72;box-shadow:0 0 7px #d4a65388}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-status449.dead{color:#a8a9ae}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-status449.dead i{background:#949599;box-shadow:none}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-body449{display:grid;grid-template-columns:46% minmax(0,1fr);min-height:0;overflow:hidden}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-scene449{position:relative;min-width:0;overflow:hidden;border-right:1px solid #7d6a4680;background:linear-gradient(180deg,#10192525 0%,#11182033 35%,#13181ee8 77%,#14191ffb 100%),var(--wb-scene449) 43% 50%/auto 100%;isolation:isolate}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-scene449::before{content:'';position:absolute;inset:20% 5% 24%;background:radial-gradient(ellipse,#c5be9925,transparent 65%);pointer-events:none}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-scene-tag449{position:absolute;top:20px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:#e7d5ad;text-shadow:0 1px 4px #000}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-scene-tag449>span{border:1px solid #c3a96a88;background:#192129aa;padding:5px 10px;border-radius:3px;letter-spacing:2px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-scene-tag449 b{font-weight:400;font-size:11px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-boss-art449{position:absolute;inset:60px 22px 174px;display:grid;place-items:center;filter:drop-shadow(0 15px 12px #0009)}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-boss-art449 img{width:100%!important;height:100%!important;max-width:350px!important;max-height:350px!important;min-height:0!important;object-fit:contain!important;image-rendering:pixelated!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .defeated .wb-boss-art449{filter:grayscale(.7) drop-shadow(0 15px 12px #0009);opacity:.52}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-boss-caption449{position:absolute;left:28px;right:28px;bottom:26px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-boss-kicker449{display:block;font-size:11px;color:#c5aa73;letter-spacing:4px;margin-bottom:7px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-boss-caption449 h1{font-size:30px!important;line-height:1.25!important;color:#f4e2bd!important;text-shadow:0 2px 8px #000;letter-spacing:1px;font-weight:800;overflow-wrap:anywhere;margin-bottom:23px!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-hp-label449{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#c7b99b;margin-bottom:8px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-hp-label449 b{font-size:17px;color:#edce94;font-variant-numeric:tabular-nums}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-hp449{height:14px;border:1px solid #a8915c;background:#141316;padding:2px;box-shadow:0 0 0 2px #0d1116}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-hp449>span{height:100%;display:block;background:linear-gradient(#cd9f5e,#9e643b);box-shadow:inset 0 1px #ffe5ae66}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-hp-detail449{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;font-size:11px;color:#9f9e9c}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-hp-detail449 strong{font-size:18px;color:#e5dac1;font-variant-numeric:tabular-nums}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-hp-detail449 strong small{font-size:12px;font-weight:400;color:#a4a1a0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-respawn449{margin-top:12px;display:flex;justify-content:space-between;border-top:1px solid #74674877;padding-top:10px;color:#c2b397;font-size:12px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-details449{display:grid;grid-template-rows:61px minmax(0,1fr);min-width:0;min-height:0;background:linear-gradient(120deg,#292c32,#202329 80%)}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-tabs449{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:14px 22px 10px;border-bottom:1px solid #89764e55}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-tabs449 button{border-color:#6e624a!important;background:#181c2266!important;padding:7px 8px!important;white-space:nowrap;font-weight:700!important;color:#b4ad9f!important;position:relative}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-tabs449 button[aria-pressed=true]{color:#f3ddb0!important;border-color:#bd9f62!important;background:linear-gradient(#8b704533,#6a523644)!important;box-shadow:inset 0 0 10px #cf9e3010!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-tabs449 i{display:inline-grid;place-items:center;min-width:17px;height:17px;background:#b89959;color:#171b21;font-style:normal;font-size:10px;border-radius:3px;margin-left:7px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449{padding:21px 24px!important;display:flex!important;flex-direction:column!important;gap:20px!important;min-height:0!important;overflow:auto!important;scrollbar-width:thin!important;scrollbar-color:#74644a #20232a!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449>*{flex-shrink:0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449::-webkit-scrollbar{display:block!important;width:5px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-kpis449{display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:18px;border-bottom:1px solid #74634566}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-kpis449>div{padding:0 17px;border-left:1px solid #5f5b5055}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-kpis449>div:first-child{padding-left:0;border:0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-kpis449 span{display:block;color:#b7ae9d;font-size:12px;margin-bottom:7px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-kpis449 strong{display:block;font-size:26px;line-height:1.2;color:#e7cb90;font-variant-numeric:tabular-nums}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-kpis449 strong small{font-size:12px;color:#b4aa94;font-weight:400}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-block449{padding:0;border:0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-section-title449{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-section-title449>span{display:grid;place-items:center;color:#cfb37a;width:22px;height:22px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-section-title449 svg{width:21px;height:21px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-section-title449 h3{font-size:16px!important;line-height:1.4!important;color:#e4d0a5!important;font-weight:700!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-section-title449>small{margin-left:auto;color:#b8a786;font-size:11px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-block449 p{font-size:13px!important;line-height:1.8!important;color:#c9c3b5!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-skill449{padding:12px 15px;border-left:2px solid #ac8b53;background:linear-gradient(90deg,#14181f7a,#1a1e2440);border-radius:0 3px 3px 0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-enemy-stats449{display:flex;gap:23px;padding-top:11px;font-size:11px;color:#aaa59c}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-enemy-stats449 b{font-size:13px;color:#d8c69f;margin-left:5px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-award449{padding-top:18px;border-top:1px solid #74634566}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-section-title449 .wb-chest-icon449{width:26px;height:26px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-section-title449 .wb-chest-icon449 svg{width:29px;height:29px;filter:none}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prizes449{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:14px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize449{display:flex;gap:7px;align-items:center;padding:12px 8px;background:#161b2299;border:1px solid #74664a66;border-radius:4px;min-width:0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize-art449{display:grid;place-items:center;width:33px;height:38px;flex:0 0 33px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize-art449 :is(img,svg){width:32px!important;height:32px!important;max-width:none!important;object-fit:contain}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize449>div{min-width:0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize449>div>span{display:block;font-size:11px;color:#bcb19b;overflow-wrap:anywhere}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize449 strong{display:block;font-size:14px;line-height:1.8;color:#e5d1a2;white-space:nowrap}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize449 small{display:block;font-size:10px;color:#9e978a}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-note449{display:flex;gap:13px;border-top:1px solid #75684a55;padding-top:13px;margin-top:auto}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-note449>span{font-size:11px;color:#b7a17a;flex-shrink:0;padding-top:2px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-note449 p{font-size:11px!important;line-height:1.8!important;color:#a8a398!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-footer449{display:flex;align-items:center;gap:10px;padding:14px 22px;background:linear-gradient(100deg,#2d3036,#25282d);border-top:1px solid #8a7650}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-footer-note449{flex:1;min-width:0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-footer-note449 b{display:block;font-size:13px;color:#d9c69d;margin-bottom:4px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-footer-note449>span{font-size:11px;color:#a8a296}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-footer449>button{height:44px!important;min-width:98px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-footer449 .wb-start449{display:flex;align-items:center;justify-content:center;gap:9px;min-width:183px;font-size:16px!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-start449 svg{width:22px;height:22px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-pane-heading449{justify-content:space-between;margin-bottom:0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-pane-heading449 p{font-size:11px!important;color:#a6a197!important;line-height:1.8!important;margin-top:3px!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-my-rank449{display:flex;align-items:center;gap:18px;padding:15px 17px;border:1px solid #ad905855;background:linear-gradient(95deg,#ac8a3822,#1d242d);border-radius:4px;font-size:12px;color:#c4b395}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-my-rank449 b{font-size:19px;color:#e0c48a}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-my-rank449 strong{margin-left:auto;font-size:20px;color:#e7d8b9;font-variant-numeric:tabular-nums}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-my-rank449 small{font-size:11px;color:#a7a298;font-weight:400}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-head449,.wb449 .wb-rank-row449{display:grid;grid-template-columns:55px minmax(0,1fr) 105px;gap:14px;align-items:center}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-head449{font-size:11px;color:#9d988d;padding:0 12px;margin-bottom:-12px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-head449>span:last-child{text-align:right}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-row449{padding:12px;border-bottom:1px solid #6b624533;font-size:13px;color:#c5bfb0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-row449.top .wb-place449{color:#dfbb73}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-row449.mine{background:#b6934820;border:1px solid #a4874e66;border-radius:3px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-row449 strong{text-align:right;font-size:14px;color:#ddc99e;font-variant-numeric:tabular-nums}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-row449 i{font-size:10px;font-style:normal;margin-left:7px;color:#e5c581}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-meter449{height:3px;margin-top:7px;background:#11161a;border-radius:2px;overflow:hidden}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-meter449>span{display:block;height:100%;background:linear-gradient(90deg,#917846,#c4a363)}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-rank-foot449{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#a6a091;margin-top:auto}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-chest-list449{display:flex;flex-direction:column;gap:12px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-chest449{display:flex;align-items:center;gap:12px;padding:14px 12px;background:linear-gradient(115deg,#35302799,#191e26);border:1px solid #aa8d5466;border-radius:4px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-chest449.opened{background:#1b202766;border-color:#57574a66}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-chest449.opened .wb-treasure449{opacity:.45;filter:grayscale(.7)}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-treasure449{width:63px;height:68px;flex-shrink:0;display:grid;place-items:center}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-treasure449 svg{width:64px;height:64px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-chest-copy449{flex:1;min-width:0}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-chest-copy449>small{color:#c2a46c;font-size:10px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-chest-copy449 h4{font-size:14px!important;color:#e0cfaa!important;margin:4px 0!important;line-height:1.4!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-chest-copy449 p{font-size:11px!important;color:#b3ac9d!important;line-height:1.7!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-expiry449{font-size:10px;color:#8f9698}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-reward-note449{display:block}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-reward-note449 p{margin:7px 0 10px!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-empty449{padding:24px;text-align:center;font-size:13px;color:#a7a08f;line-height:1.8}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-empty-chest449{display:flex;flex-direction:column;align-items:center;padding:25px 20px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-empty-chest449>span{width:100px;height:100px;opacity:.65}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-empty-chest449 svg{width:100%;height:100%}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-pending449{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px;border:1px solid #b68d4b88;background:#ad762b18;color:#ddc08a;font-size:12px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-pending449 span{font-size:11px;color:#c1b291}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-pending449 button{margin-left:auto}
+@media(max-height:760px){html.desktop-ui body #app #page #hubScene413 .wb449{grid-template-rows:64px minmax(0,1fr) 70px!important}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-header449{height:64px!important}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449{gap:14px!important;padding:16px 22px!important}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-kpis449{padding-bottom:12px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-award449{padding-top:12px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-note449{padding-top:10px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-boss-caption449{bottom:20px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-boss-caption449 h1{font-size:26px!important;margin-bottom:16px!important}}
+@media(max-width:1100px){html.desktop-ui body #app #page #hubScene413 .wb449 .wb-body449{grid-template-columns:42% minmax(0,1fr)}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-boss-caption449{left:20px;right:20px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-hp-detail449{align-items:flex-start;flex-direction:column}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prizes449{gap:5px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize449{padding:9px 6px;gap:5px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize-art449{width:28px;flex-basis:28px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-prize449 strong{font-size:12px}html.desktop-ui body #app #page #hubScene413 .wb449 .wb-footer-note449>span{font-size:10px}}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449.ranking{gap:10px!important}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449.ranking .wb-rank-row449{padding:5px 12px}
+html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449.ranking .wb-rank-meter449{margin-top:4px}
+</style>
+<script data-ui449="worldboss-desktop">
+function worldBossModel449_(){
+ const d=worldBossCache||{},p=worldBossPlanningData_(),b=d.boss;
+ const known=!!(p&&b),dead=known&&(String(b.status)==='DEAD'||Number(b.currentHp)<=0);
+ const key=ENEMY_ART_MAP202_['world_'+p?.bossId]?.art;
+ let pending=null;try{pending=worldBossPending448();}catch(_){pending={};}
+ return {d,p,b,known,dead,pending,art:key?PIXEL_ART202_[ENEMY_POSES265_?.[key]?.idle]||PIXEL_ART202_[key]:'',pct:known?Math.max(0,Math.min(100,Number(b.currentHp)/Math.max(1,p.maxHp)*100)):0};
+}
+function worldBossRewards449_(p){
+ if(!p)return '';
+ const entry=(art,label,value,note)=>`<div class="wb-prize449"><span class="wb-prize-art449">${art}</span><div><span>${label}</span><strong>${value}</strong><small>${note}</small></div></div>`;
+ return `<div class="wb-prizes449">${entry(coinArt208_(),'金幣',`${p.chestGoldMin.toLocaleString()}–${p.chestGoldMax.toLocaleString()}`,'必定獲得')}${entry(artTag202_('item_stonePack10'),'強化石',p.chestStone.toLocaleString(),'必定獲得')}${entry(objectArt202_(p.chestGemId,'gem'),escapeHtml(p.gem?.name||p.chestGemId),'專屬寶石',`${Number((p.chestGemRate*100).toFixed(2))}% 機率`)}</div>`;
+}
+function worldBossIntel449_(m){
+ const {p,d,known}=m;if(!p)return '<div class="wb-empty449">企劃資料尚未準備完成，請先更新遊戲資料。</div>';
+ const mine=d.ranking?.mine;
+ return `<div class="wb-kpis449"><div><span>今日挑戰</span><strong>${known?Number(d.attemptsLeft):'—'}<small> / ${Number(d.attemptsMax??p.attempts)}</small></strong></div><div><span>每次挑戰</span><strong>${p.maxTurns}<small> 回合</small></strong></div><div><span>我的貢獻排名</span><strong>${mine?`<small>第 </small>${Number(mine.rank)}<small> 名</small>`:'<small>'+(d.ranking?'尚無排名':'尚未更新')+'</small>'}</strong></div></div>
+ <section class="wb-block449"><div class="wb-section-title449"><span>${flatIcon313_('swords')}</span><h3>首領特性</h3><small>戰前情報</small></div><p class="wb-skill449">${escapeHtml(p.skillDescription||'尚無技能說明')}</p><div class="wb-enemy-stats449"><span>物理攻擊 <b>${p.patk}</b></span><span>魔法攻擊 <b>${p.matk}</b></span><span>防禦 <b>${p.def}</b></span></div></section>
+ <section class="wb-block449 wb-award449" data-rank-min422="1" data-rank-max422="${p.topRewardCount}"><div class="wb-section-title449"><span class="wb-chest-icon449">${chestArt206_('world')}</span><h3>擊破獎勵</h3><small>貢獻前 ${p.topRewardCount} 名</small></div><p>本次 Boss 擊破後，貢獻前 ${p.topRewardCount} 名各獲得一個專屬寶箱。</p>${worldBossRewards449_(p)}</section>
+ <div class="wb-note449"><span>討伐規則</span><p>在 ${p.maxTurns} 回合內累積有效傷害。挑戰結束後，傷害將計入本次 Boss 的貢獻排行。</p></div>`;
+}
+function worldBossRanking449_(m){
+ const rank=m.d.ranking,rows=rank?.top10||[],mine=rank?.mine,max=Math.max(1,...rows.map(r=>Number(r.damage)||0));
+ return `<div class="wb-section-title449 wb-pane-heading449"><div><h3>討伐貢獻排行</h3><p>本次 Boss 的累積有效傷害</p></div><button onclick="refreshWorldBossRanking_(this)" ${worldBossRankingLoading?'disabled':''}>${worldBossRankingLoading?'更新中…':'更新排行'}</button></div>
+ <div class="wb-my-rank449"><span>我的貢獻</span><b>${mine?'第 '+Number(mine.rank)+' 名':'尚無排名'}</b><strong>${Number(mine?.damage||0).toLocaleString()}<small> 傷害</small></strong></div>
+ <div class="wb-rank-head449"><span>名次</span><span>冒險者</span><span>累積傷害</span></div><div class="wb-rank-list449">${rows.length?rows.map(r=>`<div class="wb-rank-row449 ${Number(r.rank)<=3?'top':''} ${String(r.accountId)===String(cloudMeta.accountId)?'mine':''}"><span class="wb-place449">${Number(r.rank)<=3?'✦ ':''}${Number(r.rank)}</span><div><span>${escapeHtml(r.nickname)}${String(r.accountId)===String(cloudMeta.accountId)?'<i>你</i>':''}</span><div class="wb-rank-meter449"><span style="width:${Math.max(0,Math.min(100,Number(r.damage)/max*100))}%"></span></div></div><strong>${Number(r.damage||0).toLocaleString()}</strong></div>`).join(''):`<div class="wb-empty449">${rank?'目前還沒有貢獻紀錄。':'點選「更新排行」查看本次討伐紀錄。'}</div>`}</div>
+ <div class="wb-rank-foot449"><span>${rank?Number(rank.totalPlayers||rows.length)+' 位冒險者參與討伐':'排行依最近更新顯示'}</span><button onclick="hubOpen413_('rewards')">查看討伐獎勵 →</button></div>`;
+}
+function worldBossChests449_(m){
+ const chests=m.d.pendingChests||[];
+ return `<div class="wb-section-title449 wb-pane-heading449"><div><h3>我的討伐獎勵</h3><p>保留各次討伐的寶箱與開啟紀錄</p></div><button id="worldBossChestCheckBtn" onclick="checkWorldBossChests_(this)">檢查寶箱</button></div>
+ <div class="wb-chest-list449">${chests.length?chests.map(c=>{
+ const id=String(c.rewardId),opened=String(c.status).toUpperCase()==='OPENED'||c.opened||worldBossChestOpened_.has(id),expired=!!c.expiresAt&&new Date(c.expiresAt).getTime()<=worldBossNowMs_(),busy=worldBossChestOpening_.has(id);
+ const action=escapeAttr('openWorldBossChest('+JSON.stringify(id)+',this)');
+ return `<article class="wb-chest449 ${opened?'opened':''}"><div class="wb-treasure449">${chestArt206_('world')}</div><div class="wb-chest-copy449"><small>討伐貢獻第 ${Number(c.rank)} 名</small><h4>${escapeHtml(c.chestType||'世界 BOSS 寶箱')}</h4><p>${c.rewardGoldMin==null?'獎勵內容待同步':`${Number(c.rewardGoldMin)}–${Number(c.rewardGoldMax)} 金幣 · 強化石 ${Number(c.rewardStones||0)}`}</p><span class="wb-expiry449" data-wb-record449="${escapeAttr(c.expiresAt||'')}" data-wb-reward-id="${escapeAttr(id)}">${expired?'紀錄已到期':'紀錄保留：'+worldBossChestCountdownText_(c.expiresAt)}</span></div><button ${opened||expired||busy?'disabled':''} class="${opened?'':'primary'}" data-wb-chest-btn="${escapeAttr(id)}" onclick="${action}">${opened?'已開啟':expired?'已到期':busy?'開啟中…':'開啟寶箱'}</button></article>`;
+ }).join(''):`<div class="wb-empty449 wb-empty-chest449"><span>${chestArt206_('world')}</span><b>還沒有待開啟的寶箱</b><p>參與討伐並進入貢獻前 ${m.p?.topRewardCount||'—'} 名，爭取本次擊破獎勵。</p></div>`}</div>
+ <section class="wb-note449 wb-reward-note449"><span>本次擊破獎勵</span><p>貢獻前 ${m.p?.topRewardCount||'—'} 名各一個寶箱。寶箱內容沿用該次 Boss 的獎勵設定。</p><button onclick="hubOpen413_('challenge')">查看本次寶箱內容 →</button></section>`;
+}
+function worldBossDialog449_(tab){
+ const m=worldBossModel449_(),{p,b,d,known,dead,pending}=m;
+ const disabled=!known||dead||Number(d.attemptsLeft)<=0||worldBossChallengePending_||!!pending;
+ const stateText=!known?'讀取討伐情報':dead?'本次討伐已結束':'全服討伐進行中';
+ const tabs=[['challenge','討伐情報'],['ranking','貢獻排行'],['rewards','討伐獎勵']];
+ const count=(d.pendingChests||[]).filter(c=>!c.opened&&String(c.status||'PENDING')==='PENDING'&&!worldBossChestOpened_.has(String(c.rewardId))&&(!c.expiresAt||new Date(c.expiresAt).getTime()>worldBossNowMs_())).length;
+ return `<div class="hub-overlay413 wb-overlay449" onclick="if(event.target===this)hubClose413_()"><section class="hub-dialog413 wb449" role="dialog" aria-modal="true" aria-labelledby="hubTitle413" tabindex="-1" style="--wb-scene449:url('${hubAsset413_('worldboss')}')">
+ <header class="wb-header449"><span class="wb-heading-icon449">${flatIcon313_('swords')}</span><div><small>討伐號角</small><h2 id="hubTitle413">世界 BOSS</h2></div><span class="wb-status449 ${dead?'dead':''}"><i></i>${stateText}</span><button onclick="hubClose413_()" aria-label="關閉世界 BOSS">✕</button></header>
+ <div class="wb-body449"><section class="wb-scene449 ${dead?'defeated':''}" aria-label="本次討伐目標"><div class="wb-scene-tag449"><span>本次討伐目標</span><b>${known?'全服共同挑戰':'等待情報'}</b></div><div class="wb-boss-art449">${m.art?`<img src="${escapeAttr(m.art)}" alt="${escapeAttr(p.name)}" draggable="false">`:''}</div><div class="wb-boss-caption449"><span class="wb-boss-kicker449">世界首領</span><h1>${escapeHtml(p?.name||'世界 BOSS')}</h1><div class="wb-hp-label449"><span>全服剩餘 HP</span><b>${known?Number(m.pct.toFixed(1))+'%':'—'}</b></div><div class="wb-hp449" role="progressbar" aria-label="Boss 剩餘血量" aria-valuenow="${m.pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${m.pct}%"></span></div><div class="wb-hp-detail449"><strong>${known?Number(b.currentHp).toLocaleString():'—'}<small> / ${p?.maxHp.toLocaleString()||'—'}</small></strong><span>${dead?'等待重生':'狀態依最近更新顯示'}</span></div>${dead?`<div class="wb-respawn449">下次討伐開放 <b data-wb-respawn449="${escapeAttr(b.respawnAt||'')}">${worldBossCountdown_(b.respawnAt)}</b></div>`:''}</div></section>
+ <section class="wb-details449"><nav class="wb-tabs449" aria-label="世界 BOSS 功能">${tabs.map(([key,label])=>`<button data-hub-tab422="${key}" aria-pressed="${key===tab}" onclick="hubOpen413_('${key}')">${label}${key==='rewards'&&count?`<i>${count}</i>`:''}</button>`).join('')}</nav><div class="hub-content413 worldboss ${tab} wb-content449">${pending?`<div class="wb-pending449"><b>上次挑戰結果待確認</b><span>確認完成後即可繼續挑戰。</span><button onclick="settleWorldBossChallenge_('retry')" ${worldBossFlight448?'disabled':''}>確認結算</button></div>`:''}${tab==='ranking'?worldBossRanking449_(m):tab==='rewards'?worldBossChests449_(m):worldBossIntel449_(m)}</div></section></div>
+ <footer class="wb-footer449"><div class="wb-footer-note449"><b>${dead?'本次 Boss 已被擊敗':pending?'傷害紀錄已保留，請先確認上次結算':'準備好迎戰了嗎？'}</b><span>${dead?'更新狀態可確認下一次討伐。':'若 Boss 已先被其他玩家擊敗，本次挑戰不扣次數。'}</span></div><button id="worldBossRefreshBtn" onclick="refreshWorldBoss()" ${worldBossRefreshing_?'disabled':''}>${worldBossRefreshing_?'更新中…':'更新狀態'}</button><button id="worldBossChallengeBtn" class="primary wb-start449" onclick="startWorldBossChallenge(this)" ${disabled?'disabled':''}>${flatIcon313_('swords')}<span>${!known?'情報讀取中':dead?'等待下次討伐':pending?'結算待確認':Number(d.attemptsLeft)<=0?'今日次數已用完':'整備並挑戰'}</span></button></footer>
+ </section></div>`;
+}
+const hubDialogBase449_=hubDialog413_;hubDialog413_=function(mode,id){return viewMode_==='desktop'&&mode==='worldboss'?worldBossDialog449_(id):hubDialogBase449_(mode,id);};
+const hubKitBase449_=hubKit413_;hubKit413_=function(root){if(root?.matches('.wb449')||root?.querySelector('.wb449'))return;return hubKitBase449_(root);};
+setInterval(()=>{
+ for(const el of document.querySelectorAll('[data-wb-respawn449]'))el.textContent=worldBossCountdown_(el.dataset.wbRespawn449);
+ for(const el of document.querySelectorAll('[data-wb-record449]')){
+  const text=worldBossChestCountdownText_(el.dataset.wbRecord449);el.textContent=text==='已過期'?'紀錄已到期':'紀錄保留：'+text;
+  if(text==='已過期'){const button=el.closest('.wb-chest449')?.querySelector('[data-wb-chest-btn]');if(button&&!worldBossChestOpening_.has(el.dataset.wbRewardId)){button.disabled=true;button.textContent='已到期';}}
+ }
+},1000);
 </script>
 </body>
 </html>
