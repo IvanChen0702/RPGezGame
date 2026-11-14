@@ -2678,7 +2678,6 @@ button:hover:not(:disabled),button:active:not(:disabled){border-color:#e2bd7b!im
 .boss-element-fx55.rock{border:4px solid #d8bd82;box-shadow:0 0 18px #b9975799,inset 0 0 25px #d8bd8233;clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);border-radius:12%}
 .boss-element-fx55.arcane{border:3px solid #b6a1ff;box-shadow:0 0 24px #9079ffaa,inset 0 0 30px #7967ff44}
 #app #page .fx-layer .float-text.boss-effect-text55{left:50%!important;max-width:94%;width:max-content;box-sizing:border-box;white-space:normal!important;overflow-wrap:anywhere;text-align:center;font-size:14px!important;line-height:1.3;padding:3px 5px;border-radius:6px;background:#07121dcc}
-.skill-cast-flash55{border-color:#a393e6!important}
 .skill-live55{color:#b9aaff;font-weight:800;margin-top:5px}
 .boss-quake55{animation:bossQuake55 .45s ease-out}
 @keyframes bossElementPulse55{0%{opacity:0;transform:scale(.55) rotate(-12deg)}30%{opacity:1}100%{opacity:0;transform:scale(1.2) rotate(12deg)}}
@@ -4158,11 +4157,6 @@ html.mobile-ui.mobile-battle34 #app #page .mobile-battle-ended38 .action-detail{
 
 /* v11.38.36 mobile latest statuses first; enemy notices use wall-clock time */
 html.mobile-ui #playerStatusZone .arcane-meter{display:none!important}
-.mobile-enemy-notice39{position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:center;justify-content:center;padding:12px;background:#040a1255;box-sizing:border-box}
-.mobile-enemy-notice39>.boss-phase-flash{position:static;transform:none;min-width:0;width:min(520px,100%);box-sizing:border-box;animation:none}
-.mobile-enemy-notice39>.cyber-skill-flash{position:static;inset:auto;background:transparent;animation:none;display:flex;max-width:100%}
-.mobile-enemy-notice39>.cyber-skill-flash>div{max-width:100%;box-sizing:border-box;overflow-wrap:anywhere}
-.boss-phase-flash .skill-desc-formatted,.boss-phase-flash .skill-desc-formatted span{display:inline}
 </style>
 <style>
 /* v11.38.36 Desktop readiness: three persistent columns, scroll only on overflow. */
@@ -10596,7 +10590,7 @@ function orionFx111_(kind='radiance',target='enemy'){
  fx.innerHTML='<i class="orion-ring111"></i><i class="orion-rays111"></i><i class="orion-core111"></i>';layer.appendChild(fx);setTimeout(()=>fx.remove(),battleDelay(1050));
 }
 function orionNotice111_(b,title,detail){
- const box=document.createElement('div');box.className='boss-phase-flash orion-notice111';box.innerHTML=`<strong>${escapeHtml(title)}</strong><span>${enemyDescriptionHtml40_(detail)}</span>`;mobileEnemyNotice39_(box,b,950);
+ enemyNotice458_(b,title,detail,{duration:1600});
 }
 function showOrionOpening111_(b){
  if(!orion108_(b)||b.orionOpeningFx111||state.page!=='battle'||!document.getElementById('enemyCombatant'))return;
@@ -16672,7 +16666,8 @@ function pixelRender192_(t){
   if(shield>0){pixelShield203_(c,a,side,clock);}
  }
  for(const e of r.events){const a=anchors[e.side];if(!a)continue;const p=Math.min(1,(t-e.start)/e.duration),x=a.x,y=a.y-a.h*.55; c.save();c.globalAlpha=1-p*.75;
-  if(e.type==='magic'){const b=anchors[e.target];if(b){const q=Math.min(1,p*1.6),xx=x+(b.x-x)*q,yy=y+(b.y-b.h*.55-y)*q-Math.sin(q*Math.PI)*8;c.fillStyle='#a8edff';c.fillRect(Math.round(xx)-2,Math.round(yy)-2,5,5);c.fillStyle='#fff3c8';c.fillRect(Math.round(xx)-1,Math.round(yy)-1,2,2);for(let j=1;j<5;j++){c.fillStyle=j%2?'#77bbdf':'#bddceb';c.fillRect(Math.round(xx-j*3*(e.side==='player'?1:-1)),Math.round(yy),2,2);}}}
+  if(e.type==='reflect459')pixelReflect459_(c,e,anchors,t,reduce);
+  else if(e.type==='magic'){const b=anchors[e.target];if(b){const q=Math.min(1,p*1.6),xx=x+(b.x-x)*q,yy=y+(b.y-b.h*.55-y)*q-Math.sin(q*Math.PI)*8;c.fillStyle='#a8edff';c.fillRect(Math.round(xx)-2,Math.round(yy)-2,5,5);c.fillStyle='#fff3c8';c.fillRect(Math.round(xx)-1,Math.round(yy)-1,2,2);for(let j=1;j<5;j++){c.fillStyle=j%2?'#77bbdf':'#bddceb';c.fillRect(Math.round(xx-j*3*(e.side==='player'?1:-1)),Math.round(yy),2,2);}}}
   else if(['hit','slash','fire','arcane','ice','wind','lightning','light','dark','rock'].includes(e.type)){
    c.fillStyle=e.type==='fire'?'#ffc877':e.type==='ice'?'#b0f5ff':e.type==='dark'?'#d0a1ff':'#fff4c9';for(let j=0;j<9;j++){const angle=j*2.4,rad=4+p*18;c.fillRect(Math.round(x+Math.cos(angle)*rad),Math.round(y+Math.sin(angle)*rad),j%3?2:3,j%2?2:3);}
    if(e.type==='slash'){c.fillStyle='#fff8dc';for(let j=0;j<9;j++)c.fillRect(Math.round(x-10+j*2),Math.round(y+8-j*2),3,2);}
@@ -18371,7 +18366,7 @@ function render(){
   syncEntryButtons228_();
   finishUi206_();finishUi210_();decorateUnlockNotices264_();decorateRewardDots276_();
   restoreCommands363_(commandSnapshot363);updateHud398_();
-  restorePixelScroll193_(pixelScroll193);restoreBattleFeed408_(feedSnapshot408);
+  restorePixelScroll193_(pixelScroll193);restoreBattleFeed408_(feedSnapshot408);syncEnemyNotice458_();requestAnimationFrame(syncEnemyNotice458_);syncPetTraining458_();
   restoreShopScroll36_(shopScroll36);
   if(typeof presenceSync358_==='function')presenceSync358_();mountTown311_();townNavSync311_();finishInventoryWindow315_();finishPresentation317_();
   townReady401_();
@@ -21785,23 +21780,67 @@ function mobileStatusTutorial38_(){
  const extra=[['能力增益','技能或裝備可暫時提升物攻、魔攻、防禦或爆擊等能力；數值與剩餘回合以目前狀態為準。'],['護盾','傷害先由護盾承受；護盾耗盡或持續時間結束後消失。不同護盾的特殊效果依來源技能或裝備說明。'],['持續恢復','在回合結算時恢復生命，直到持續回合結束；禁療與詛咒會影響恢復。'],['裝備免疫','由裝備提供的常駐免疫，遇到使裝備免疫失效的副本規則時會停用。'],['魔導',skillTemplates.mageAptitudeII?.desc||'魔法師的資質II提供的增益，最多3層；使用魔法攻擊技能時消耗，每層使該技能最終傷害增加15%。']];
  return `<details class="status-tutorial38"><summary>查看所有 BUFF／異常狀態教學</summary><h3>BUFF 與裝備效果</h3>${groups.buff.join('')}${extra.map(([name,desc])=>`<div class="battle-status-help-item"><span class="battle-status-help-name buff">${escapeHtml(name)}</span><span>${escapeHtml(desc)}</span></div>`).join('')}<h3>異常狀態</h3>${groups.debuff.join('')}</details>`;
 }
-let mobileEnemyNoticeState39_={active:null,queue:[],timer:null};
-function mobileEnemyNotice39_(node,battle,duration=3000){
- const q=mobileEnemyNoticeState39_;
- if(q.active&&q.active.battle!==battle){clearTimeout(q.timer);q.active.overlay.remove();q.active=null;q.queue=[]}
- q.queue.push({node,battle,duration});showNextMobileEnemyNotice39_();
+// Presentation only: no combat waits, mutations or API calls.
+let enemyNoticeState458_={active:null,queue:[],timer:null};
+function enemyNoticeText458_(html){
+ const tpl=document.createElement('template');tpl.innerHTML=enemyDescriptionHtml40_(String(html||''));
+ tpl.content.querySelectorAll('br').forEach(br=>br.replaceWith('\n'));
+ return tpl.content.textContent.replace(/[ \t]+/g,' ').trim();
 }
-function showNextMobileEnemyNotice39_(){
- const q=mobileEnemyNoticeState39_;if(q.active)return;
+function enemyNoticeLive458_(battle){return state.page==='battle'&&battle===state.currentBattle&&!battle?.won&&!battle?.lost;}
+function clearEnemyNotice458_(clearQueue=true){
+ const q=enemyNoticeState458_;clearTimeout(q.timer);q.timer=null;q.active?.node.remove();q.active=null;if(clearQueue)q.queue=[];
+}
+function enemyNotice458_(battle,title,detail,options={}){
+ if(!battle||!enemyNoticeLive458_(battle))return;
+ const q=enemyNoticeState458_;if(q.active&&!enemyNoticeLive458_(q.active.battle))clearEnemyNotice458_();
+ const kind=options.kind==='phase'?'phase':'special',name=enemyNoticeText458_(title)||'敵方技能',full=enemyNoticeText458_(detail);
+ const key=JSON.stringify([battle.turn,kind,name,full]);
+ if(q.active?.battle===battle&&q.active.key===key||q.queue.some(n=>n.battle===battle&&n.key===key))return;
+ // Store every full rule before shortening its presentation; dropped visual queues lose no information.
+ log(`<strong>【${kind==='phase'?'敵方階段':'敵方技能'}・${escapeHtml(name)}】</strong>${full?' '+escapeHtml(full):''}`);
+ if(kind==='phase')clearEnemyNotice458_();
+ const summary=enemyNoticeText458_(options.summary||full||'詳見戰鬥紀錄');
+ q.queue.push({battle,kind,title:name,detail:full,summary,key,turn:battle.turn,queuedAt:Date.now(),duration:Math.max(1600,Math.min(5000,Number(options.duration)||3000))});
+ if(q.queue.length>3)q.queue.shift();
+ showNextEnemyNotice458_();
+}
+function showNextEnemyNotice458_(){
+ const q=enemyNoticeState458_;if(q.active)return;
  while(q.queue.length){
-  const next=q.queue.shift();if(state.page!=='battle'||next.battle!==state.currentBattle)continue;
-  const overlay=document.createElement('div');overlay.className='mobile-enemy-notice39';overlay.setAttribute('role','status');overlay.appendChild(next.node);document.body.appendChild(overlay);
-  q.active={...next,overlay};
-  // Wall-clock time: render, battle speed and subsequent notices cannot remove it early.
-  q.timer=setTimeout(()=>{overlay.remove();q.active=null;q.timer=null;if(state.currentBattle?.won||state.currentBattle?.lost)q.queue=[];showNextMobileEnemyNotice39_()},next.duration);
-  return;
+  const next=q.queue.shift();if(!enemyNoticeLive458_(next.battle)||next.turn!==next.battle.turn||Date.now()-next.queuedAt>5000)continue;
+  const node=document.createElement('section');node.className=`enemy-notice458 ${next.kind}`;node.setAttribute('role','status');node.setAttribute('aria-live','polite');node.setAttribute('aria-atomic','true');
+  node.setAttribute('aria-label',`${next.kind==='phase'?'敵方階段切換':'敵方特殊技能'}：${next.title}。${next.detail}`);
+  node.innerHTML=`<div class="enemy-kicker458"><i aria-hidden="true"></i>${next.kind==='phase'?'階段切換':'特殊技能'}</div><div class="enemy-title458">${escapeHtml(next.title)}</div><div class="enemy-copy458">${escapeHtml(next.summary)}</div>`;
+  q.active={...next,node,expiresAt:Date.now()+next.duration};
+  const active=q.active;syncEnemyNotice458_();
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)node.animate?.([{opacity:0,transform:'translateX(-5px)'},{opacity:1,transform:'translateX(0)'}],{duration:180,easing:'ease-out'});
+  q.timer=setTimeout(()=>{if(q.active!==active)return;clearEnemyNotice458_(false);showNextEnemyNotice458_();},next.duration);return;
  }
 }
+function syncEnemyNotice458_(){
+ const q=enemyNoticeState458_,active=q.active;
+ if(active&&(!enemyNoticeLive458_(active.battle)||Date.now()>=active.expiresAt)){clearEnemyNotice458_(!enemyNoticeLive458_(active.battle));showNextEnemyNotice458_();return;}
+ if(!active)return;
+ const layout=document.querySelector('#battleStage .battle-layout');if(!layout){clearEnemyNotice458_();return;}
+ if(active.node.parentNode!==layout)layout.appendChild(active.node);
+ // Follow the existing controls; never move them or capture their pointer events.
+ const controls=layout.querySelector('.battle-overlay200'),rect=layout.getBoundingClientRect(),base=viewMode_==='mobile'?42:76;
+ const top=Math.max(base,controls?controls.getBoundingClientRect().bottom-rect.top+6:0);
+ active.node.hidden=false;active.node.classList.remove('tight458');
+ active.node.style.setProperty('--enemy-notice-top458',`${Math.round(top)}px`);
+ if(viewMode_==='mobile'&&innerWidth>innerHeight&&innerHeight<480){
+  // Very short landscape layouts put the HUD at the top. Use only its spare space,
+  // never cover HP/status text; the complete rule is still available in the feed.
+  const occupied=[...layout.querySelectorAll('#enemyHpBar111,#enemyBattleStats,#enemyCombatant .combat-head35,#enemyCombatant .combat-status-tag')].map(el=>el.getBoundingClientRect()).filter(r=>r.width&&r.height);
+  const box=active.node.getBoundingClientRect(),hudTop=Math.min(...occupied.map(r=>r.top)),hudBottom=Math.max(...occupied.map(r=>r.bottom));
+  if(box.bottom>hudTop&&box.top<hudBottom){
+   active.node.classList.add('tight458');active.node.style.setProperty('--enemy-notice-top458',`${Math.ceil(hudBottom-rect.top+6)}px`);
+   active.node.hidden=active.node.getBoundingClientRect().bottom>rect.bottom-4;
+  }
+ }
+}
+window.addEventListener('resize',()=>requestAnimationFrame(syncEnemyNotice458_));
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeConsumableChoice34_()});
 function itemBattleButton(id,i){
   if(!id)return `<button disabled>空道具欄</button>`;
@@ -22103,7 +22142,7 @@ async function applyDirectDamageToEnemyLegacy122_(amount,kind='physical',source=
   if(actual>0&&reflectRate>0){
     const reflected=Math.max(1,Math.trunc(actual*reflectRate));
     const taken=await applyIncomingDamage(reflected,`${source}反傷`,false);
-    if(taken>0){floatText(document.getElementById('playerFx'),`-${taken} 反傷`,'magic');log(`【魔力反射】反射本次實際傷害 ${actual} × ${Math.round(reflectRate*100)}% = ${taken} 魔法傷害。`);}
+    if(taken>0){reflectAttackFx56_(document.getElementById('enemyCombatant'),document.getElementById('playerCombatant'));floatText(document.getElementById('playerFx'),`-${taken} 反傷`,'magic');log(`【魔力反射】反射本次實際傷害 ${actual} × ${Math.round(reflectRate*100)}% = ${taken} 魔法傷害。`);}
   }
   return actual;
 }
@@ -22173,7 +22212,27 @@ function equippedReflectEffect180_(){
 function hasReflectArmor(){return equippedReflectEffect180_().rate>0;}
 
 function reflectAttackFx56_(from,to){
- playSfx('physical');drawRay(from,to,'physical');slashFx(to);hitFx(to);
+ if(!from||!to)return;
+ playSfx('block221');
+ if(pixelEmit192_('reflect459',pixelSide192_(from),{target:pixelSide192_(to),duration:650}))return;
+ // DOM fallback also stays in place; never create attack, cast or hit motion.
+ battleAuraFx_(from,'shield');
+}
+function pixelReflect459_(c,e,anchors,t,reduce){
+ const a=anchors[e.side],b=anchors[e.target];if(!a||!b)return;
+ const p=Math.max(0,Math.min(1,(t-e.start)/e.duration)),dir=b.x>=a.x?1:-1;
+ const h=Math.max(22,a.h*1.35),x=a.x+dir*h*.34,y=pixelFloor203_()-h*.48;
+ c.save();c.globalAlpha*=reduce?.7:Math.min(1,p/.12)*(1-p)*1.2;
+ c.translate(x,y);c.scale(dir,1);c.strokeStyle='#b9f7ff';c.fillStyle='#68d9f52b';c.lineWidth=1.5;
+ c.beginPath();c.moveTo(-4,-h*.45);c.quadraticCurveTo(h*.3,0,-4,h*.45);c.quadraticCurveTo(3,0,-4,-h*.45);c.fill();c.stroke();
+ c.strokeStyle='#e8d39b';c.lineWidth=.8;c.beginPath();c.moveTo(-2,-h*.28);c.quadraticCurveTo(h*.18,0,-2,h*.28);c.stroke();c.restore();
+ if(reduce||p<.22)return;
+ const q=Math.min(1,(p-.22)/.6),endY=pixelFloor203_()-Math.max(22,b.h*1.35)*.48;
+ const px=x+(b.x-x)*q,py=y+(endY-y)*q-Math.sin(q*Math.PI)*6;
+ c.save();c.globalAlpha*=Math.min(1,(1-p)*5);c.strokeStyle='#a7f0ff';c.lineWidth=2;
+ c.beginPath();c.moveTo(px-dir*9,py+1);c.lineTo(px,py);c.stroke();c.fillStyle='#fff4cf';c.fillRect(Math.round(px)-1,Math.round(py)-1,3,3);
+ if(q>=1){c.beginPath();c.ellipse(b.x,endY,3+(p-.82)*20,5+(p-.82)*25,0,0,Math.PI*2);c.stroke();}
+ c.restore();
 }
 function reflectEffectText56_(actor,text){
  if(!actor){battleEffectText55_('player',text,'buff');return;}
@@ -22640,7 +22699,6 @@ async function useSkill(i){
    const stacks=mageAptitudeIIActive_()?arcaneStacksValue_(b.arcaneStacks):0;
    const hits=stacks+Math.max(1,Math.trunc(Number(sk.hits??2)));
    log(`【${sk.name}】魔導 ${stacks} 層，共 ${hits} 擊，本次不消耗魔導。`);
-   playerSkillNotice55_(sk.name,`魔導 ${stacks} 層 + ${Math.max(1,Math.trunc(Number(sk.hits??2)))}，共 ${hits} 連擊；每擊魔攻 × ${Math.round(Number(sk.mult??2)*100)}%，本次不消耗魔導。`);
    battleEffectText55_('player',`魔導保留 ${stacks} 層・${hits} 連擊`,'buff');bossElementFx55_(pc,'arcane');await wait(280);
    for(let hit=1;hit<=hits&&b.enemyHp>0&&b.playerHp>0;hit++){
      let dmg=magicDamageAgainstEnemy(s.matk*Number(sk.mult??2),e,s);
@@ -22942,15 +23000,11 @@ function showBossPhaseFlash_(b,p){
   const stage=document.getElementById('battleStage');
   if(!stage)return;
 
-  const box=document.createElement('div');
-  box.className='boss-phase-flash';
-  box.innerHTML=`<strong>${escapeHtml(bossPhaseName_(b,p.phase))}</strong><span>已切換行為模式</span>`;
-  mobileEnemyNotice39_(box,b,3000);
+  const detail=bossPhasePresentation55_(b,p);
+  const summary=fireBoss55_(b)&&p.phase==='phase2'?'復活\n鍛魂失效':rockBoss_(b)&&p.phase==='phase2'?'淨化・無敵 1R\n防禦持續提升':bossPhaseStatText_(p);
+  enemyNotice458_(b,bossPhaseName_(b,p.phase),detail,{kind:'phase',summary,duration:3000});
   const banner=document.getElementById('turnBanner');
   if(banner)banner.textContent=`BOSS 型態轉換：${bossPhaseName_(b,p.phase)}`;
-  log(`<strong>${escapeHtml(bossPhaseName_(b,p.phase))}</strong>：已切換行為模式`);
-  const enemyFx=document.getElementById('enemyFx');
-  if(enemyFx)floatText(enemyFx,bossPhaseName_(b,p.phase),'buff');
 }
 function updateBossPhase_(b,e){
   if(b?.worldBoss)return;
@@ -22962,7 +23016,7 @@ function updateBossPhase_(b,e){
   if(p.blessing>0)applyBattleStatus_('enemy','blessing',{duration:p.blessing});
   if(!oldPhase)log(`<strong>${escapeHtml(bossPhaseName_(b,p.phase))}</strong>：已切換行為模式`);
 
-  // phase1 是開場狀態，不用蓋掉遭遇演出；真正轉階段時才跳大型提示。
+  // phase1 是開場狀態；真正轉階段時才顯示敵側字幕。
   if(oldPhase && oldPhase!==p.phase)showBossPhaseFlash_(b,p);
   refreshEnemyPhase34_();
 }
@@ -23299,13 +23353,6 @@ function bossAttackFx55_(from,to,kind,theme){
  if(kind==='physical')slashFx(to);
  bossElementFx55_(to,theme);
 }
-function playerSkillNotice55_(title,description,arenaActor=null){
- const box=document.createElement('div');box.className='boss-phase-flash skill-cast-flash55';
- box.innerHTML=`<strong>${escapeHtml(title)}</strong><span>${enemyDescriptionHtml40_(description)}</span>`;
- if(!arenaActor){mobileEnemyNotice39_(box,state.currentBattle,1100);return;}
- const overlay=document.createElement('div');overlay.className='mobile-enemy-notice39 player-skill-notice55';overlay.setAttribute('role','status');overlay.appendChild(box);document.body.appendChild(overlay);
- setTimeout(()=>overlay.remove(),1100);
-}
 function showRockCleanse55_(b,count){
  battleEffectText55_('enemy',count?`淨化 ${count} 種異常`:'淨化：無異常狀態','buff');
  battleAuraFx_(document.getElementById('enemyCombatant'),'buff');
@@ -23598,9 +23645,7 @@ function cycleSkillNotice48_(x,b,e){
   row.trigger==='turn_cycle'&&(!row.phase||row.phase===b.activePhase)&&
   ((Math.max(1,Math.trunc(b.turn||1))-1)%Math.max(1,Math.trunc(row.value||1))+1)===(row.stacks||1));
  const lines=rows.map(row=>String(row.message||'').replace(/^【[^】]+】/,'').replace(/\{heal\}/g,String(Math.max(1,Math.trunc(e.hp*Math.max(0,row.param1||0)))))).filter(Boolean);
- const box=document.createElement('div');box.className='boss-phase-flash';
- box.innerHTML=`<strong>${escapeHtml(title)}</strong><span>${enemyDescriptionHtml40_(lines.join('｜'))}</span>`;
- mobileEnemyNotice39_(box,b,1000);
+ enemyNotice458_(b,title,lines.join('｜'),{duration:1600});
 }
 async function performCycleAttack47_(x,b,e,s,pc,ec){
  cycleSkillNotice48_(x,b,e);
@@ -23702,9 +23747,7 @@ function runEnemyBehaviors_(timing,b,e){
 
 function showCyberSkillFx_(kind,title,detail=''){
 
-  const el=document.createElement('div');el.className=`cyber-skill-flash ${kind}`;
-  el.innerHTML=`<div>${escapeHtml(title)}${detail?`<div style="font-size:9px;margin-top:7px;font-weight:800;letter-spacing:.02em">${enemyDescriptionHtml40_(detail)}</div>`:''}</div>`;
-  mobileEnemyNotice39_(el,state.currentBattle,1000);
+  enemyNotice458_(state.currentBattle,title,detail,{duration:1600});
   const enemy=document.getElementById('enemyCombatant');
   if(enemy)battleAuraFx_(enemy,kind==='firewall'?'buff':kind==='antivirus'?'heal':'debuff');
 
@@ -26429,7 +26472,6 @@ async function arenaUseLegacy127_(actor,target,id){
    const stacks=arenaMageAptitudeIIActive_(actor)?arcaneStacksValue_(actor.arcaneStacks):0;
    const hits=stacks+Math.max(1,Math.trunc(Number(sk.hits??2)));
    arenaLog_(`${actor.name}【${name}】魔導 ${stacks} 層，共 ${hits} 擊，本次不消耗魔導。`);
-   playerSkillNotice55_(name,`${actor.name}：魔導 ${stacks} 層，共 ${hits} 連擊；每擊魔攻 × ${Math.round(Number(sk.mult??2)*100)}%，魔導保留。`,actor);
    arenaEffectText_(actor,`魔導保留 ${stacks} 層・${hits} 連擊`,'buff');bossElementFx55_(arenaCombatantEl_(actor),'arcane');await wait(280);
    for(let i=1;i<=hits&&target.hp>0&&actor.hp>0;i++){
      const d=mag(Number(sk.mult??2)),got=await arenaHit_(actor,target,d,'magic',`-${d} (${i}/${hits})`);
@@ -27204,11 +27246,32 @@ function petCards297(){return `<div class="pet-summary297"><span>同行寵物提
 function openPetList297(){if(activeBattleNow())return toast('戰鬥中無法管理寵物。');petModal297={id:null,emotion:'idle'};petPaint297();}
 function openPet297(id){if(activeBattleNow())return toast('戰鬥中無法管理寵物。');petModal297={id,emotion:'idle'};petPaint297();}
 function closePet297(){if(petBusy297)return;document.getElementById('petDialog297')?.remove();petModal297=null;}
+function petTrainingInfo458_(pet){
+ const stones=Number(state.stones||0),locks=pet?.traits?.filter(t=>t?.locked).length||0;
+ const raw=petRows297(petData297(),'PetTrainingCosts').find(r=>Number(r.LockedCount)===locks)?.StoneCost;
+ let cost=null;try{cost=petInteger297(raw,1);}catch(_){}
+ const code=!pet?'PET_NOT_OWNED':!petTrainableIndices324_(pet).length?'PET_ALL_LOCKED':cost===null||!Number.isSafeInteger(stones)||stones<0?'PET_SETTING_REQUIRED':stones<cost?'PET_STONES_INSUFFICIENT':'';
+ return {stones,cost,code};
+}
+function syncPetTraining458_(){
+ const button=document.getElementById('petTrainButton458');if(!button)return;
+ const pet=(state.pets297||[]).find(p=>p.id===petModal297?.id),info=petTrainingInfo458_(pet);
+ button.disabled=petBusy297||!!petPending297()||!!info.code;
+ // Theme rules use high-specificity !important selectors; keep the disabled
+ // appearance on the button so it cannot remain gold in either layout.
+ for(const [property,value]of Object.entries({background:'#292929','border-color':'#515151',color:'#aaa','box-shadow':'none',opacity:'.65',filter:'grayscale(1)',cursor:'not-allowed'})){
+  if(button.disabled)button.style.setProperty(property,value,'important');else button.style.removeProperty(property);
+ }
+ button.title=PET_ERRORS297[info.code]||'';
+ const cost=document.getElementById('petTrainingCost458');if(cost)cost.textContent=`強化石 ${info.stones.toLocaleString()}｜本次消耗 ${info.cost===null?'待設定':info.cost} 顆`;
+ const hint=document.getElementById('petTrainingFunds458');if(hint){hint.hidden=info.code!=='PET_STONES_INSUFFICIENT';hint.textContent=hint.hidden?'':`強化石不足（還差 ${(info.cost-info.stones).toLocaleString()} 顆）`;}
+}
+function petTrainingError458_(petId){return petTrainingInfo458_((state.pets297||[]).find(p=>p.id===petId)).code;}
 function petPaint297(){
  if(!petModal297)return;document.getElementById('petDialog297')?.remove();const el=document.createElement('div');el.id='petDialog297';el.className='pet-overlay297';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-labelledby','petTitle297');
- const p=(state.pets297||[]).find(x=>x.id===petModal297.id),max=Number(petConfig297(petData297(),'MaxLevel')),exp=p?petRequiredExp297(petData297(),p.level):0,locks=p?.traits.filter(t=>t.locked).length||0,cost=petRows297(petData297(),'PetTrainingCosts').find(r=>Number(r.LockedCount)===locks)?.StoneCost;
+ const p=(state.pets297||[]).find(x=>x.id===petModal297.id),max=Number(petConfig297(petData297(),'MaxLevel')),exp=p?petRequiredExp297(petData297(),p.level):0,training=petTrainingInfo458_(p),cost=training.cost;
  const pending=petPending297();
- el.innerHTML=`<section class="pet-window297"><header><h2 id="petTitle297">${p?escapeHtml(petName297(p)):'寵物同行'}</h2><button onclick="closePet297()" ${petBusy297?'disabled':''} aria-label="關閉寵物管理">✕</button></header><div class="pet-scroll297">${pending?'<div class="notice">有一筆操作待確認。<button onclick="petAction297()">確認上次結果</button></div>':''}${p?`<div class="pet-profile297"><div class="pet-portrait297 pet-${petModal297.emotion}297">${petImage297(p)}</div><div><b>Lv.${p.level} / ${max}</b><p>${p.level>=max?'已達最高等級':`經驗 ${p.exp} / ${exp}`}</p><progress max="${exp}" value="${p.level>=max?exp:p.exp}"></progress><p>${p.origin==='chaos'?'混沌寵物蛋取得':p.origin==='advanced'?'高級蛋取得':'一般蛋取得'}</p><button onclick="petAction297('pet/equip',{petId:'${state.equippedPet297===p.id?'':escapeAttr(p.id)}'})" ${petBusy297?'disabled':''}>${state.equippedPet297===p.id?'取消同行':'設為同行'}</button></div></div><div class="pet-traits297">${[0,1,2].map((i)=>{const t=p.traits[i],q=t&&petRows297(petData297(),'PetQualities').find(q=>q.QualityID===t.quality);return `<div class="pet-trait297"><div style="color:${q?.Color||'#888'}">${t?`<small>${escapeHtml(q?.Name||t.quality)}</small><b>${escapeHtml(petTraitText297(t))}</b>`:`<b>Lv.${[1,50,100][i]} 解鎖</b>`}</div>${t?`<button onclick="petAction297('pet/lock',{petId:'${escapeAttr(p.id)}',index:${i},locked:${!t.locked}})" ${petBusy297?'disabled':''}>${t.locked?'已鎖定':'鎖定'}</button>`:'<span>未解鎖</span>'}</div>`;}).join('')}</div><div class="pet-training297"><span>強化石 ${Number(state.stones||0).toLocaleString()}｜本次消耗 ${cost==null||cost===''?'待設定':Number(cost)} 顆</span><button onclick="petAction297('pet/train',{petId:'${escapeAttr(p.id)}'})" ${petBusy297||cost==null||cost===''||locks===p.traits.length?'disabled':''}>訓練未鎖定詞條</button><small>未鎖定的能力、品質與數值會全部重抽，可能降低品質。</small></div><div class="pet-potion297"><div><b>寵物經驗藥水 ×${Number(state.consumables?.petExpPotion||0)}</b><small>每罐 +100 經驗；達滿級後停止消耗。</small></div><input id="petPotionQty297" type="number" min="1" max="${Math.max(1,Number(state.consumables?.petExpPotion||0))}" value="1" aria-label="使用藥水數量"><button onclick="petAction297('pet/potion',{petId:'${escapeAttr(p.id)}',quantity:Number(document.getElementById('petPotionQty297').value)})" ${petBusy297||p.level>=max||!state.consumables?.petExpPotion?'disabled':''}>使用</button></div><button onclick="openPetList297()">返回寵物列表</button>`:petCards297()}</div></section>`;
+ el.innerHTML=`<section class="pet-window297"><header><h2 id="petTitle297">${p?escapeHtml(petName297(p)):'寵物同行'}</h2><button onclick="closePet297()" ${petBusy297?'disabled':''} aria-label="關閉寵物管理">✕</button></header><div class="pet-scroll297">${pending?'<div class="notice">有一筆操作待確認。<button onclick="petAction297()">確認上次結果</button></div>':''}${p?`<div class="pet-profile297"><div class="pet-portrait297 pet-${petModal297.emotion}297">${petImage297(p)}</div><div><b>Lv.${p.level} / ${max}</b><p>${p.level>=max?'已達最高等級':`經驗 ${p.exp} / ${exp}`}</p><progress max="${exp}" value="${p.level>=max?exp:p.exp}"></progress><p>${p.origin==='chaos'?'混沌寵物蛋取得':p.origin==='advanced'?'高級蛋取得':'一般蛋取得'}</p><button onclick="petAction297('pet/equip',{petId:'${state.equippedPet297===p.id?'':escapeAttr(p.id)}'})" ${petBusy297?'disabled':''}>${state.equippedPet297===p.id?'取消同行':'設為同行'}</button></div></div><div class="pet-traits297">${[0,1,2].map((i)=>{const t=p.traits[i],q=t&&petRows297(petData297(),'PetQualities').find(q=>q.QualityID===t.quality);return `<div class="pet-trait297"><div style="color:${q?.Color||'#888'}">${t?`<small>${escapeHtml(q?.Name||t.quality)}</small><b>${escapeHtml(petTraitText297(t))}</b>`:`<b>Lv.${[1,50,100][i]} 解鎖</b>`}</div>${t?`<button onclick="petAction297('pet/lock',{petId:'${escapeAttr(p.id)}',index:${i},locked:${!t.locked}})" ${petBusy297?'disabled':''}>${t.locked?'已鎖定':'鎖定'}</button>`:'<span>未解鎖</span>'}</div>`;}).join('')}</div><div class="pet-training297"><span id="petTrainingCost458">強化石 ${Number(state.stones||0).toLocaleString()}｜本次消耗 ${cost==null||cost===''?'待設定':Number(cost)} 顆</span><button id="petTrainButton458" aria-describedby="petTrainingFunds458" onclick="petAction297('pet/train',{petId:'${escapeAttr(p.id)}'})" ${petBusy297||pending||training.code?'disabled':''}>訓練未鎖定詞條</button><small id="petTrainingFunds458" role="status" aria-live="polite" ${training.code==='PET_STONES_INSUFFICIENT'?'':'hidden'}>${training.code==='PET_STONES_INSUFFICIENT'?'強化石不足（還差 '+(cost-training.stones).toLocaleString()+' 顆）':''}</small><small>未鎖定的能力、品質與數值會全部重抽，可能降低品質。</small></div><div class="pet-potion297"><div><b>寵物經驗藥水 ×${Number(state.consumables?.petExpPotion||0)}</b><small>每罐 +100 經驗；達滿級後停止消耗。</small></div><input id="petPotionQty297" type="number" min="1" max="${Math.max(1,Number(state.consumables?.petExpPotion||0))}" value="1" aria-label="使用藥水數量"><button onclick="petAction297('pet/potion',{petId:'${escapeAttr(p.id)}',quantity:Number(document.getElementById('petPotionQty297').value)})" ${petBusy297||p.level>=max||!state.consumables?.petExpPotion?'disabled':''}>使用</button></div><button onclick="openPetList297()">返回寵物列表</button>`:petCards297()}</div></section>`;
  el.onclick=e=>{if(e.target===el)closePet297();};el.onkeydown=e=>{if(e.key==='Escape')closePet297();if(e.key==='Tab'){const a=[...el.querySelectorAll('button:not(:disabled),input,summary')],first=a[0],last=a.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};document.body.appendChild(el);el.querySelector('button')?.focus();
 }
 function petPendingKey297(){return 'rpg_pet_pending297:'+cloudMeta.accountId;}
@@ -27330,12 +27393,13 @@ function petStatus298_(text){
  if(el)el.textContent=text;
 }
 const petPaintOriginal298=petPaint297;
-petPaint297=function(){petPaintOriginal298();const dialog=document.getElementById('petDialog297');if(!dialog)return;const w=dialog.querySelector('.pet-window297');w?.classList.add('pet-ceremony298');if(w&&!w.querySelector('.pet-sparks298'))w.insertAdjacentHTML('afterbegin',petSparks298_());dialog.querySelectorAll('.pet-trait297').forEach((r,i)=>{r.dataset.petTrait298=String(i);const p=(state.pets297||[]).find(p=>p.id===petModal297?.id);r.dataset.locked298=String(!!p?.traits[i]?.locked);r.dataset.trainable324=String(petTrainable324_(p,i));});if(petModal297?.status298)petStatus298_(petModal297.status298);petTrainingSync336_();};
+petPaint297=function(){petPaintOriginal298();const dialog=document.getElementById('petDialog297');if(!dialog)return;const w=dialog.querySelector('.pet-window297');w?.classList.add('pet-ceremony298');if(w&&!w.querySelector('.pet-sparks298'))w.insertAdjacentHTML('afterbegin',petSparks298_());dialog.querySelectorAll('.pet-trait297').forEach((r,i)=>{r.dataset.petTrait298=String(i);const p=(state.pets297||[]).find(p=>p.id===petModal297?.id);r.dataset.locked298=String(!!p?.traits[i]?.locked);r.dataset.trainable324=String(petTrainable324_(p,i));});if(petModal297?.status298)petStatus298_(petModal297.status298);petTrainingSync336_();syncPetTraining458_();};
 function petBusyUI298_(busy,action){
  petBusy297=busy;
  document.querySelectorAll('#petDialog297 button,#petDialog297 input,#petEggDialog297 button').forEach(b=>{b.disabled=busy;b.setAttribute('aria-busy',String(busy));});
  const egg=document.getElementById('petEggDialog297');if(action==='pet/open'){egg?.classList.toggle('pet-opening298',busy);if(busy){egg?.classList.remove('pet-hatched298');const box=document.getElementById('petEggResults297');if(box)box.innerHTML='';egg?.querySelector('details')?.removeAttribute('open');}}
  if(action==='pet/train')document.getElementById('petDialog297')?.classList.toggle('pet-training-active298',busy);
+ syncPetTraining458_();
  const portrait=document.querySelector('#petDialog297 .pet-portrait297');if(portrait&&busy)portrait.className='pet-portrait297 pet-serious297';
  petUpdateBox298_();
 }
@@ -27350,6 +27414,7 @@ petAction297=async function(action,payload={}){
  if(pending&&action){petStatus298_('有一筆操作等待確認，請先按「確認上次結果」。');return;}if(!pending&&!action)return;
  let trainApproval324=null;
  if(action==='pet/train'&&!pending){
+  const fundsError=petTrainingError458_(payload.petId);if(fundsError){syncPetTraining458_();petStatus298_(PET_ERRORS297[fundsError]||'請重新選擇寵物。');return;}
   if(petTrainingConfirm324_)return;petTrainingConfirm324_=true;
   const confirmSession324=characterSessionContext_();
   try{trainApproval324=await petApproveTrain324_(payload.petId);if(!trainApproval324)return;assertCharacterSession_(confirmSession324);}
@@ -27368,7 +27433,7 @@ petAction297=async function(action,payload={}){
     const pet324=(state.pets297||[]).find(p=>p.id===payload.petId);
     if(!pet324)return;
     if(petTrainingSignature324_(pet324)!==trainApproval324&&!await petApproveTrain324_(payload.petId))return;
-    assertCharacterSession_(session);trainingIndices324=new Set(petTrainableIndices324_(pet324));if(petModal297)petPaint297();
+    assertCharacterSession_(session);const fundsError=petTrainingError458_(payload.petId);if(fundsError)throw Error(fundsError);trainingIndices324=new Set(petTrainableIndices324_(pet324));if(petModal297)petPaint297();
    }
    request={action,...payload,requestId:crypto.randomUUID(),expectedSaveRevision:pre.revision};characterStorageWrite44_(key,JSON.stringify(request));}
   if(operation==='pet/train')petTrainingStart336_(request.petId,trainingIndices324);
@@ -28750,8 +28815,8 @@ function questAvailablePaint381(){
 }
 const questReadyPaintBase381=questReadyPaint380;questReadyPaint380=function(){questReadyPaintBase381();questAvailablePaint381();};
 questAvailablePaint381();
-</script><script data-ui382="visual-repair">const ICON_FIXES382={"gem_voidSoulStone": assetSrc393_("assets/images/icons/gems/gem_voidSoulStone.svg"), "gem_xuanwuCore": assetSrc393_("assets/images/icons/gems/gem_xuanwuCore.svg"), "gem_orderHeart": assetSrc393_("assets/images/icons/gems/gem_orderHeart.svg"), "gem_crit_10": assetSrc393_("assets/images/icons/gems/gem_crit_10.q85.webp"), "gem_luckyGem6": assetSrc393_("assets/images/icons/gems/gem_luckyGem6.svg"), "gem_aurion": assetSrc393_("assets/images/icons/gems/gem_aurion.svg"), "gem_hellHound": assetSrc393_("assets/images/icons/gems/gem_hellHound.svg"), "gem_def_5": assetSrc393_("assets/images/icons/gems/gem_def_5.q85.webp"), "gem_goldenDragon": assetSrc393_("assets/images/icons/gems/gem_goldenDragon.svg"), "gem_dragonEmpress": assetSrc393_("assets/images/icons/gems/gem_dragonEmpress.svg"), "gem_undeadCore": assetSrc393_("assets/images/icons/gems/gem_undeadCore.svg"), "gem_patk_20": assetSrc393_("assets/images/icons/gems/gem_patk_20.q85.webp"), "gem_def_20": assetSrc393_("assets/images/icons/gems/gem_def_20.q85.webp"), "gem_chronos": assetSrc393_("assets/images/icons/gems/gem_chronos.svg"), "gem_netherTreeHeart": assetSrc393_("assets/images/icons/gems/gem_netherTreeHeart.svg"), "gem_velasien": assetSrc393_("assets/images/icons/gems/gem_velasien.svg"), "gem_berserkGiant": assetSrc393_("assets/images/icons/gems/gem_berserkGiant.svg"), "gem_hellDemon": assetSrc393_("assets/images/icons/gems/gem_hellDemon.svg"), "gem_reysaan": assetSrc393_("assets/images/icons/gems/gem_reysaan.svg"), "gem_tyssevia": assetSrc393_("assets/images/icons/gems/gem_tyssevia.svg"), "gem_luckyGem2": assetSrc393_("assets/images/icons/gems/gem_luckyGem2.svg"), "gem_hellDemonII": assetSrc393_("assets/images/icons/gems/gem_hellDemonII.svg"), "gem_velska": assetSrc393_("assets/images/icons/gems/gem_velska.svg"), "gem_luckyGem4": assetSrc393_("assets/images/icons/gems/gem_luckyGem4.svg"), "gem_abyssEmperor": assetSrc393_("assets/images/icons/gems/gem_abyssEmperor.svg"), "gem_dragonKingII": assetSrc393_("assets/images/icons/gems/gem_dragonKingII.svg"), "gem_hellHoundII": assetSrc393_("assets/images/icons/gems/gem_hellHoundII.svg"), "gem_undeadKingII": assetSrc393_("assets/images/icons/gems/gem_undeadKingII.svg"), "gem_crit_20": assetSrc393_("assets/images/icons/gems/gem_crit_20.q85.webp"), "gem_Thalessia": assetSrc393_("assets/images/icons/gems/gem_Thalessia.svg"), "gem_terrax": assetSrc393_("assets/images/icons/gems/gem_terrax.svg"), "gem_patk_10": assetSrc393_("assets/images/icons/gems/gem_patk_10.q85.webp"), "gem_crit_5": assetSrc393_("assets/images/icons/gems/gem_crit_5.q85.webp"), "gem_luckyGem5": assetSrc393_("assets/images/icons/gems/gem_luckyGem5.svg"), "gem_worldTreeCrystal": assetSrc393_("assets/images/icons/gems/gem_worldTreeCrystal.svg"), "gem_mirrorEmperorEye": assetSrc393_("assets/images/icons/gems/gem_mirrorEmperorEye.svg"), "gem_cfiredragon": assetSrc393_("assets/images/icons/gems/gem_cfiredragon.svg"), "gem_gloryGem": assetSrc393_("assets/images/icons/gems/gem_gloryGem.svg"), "gem_starterGem": assetSrc393_("assets/images/icons/gems/gem_starterGem.svg"), "gem_matk_10": assetSrc393_("assets/images/icons/gems/gem_matk_10.q85.webp"), "gem_erebetis": assetSrc393_("assets/images/icons/gems/gem_erebetis.svg"), "gem_maxHP_10": assetSrc393_("assets/images/icons/gems/gem_maxHP_10.q85.webp"), "gem_poisonDragonGem": assetSrc393_("assets/images/icons/gems/gem_poisonDragonGem.svg"), "gem_maxHP_5": assetSrc393_("assets/images/icons/gems/gem_maxHP_5.q85.webp"), "gem_patk_5": assetSrc393_("assets/images/icons/gems/gem_patk_5.q85.webp"), "gem_abyssEye": assetSrc393_("assets/images/icons/gems/gem_abyssEye.svg"), "gem_berserkDice": assetSrc393_("assets/images/icons/gems/gem_berserkDice.svg"), "gem_eclipseObserver": assetSrc393_("assets/images/icons/gems/gem_eclipseObserver.svg"), "gem_luckyGem1": assetSrc393_("assets/images/icons/gems/gem_luckyGem1.svg"), "gem_gloryGemII": assetSrc393_("assets/images/icons/gems/gem_gloryGemII.svg"), "gem_dragonEmpressII": assetSrc393_("assets/images/icons/gems/gem_dragonEmpressII.svg"), "gem_maxHP_20": assetSrc393_("assets/images/icons/gems/gem_maxHP_20.q85.webp"), "gem_dragonKing": assetSrc393_("assets/images/icons/gems/gem_dragonKing.svg"), "gem_matk_5": assetSrc393_("assets/images/icons/gems/gem_matk_5.q85.webp"), "gem_turgura": assetSrc393_("assets/images/icons/gems/gem_turgura.svg"), "gem_gloryGemIII": assetSrc393_("assets/images/icons/gems/gem_gloryGemIII.svg"), "gem_riftShellCore": assetSrc393_("assets/images/icons/gems/gem_riftShellCore.svg"), "gem_def_10": assetSrc393_("assets/images/icons/gems/gem_def_10.q85.webp"), "gem_matk_20": assetSrc393_("assets/images/icons/gems/gem_matk_20.q85.webp"), "gem_frostDragonGem": assetSrc393_("assets/images/icons/gems/gem_frostDragonGem.svg"), "gem_undeadKing": assetSrc393_("assets/images/icons/gems/gem_undeadKing.svg"), "gem_60bossGem": assetSrc393_("assets/images/icons/gems/gem_60bossGem.svg"), "gem_luckyGem3": assetSrc393_("assets/images/icons/gems/gem_luckyGem3.svg"), "equipment_turguraWeapon": assetSrc393_("assets/images/icons/equipment/weapon/equipment_turguraWeapon.svg"), "equipment_eternalKnightArmor": assetSrc393_("assets/images/icons/equipment/armor/equipment_eternalKnightArmor.svg"), "family_dragonMage": assetSrc393_("assets/images/characters/enemies/families/family_dragonMage.svg"), "gem_chaosBarrierStone": assetSrc393_("assets/images/icons/gems/gem_chaosBarrierStone.svg"), "gem_chaosMagicStone": assetSrc393_("assets/images/icons/gems/gem_chaosMagicStone.svg"), "gem_chaosFateStone": assetSrc393_("assets/images/icons/gems/gem_chaosFateStone.svg"), "gem_lilyBlueCrystal368": assetSrc393_("assets/images/icons/gems/gem_lilyBlueCrystal368.svg")};
-// Cosmetic asset replacements: immutable source art is wrapped with explicit clipping, not CSS-dependent nested viewports.
+</script><script data-ui382="visual-repair">const ICON_FIXES382={"gem_voidSoulStone": assetSrc393_("assets/images/icons/gems/gem_voidSoulStone.svg"), "gem_xuanwuCore": assetSrc393_("assets/images/icons/gems/gem_xuanwuCore.svg"), "gem_orderHeart": assetSrc393_("assets/images/icons/gems/gem_orderHeart.svg"), "gem_crit_10": assetSrc393_("assets/images/icons/gems/gem_crit_10.q85.webp"), "gem_luckyGem6": assetSrc393_("assets/images/icons/gems/gem_luckyGem6.svg"), "gem_aurion": assetSrc393_("assets/images/icons/gems/gem_aurion.svg"), "gem_hellHound": assetSrc393_("assets/images/icons/gems/gem_hellHound.svg"), "gem_def_5": assetSrc393_("assets/images/icons/gems/gem_def_5.q85.webp"), "gem_goldenDragon": assetSrc393_("assets/images/icons/gems/gem_goldenDragon.svg"), "gem_dragonEmpress": assetSrc393_("assets/images/icons/gems/gem_dragonEmpress.svg"), "gem_undeadCore": assetSrc393_("assets/images/icons/gems/gem_undeadCore.svg"), "gem_patk_20": assetSrc393_("assets/images/icons/gems/gem_patk_20.q85.webp"), "gem_def_20": assetSrc393_("assets/images/icons/gems/gem_def_20.q85.webp"), "gem_chronos": assetSrc393_("assets/images/icons/gems/gem_chronos.svg"), "gem_netherTreeHeart": assetSrc393_("assets/images/icons/gems/gem_netherTreeHeart.svg"), "gem_velasien": assetSrc393_("assets/images/icons/gems/gem_velasien.svg"), "gem_berserkGiant": assetSrc393_("assets/images/icons/gems/gem_berserkGiant.svg"), "gem_hellDemon": assetSrc393_("assets/images/icons/gems/gem_hellDemon.svg"), "gem_reysaan": assetSrc393_("assets/images/icons/gems/gem_reysaan.svg"), "gem_tyssevia": assetSrc393_("assets/images/icons/gems/gem_tyssevia.svg"), "gem_luckyGem2": assetSrc393_("assets/images/icons/gems/gem_luckyGem2.svg"), "gem_hellDemonII": assetSrc393_("assets/images/icons/gems/gem_hellDemonII.svg"), "gem_velska": assetSrc393_("assets/images/icons/gems/gem_velska.svg"), "gem_luckyGem4": assetSrc393_("assets/images/icons/gems/gem_luckyGem4.svg"), "gem_abyssEmperor": assetSrc393_("assets/images/icons/gems/gem_abyssEmperor.svg"), "gem_dragonKingII": assetSrc393_("assets/images/icons/gems/gem_dragonKingII.svg"), "gem_hellHoundII": assetSrc393_("assets/images/icons/gems/gem_hellHoundII.svg"), "gem_undeadKingII": assetSrc393_("assets/images/icons/gems/gem_undeadKingII.svg"), "gem_crit_20": assetSrc393_("assets/images/icons/gems/gem_crit_20.q85.webp"), "gem_Thalessia": assetSrc393_("assets/images/icons/gems/gem_Thalessia.svg"), "gem_terrax": assetSrc393_("assets/images/icons/gems/gem_terrax.svg"), "gem_patk_10": assetSrc393_("assets/images/icons/gems/gem_patk_10.q85.webp"), "gem_crit_5": assetSrc393_("assets/images/icons/gems/gem_crit_5.q85.webp"), "gem_luckyGem5": assetSrc393_("assets/images/icons/gems/gem_luckyGem5.svg"), "gem_worldTreeCrystal": assetSrc393_("assets/images/icons/gems/gem_worldTreeCrystal.svg"), "gem_mirrorEmperorEye": assetSrc393_("assets/images/icons/gems/gem_mirrorEmperorEye.svg"), "gem_cfiredragon": assetSrc393_("assets/images/icons/gems/gem_cfiredragon.svg"), "gem_gloryGem": assetSrc393_("assets/images/icons/gems/gem_gloryGem.svg"), "gem_starterGem": assetSrc393_("assets/images/icons/gems/gem_starterGem.svg"), "gem_matk_10": assetSrc393_("assets/images/icons/gems/gem_matk_10.q85.webp"), "gem_erebetis": assetSrc393_("assets/images/icons/gems/gem_erebetis.svg"), "gem_maxHP_10": assetSrc393_("assets/images/icons/gems/gem_maxHP_10.q85.webp"), "gem_poisonDragonGem": assetSrc393_("assets/images/icons/gems/gem_poisonDragonGem.svg"), "gem_maxHP_5": assetSrc393_("assets/images/icons/gems/gem_maxHP_5.q85.webp"), "gem_patk_5": assetSrc393_("assets/images/icons/gems/gem_patk_5.q85.webp"), "gem_abyssEye": assetSrc393_("assets/images/icons/gems/gem_abyssEye.svg"), "gem_berserkDice": assetSrc393_("assets/images/icons/gems/gem_berserkDice.svg"), "gem_eclipseObserver": assetSrc393_("assets/images/icons/gems/gem_eclipseObserver.svg"), "gem_luckyGem1": assetSrc393_("assets/images/icons/gems/gem_luckyGem1.svg"), "gem_gloryGemII": assetSrc393_("assets/images/icons/gems/gem_gloryGemII.svg"), "gem_dragonEmpressII": assetSrc393_("assets/images/icons/gems/gem_dragonEmpressII.svg"), "gem_maxHP_20": assetSrc393_("assets/images/icons/gems/gem_maxHP_20.q85.webp"), "gem_dragonKing": assetSrc393_("assets/images/icons/gems/gem_dragonKing.svg"), "gem_matk_5": assetSrc393_("assets/images/icons/gems/gem_matk_5.q85.webp"), "gem_turgura": assetSrc393_("assets/images/icons/gems/gem_turgura.svg"), "gem_gloryGemIII": assetSrc393_("assets/images/icons/gems/gem_gloryGemIII.svg"), "gem_riftShellCore": assetSrc393_("assets/images/icons/gems/gem_riftShellCore.svg"), "gem_def_10": assetSrc393_("assets/images/icons/gems/gem_def_10.q85.webp"), "gem_matk_20": assetSrc393_("assets/images/icons/gems/gem_matk_20.q85.webp"), "gem_frostDragonGem": assetSrc393_("assets/images/icons/gems/gem_frostDragonGem.svg"), "gem_undeadKing": assetSrc393_("assets/images/icons/gems/gem_undeadKing.svg"), "gem_60bossGem": assetSrc393_("assets/images/icons/gems/gem_60bossGem.svg"), "gem_luckyGem3": assetSrc393_("assets/images/icons/gems/gem_luckyGem3.svg"), "equipment_turguraWeapon": assetSrc393_("assets/images/icons/equipment/weapon/equipment_turguraWeapon.svg"), "equipment_eternalKnightArmor": assetSrc393_("assets/images/icons/equipment/armor/equipment_eternalKnightArmor.svg"), "family_dragonMage": assetSrc393_("assets/images/characters/enemies/families/family_dragonMage459-ee677460fd.webp"), "gem_chaosBarrierStone": assetSrc393_("assets/images/icons/gems/gem_chaosBarrierStone.svg"), "gem_chaosMagicStone": assetSrc393_("assets/images/icons/gems/gem_chaosMagicStone.svg"), "gem_chaosFateStone": assetSrc393_("assets/images/icons/gems/gem_chaosFateStone.svg"), "gem_lilyBlueCrystal368": assetSrc393_("assets/images/icons/gems/gem_lilyBlueCrystal368.svg")};
+// Cosmetic asset replacements. v459: dragonMage uses a 128px raster of the existing clipped art; dimensionless SVG metrics differ in WebKit Canvas.
 Object.assign(PIXEL_ART202_,ICON_FIXES382);for(const key of Object.keys(ICON_FIXES382)){delete ART_RECTS206_[key];delete pixelArtCache202_[key];}
 petEggArt298_=function(extra=''){return assetHtml393_(`<img class="pixel-art202 pet-egg-icon298 ${escapeAttr(extra)}" data-art-key="item_petEgg" src="assets/images/icons/items/petEgg382.q85-cd5d7668.webp" width="40" height="40" alt="寵物蛋">`);};
 chaosPetEggArt333_=function(extra=''){return assetHtml393_(`<img class="pixel-art202 pet-egg-icon298 ${escapeAttr(extra)}" data-art-key="item_chaosPetEgg" src="assets/images/icons/items/chaosPetEgg382.q85-d78e1fdd.webp" width="40" height="40" alt="混沌寵物蛋">`);};
@@ -31375,5 +31440,26 @@ HERO_HANDS246_.female[6]={"idle": [188, 168], "attack": [202, 121], "cast": [109
 HERO_HANDS246_.female[7]={"idle": [187, 168], "attack": [204, 121], "cast": [110, 147], "palm": [191, 104]};
 heroCompositeCache228_.clear();
 </script>
+<style id="battle-pet458">
+#battleStage .enemy-notice458{position:absolute;z-index:12;pointer-events:none;top:var(--enemy-notice-top458,76px);left:auto;right:6%;width:min(400px,46%);padding:17px 24px 18px 16px;box-sizing:border-box;border:0;border-radius:0;background:radial-gradient(ellipse at 24% 48%,#13100bf0 0%,#19130eb5 45%,#19130e00 76%);color:#f3d9a4;text-shadow:0 2px 5px #000}
+#battleStage .enemy-notice458 .enemy-kicker458{display:flex;align-items:center;gap:9px;font-size:12px;line-height:18px;color:#ddc399;letter-spacing:2px}
+#battleStage .enemy-notice458 .enemy-kicker458 i{width:24px;height:1px;background:#be9658}
+#battleStage .enemy-notice458 .enemy-title458{font-family:Georgia,"Noto Serif TC",serif;font-weight:700;font-size:32px;letter-spacing:4px;line-height:1.4;margin:4px 0 5px;color:#f7dfb1;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+#battleStage .enemy-notice458 .enemy-copy458{font-size:13px;line-height:22px;color:#e1d8c5;letter-spacing:.5px;white-space:pre-line;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+#battleStage .enemy-notice458.special{background:radial-gradient(ellipse at 24% 48%,#200d0df0 0%,#221411b5 45%,#22141100 76%)}
+#battleStage .enemy-notice458.special .enemy-title458{font-size:27px;color:#f2c1a4}
+#battleStage .enemy-notice458.special .enemy-kicker458 i{background:#bf8068}
+html.mobile-ui #battleStage .enemy-notice458{right:0;width:84px;padding:4px}
+html.mobile-ui #battleStage .enemy-notice458 .enemy-kicker458{font-size:9px;line-height:11px;gap:3px;letter-spacing:0}
+html.mobile-ui #battleStage .enemy-notice458 .enemy-kicker458 i{display:none}
+html.mobile-ui #battleStage .enemy-notice458 .enemy-title458{font-size:15px;line-height:20px;letter-spacing:1px;margin:2px 0}
+html.mobile-ui #battleStage .enemy-notice458 .enemy-copy458{font-size:10px;line-height:14px;letter-spacing:0}
+html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-kicker458{display:none}
+html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-title458{line-height:20px;margin:0;-webkit-line-clamp:1}
+html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-line-clamp:1}
+#petDialog297 .pet-training297 button:disabled{background:#292929!important;border-color:#515151!important;color:#aaa!important;box-shadow:none!important;opacity:.65!important;cursor:not-allowed}
+#petDialog297 #petTrainingFunds458{color:#e8b97e;font-weight:600}
+</style>
+
 </body>
 </html>
