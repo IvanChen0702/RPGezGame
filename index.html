@@ -11084,10 +11084,12 @@ function relicLootTile429_(o){
 function relicSkin429_(root){
  root.classList.add('relic-ui429');
  const card=root.querySelector('.relic-card144'),head=card?.querySelector(':scope>header');if(!head)return;
+ // Reapplying the skin must preserve the encounter subtitle and portrait.
+ if(head.querySelector('.r429-header-copy')){relicSyncButtons149_();return;}
  const title=head.querySelector('h2')?.textContent||'',floor=Number(relicRun144_?.floor||0);
  // Release only the presentation properties written by the old desktop skin.
  [card,head,...root.querySelectorAll('.relic-actions144,.relic-actions144>button')].forEach(n=>n?.removeAttribute('style'));
- head.innerHTML=`<img class="r429-header-art" src="assets/images/mode-entries422/relic.webp" alt="" width="64" height="64"><div class="r429-header-copy"><small>遺物探險 · 深層寶庫</small><h2>${escapeHtml(title)}</h2></div>${floor?`<div class="r429-floor"><b>${floor}</b><small>FLOOR</small></div>`:''}<button type="button" class="r429-close" aria-label="收起探險視窗" onclick="relicClose144_()">×</button>`;
+ head.innerHTML=`<img class="r429-header-art" src="assets/images/mode-entries422/relic.webp" alt="" width="64" height="64"><div class="r429-header-copy"><small data-relic-eyebrow455>遺物探險 · 深層寶庫</small><h2>${escapeHtml(title)}</h2></div>${floor?`<div class="r429-floor"><b>${floor}</b><small>FLOOR</small></div>`:''}<button type="button" class="r429-close" aria-label="收起探險視窗" onclick="relicClose144_()">×</button>`;
  relicSyncButtons149_();
 }
 function relicCampBody429_(){
@@ -11112,7 +11114,7 @@ function relicArrangeActions152_(root){
 }
 function relicModal144_(title,body,actions=''){
  relicClose144_();const el=document.createElement('div');el.className='account-overlay relic-overlay144';el.id='relicOverlay144';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',title);el.setAttribute('data-relic-tone',/失敗|尚未完成/.test(title)?'error':/成功|勝利|戰利品/.test(title)?'reward':'normal');
- el.innerHTML=`<section class="account-card relic-card144"><header><span class="relic-eyebrow149">RELIC EXPEDITION</span><h2>${escapeHtml(title)}</h2></header><div class="relic-scroll144">${body}</div><div class="relic-feedback149" role="status" aria-live="polite" hidden></div>${actions?`<footer class="relic-actions144">${actions}</footer>`:''}</section>`;
+ el.innerHTML=`<section class="account-card relic-card144"><header><span class="relic-eyebrow149" data-relic-eyebrow455>RELIC EXPEDITION</span><h2>${escapeHtml(title)}</h2></header><div class="relic-scroll144">${body}</div><div class="relic-feedback149" role="status" aria-live="polite" hidden></div>${actions?`<footer class="relic-actions144">${actions}</footer>`:''}</section>`;
  document.body.appendChild(el);relicOverlay144_=el;
  for(const b of el.querySelectorAll('button[onclick]')){const code=b.getAttribute('onclick');b.type='button';b.setAttribute('onclick','return relicAction149_(this,async()=>{await '+code+'})');if(/relicRetreat144_/.test(code))b.classList.add('relic-exit149');if(/relicSaveLeave144_/.test(code))b.classList.add('relic-save149');}
  relicArrangeActions152_(el);decorateItemBorders_(el);relicSyncButtons149_();
@@ -11157,9 +11159,13 @@ function relicInfo144_(){
  const curses=r.curses||[],curseNames=curses.map(id=>escapeHtml(relicCurseInfo144_(id).Name)).join('、');
  const curseDetails=curses.length?`<details class="relic-preview-curses257"><summary>目前寶庫詛咒（${curses.length}）<span>${curseNames}</span></summary>${relicCursesHelp149_()}</details>`:'';
  relicModal144_(`第${r.floor}層｜${e.name}`,`<div class="relic-enemy-stats149">${[['HP',e.hp],['DEF',e.def],['PATK',e.patk],['MATK',e.matk]].map(([k,v])=>`<div><small>${k}</small><strong>${Number(v).toLocaleString()}</strong></div>`).join('')}</div><div class="notice relic-preview-skill257">${escapeHtml(relicEnemySkill271_(e))}</div><div class="relic-hp149">玩家剩餘生命 <strong>${Math.floor(r.hp).toLocaleString()}</strong></div>${curseDetails}${relicAccum144_()}`,`<button class="primary" onclick="relicReady144_()">戰鬥整備 →</button><button onclick="relicRetreat144_()">撤離結算</button><button onclick="relicSaveLeave144_()">保存並離開</button>`);
- const overlay=document.getElementById('relicOverlay144');overlay.classList.add('relic-preview257');
- const header=overlay.querySelector('header');header.querySelector('.relic-eyebrow149').textContent='下一場遭遇';
- header.insertAdjacentHTML('beforeend',`<div class="relic-preview-portrait257">${relicPreviewArt257_(e)}</div>`);
+ const overlay=document.getElementById('relicOverlay144');if(!overlay)return;overlay.classList.add('relic-preview257');
+ const header=overlay.querySelector('.relic-card144>header');if(!header)return;
+ // v429 rebuilds the header on both platforms; target its semantic subtitle too.
+ const eyebrow=header.querySelector('[data-relic-eyebrow455],.relic-eyebrow149');if(eyebrow)eyebrow.textContent='下一場遭遇';
+ const art=relicPreviewArt257_(e),slot=header.querySelector('.r429-header-art');
+ if(slot)slot.outerHTML=`<div class="r429-header-art relic-preview-portrait257">${art}</div>`;
+ else header.insertAdjacentHTML('beforeend',`<div class="relic-preview-portrait257">${art}</div>`);
 }
 
 async function relicReady144_(){

@@ -4,7 +4,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'/opt/codex/runtimes/cod
 const url=process.env.GAME_TEST_URL||'http://127.0.0.1:8443/',out=process.env.AVATAR_TEST_OUT||'/workspace/work/avatar454';fs.mkdirSync(out,{recursive:true});
 async function setup(page,mode,sex='female'){
  await page.evaluate(({mode,sex})=>{
-  document.getElementById('accountOverlay')?.remove();document.body.classList.remove('login-required-lock');initialEntryShown45_=true;state=defaultState();viewMode_=mode;applyViewMode_();
+  document.getElementById('accountOverlay')?.remove();document.body.classList.remove('login-required-lock');initialEntryShown45_=true;state=defaultState();viewModePreference_=mode;applyViewMode_();
   localStorage.setItem(avatarPreferenceKey220_(),sex);
   state.base={hp:100000,patk:100,matk:100,def:30,crit:0,critDamage:100};state.currentHp=100000;
   const ids=['thalessiahead','timeMirrorArmor','chronosArcaneStaff'];
