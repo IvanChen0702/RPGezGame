@@ -1,0 +1,104 @@
+{
+  "main01": {
+    "src": "assets/images/backgrounds/battle/desktop/main01-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main02": {
+    "src": "assets/images/backgrounds/battle/desktop/main02-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main03": {
+    "src": "assets/images/backgrounds/battle/desktop/main03-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main04": {
+    "src": "assets/images/backgrounds/battle/desktop/main04-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main05": {
+    "src": "assets/images/backgrounds/battle/desktop/main05-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main06": {
+    "src": "assets/images/backgrounds/battle/desktop/main06-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main07": {
+    "src": "assets/images/backgrounds/battle/desktop/main07-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main08": {
+    "src": "assets/images/backgrounds/battle/desktop/main08-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main09": {
+    "src": "assets/images/backgrounds/battle/desktop/main09-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "main10": {
+    "src": "assets/images/backgrounds/battle/desktop/main10-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "temple": {
+    "src": "assets/images/backgrounds/battle/desktop/temple-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "castle": {
+    "src": "assets/images/backgrounds/battle/desktop/castle-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "arena": {
+    "src": "assets/images/backgrounds/battle/desktop/arena-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "boxing": {
+    "src": "assets/images/backgrounds/battle/desktop/boxing-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "dungeon": {
+    "src": "assets/images/backgrounds/battle/desktop/dungeon-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "default": {
+    "src": "assets/images/backgrounds/battle/desktop/default-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  },
+  "chaos": {
+    "src": "assets/images/backgrounds/battle/desktop/chaos-456.webp",
+    "width": 1774,
+    "height": 887,
+    "floorY": 0.74
+  }
+}

@@ -24,7 +24,7 @@ try{
   const heads=[null,{name:'皮革帽'},{name:'法師帽'},{name:'王冠'},...Object.keys(HEAD_STYLES454_).map(template=>({template}))];
   const armors=[null,{name:'鎖子甲'},{name:'法袍'},{name:'神鎧'},...Object.keys(ARMOR_STYLES454_).map(template=>({template}))];
   let n=0;for(const sex of ['male','female'])for(const head of heads)for(const armor of armors)for(const pose of ['idle','attack','cast']){
-   const g={sex,head,armor,hood:/帽/.test(head?.name||''),robe:/袍/.test(armor?.name||''),weapon:{template:'astralLance'},rings:[],kind:'astralLance'};
+   const g={sex,head,armor,hood:/法師帽/.test(head?.name||''),robe:/袍/.test(armor?.name||''),weapon:{template:'astralLance'},rings:[],kind:'astralLance'};
    const im=femaleHeroComposite220_(g,pose);if(!im||!im.heroFrame250_||im.heroFrame250_.top>=.3)throw Error('missing composite/head '+JSON.stringify({sex,head,armor,pose}));
    const pixels=im.getContext('2d').getImageData(0,0,512,512).data;let nonzero=0;for(let i=3;i<pixels.length;i+=4)nonzero+=pixels[i]>24?1:0;if(nonzero<3000)throw Error('blank composite');n++;
   }
@@ -53,7 +53,7 @@ try{
  // Same shared renderer supports the mirrored arena actor; no actor state writes.
  await p.emulateMedia({reducedMotion:'no-preference'});
  console.log('mirrored/reduced-motion',await p.evaluate(()=>{const r=pixelStage192_,g=r.gear.player,a={...pixelAnchor192_('player'),side:'enemy'},before=JSON.stringify(state.currentBattle),c=document.createElement('canvas');c.width=500;c.height=500;pixelDrawHero203_(c.getContext('2d'),a,g,500,{type:'skill386',visual386:'thunder',skillId386:'heavenlyThunder',start:0,duration:1800,rate386:1,shots386:[],expected386:3},false);if(before!==JSON.stringify(state.currentBattle))throw Error('visual changed battle');return 'PASS';}));
- // External-action failure falls back to embedded idle instead of blanking the character.
+ // External-action failure falls back to idle instead of blanking the character.
  await p.route('**/body245_female_4_cast.webp*',r=>r.abort());
  await p.evaluate(()=>{PIXEL_ART202_.body245_female_4_cast+='?test-failure454';delete pixelArtCache202_.body245_female_4_cast;heroCompositeCache228_.clear();artImage202_('body245_female_4_cast');});await p.waitForTimeout(250);
  assert(await p.evaluate(()=>{const g=pixelStage192_.gear.player;return !!artImage202_('body245_female_4_cast').avatarFallback454_&&!!femaleHeroComposite220_(g,'cast');}));
