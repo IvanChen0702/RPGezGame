@@ -19998,7 +19998,7 @@ async function checkWorldBossChests_(btn=null){
 }
 async function refreshWorldBossRanking_(btn=null){
   if(worldBossRankingLoading||!worldBossCache?.boss?.instanceId)return;worldBossRankingLoading=true;if(btn)btn.disabled=true;
-  try{const d=await apiPost('worldboss/ranking',{sessionToken:cloudMeta.sessionToken,bossInstanceId:worldBossCache.boss.instanceId},{silentLoading:true});worldBossCache.ranking=d.ranking;worldBossRankingReady=true;saveWorldBossRankLocal_({bossInstanceId:worldBossCache.boss.instanceId,ranking:d.ranking});toast('世界 BOSS 貢獻排行已更新。');render()}catch(err){toast(`排行更新失敗：${err.message}`)}finally{worldBossRankingLoading=false;if(btn)btn.disabled=false}
+  try{const d=await apiPost('worldboss/ranking',{sessionToken:cloudMeta.sessionToken,bossInstanceId:worldBossCache.boss.instanceId},{silentLoading:true});worldBossCache.ranking=d.ranking;worldBossRankingReady=true;saveWorldBossRankLocal_({bossInstanceId:worldBossCache.boss.instanceId,ranking:d.ranking});toast('世界 BOSS 貢獻排行已更新。')}catch(err){toast(`排行更新失敗：${err.message}`)}finally{worldBossRankingLoading=false;if(btn?.isConnected)btn.disabled=false;if(state.page==='worldboss')render()}
 }
 function startWorldBossConfirmed24_(){
   const p=worldBossPlanningData_(),b=worldBossCache?.boss;if(!p||!b){toast('世界 BOSS 資料尚未準備完成。');return}if(String(b.status)==='DEAD'||Number(b.currentHp)<=0){toast('世界 BOSS 已被擊敗。');return}if(Number(worldBossCache.attemptsLeft||0)<=0){toast('今日世界 BOSS 挑戰次數已用完。');return}
@@ -30883,7 +30883,7 @@ for(const name of ['useSkill','skipPlayerTurn','useBattleItem']){
  };
 }
 </script>
-<style data-ui449="worldboss-desktop-preview">
+<style data-ui449="worldboss-desktop">
 html.desktop-ui body #app #page #hubScene413 .wb449{position:relative!important;width:min(1220px,calc(100vw - 48px))!important;height:min(760px,var(--window-height421,calc(100dvh - 96px)))!important;max-height:var(--window-height421,calc(100dvh - 96px))!important;border:1px solid #a28b5e!important;border-radius:8px!important;background:#202329!important;box-shadow:0 24px 100px #000b,inset 0 0 0 3px #d9bd7a0a!important;display:grid!important;grid-template-rows:76px minmax(0,1fr) 82px!important;overflow:hidden!important;color:#ede3ce!important;font-family:'Microsoft JhengHei',sans-serif!important}
 html.desktop-ui body #app #page #hubScene413 .wb449 *{box-sizing:border-box}
 html.desktop-ui body #app #page #hubScene413 .wb449 :is(h1,h2,h3,h4,p){margin:0!important}
@@ -31010,7 +31010,7 @@ html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449.ranking{gap:1
 html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449.ranking .wb-rank-row449{padding:5px 12px}
 html.desktop-ui body #app #page #hubScene413 .wb449 .wb-content449.ranking .wb-rank-meter449{margin-top:4px}
 </style>
-<script data-ui449="worldboss-desktop-preview">
+<script data-ui449="worldboss-desktop">
 function worldBossModel449_(){
  const d=worldBossCache||{},p=worldBossPlanningData_(),b=d.boss;
  const known=!!(p&&b),dead=known&&(String(b.status)==='DEAD'||Number(b.currentHp)<=0);

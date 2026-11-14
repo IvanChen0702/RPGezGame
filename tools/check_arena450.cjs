@@ -13,7 +13,7 @@ const assert=require('node:assert/strict');
    document.body.classList.remove('login-required-lock');initialEntryShown45_=true;
    save=()=>{};isCloudLoggedIn=()=>true;toast=t=>window.lastToast450=t;bootstrapDataCache={};
    window.fixture450=(mobile=false)=>{
-    state=defaultState();state.page='arena';state.maxCleared=50;
+    updateCooldowns132.clear();state=defaultState();state.page='arena';state.maxCleared=50;
     cloudMeta={accountId:'synthetic-450',sessionToken:'fixture'};
     viewModePreference_=mobile?'mobile':'desktop';applyViewMode_();arenaTab_='challenge';
     arenaCache_={status:{ok:true,needsDefense:false,season:{seasonId:'fixture'}},ranking:[{rank:1,nickname:'舊排行',points:10}],rankingLoaded:true,revenge:[{revengeId:'fixture-revenge',targetNickname:'復仇測試玩家',winDelta:2}],revengeLoaded:true};
@@ -25,7 +25,7 @@ const assert=require('node:assert/strict');
    render=()=>{
     window.renderCount450=(window.renderCount450||0)+1;
     const root=document.getElementById('page');root.dataset.gamePage=state.page;
-    root.innerHTML=hubActive413_()?renderHub413_('arena'):arenaTab_==='revenge'?renderArenaRevenge_():renderArenaRanking_();
+    root.innerHTML=hubActive413_()?renderHub413_(state.page):renderArena_();
     hubMount413_();hubKit413_(root);
    };
    window.defer450=()=>{calls450=[];apiPost=action=>{calls450.push(action);return new Promise(resolve=>window.resolve450=resolve);};};
@@ -99,14 +99,53 @@ const assert=require('node:assert/strict');
   console.log('PASS late responses cannot reopen dialogs, replace another tab or cross account/cache changes');
 
   await p.setViewportSize({width:390,height:844});
+  // Let the application's debounced resize render finish before installing the fixture.
+  await p.waitForTimeout(500);
   await p.evaluate(()=>{fixture450(true);arenaTab_='ranking';render();});
   await p.click('#arenaRankingRefreshBtn');
-  await p.waitForFunction(()=>document.querySelector('.arena-rank-player')?.textContent.includes('最新排行'),null,{timeout:5000}).catch(async e=>{console.log(await p.evaluate(()=>({cache:arenaCache_,tab:arenaTab_,page:state.page,mode:viewMode_,calls:calls450,visible:arenaPaneVisible450_('ranking'),text:document.querySelector('.arena-rank-player')?.textContent})));throw e;});
+  await p.waitForFunction(()=>document.querySelector('.arena-rank-player')?.textContent.includes('最新排行'));
   await p.evaluate(()=>{arenaTab_='revenge';next450={ok:true,rows:[{revengeId:'mobile',targetNickname:'手機復仇'}]};render();});
   await p.locator('.arena-revenge-panel214 .section-title button').click();
   await p.waitForFunction(()=>document.querySelector('.arena-revenge-list214')?.textContent.includes('手機復仇'));
   assert.equal(await p.locator('.arena-revenge-list214').evaluate(e=>e.style.getPropertyValue('overflow')),'');
   assert.deepEqual(errors,[]);
   console.log('PASS mobile refresh preserved; desktop inline styles do not leak; no script errors');
+
+  // Exercise the approved world-boss dialog with production readers and synthetic API responses.
+  await p.setViewportSize({width:1440,height:900});await p.waitForTimeout(500);
+  await p.evaluate(()=>{
+   fixture450();state.page='worldboss';updateCooldowns132.clear();
+   worldBossPlanningData_=()=>({bossId:'poisonDragon',name:'測試首領',maxHp:100000,maxTurns:5,attempts:2,topRewardCount:10,chestGoldMin:10,chestGoldMax:20,chestStone:5,chestGemId:'fixture-gem',chestGemRate:.5,gem:{name:'測試寶石'},patk:100,matk:100,def:50,skillDescription:'合成測試情報'});
+   worldBossCache={boss:{instanceId:'fixture-boss',bossId:'poisonDragon',currentHp:90000,status:'ALIVE'},attemptsLeft:2,attemptsMax:2,pendingChests:[]};
+   localStorage.removeItem(worldBossPendingKey448());hubUI413_={mode:'worldboss',facility:'ranking'};
+   apiPost=async action=>{
+    if(action==='worldboss/ranking')return {ok:true,ranking:{top10:[{rank:1,nickname:'更新後貢獻排行',damage:1234}],mine:{rank:1,damage:1234},totalPlayers:1}};
+    if(action==='worldboss/status')return {...worldBossCache,boss:{...worldBossCache.boss,currentHp:12345}};
+    if(action==='worldboss/reward/check')return {ok:true,chests:[{rewardId:'fixture-reward',rank:1,status:'PENDING',chestType:'測試寶箱',rewardGemId:'fixture-gem',rewardGoldMin:10,rewardGoldMax:20,rewardStones:5,expiresAt:new Date(Date.now()+3600000).toISOString()}]};
+    throw Error('Unexpected fixture request '+action);
+   };render();
+  });
+  await p.locator('.wb-pane-heading449 button').click();
+  await p.waitForFunction(()=>document.querySelector('.wb-rank-list449')?.textContent.includes('更新後貢獻排行'));
+  // The existing update cooldown lasts three seconds; the button must recover after it.
+  await p.waitForFunction(()=>!document.querySelector('.wb-pane-heading449 button').disabled,null,{timeout:5000});
+  await p.click('#worldBossRefreshBtn');
+  await p.waitForFunction(()=>worldBossCache.boss.currentHp===12345);
+  assert.match(await p.locator('.wb-hp-detail449').innerText(),/12,345/);
+  await p.click('[data-hub-tab422="rewards"]');await p.click('#worldBossChestCheckBtn');
+  await p.waitForFunction(()=>document.querySelector('[data-wb-chest-btn="fixture-reward"]'));
+  await p.evaluate(()=>gameConfirm_=async text=>{window.confirm450=text;return false;});
+  await p.click('[data-wb-chest-btn="fixture-reward"]');
+  assert.match(await p.evaluate(()=>confirm450),/測試寶箱/);assert.match(await p.evaluate(()=>confirm450),/10～20/);
+  for(const [width,height] of [[1440,900],[1280,720],[1024,600],[1920,1080]]){
+   await p.setViewportSize({width,height});
+   for(const tab of ['challenge','ranking','rewards']){
+    await p.evaluate(tab=>hubOpen413_(tab),tab);
+    const geometry=await p.locator('.wb449').evaluate(e=>{const r=e.getBoundingClientRect(),c=e.querySelector('.wb-content449');return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,overflow:c.scrollWidth-c.clientWidth};});
+    assert.ok(geometry.left>=0&&geometry.top>=0&&geometry.right<=width+1&&geometry.bottom<=height+1,JSON.stringify(geometry));assert.ok(geometry.overflow<=1);
+   }
+  }
+  assert.deepEqual(errors,[]);
+  console.log('PASS world-boss ranking/status/chest handlers and four desktop viewport layouts');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
