@@ -1,0 +1,841 @@
+{
+  "version": 457,
+  "anchors": {
+    "male": {
+      "neck": [
+        [
+          [
+            205,
+            69
+          ],
+          [
+            586,
+            69
+          ],
+          [
+            962,
+            70
+          ],
+          [
+            1349,
+            71
+          ]
+        ],
+        [
+          [
+            193,
+            402
+          ],
+          [
+            583,
+            402
+          ],
+          [
+            962,
+            403
+          ],
+          [
+            1346,
+            401
+          ]
+        ],
+        [
+          [
+            195,
+            740
+          ],
+          [
+            584,
+            741
+          ],
+          [
+            960,
+            740
+          ],
+          [
+            1347,
+            740
+          ]
+        ]
+      ],
+      "hands": [
+        [
+          [
+            304,
+            192
+          ],
+          [
+            684,
+            189
+          ],
+          [
+            1061,
+            190
+          ],
+          [
+            1450,
+            191
+          ]
+        ],
+        [
+          [
+            317,
+            434
+          ],
+          [
+            699,
+            433
+          ],
+          [
+            1085,
+            431
+          ],
+          [
+            1469,
+            432
+          ]
+        ],
+        [
+          [
+            143,
+            821
+          ],
+          [
+            519,
+            822
+          ],
+          [
+            900,
+            823
+          ],
+          [
+            1294,
+            822
+          ]
+        ]
+      ],
+      "palms": [
+        [
+          304,
+          736
+        ],
+        [
+          685,
+          735
+        ],
+        [
+          1070,
+          733
+        ],
+        [
+          1453,
+          735
+        ]
+      ],
+      "targetNeck": [
+        136,
+        102
+      ],
+      "foot": 245
+    },
+    "female": {
+      "neck": [
+        [
+          [
+            199,
+            55
+          ],
+          [
+            575,
+            54
+          ],
+          [
+            941,
+            55
+          ],
+          [
+            1322,
+            55
+          ]
+        ],
+        [
+          [
+            199,
+            388
+          ],
+          [
+            575,
+            387
+          ],
+          [
+            939,
+            388
+          ],
+          [
+            1317,
+            387
+          ]
+        ],
+        [
+          [
+            200,
+            721
+          ],
+          [
+            576,
+            722
+          ],
+          [
+            941,
+            721
+          ],
+          [
+            1320,
+            722
+          ]
+        ]
+      ],
+      "hands": [
+        [
+          [
+            294,
+            174
+          ],
+          [
+            668,
+            175
+          ],
+          [
+            1035,
+            175
+          ],
+          [
+            1415,
+            176
+          ]
+        ],
+        [
+          [
+            317,
+            421
+          ],
+          [
+            698,
+            420
+          ],
+          [
+            1055,
+            421
+          ],
+          [
+            1438,
+            421
+          ]
+        ],
+        [
+          [
+            157,
+            802
+          ],
+          [
+            527,
+            805
+          ],
+          [
+            893,
+            803
+          ],
+          [
+            1273,
+            803
+          ]
+        ]
+      ],
+      "palms": [
+        [
+          304,
+          724
+        ],
+        [
+          671,
+          724
+        ],
+        [
+          1046,
+          726
+        ],
+        [
+          1419,
+          726
+        ]
+      ],
+      "targetNeck": [
+        136,
+        102
+      ],
+      "foot": 242
+    }
+  },
+  "parts": {
+    "body245_male_4_idle": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_4_idle-457.webp",
+      "rect": {
+        "left": 71,
+        "top": 52,
+        "width": 273,
+        "height": 256
+      },
+      "neck": [
+        205,
+        69
+      ],
+      "scale": 0.5983263598326359,
+      "offset": [
+        56,
+        92
+      ],
+      "hand": [
+        195,
+        176
+      ]
+    },
+    "body245_male_5_idle": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_5_idle-457.webp",
+      "rect": {
+        "left": 430,
+        "top": 47,
+        "width": 293,
+        "height": 261
+      },
+      "neck": [
+        586,
+        69
+      ],
+      "scale": 0.5983263598326359,
+      "offset": [
+        43,
+        89
+      ],
+      "hand": [
+        195,
+        174
+      ]
+    },
+    "body245_male_6_idle": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_6_idle-457.webp",
+      "rect": {
+        "left": 812,
+        "top": 54,
+        "width": 288,
+        "height": 254
+      },
+      "neck": [
+        962,
+        70
+      ],
+      "scale": 0.6008403361344538,
+      "offset": [
+        46,
+        92
+      ],
+      "hand": [
+        195,
+        174
+      ]
+    },
+    "body245_male_7_idle": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_7_idle-457.webp",
+      "rect": {
+        "left": 1200,
+        "top": 54,
+        "width": 284,
+        "height": 254
+      },
+      "neck": [
+        1349,
+        71
+      ],
+      "scale": 0.6033755274261603,
+      "offset": [
+        46,
+        92
+      ],
+      "hand": [
+        197,
+        174
+      ]
+    },
+    "body245_male_4_attack": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_4_attack-457.webp",
+      "rect": {
+        "left": 49,
+        "top": 385,
+        "width": 292,
+        "height": 244
+      },
+      "neck": [
+        193,
+        402
+      ],
+      "scale": 0.6299559471365639,
+      "offset": [
+        45,
+        91
+      ],
+      "hand": [
+        214,
+        122
+      ]
+    },
+    "body245_male_5_attack": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_5_attack-457.webp",
+      "rect": {
+        "left": 413,
+        "top": 375,
+        "width": 313,
+        "height": 254
+      },
+      "neck": [
+        583,
+        402
+      ],
+      "scale": 0.6299559471365639,
+      "offset": [
+        29,
+        85
+      ],
+      "hand": [
+        209,
+        122
+      ]
+    },
+    "body245_male_6_attack": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_6_attack-457.webp",
+      "rect": {
+        "left": 801,
+        "top": 386,
+        "width": 307,
+        "height": 243
+      },
+      "neck": [
+        962,
+        403
+      ],
+      "scale": 0.6327433628318584,
+      "offset": [
+        34,
+        91
+      ],
+      "hand": [
+        214,
+        120
+      ]
+    },
+    "body245_male_7_attack": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_7_attack-457.webp",
+      "rect": {
+        "left": 1202,
+        "top": 385,
+        "width": 291,
+        "height": 244
+      },
+      "neck": [
+        1346,
+        401
+      ],
+      "scale": 0.6271929824561403,
+      "offset": [
+        46,
+        92
+      ],
+      "hand": [
+        213,
+        121
+      ]
+    },
+    "body245_male_4_cast": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_4_cast-457.webp",
+      "rect": {
+        "left": 47,
+        "top": 696,
+        "width": 294,
+        "height": 281
+      },
+      "neck": [
+        195,
+        740
+      ],
+      "scale": 0.6033755274261603,
+      "offset": [
+        47,
+        75
+      ],
+      "hand": [
+        105,
+        151
+      ],
+      "palm": [
+        202,
+        100
+      ]
+    },
+    "body245_male_5_cast": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_5_cast-457.webp",
+      "rect": {
+        "left": 410,
+        "top": 699,
+        "width": 313,
+        "height": 278
+      },
+      "neck": [
+        584,
+        741
+      ],
+      "scale": 0.6059322033898306,
+      "offset": [
+        31,
+        77
+      ],
+      "hand": [
+        97,
+        151
+      ],
+      "palm": [
+        197,
+        98
+      ]
+    },
+    "body245_male_6_cast": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_6_cast-457.webp",
+      "rect": {
+        "left": 795,
+        "top": 697,
+        "width": 307,
+        "height": 280
+      },
+      "neck": [
+        960,
+        740
+      ],
+      "scale": 0.6033755274261603,
+      "offset": [
+        36,
+        76
+      ],
+      "hand": [
+        100,
+        152
+      ],
+      "palm": [
+        202,
+        98
+      ]
+    },
+    "body245_male_7_cast": {
+      "src": "assets/images/characters/player/male/bodies/body245_male_7_cast-457.webp",
+      "rect": {
+        "left": 1194,
+        "top": 699,
+        "width": 297,
+        "height": 278
+      },
+      "neck": [
+        1347,
+        740
+      ],
+      "scale": 0.6033755274261603,
+      "offset": [
+        44,
+        77
+      ],
+      "hand": [
+        104,
+        151
+      ],
+      "palm": [
+        200,
+        99
+      ]
+    },
+    "body245_female_4_idle": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_4_idle-457.webp",
+      "rect": {
+        "left": 74,
+        "top": 42,
+        "width": 263,
+        "height": 268
+      },
+      "neck": [
+        199,
+        55
+      ],
+      "scale": 0.5490196078431373,
+      "offset": [
+        67,
+        95
+      ],
+      "hand": [
+        188,
+        167
+      ]
+    },
+    "body245_female_5_idle": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_5_idle-457.webp",
+      "rect": {
+        "left": 433,
+        "top": 38,
+        "width": 275,
+        "height": 272
+      },
+      "neck": [
+        575,
+        54
+      ],
+      "scale": 0.546875,
+      "offset": [
+        58,
+        93
+      ],
+      "hand": [
+        187,
+        168
+      ]
+    },
+    "body245_female_6_idle": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_6_idle-457.webp",
+      "rect": {
+        "left": 800,
+        "top": 41,
+        "width": 275,
+        "height": 269
+      },
+      "neck": [
+        941,
+        55
+      ],
+      "scale": 0.5490196078431373,
+      "offset": [
+        59,
+        94
+      ],
+      "hand": [
+        188,
+        168
+      ]
+    },
+    "body245_female_7_idle": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_7_idle-457.webp",
+      "rect": {
+        "left": 1198,
+        "top": 41,
+        "width": 261,
+        "height": 269
+      },
+      "neck": [
+        1322,
+        55
+      ],
+      "scale": 0.5490196078431373,
+      "offset": [
+        68,
+        94
+      ],
+      "hand": [
+        187,
+        168
+      ]
+    },
+    "body245_female_4_attack": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_4_attack-457.webp",
+      "rect": {
+        "left": 73,
+        "top": 374,
+        "width": 264,
+        "height": 261
+      },
+      "neck": [
+        199,
+        388
+      ],
+      "scale": 0.5668016194331984,
+      "offset": [
+        65,
+        94
+      ],
+      "hand": [
+        203,
+        121
+      ]
+    },
+    "body245_female_5_attack": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_5_attack-457.webp",
+      "rect": {
+        "left": 420,
+        "top": 367,
+        "width": 295,
+        "height": 268
+      },
+      "neck": [
+        575,
+        387
+      ],
+      "scale": 0.5645161290322581,
+      "offset": [
+        48,
+        91
+      ],
+      "hand": [
+        205,
+        121
+      ]
+    },
+    "body245_female_6_attack": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_6_attack-457.webp",
+      "rect": {
+        "left": 791,
+        "top": 373,
+        "width": 288,
+        "height": 262
+      },
+      "neck": [
+        939,
+        388
+      ],
+      "scale": 0.5668016194331984,
+      "offset": [
+        52,
+        93
+      ],
+      "hand": [
+        202,
+        121
+      ]
+    },
+    "body245_female_7_attack": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_7_attack-457.webp",
+      "rect": {
+        "left": 1190,
+        "top": 373,
+        "width": 270,
+        "height": 262
+      },
+      "neck": [
+        1317,
+        387
+      ],
+      "scale": 0.5645161290322581,
+      "offset": [
+        64,
+        94
+      ],
+      "hand": [
+        204,
+        121
+      ]
+    },
+    "body245_female_4_cast": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_4_cast-457.webp",
+      "rect": {
+        "left": 58,
+        "top": 691,
+        "width": 279,
+        "height": 281
+      },
+      "neck": [
+        200,
+        721
+      ],
+      "scale": 0.5577689243027888,
+      "offset": [
+        57,
+        85
+      ],
+      "hand": [
+        112,
+        147
+      ],
+      "palm": [
+        194,
+        104
+      ]
+    },
+    "body245_female_5_cast": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_5_cast-457.webp",
+      "rect": {
+        "left": 422,
+        "top": 691,
+        "width": 288,
+        "height": 281
+      },
+      "neck": [
+        576,
+        722
+      ],
+      "scale": 0.56,
+      "offset": [
+        50,
+        85
+      ],
+      "hand": [
+        109,
+        148
+      ],
+      "palm": [
+        189,
+        103
+      ]
+    },
+    "body245_female_6_cast": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_6_cast-457.webp",
+      "rect": {
+        "left": 793,
+        "top": 691,
+        "width": 285,
+        "height": 281
+      },
+      "neck": [
+        941,
+        721
+      ],
+      "scale": 0.5577689243027888,
+      "offset": [
+        53,
+        85
+      ],
+      "hand": [
+        109,
+        148
+      ],
+      "palm": [
+        195,
+        105
+      ]
+    },
+    "body245_female_7_cast": {
+      "src": "assets/images/characters/player/female/bodies/body245_female_7_cast-457.webp",
+      "rect": {
+        "left": 1184,
+        "top": 691,
+        "width": 275,
+        "height": 281
+      },
+      "neck": [
+        1320,
+        722
+      ],
+      "scale": 0.56,
+      "offset": [
+        60,
+        85
+      ],
+      "hand": [
+        110,
+        147
+      ],
+      "palm": [
+        191,
+        104
+      ]
+    }
+  }
+}

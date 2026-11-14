@@ -25,6 +25,6 @@
 - [catalog456.json](assets/catalog456.json) 記錄每個新路徑、搬移前來源、大小及 SHA-256，作為這次無損搬移證據。`previous: null` 代表本次新增的桌面背景。
 - [battle-scenes456.json](assets/battle-scenes456.json) 記錄重繪原生尺寸及站立基準；執行時使用 index.html 中同值的 `DESKTOP_SCENES456_`，不額外下載資料檔。
 - 新背景的站立基準為圖片高度 74%；等比例縮放後與 `pixelFloor203_()` 對齊，角色與陰影使用相同基準。桌面獨立靜態背景層最多約 400 萬像素，特效畫布仍約 160 萬；手機不下載桌面圖，桌面載入失敗使用原圖。
-- 新舊頭部與防具由同一角色合成器處理：舊頭部含頸部、新頭部截止於下顎，混搭時校正下顎並用新防具領口遮蓋多餘頸部。待機、攻擊、施法、整備與城鎮共用此規則。
+- v457 新防具以舊角色領口、腰線與腳底重新製作，原有頭部保持原座標；移除 v456 移動舊頭部及頸部覆蓋補丁。待機、攻擊、施法、整備與城鎮共用合成器。新部件與持武器接點見 tools/source-assets/avatar457/registration.json，雜湊清單見 docs/assets/catalog457.json。
 
 修改素材後執行 `python tools/audit_assets.py`、`python tools/package_site.py`，以及相關瀏覽器檢查。歷史素材沒有因「找不到直接引用」而被刪除。

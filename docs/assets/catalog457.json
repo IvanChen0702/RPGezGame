@@ -1,0 +1,149 @@
+{
+  "version": 457,
+  "files": [
+    {
+      "key": "body245_male_4_idle",
+      "path": "assets/images/characters/player/male/bodies/body245_male_4_idle-457.webp",
+      "bytes": 16488,
+      "sha256": "636386de86c01a3b14cdffc50cff0a7c0f75af85c52fed37e06827819a065747"
+    },
+    {
+      "key": "body245_male_5_idle",
+      "path": "assets/images/characters/player/male/bodies/body245_male_5_idle-457.webp",
+      "bytes": 17718,
+      "sha256": "0bfd9dd19e1380e5dbecc59837deb9da5b8487d26cbd1047312f92704279c0d9"
+    },
+    {
+      "key": "body245_male_6_idle",
+      "path": "assets/images/characters/player/male/bodies/body245_male_6_idle-457.webp",
+      "bytes": 15278,
+      "sha256": "76ce9156eeced513b2498d4b9f155c35b6a524266eb638d0f02604287032eac7"
+    },
+    {
+      "key": "body245_male_7_idle",
+      "path": "assets/images/characters/player/male/bodies/body245_male_7_idle-457.webp",
+      "bytes": 14398,
+      "sha256": "b4f94cf4a4a281b615bc0409dd898f2802f911456d7d7a80bd50d46c3797ce09"
+    },
+    {
+      "key": "body245_male_4_attack",
+      "path": "assets/images/characters/player/male/bodies/body245_male_4_attack-457.webp",
+      "bytes": 18080,
+      "sha256": "5966be1f5432ab92d0d186955c59d9982639b2f97e9ec2022b17b07fb36e74ff"
+    },
+    {
+      "key": "body245_male_5_attack",
+      "path": "assets/images/characters/player/male/bodies/body245_male_5_attack-457.webp",
+      "bytes": 19318,
+      "sha256": "fbb551895b9a3fa37885f9709a773673ccc017b1557af8458768cd65d2a0bb40"
+    },
+    {
+      "key": "body245_male_6_attack",
+      "path": "assets/images/characters/player/male/bodies/body245_male_6_attack-457.webp",
+      "bytes": 17008,
+      "sha256": "33771cbebce48c4b04a6c85d0db845ecf40a80e912ad2c2b39a74473b79e9676"
+    },
+    {
+      "key": "body245_male_7_attack",
+      "path": "assets/images/characters/player/male/bodies/body245_male_7_attack-457.webp",
+      "bytes": 15790,
+      "sha256": "6d14b685302e283c0af7f18b294731170c2b7681a22ce327f0dd4fc564bbbeb8"
+    },
+    {
+      "key": "body245_male_4_cast",
+      "path": "assets/images/characters/player/male/bodies/body245_male_4_cast-457.webp",
+      "bytes": 18710,
+      "sha256": "6571f08d291a39c6e7d4d017bb2f3a5cad5a0a68e309087f1ecd80491502e9bc"
+    },
+    {
+      "key": "body245_male_5_cast",
+      "path": "assets/images/characters/player/male/bodies/body245_male_5_cast-457.webp",
+      "bytes": 19700,
+      "sha256": "9db616f57aafc9c23773f6f78a3d6cfede4b31192e78ed50240343d28f3f110b"
+    },
+    {
+      "key": "body245_male_6_cast",
+      "path": "assets/images/characters/player/male/bodies/body245_male_6_cast-457.webp",
+      "bytes": 17686,
+      "sha256": "5a56b0487734699ef01465a8445132df2890b7dd7490c63b2b5d128cba4de838"
+    },
+    {
+      "key": "body245_male_7_cast",
+      "path": "assets/images/characters/player/male/bodies/body245_male_7_cast-457.webp",
+      "bytes": 17052,
+      "sha256": "3198e132e1de4655b7bdd256c29f3a5122b14ad2edfe09adde1f07c04fa54405"
+    },
+    {
+      "key": "body245_female_4_idle",
+      "path": "assets/images/characters/player/female/bodies/body245_female_4_idle-457.webp",
+      "bytes": 13992,
+      "sha256": "bf166d411731ac372b86daa9eb0a7641f157222442ccdfd962445be8dd0b4e23"
+    },
+    {
+      "key": "body245_female_5_idle",
+      "path": "assets/images/characters/player/female/bodies/body245_female_5_idle-457.webp",
+      "bytes": 14784,
+      "sha256": "5b5db959740be238305aaae40765a7d07db6b78071bedb467b5132a0e00d65d2"
+    },
+    {
+      "key": "body245_female_6_idle",
+      "path": "assets/images/characters/player/female/bodies/body245_female_6_idle-457.webp",
+      "bytes": 13078,
+      "sha256": "b19f1cf1b7a190458ad8837ebb12db2caa205a5f4e8bd44d83ea897019972337"
+    },
+    {
+      "key": "body245_female_7_idle",
+      "path": "assets/images/characters/player/female/bodies/body245_female_7_idle-457.webp",
+      "bytes": 11480,
+      "sha256": "ef3ca5b4ae02d5d0e66b0f644a5ab5048543e6865ab6cb3ac34135e5f920ed5a"
+    },
+    {
+      "key": "body245_female_4_attack",
+      "path": "assets/images/characters/player/female/bodies/body245_female_4_attack-457.webp",
+      "bytes": 15328,
+      "sha256": "e9cbf45a26af9b299cc7d7d7d979220bcbc7607e9a7a331aeb34dfbd3b8ab792"
+    },
+    {
+      "key": "body245_female_5_attack",
+      "path": "assets/images/characters/player/female/bodies/body245_female_5_attack-457.webp",
+      "bytes": 16158,
+      "sha256": "fb376a16f8470e7220d8db3140e484fc2b8f661281ce12d3b374e33ba48d564e"
+    },
+    {
+      "key": "body245_female_6_attack",
+      "path": "assets/images/characters/player/female/bodies/body245_female_6_attack-457.webp",
+      "bytes": 13780,
+      "sha256": "fff1da7a9d41dd9ae3db468e3a972d516883196f5c8349b34d8092571ff34462"
+    },
+    {
+      "key": "body245_female_7_attack",
+      "path": "assets/images/characters/player/female/bodies/body245_female_7_attack-457.webp",
+      "bytes": 12372,
+      "sha256": "dd8338886d8753e9fdf8be92f1154439dd346677dbb023087e275cd1dcf901f8"
+    },
+    {
+      "key": "body245_female_4_cast",
+      "path": "assets/images/characters/player/female/bodies/body245_female_4_cast-457.webp",
+      "bytes": 16348,
+      "sha256": "41feaf255e8b1ee3a35f380cd444d84b6c30f6e435f2c1e2069dfab2db90ece3"
+    },
+    {
+      "key": "body245_female_5_cast",
+      "path": "assets/images/characters/player/female/bodies/body245_female_5_cast-457.webp",
+      "bytes": 16414,
+      "sha256": "0ee4b6c4f608fdcc6de379e39986214b01c2ad21e431b241f28e87ebe88e786b"
+    },
+    {
+      "key": "body245_female_6_cast",
+      "path": "assets/images/characters/player/female/bodies/body245_female_6_cast-457.webp",
+      "bytes": 14240,
+      "sha256": "52f9bfa2dea057ae48009d94626a155d5c731650bfe760e9f465005d3157f668"
+    },
+    {
+      "key": "body245_female_7_cast",
+      "path": "assets/images/characters/player/female/bodies/body245_female_7_cast-457.webp",
+      "bytes": 13670,
+      "sha256": "949e37d7a9ed3d4905c86ca49887bbfd6e87113ab5fb83c02ae39a585c433441"
+    }
+  ]
+}

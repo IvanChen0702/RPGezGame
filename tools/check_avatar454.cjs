@@ -54,7 +54,7 @@ try{
  await p.emulateMedia({reducedMotion:'no-preference'});
  console.log('mirrored/reduced-motion',await p.evaluate(()=>{const r=pixelStage192_,g=r.gear.player,a={...pixelAnchor192_('player'),side:'enemy'},before=JSON.stringify(state.currentBattle),c=document.createElement('canvas');c.width=500;c.height=500;pixelDrawHero203_(c.getContext('2d'),a,g,500,{type:'skill386',visual386:'thunder',skillId386:'heavenlyThunder',start:0,duration:1800,rate386:1,shots386:[],expected386:3},false);if(before!==JSON.stringify(state.currentBattle))throw Error('visual changed battle');return 'PASS';}));
  // External-action failure falls back to idle instead of blanking the character.
- await p.route('**/body245_female_4_cast.webp*',r=>r.abort());
+ await p.route('**/body245_female_4_cast*.webp*',r=>r.abort());
  await p.evaluate(()=>{PIXEL_ART202_.body245_female_4_cast+='?test-failure454';delete pixelArtCache202_.body245_female_4_cast;heroCompositeCache228_.clear();artImage202_('body245_female_4_cast');});await p.waitForTimeout(250);
  assert(await p.evaluate(()=>{const g=pixelStage192_.gear.player;return !!artImage202_('body245_female_4_cast').avatarFallback454_&&!!femaleHeroComposite220_(g,'cast');}));
  assert.deepEqual(errors,[]);console.log('external asset fallback + no runtime errors PASS');
