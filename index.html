@@ -18366,7 +18366,9 @@ function render(){
   syncEntryButtons228_();
   finishUi206_();finishUi210_();decorateUnlockNotices264_();decorateRewardDots276_();
   restoreCommands363_(commandSnapshot363);updateHud398_();
-  restorePixelScroll193_(pixelScroll193);restoreBattleFeed408_(feedSnapshot408);syncEnemyNotice458_();requestAnimationFrame(syncEnemyNotice458_);syncPetTraining458_();
+  restorePixelScroll193_(pixelScroll193);restoreBattleFeed408_(feedSnapshot408);syncEnemyNotice458_();requestAnimationFrame(syncEnemyNotice458_);
+  // The first render can run before the later pets-ui script has been parsed.
+  if(typeof syncPetTraining458_==='function')syncPetTraining458_();
   restoreShopScroll36_(shopScroll36);
   if(typeof presenceSync358_==='function')presenceSync358_();mountTown311_();townNavSync311_();finishInventoryWindow315_();finishPresentation317_();
   townReady401_();
