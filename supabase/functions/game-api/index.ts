@@ -1218,96 +1218,33 @@ async function distributeWorldBossRewards_(bossInstanceId) {
   };
 }
 async function submitWorldBossChallenge_(body) {
-  // v11.31.72: 不需要 STARTED challenge；戰鬥結束時一次驗證、建立 DONE Attempt、扣血並回傳最新狀態。
-  const auth = requireAuth_(body.sessionToken),
-    damage = Math.max(0, Math.trunc(Number(body.damage) || 0));
+  const auth = requireAuth_(body.sessionToken), cfg = await worldBossConfig_();
   const requestedBossId = String(body.bossInstanceId || '').trim();
-  const lock = LockService.getScriptLock();
-  await lock.waitLock(15000);
-  try {
-    const cfg = await worldBossConfig_(),
-      boss = await ensureWorldBossInstance_(),
-      dateKey = wbDateKey_();
-    if (!requestedBossId || String(boss.BossInstanceID) !== requestedBossId) return {
-      ok: false,
-      error: 'WORLD_BOSS_INSTANCE_CHANGED',
-      message: '世界 BOSS 已更新，這次戰績無法套用到新的 BOSS。'
-    };
-    if (String(boss.Status) !== 'ALIVE' || Number(boss.CurrentHP) <= 0) return {
-      ok: false,
-      error: 'WORLD_BOSS_DEAD',
-      message: '世界 BOSS 已被其他玩家擊敗。'
-    };
-    const used = (await readObjects_(DB.WORLD_BOSS_ATTEMPTS)).filter(r => String(r.AccountID).trim() === String(auth.accountId).trim() && normalizeWbDateKey_(r.DateKey) === normalizeWbDateKey_(dateKey) && String(r.Status).toUpperCase() === 'DONE').length;
-    if (used >= cfg.attempts) return {
-      ok: false,
-      error: 'WORLD_BOSS_NO_ATTEMPTS',
-      message: '今日世界 BOSS 挑戰次數已用完。'
-    };
-    const actual = Math.min(damage, Math.max(0, Math.trunc(Number(boss.CurrentHP) || 0)));
-    const hp = Math.max(0, Math.trunc(Number(boss.CurrentHP) || 0) - actual);
-    const patch = {
-      CurrentHP: hp,
-      Revision: (Number(boss.Revision) || 1) + 1
-    };
-    if (hp <= 0) {
-      const deadAt = new Date(),
-        respawn = new Date(deadAt.getTime() + cfg.respawnMinutes * 60000);
-      patch.Status = 'DEAD';
-      patch.DeadAt = deadAt.toISOString();
-      patch.RespawnAt = respawn.toISOString();
-    }
-    await updateRowObject_(DB.WORLD_BOSS_STATE, boss.__row, patch);
-    const acc = await runtimeAccountById_(auth.accountId),
-      now = new Date().toISOString(),
-      challengeId = wbNewId_('wbc');
-    await appendObject_(DB.WORLD_BOSS_ATTEMPTS, {
-      ChallengeID: challengeId,
-      BossInstanceID: requestedBossId,
-      AccountID: auth.accountId,
-      Nickname: String(acc?.Nickname || '冒險者'),
-      DateKey: dateKey,
-      AttemptNo: used + 1,
-      StartedAt: now,
-      SubmittedAt: now,
-      Damage: actual,
-      Status: 'DONE'
-    });
-    invalidateWorldBossRankingCache_(requestedBossId);
-    const latest = await findRowByValue_(DB.WORLD_BOSS_STATE, 'BossInstanceID', requestedBossId);
-    let chestAwarded = false,
-      chest = null;
-    if (latest && String(latest.Status) === 'DEAD') {
-      await distributeWorldBossRewards_(requestedBossId);
-      const reward = (await readObjects_(DB.WORLD_BOSS_REWARDS)).find(r => String(r.BossInstanceID || '').trim() === requestedBossId && String(r.AccountID || '').trim() === String(auth.accountId).trim());
-      if (reward) {
-        const ex = await wbRewardExpiryInfo_(reward, Date.now());
-        chestAwarded = true;
-        chest = {
-          rewardId: String(reward.RewardID),
-          rank: Number(reward.Rank) || 0,
-          chestType: String(reward.ChestType || '世界 BOSS 寶箱'),
-          expiresAt: ex.expiresAt
-        };
-      }
-    }
-    return {
-      ok: true,
-      challengeId,
-      acceptedDamage: actual,
-      bossHp: latest ? Number(latest.CurrentHP) || 0 : 0,
-      bossStatus: latest ? String(latest.Status) : 'DEAD',
-      respawnAt: latest ? String(latest.RespawnAt || '') : '',
-      attemptNo: used + 1,
-      attemptsMax: cfg.attempts,
-      attemptsLeft: Math.max(0, cfg.attempts - (used + 1)),
-      serverNow: new Date().toISOString(),
-      chestAwarded,
-      chest
-    };
-  } finally {
-    await lock.releaseLock();
+  const damage = Number(body.damage);
+  // Old clients omitted a request ID. Keep their first submission compatible;
+  // new clients persist one UUID and the frozen damage until acknowledged.
+  const requestId = body.requestId == null ? Utilities.getUuid() : String(body.requestId);
+  if (!requestedBossId || !Number.isSafeInteger(damage) || damage < 0 ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId)) {
+    return {ok:false,error:'WORLD_BOSS_INVALID_SETTLEMENT'};
   }
+  const result = await secureRpc78('game_worldboss_submit448', {
+    p_account:auth.accountId, p_boss:requestedBossId, p_request:requestId,
+    p_damage:damage, p_attempts:cfg.attempts, p_respawn_minutes:cfg.respawnMinutes
+  });
+  if (!result.ok) return result;
+  invalidateWorldBossRankingCache_(requestedBossId);
+  // Reward delivery is independently recoverable via status. An award failure
+  // must never turn a committed damage/attempt receipt into a failed settlement.
+  if (result.bossStatus === 'DEAD' && result.settlementStatus !== 'boss_changed') {
+    try {
+      await distributeWorldBossRewards_(requestedBossId);
+      const reward=(await readObjects_(DB.WORLD_BOSS_REWARDS)).find(r=>String(r.BossInstanceID)===requestedBossId&&String(r.AccountID).trim()===String(auth.accountId).trim());
+      if(reward){const expiry=await wbRewardExpiryInfo_(reward,Date.now());result.chestAwarded=true;result.chest={rewardId:String(reward.RewardID),rank:Number(reward.Rank)||0,chestType:String(reward.ChestType||'世界 BOSS 寶箱'),expiresAt:expiry.expiresAt};}
+    }
+    catch (_) { result.rewardsPending = true; console.warn('WORLD_BOSS_REWARD_RECOVERY_PENDING448'); }
+  }
+  return {chestAwarded:false, chest:null, ...result};
 }
 // ------------------------------
 // Boxing Machine v11.24.0

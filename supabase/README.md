@@ -64,3 +64,17 @@ npm --prefix supabase/tests test
 使用 PGlite 隔離 PostgreSQL 相容引擎，沒有正式資料庫連線。權限回歸以 **非 superuser、非 supabase_admin 成員的 postgres** 重現 438 錯誤，確認 440 可獨立提交、平台 ACL 完整保留且報告列為未完成、441 被拒絕不影響已提交的 440，並驗證真正有權限的管理員可完成平台修正。
 
 另涵蓋可重跑、其他權限與資料不變、匿名／登入／伺服器／批次背包呼叫，以及非預期 PUBLIC 授權時原子回滾。寵物測試涵蓋不同 presence／Auth／legacy ID、舊錯誤重現、換寵物／取消攜帶、異常關聯及私密資料保護。420 本機替身只模擬呼叫契約，不能代替正式整合測試。文件、測試與 SQL 均不打包到 Cloudflare 公開成品。
+
+## 世界 BOSS 結算 448
+
+`migrations/20261114042601_worldboss_settlement448.sql` 新增只限 service_role 執行的 `game_worldboss_submit448`（SECURITY INVOKER）。API 驗證帳號後，使用已發布企劃的次數／重生設定呼叫；不調整玩家存檔、舊次數、RLS 或歷史 migration。
+
+- Accounts 列鎖保護同帳號每日次數，WorldBossState 列鎖保護 Boss 血量；一次交易寫入扣血與 DONE 紀錄。
+- 前端固定 request UUID 與傷害值，回應中斷後重送同一筆。先查既有紀錄，再檢查死亡／每日上限，因此最後一擊重試不重複扣次數。
+- Boss 已死亡、已更替／移除：正常結束，不新增挑戰、不把傷害轉到下一隻 Boss；每日次數已滿同樣正常離場。
+- 獎勵補發失敗不推翻已提交的結算，沿用 status 補發路徑。
+- 舊前端未帶 requestId 的首次提交仍相容，但完整跨網路重試去重須更新前端。
+- 前端結束旗標與結算請求分開，待確認時禁止技能／跳過／道具；可返回世界 Boss。待確認請求依帳號存放本機，重整後仍能確認，未確認前不開啟下一場。
+- 舊版已多扣的歷史紀錄無法只憑目前資料辨識，這次不批次修改或補發次數。
+
+順序：套用 448 → 部署 game-api → 發布前端。不可重新套用歷史 436／438。測試：`npm --prefix supabase/tests run test:worldboss`；本機瀏覽器流程：啟動 8443 HTTP server 後執行 `node tools/check_ui447_448.cjs`（需 Playwright 與 Chromium）。測試使用合成帳號／本機資料庫，涵蓋死亡競爭、重試、上限、午夜、交易回滾、權限、獎勵失敗，以及手機／桌面結算與 NPC 圖集。
