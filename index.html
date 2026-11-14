@@ -25740,13 +25740,32 @@ function renderArenaOffensePrep_(){
  <div class="arena-attack-columns"><section class="panel arena-attack-skills"><div class="section-title"><h3>進攻技能</h3><span class="badge">與一般戰鬥共用</span></div>${arenaSharedSkills328_()}</section>
  <section class="panel arena-attack-equipment"><div class="section-title"><h3>裝備配置</h3><span class="badge">與整備頁共用</span></div>${equipmentLoadoutPanel_()}${arenaEquipSlotsHtml_('offense',eq)}</section></div></section>`;
 }
-async function refreshArenaRanking_(btn){
- arenaCache_=arenaCache_||{};if(arenaCache_.rankingBusy)return;arenaCache_.rankingBusy=true;if(btn)setInlineLoading_(btn,true,'更新中...');
- try{const d=await apiPost('arena/ranking',{sessionToken:cloudMeta.sessionToken,limit:100},{maxRetry:1});if(!d?.ok)throw new Error(d?.error||'ARENA_RANKING_FAILED');arenaCache_.ranking=d.rows||[];arenaCache_.myRank=d.myRank||null;arenaCache_.rankingLoaded=true}
- catch(e){toast('競技場排行榜讀取失敗：'+e.message)}
- finally{arenaCache_.rankingBusy=false;if(btn&&btn.isConnected)setInlineLoading_(btn,false);if(state.page==='arena'&&arenaTab_==='ranking')render()}
+// Desktop hub tabs and the legacy/mobile tabs have separate selection state.
+function arenaPaneVisible450_(tab){
+ if(state.page!=='arena')return false;
+ return hubActive413_()?hubUI413_.mode==='arena'&&hubUI413_.facility===(tab==='revenge'?'record':tab):arenaTab_===tab;
 }
-
+function arenaReadCurrent450_(cache,session){
+ const current=characterSessionContext_();
+ return arenaCache_===cache&&session.accountId===current.accountId&&session.generation===current.generation;
+}
+async function refreshArenaRanking_(btn){
+ const cache=arenaCache_||(arenaCache_={}),session=characterSessionContext_();
+ if(cache.rankingBusy)return;cache.rankingBusy=true;if(btn)setInlineLoading_(btn,true,'更新中…');
+ try{
+  const d=await apiPost('arena/ranking',{sessionToken:cloudMeta.sessionToken,limit:100},{maxRetry:1});
+  if(!arenaReadCurrent450_(cache,session))return;
+  if(!d?.ok||!Array.isArray(d.rows))throw new Error(d?.error||'ARENA_RANKING_FAILED');
+  cache.ranking=d.rows;cache.myRank=d.myRank||null;cache.rankingLoaded=true;cache.rankingLoadError='';
+ }catch(e){if(arenaReadCurrent450_(cache,session)){cache.rankingLoadError=String(e.message||e);toast('競技場排行榜讀取失敗：'+e.message);}}
+ finally{
+  cache.rankingBusy=false;
+  if(arenaReadCurrent450_(cache,session)){
+   if(btn?.isConnected)setInlineLoading_(btn,false);
+   if(arenaPaneVisible450_('ranking'))render();
+  }
+ }
+}
 
 // v11.38.101: data-driven season rewards and dungeon-style prize cards.
 const ARENA_HAMMER_REWARDS57_ = [[1,1,10],[2,2,7],[3,3,5],[4,10,3],[11,999999,1]].map(([RankMin,RankMax,ConsumableQuantity])=>({RankMin,RankMax,EquipmentID:'',GemID:'',Gold:0,ConsumableID:'legendaryHammer',ConsumableQuantity,SeasonID:''}));
@@ -25909,7 +25928,7 @@ async function claimArenaReward_(btn){
 }
 function renderArenaRanking_(){
  const rows=arenaCache_?.ranking||[],me=arenaCache_?.myRank;
- return `<div class="panel arena-ranking-panel"><div class="section-title"><div><div class="arena-eyebrow">SEASON RANKING</div><h3 style="margin:1px 0 0">競技場排行榜</h3></div><button id="arenaRankingRefreshBtn" onclick="refreshArenaRanking_(this)">↻ 更新排行</button></div><div class="small">依積分排序；同積分依勝場、累積傷害與較早達成積分時間排序。</div>${me?`<div class="arena-my-rank"><span>我的名次</span><b>#${Number(me.rank||0)}</b><strong>${Number(me.points||0)} 分</strong></div>`:''}${rows.length?`<div class="arena-rank-list">${rows.map(r=>`<div class="arena-rank-row ${r.isSelf?'self':''}"><div class="arena-rank-no">#${Number(r.rank||0)}</div><div class="arena-rank-player"><b>${arenaName324_(r,r.nickname||'冒險者')}</b><span>${Number(r.wins||0)}W / ${Number(r.losses||0)}L / ${Number(r.draws||0)}D</span></div><div class="arena-rank-damage"><span>累積傷害</span><b>${Number(r.totalDamage||0).toLocaleString()}</b></div><div class="arena-rank-points">${Number(r.points||0)}<span>PTS</span></div></div>`).join('')}</div>`:`<div class="empty">${arenaCache_?.rankingBusy?'排行榜讀取中…':'目前尚無排行資料'}</div>`}</div>`;
+ return `<div class="panel arena-ranking-panel"><div class="section-title"><div><div class="arena-eyebrow">SEASON RANKING</div><h3 style="margin:1px 0 0">競技場排行榜</h3></div><button id="arenaRankingRefreshBtn" onclick="refreshArenaRanking_(this)" ${arenaCache_?.rankingBusy?'disabled aria-busy="true"':''}>${arenaCache_?.rankingBusy?'更新中…':'↻ 更新排行'}</button></div><div class="small">依積分排序；同積分依勝場、累積傷害與較早達成積分時間排序。</div>${me?`<div class="arena-my-rank"><span>我的名次</span><b>#${Number(me.rank||0)}</b><strong>${Number(me.points||0)} 分</strong></div>`:''}${rows.length?`<div class="arena-rank-list">${rows.map(r=>`<div class="arena-rank-row ${r.isSelf?'self':''}"><div class="arena-rank-no">#${Number(r.rank||0)}</div><div class="arena-rank-player"><b>${arenaName324_(r,r.nickname||'冒險者')}</b><span>${Number(r.wins||0)}W / ${Number(r.losses||0)}L / ${Number(r.draws||0)}D</span></div><div class="arena-rank-damage"><span>累積傷害</span><b>${Number(r.totalDamage||0).toLocaleString()}</b></div><div class="arena-rank-points">${Number(r.points||0)}<span>PTS</span></div></div>`).join('')}</div>`:`<div class="empty">${arenaCache_?.rankingBusy?'排行榜讀取中…':arenaCache_?.rankingLoadError?'排行榜讀取失敗，請重新整理。':arenaCache_?.rankingLoaded?'目前尚無排行資料':'尚未讀取排行，請按更新排行。'}</div>`}</div>`;
 }
 const ARENA_CONFIG_DEFAULT126_={SeasonDays:7,StartPoints:10,MinPoints:0,DailyOpponentCount:5,MaxTurns:20,PlayerWinDelta:2,PlayerLoseDelta:-2,DefenderWinDelta:2,DefenderLoseDelta:-2,NpcWinDelta:1,NpcLoseDelta:-1,DrawDelta:0,RevengeWinDelta:2,RevengeLoseDelta:0,DailyResetTimezone:'Asia/Taipei',ArenaLevel:250,RankingTopReward:0,RetryWinDelta:1,RetryLoseDelta:-1,RetryDefenderWinDelta:1,RetryDefenderLoseDelta:-1};
 function arenaParseConfig126_(rows){
@@ -25939,8 +25958,9 @@ function renderArenaChallenge_(){
 }
 function renderArenaRevenge_(){
  const rows=arenaCache_?.revenge||[];
- return `<div class="panel arena-revenge-panel214"><div class="section-title"><h3>復仇名單</h3><button onclick="refreshArenaRevenge_(this)">重新整理</button></div>
- <div class="arena-revenge-list214" tabindex="0" aria-label="復仇名單">${rows.length?rows.map(r=>`<div class="between" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${arenaName324_(r,r.targetNickname||'未知玩家')}</b><div class="small">此復仇權保留至賽季結束</div><div class="small arena-points179"><span>勝利 +${Number(r.winDelta??2)}</span><span>失敗 0</span></div></div><button class="danger" onclick="arenaStartRevenge_('${escapeAttr(r.revengeId)}',this)">復仇</button></div>`).join(''):'<div class="empty">目前沒有可復仇的玩家。</div>'}</div></div>`;
+ return `<div class="panel arena-revenge-panel214"><div class="section-title"><h3>復仇名單</h3><button onclick="refreshArenaRevenge_(this)" ${arenaCache_?.revengeBusy?'disabled aria-busy="true"':''}>${arenaCache_?.revengeBusy?'更新中…':'重新整理'}</button></div>
+ ${arenaCache_?.revengeLoadError&&rows.length?'<div class="notice" role="status">更新失敗，目前顯示上次的名單，請重新整理。</div>':''}
+ <div class="arena-revenge-list214" tabindex="0" aria-label="復仇名單">${rows.length?rows.map(r=>`<div class="between" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${arenaName324_(r,r.targetNickname||'未知玩家')}</b><div class="small">此復仇權保留至賽季結束</div><div class="small arena-points179"><span>勝利 +${Number(r.winDelta??2)}</span><span>失敗 0</span></div></div><button class="danger" onclick="arenaStartRevenge_('${escapeAttr(r.revengeId)}',this)">復仇</button></div>`).join(''):`<div class="empty">${arenaCache_?.revengeBusy?'復仇名單讀取中…':arenaCache_?.revengeLoadError?'復仇名單讀取失敗，請重新整理。':arenaCache_?.revengeLoaded?'目前沒有可復仇的玩家。':'尚未讀取復仇名單，請按重新整理。'}</div>`}</div></div>`;
 }
 function renderArenaDefenseLegacy27_(){
  if(arenaDefenseTab_==='stats')arenaDefenseTab_='equipment';const d=arenaDraft_(),eq=arenaCache_?.defenseEquipment||arenaEquipmentSnapshot_(),snap=arenaSnapshot_();
@@ -26018,7 +26038,7 @@ async function refreshArena_(btn=null){
   try{
    const rv=await apiPost('arena/revenge/list',{sessionToken:cloudMeta.sessionToken},{silentLoading:true,maxRetry:1});
    if(!rv?.ok)throw new Error(rv?.error||'ARENA_REVENGE_FAILED');
-   arenaCache_.revenge=rv.rows||[];arenaCache_.revengeLoaded=true;
+   arenaCache_.revenge=rv.rows||[];arenaCache_.revengeLoaded=true;arenaCache_.revengeLoadError='';
   }catch(re){arenaCache_.revengeLoadError=String(re?.message||re);console.warn('Arena revenge refresh failed',re)}
  entryPhase228_('arena','ready');}catch(e){entryPhase228_('arena','error');toast('競技場讀取失敗：'+e.message)}
  finally{
@@ -26028,15 +26048,22 @@ async function refreshArena_(btn=null){
  }
 }
 async function refreshArenaRevenge_(btn=null){
- arenaCache_=arenaCache_||{};if(arenaCache_.revengeBusy)return;arenaCache_.revengeBusy=true;
+ const cache=arenaCache_||(arenaCache_={}),session=characterSessionContext_();
+ if(cache.revengeBusy)return;cache.revengeBusy=true;
  try{
-  if(btn){btn.disabled=true;btn.textContent='更新中...'}
+  if(btn)setInlineLoading_(btn,true,'更新中…');
   const d=await apiPost('arena/revenge/list',{sessionToken:cloudMeta.sessionToken},{silentLoading:true,maxRetry:1});
-  if(!d?.ok)throw new Error(d?.error||'ARENA_REVENGE_FAILED');
-  arenaCache_.revenge=d.rows||[];arenaCache_.revengeLoaded=true;
-  if(state.page==='arena')render();
- }catch(e){toast('復仇名單讀取失敗：'+e.message)}
- finally{arenaCache_.revengeBusy=false;if(btn&&btn.isConnected)btn.disabled=false;if(state.page==='arena'&&arenaTab_==='revenge')render()}
+  if(!arenaReadCurrent450_(cache,session))return;
+  if(!d?.ok||!Array.isArray(d.rows))throw new Error(d?.error||'ARENA_REVENGE_FAILED');
+  cache.revenge=d.rows;cache.revengeLoaded=true;cache.revengeLoadError='';
+ }catch(e){if(arenaReadCurrent450_(cache,session)){cache.revengeLoadError=String(e.message||e);toast('復仇名單讀取失敗：'+e.message);}}
+ finally{
+  cache.revengeBusy=false;
+  if(arenaReadCurrent450_(cache,session)){
+   if(btn?.isConnected)setInlineLoading_(btn,false);
+   if(arenaPaneVisible450_('revenge'))render();
+  }
+ }
 }
 function arenaSetAiCondition_(i,v){arenaCache_.defenseDirty=true;const d=arenaDraft_();d.ai=d.ai||[];d.ai[i]={...(d.ai[i]||{}),condition:v};}
 async function arenaUploadDefense_(btn){
@@ -29806,6 +29833,10 @@ function hubKit413_(root){
   list?.querySelectorAll('.commission326').forEach(n=>style(n,{'min-height':'220px','grid-template-rows':'20px minmax(64px,auto) 30px 44px'}));
   list?.querySelectorAll('.arena-challenge-btn').forEach(n=>style(n,{height:'44px','min-height':'44px','font-size':'15px'}));
   list?.querySelectorAll('.arena-opponent-name').forEach(n=>style(n,{'font-size':'16px'}));
+  // The old full-screen flex rule gives this list a zero basis inside an
+  // auto-height desktop dialog. Let the dialog content own vertical scrolling.
+  for(const node of content.querySelectorAll('.arena-revenge-panel214,.arena-revenge-list214'))
+   style(node,{display:'block',flex:'none',height:'auto','max-height':'none','overflow':'visible'});
   content.querySelectorAll('.hub-mission424 button.primary,.hub-mission424 button.danger').forEach(n=>style(n,{'min-height':'44px',padding:'10px 18px','font-size':'14px'}));
   content.querySelectorAll('.hub-mission424 .boxing-kpis').forEach(n=>style(n,{display:'grid','grid-template-columns':'repeat(3,minmax(0,1fr))',gap:'12px'}));
  }
@@ -29822,6 +29853,11 @@ function hubOpen413_(id){
  if(!Object.hasOwn(hubLayout413_[mode].tabs,id))return;
  const switching=!!hubUI413_.facility;
  hubFocus413_='challenge';hubUI413_.facility=id;hubKeys413_.clear();
+ // Desktop navigation does not call setArenaTab_ (the mobile/legacy entry).
+ if(mode==='arena'){
+  if(id==='ranking'&&!arenaCache_?.rankingLoaded)void refreshArenaRanking_();
+  if(id==='record'&&!arenaCache_?.revengeLoaded&&!arenaBusy_)void refreshArenaRevenge_();
+ }
  const current=document.querySelector('#hubScene413 .hub-overlay413');
  if(switching&&current){
   current.outerHTML=hubDialog413_(mode,id);
