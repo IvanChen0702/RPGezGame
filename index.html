@@ -16507,12 +16507,10 @@ function femaleHeroComposite220_(g,pose='idle'){
  const c=document.createElement('canvas');c.width=c.height=512;const q=c.getContext('2d');q.imageSmoothingEnabled=false;q.translate(128,128);const crop246=HERO_CROPS246_[`${sex}_${suit}_${pose}`]||[0,0,256,256];q.drawImage(im,...crop246,...crop246);
  // Jaw and head sit above body. Use a single continuous horizontal seam.
  q.save();q.beginPath();const outline245=sex==='female'?[[40,0],[198,0],[198,88],[171,103],[127,103],[109,85],[76,79],[40,74]]:[[91,0],[201,0],[201,89],[169,104],[124,102],[109,85],[91,70]];outline245.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();q.clip();if(suit<4)q.clearRect(0,0,256,110);q.restore();
- // v456: old heads include a neck; new heads end at the jaw. Register the jaw,
- // then let the new collar cover the excess old neck instead of leaving a cut edge.
- const headDy456=suit>=4&&hs<4?(sex==='male'?8:6):suit<4&&hs>=4?-6:0;
- q.drawImage(hd,0,headDy456,256,256);
- if(suit>=4&&hs<4)q.drawImage(im,0,110,256,146,0,110,256,146);
- c.heroFrame250_={pad:128,size:256,foot:spriteMetrics203_(im).foot,top:Math.min(spriteMetrics203_(im).top,spriteMetrics203_(hd).top+headDy456/256)};
+ // v457: bodies are authored against the original collar/sole rig. Old heads stay fixed.
+ const headDy457=hs>=4?-6:0;
+ q.drawImage(hd,0,headDy457,256,256);
+ c.heroFrame250_={pad:128,size:256,foot:spriteMetrics203_(im).foot,top:Math.min(spriteMetrics203_(im).top,spriteMetrics203_(hd).top+headDy457/256)};
  if(weapon)drawAttachedWeapon246_(q,weapon,im,g,pose,suit);
  heroCompositeCache228_.set(cacheKey245,c);if(heroCompositeCache228_.size>24)heroCompositeCache228_.delete(heroCompositeCache228_.keys().next().value);return c;
 }
@@ -31340,6 +31338,42 @@ pixelDrawHero203_=function(c,a,g,t,action,phantom){
  paint(idle,1-m.weight);paint(cast,m.weight);c.restore();floatingAura454_(c,a,m,true);c.restore();return true;
 };
 
+</script>
+<script id="avatar-body457">
+// Approved v457 bodies use the original collar/sole rig instead of moving legacy heads.
+PIXEL_ART202_["body245_male_4_idle"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_4_idle-457.webp");
+PIXEL_ART202_["body245_male_5_idle"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_5_idle-457.webp");
+PIXEL_ART202_["body245_male_6_idle"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_6_idle-457.webp");
+PIXEL_ART202_["body245_male_7_idle"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_7_idle-457.webp");
+PIXEL_ART202_["body245_male_4_attack"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_4_attack-457.webp");
+PIXEL_ART202_["body245_male_5_attack"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_5_attack-457.webp");
+PIXEL_ART202_["body245_male_6_attack"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_6_attack-457.webp");
+PIXEL_ART202_["body245_male_7_attack"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_7_attack-457.webp");
+PIXEL_ART202_["body245_male_4_cast"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_4_cast-457.webp");
+PIXEL_ART202_["body245_male_5_cast"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_5_cast-457.webp");
+PIXEL_ART202_["body245_male_6_cast"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_6_cast-457.webp");
+PIXEL_ART202_["body245_male_7_cast"]=assetSrc393_("assets/images/characters/player/male/bodies/body245_male_7_cast-457.webp");
+PIXEL_ART202_["body245_female_4_idle"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_4_idle-457.webp");
+PIXEL_ART202_["body245_female_5_idle"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_5_idle-457.webp");
+PIXEL_ART202_["body245_female_6_idle"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_6_idle-457.webp");
+PIXEL_ART202_["body245_female_7_idle"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_7_idle-457.webp");
+PIXEL_ART202_["body245_female_4_attack"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_4_attack-457.webp");
+PIXEL_ART202_["body245_female_5_attack"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_5_attack-457.webp");
+PIXEL_ART202_["body245_female_6_attack"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_6_attack-457.webp");
+PIXEL_ART202_["body245_female_7_attack"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_7_attack-457.webp");
+PIXEL_ART202_["body245_female_4_cast"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_4_cast-457.webp");
+PIXEL_ART202_["body245_female_5_cast"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_5_cast-457.webp");
+PIXEL_ART202_["body245_female_6_cast"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_6_cast-457.webp");
+PIXEL_ART202_["body245_female_7_cast"]=assetSrc393_("assets/images/characters/player/female/bodies/body245_female_7_cast-457.webp");
+HERO_HANDS246_.male[4]={"idle": [195, 176], "attack": [214, 122], "cast": [105, 151], "palm": [202, 100]};
+HERO_HANDS246_.male[5]={"idle": [195, 174], "attack": [209, 122], "cast": [97, 151], "palm": [197, 98]};
+HERO_HANDS246_.male[6]={"idle": [195, 174], "attack": [214, 120], "cast": [100, 152], "palm": [202, 98]};
+HERO_HANDS246_.male[7]={"idle": [197, 174], "attack": [213, 121], "cast": [104, 151], "palm": [200, 99]};
+HERO_HANDS246_.female[4]={"idle": [188, 167], "attack": [203, 121], "cast": [112, 147], "palm": [194, 104]};
+HERO_HANDS246_.female[5]={"idle": [187, 168], "attack": [205, 121], "cast": [109, 148], "palm": [189, 103]};
+HERO_HANDS246_.female[6]={"idle": [188, 168], "attack": [202, 121], "cast": [109, 148], "palm": [195, 105]};
+HERO_HANDS246_.female[7]={"idle": [187, 168], "attack": [204, 121], "cast": [110, 147], "palm": [191, 104]};
+heroCompositeCache228_.clear();
 </script>
 </body>
 </html>
