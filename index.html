@@ -21138,6 +21138,18 @@ function settlementError417_(err,step,ticket){
  const floor=Number(ticket.selection?.floor);
  return (ticket.selection?.mode==='main'&&floor>0?'主線第 '+floor+' 層':'戰鬥')+'・'+step+'：'+reason+(code&&code!==reason?'（'+code+'）':'');
 }
+// Retry only explicit pre-dispatch contention, with the persisted settlement ID.
+async function finishRequest452_(ticket,session){
+ const payload={battleId:ticket.battleId,...ticket.finish};
+ for(let attempt=0;;attempt++){
+  assertCharacterSession_(session);
+  try{return await apiPost('battle/finish',payload,{silentLoading:true,maxRetry:0});}
+  catch(err){
+   if(err?.code!=='SERVER_BUSY'||err?.httpStatus!==429||attempt>=2)throw err;
+   await new Promise(resolve=>setTimeout(resolve,2000));
+  }
+ }
+}
 async function finishBattle78_(b,result='won'){
  if(b?.settled78)return true;
  const ticket=b?.ticket78||battlePending78_();if(!ticket?.battleId)throw Error('本次戰鬥尚未確認，請重新進入。');b ||= state.currentBattle;const session=characterSessionContext_();
@@ -21159,7 +21171,7 @@ async function finishBattle78_(b,result='won'){
       receipt={...outcome,accountId:status.accountId,revision:status.revision,goatCount:status.battle.goatCount??outcome.goatCount};
     }
   }
-  if(!receipt){step='寫入戰鬥結果';receipt=await apiPost('battle/finish',{battleId:ticket.battleId,...ticket.finish},{silentLoading:true,maxRetry:0});}
+  if(!receipt){step='寫入戰鬥結果';receipt=await finishRequest452_(ticket,session);}
   assertCharacterSession_(session);
   if(receipt?.accountId!==session.accountId || !Number.isSafeInteger(Number(receipt.revision)) || Number(receipt.revision)<=0)throw Error('結算回應的帳號或版本不符。');
   step='讀回通關存檔';

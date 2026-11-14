@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node permissions438.mjs && node permissions440.mjs && node presence439.mjs && node --test lease446.mjs && node worldboss448.mjs",
+    "test": "node permissions438.mjs && node permissions440.mjs && node presence439.mjs && node --test lease446.mjs && node worldboss448.mjs && node jobs452.mjs",
     "test:lease": "node --test lease446.mjs",
     "test:worldboss": "node worldboss448.mjs"
   },
