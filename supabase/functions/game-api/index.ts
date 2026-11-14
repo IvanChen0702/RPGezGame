@@ -118,7 +118,7 @@ function petOpen297(data,save,quantity,rng,id,boxId='petEgg'){
 }
 
 
-export function makeEngine({base,key,token,actor,planning,privateConfig={},fetcher=fetch,guard=async()=>{},runJob=async(_stage,work)=>work(),readTimeoutMs=15000}){
+export function makeEngine({base,key,token,actor,planning,privateConfig={},fetcher=fetch,guard=async()=>{},runJob=async(_stage,work)=>work(),readTimeoutMs=15000,readOnly=false}){
 const EDGE_BASE=base,EDGE_KEY=key,EDGE_TOKEN=token,EDGE_ACTOR=actor,EDGE_PLANNING=planning,EDGE_PRIVATE=privateConfig;
 const encodeBytes=v=>typeof v==='string'?new TextEncoder().encode(v):new Uint8Array(v.map(x=>x&255));
 const Utilities={getUuid:()=>crypto.randomUUID(),DigestAlgorithm:{SHA_256:'SHA-256'},Charset:{UTF_8:'UTF-8'},newBlob:s=>({getBytes:()=>[...new TextEncoder().encode(s)]}),
@@ -131,7 +131,10 @@ const cache=new Map();const CacheService={getScriptCache:()=>({get:k=>cache.get(
 const PropertiesService={getScriptProperties:()=>({getProperty:k=>k==='SUPABASE_URL'?base:k==='SUPABASE_SERVICE_KEY'?key:k==='SERVER_SECRET'?'edge-not-used-for-primary':'',setProperty(){},deleteProperty(){}})};
 const LockService={getScriptLock:()=>({waitLock:guard,releaseLock:async()=>{}})};
 const UrlFetchApp={fetch:async(url,opt={})=>{
- await guard();const u=new URL(url);if(u.origin!==new URL(base).origin||!u.pathname.startsWith('/rest/v1/'))throw Error('OUTBOUND_ROUTE_DENIED');
+ await guard();const u=new URL(url);
+ // Audited display routes must never gain an implicit write or RPC side effect.
+ if(readOnly&&(String(opt.method||'GET').toUpperCase()!=='GET'||u.pathname.startsWith('/rest/v1/rpc/')))throw Error('READ_PATH_WRITE_DENIED');
+ if(u.origin!==new URL(base).origin||!u.pathname.startsWith('/rest/v1/'))throw Error('OUTBOUND_ROUTE_DENIED');
  const h={...(opt.headers||{}),apikey:key};if(!key.startsWith('eyJ'))delete h.Authorization;
  if(opt.contentType)h['Content-Type']=opt.contentType;
  const r=await fetcher(url,{method:(opt.method||'GET').toUpperCase(),headers:h,body:opt.payload,signal:AbortSignal.timeout(String(opt.method||'GET').toUpperCase()==='GET'?readTimeoutMs:15000)});const text=await r.text();
@@ -6131,7 +6134,9 @@ state.base={hp:cfgNum('BaseHP',100),def:cfgNum('BaseDEF',0),patk:cfgNum('BasePAT
 }
 
 // v446: only audited read paths bypass the legacy cross-player mutation lease.
-const readActions446 = new Set(['battle/status', 'quest/status', 'chaos/catalog']);
+// v453: full dependency audit and response-parity tests; writes remain serialized.
+const readOnlyActions453 = new Set(['arena/ranking','arena/revenge/list','arena/reports','boxing/ranking','worldboss/ranking','auction/my-sales']);
+const readActions446 = new Set(['battle/status', 'quest/status', 'chaos/catalog', ...readOnlyActions453]);
 const traceActions446 = new Set([
  'health','leaderboard','data/version','data/bootstrap','profile/avatar/get','profile/avatar/set','profile/nickname',
  'save/get','save/set','auction/list','auction/create','auction/cancel','auction/buy','auction/my-sales','auction/claim',
@@ -6242,7 +6247,7 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
     if(lease.summary.release_state==='unconfirmed')throw Error('LOCK_RELEASE_UNCONFIRMED');
    }
   };
-  const engine=makeEngine({base,key,token,actor,planning:plans[0].data_json,privateConfig:Object.fromEntries(privateRows.map(x=>[x.name,x.rows])),fetcher,guard,runJob,readTimeoutMs:cron?5000:15000});
+  const engine=makeEngine({base,key,token,actor,planning:plans[0].data_json,privateConfig:Object.fromEntries(privateRows.map(x=>[x.name,x.rows])),fetcher,guard,runJob,readTimeoutMs:cron?5000:15000,readOnly:readOnlyActions453.has(body.action)});
   if(cron)return reply(200,{ok:true,...await (body.action==='system/boxingTick'?engine.boxingJobs():engine.jobs())});
   const data=await (publicActions.has(body.action)?engine.read(body):engine.dispatch(body));
   return reply(200,data);

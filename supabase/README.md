@@ -78,3 +78,7 @@ npm --prefix supabase/tests test
 - 舊版已多扣的歷史紀錄無法只憑目前資料辨識，這次不批次修改或補發次數。
 
 順序：套用 448 → 部署 game-api → 發布前端。不可重新套用歷史 436／438。測試：`npm --prefix supabase/tests run test:worldboss`；本機瀏覽器流程：啟動 8443 HTTP server 後執行 `node tools/check_ui447_448.cjs`（需 Playwright 與 Chromium）。測試使用合成帳號／本機資料庫，涵蓋死亡競爭、重試、上限、午夜、交易回滾、權限、獎勵失敗，以及手機／桌面結算與 NPC 圖集。
+
+## 顯示查詢免全域鎖 453
+
+六條已審核的純讀取路徑移出全域鎖，保留身分驗證、回應格式與玩法解鎖；會補獎或建立資料的狀態查詢仍保留原鎖。詳見 [依賴審核與測試](review/read_isolation453.md)。只更新 game-api 的兩個原始碼檔，無 SQL migration 或前端變更。
