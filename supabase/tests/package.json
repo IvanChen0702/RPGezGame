@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node permissions438.mjs && node permissions440.mjs && node presence439.mjs && node --test lease446.mjs",
-    "test:lease": "node --test lease446.mjs"
+    "test": "node permissions438.mjs && node permissions440.mjs && node presence439.mjs && node --test lease446.mjs && node worldboss448.mjs",
+    "test:lease": "node --test lease446.mjs",
+    "test:worldboss": "node worldboss448.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.16"

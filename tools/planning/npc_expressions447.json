@@ -1,0 +1,318 @@
+{
+  "lily": {
+    "source_sha256": "462f8f601b06041c7041a4c982646bfeb7a763d3927fa6d08e6fb2ae8528ea77",
+    "atlas": [
+      1920,
+      724
+    ],
+    "frame": [
+      480,
+      724
+    ],
+    "expressions": [
+      "deadpan",
+      "surprised",
+      "worried",
+      "serious"
+    ],
+    "frames": [
+      {
+        "source_box": [
+          133,
+          118,
+          516,
+          710
+        ],
+        "scale": 1.1137931034482758,
+        "placement": [
+          45,
+          22
+        ],
+        "body_height": 646,
+        "bottom": 675
+      },
+      {
+        "source_box": [
+          609,
+          118,
+          991,
+          710
+        ],
+        "scale": 1.1137931034482758,
+        "placement": [
+          45,
+          22
+        ],
+        "body_height": 646,
+        "bottom": 675
+      },
+      {
+        "source_box": [
+          134,
+          808,
+          517,
+          1400
+        ],
+        "scale": 1.1137931034482758,
+        "placement": [
+          45,
+          22
+        ],
+        "body_height": 646,
+        "bottom": 675
+      },
+      {
+        "source_box": [
+          609,
+          808,
+          993,
+          1400
+        ],
+        "scale": 1.1137931034482758,
+        "placement": [
+          44,
+          22
+        ],
+        "body_height": 646,
+        "bottom": 675
+      }
+    ]
+  },
+  "xi": {
+    "source_sha256": "83b7d0ed3686456f267c7b9f23939a83cf6c8cf61467e0fab067930d8341b5cd",
+    "atlas": [
+      1920,
+      724
+    ],
+    "frame": [
+      480,
+      724
+    ],
+    "expressions": [
+      "deadpan",
+      "surprised",
+      "worried",
+      "serious"
+    ],
+    "frames": [
+      {
+        "source_box": [
+          114,
+          124,
+          512,
+          738
+        ],
+        "scale": 1.159468438538206,
+        "placement": [
+          15,
+          11
+        ],
+        "body_height": 698,
+        "bottom": 716
+      },
+      {
+        "source_box": [
+          578,
+          125,
+          976,
+          738
+        ],
+        "scale": 1.161397670549085,
+        "placement": [
+          14,
+          11
+        ],
+        "body_height": 698,
+        "bottom": 716
+      },
+      {
+        "source_box": [
+          115,
+          806,
+          513,
+          1419
+        ],
+        "scale": 1.161397670549085,
+        "placement": [
+          14,
+          11
+        ],
+        "body_height": 698,
+        "bottom": 716
+      },
+      {
+        "source_box": [
+          578,
+          808,
+          976,
+          1419
+        ],
+        "scale": 1.1652754590984975,
+        "placement": [
+          13,
+          11
+        ],
+        "body_height": 698,
+        "bottom": 716
+      }
+    ]
+  },
+  "kazama": {
+    "source_sha256": "bd32d7f9b96ff3aa9493ae4683f47222f1210106fea1f5caaa41112ef6da2269",
+    "atlas": [
+      1920,
+      724
+    ],
+    "frame": [
+      480,
+      724
+    ],
+    "expressions": [
+      "deadpan",
+      "surprised",
+      "worried",
+      "serious"
+    ],
+    "frames": [
+      {
+        "source_box": [
+          85,
+          98,
+          501,
+          715
+        ],
+        "scale": 1.0512396694214876,
+        "placement": [
+          31,
+          34
+        ],
+        "body_height": 636,
+        "bottom": 676
+      },
+      {
+        "source_box": [
+          567,
+          99,
+          984,
+          715
+        ],
+        "scale": 1.0529801324503312,
+        "placement": [
+          30,
+          34
+        ],
+        "body_height": 636,
+        "bottom": 676
+      },
+      {
+        "source_box": [
+          85,
+          783,
+          502,
+          1401
+        ],
+        "scale": 1.0495049504950495,
+        "placement": [
+          31,
+          34
+        ],
+        "body_height": 636,
+        "bottom": 676
+      },
+      {
+        "source_box": [
+          569,
+          783,
+          985,
+          1401
+        ],
+        "scale": 1.0495049504950495,
+        "placement": [
+          31,
+          34
+        ],
+        "body_height": 636,
+        "bottom": 676
+      }
+    ]
+  },
+  "yexian": {
+    "source_sha256": "283142fb8e60beb9144939523053b78baf067a86371d626daa9342fe904dd5e5",
+    "atlas": [
+      1920,
+      724
+    ],
+    "frame": [
+      480,
+      724
+    ],
+    "expressions": [
+      "deadpan",
+      "surprised",
+      "worried",
+      "serious"
+    ],
+    "frames": [
+      {
+        "source_box": [
+          57,
+          124,
+          492,
+          780
+        ],
+        "scale": 1.0093167701863355,
+        "placement": [
+          24,
+          27
+        ],
+        "body_height": 650,
+        "bottom": 683
+      },
+      {
+        "source_box": [
+          532,
+          124,
+          959,
+          780
+        ],
+        "scale": 1.0093167701863355,
+        "placement": [
+          28,
+          27
+        ],
+        "body_height": 650,
+        "bottom": 683
+      },
+      {
+        "source_box": [
+          57,
+          854,
+          485,
+          1509
+        ],
+        "scale": 1.010886469673406,
+        "placement": [
+          27,
+          27
+        ],
+        "body_height": 650,
+        "bottom": 683
+      },
+      {
+        "source_box": [
+          533,
+          854,
+          965,
+          1509
+        ],
+        "scale": 1.010886469673406,
+        "placement": [
+          25,
+          27
+        ],
+        "body_height": 650,
+        "bottom": 683
+      }
+    ]
+  }
+}
