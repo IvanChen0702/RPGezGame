@@ -57,7 +57,7 @@ function harness(config = {}) {
     Response, Request, AbortSignal, crypto: webcrypto, Date: Clock,
     console: { info: line => logs.push(JSON.parse(line)) },
     createGameLease446: opts => createGameLease446({ ...opts, now: () => time, sleep: async ms => { time += ms; } }),
-    makeEngine: ({ guard, actor }) => ({
+    makeEngine: ({ guard, actor, runJob, readTimeoutMs }) => ({
       async dispatch(body) {
         entered.resolve();
         if (config.block) await gate.promise;
@@ -67,8 +67,19 @@ function harness(config = {}) {
         return { ok: true, accountId: actor.accountId, requestId: body.requestId };
       },
       async read() { return { ok: true }; },
-      async jobs() { operations.push('cron'); return { ok: true }; },
-      async boxingJobs() { operations.push('boxing-cron'); return { ok: true }; }
+      async jobs() {
+        assert.equal(readTimeoutMs, 5000);
+        const work = label => runJob(label, async () => {
+          assert.ok(owner); operations.push(label);
+          if (config.jobDeadline) { time += 8001; await guard(); }
+          if (config.jobError) throw Error('synthetic failure');
+          return { ok: true };
+        });
+        await work('boxing_season');
+        assert.equal(owner, null);
+        return work('worldboss_cleanup');
+      },
+      async boxingJobs() { return runJob('boxing_season', async () => { operations.push('boxing-cron'); return { ok: true }; }); }
     })
   };
   vm.createContext(context); vm.runInContext(wrapper + '\nthis.handler = makeGameApi;', context);
@@ -171,7 +182,7 @@ test('public reads and CORS do not acquire locks', async () => {
 });
 test('cron still needs its secret and shares the protected mutation path', async () => {
   const h = harness(); assert.equal((await h.request('system/tick')).status, 200);
-  assert.equal(h.acquires, 1); assert.equal(h.releases, 1); assert.deepEqual(h.operations, ['cron']);
+  assert.equal(h.acquires, 2); assert.equal(h.releases, 2); assert.deepEqual(h.operations, ['boxing_season','worldboss_cleanup']);
   const before = h.calls.length;
   const rejected = await h.api(new Request('https://edge.test', { method: 'POST', body: JSON.stringify({ action: 'system/tick' }) }));
   assert.equal(rejected.status, 403); assert.equal(h.calls.length, before);
@@ -182,4 +193,24 @@ test('runtime tracks the whole request through cleanup, including client abort',
   const response = handler(new Request('https://edge.test', { signal: controller.signal })); controller.abort();
   assert.ok(retained); assert.equal(finished, false); cleanup.resolve();
   assert.equal((await response).status, 200); await retained; assert.equal(finished, true);
+});
+
+test('cron unit failure releases the lock and does not start later units', async () => {
+ const h=harness({jobError:true});assert.equal((await h.request('system/tick')).status,503);
+ assert.equal(h.owner,null);assert.deepEqual(h.operations,['boxing_season']);
+ assert.ok(h.logs.some(x=>x.kind==='job_completed'&&x.release_state==='released'));
+});
+test('cron unit deadline releases before another database operation',async()=>{
+ const h=harness({jobDeadline:true});const r=await h.request('system/tick');
+ assert.equal((await r.json()).error,'JOB_EXECUTION_DEADLINE');assert.equal(h.owner,null);
+ assert.deepEqual(h.operations,['boxing_season']);
+});
+test('uncertain cron unlock never advances to the next unit',async()=>{
+ const h=harness({failReleases:99});const r=await h.request('system/tick');
+ assert.equal((await r.json()).error,'LOCK_RELEASE_UNCONFIRMED');
+ assert.deepEqual(h.operations,['boxing_season']);assert.equal(h.acquires,1);
+});
+test('contended cron never starts a job or releases another owner',async()=>{
+ const h=harness({owner:'player'});assert.equal((await h.request('system/tick')).status,429);
+ assert.deepEqual(h.operations,[]);assert.equal(h.owner,'player');assert.equal(h.releases,0);
 });

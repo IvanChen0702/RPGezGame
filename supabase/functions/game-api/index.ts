@@ -118,7 +118,7 @@ function petOpen297(data,save,quantity,rng,id,boxId='petEgg'){
 }
 
 
-export function makeEngine({base,key,token,actor,planning,privateConfig={},fetcher=fetch,guard=async()=>{}}){
+export function makeEngine({base,key,token,actor,planning,privateConfig={},fetcher=fetch,guard=async()=>{},runJob=async(_stage,work)=>work(),readTimeoutMs=15000}){
 const EDGE_BASE=base,EDGE_KEY=key,EDGE_TOKEN=token,EDGE_ACTOR=actor,EDGE_PLANNING=planning,EDGE_PRIVATE=privateConfig;
 const encodeBytes=v=>typeof v==='string'?new TextEncoder().encode(v):new Uint8Array(v.map(x=>x&255));
 const Utilities={getUuid:()=>crypto.randomUUID(),DigestAlgorithm:{SHA_256:'SHA-256'},Charset:{UTF_8:'UTF-8'},newBlob:s=>({getBytes:()=>[...new TextEncoder().encode(s)]}),
@@ -134,7 +134,7 @@ const UrlFetchApp={fetch:async(url,opt={})=>{
  await guard();const u=new URL(url);if(u.origin!==new URL(base).origin||!u.pathname.startsWith('/rest/v1/'))throw Error('OUTBOUND_ROUTE_DENIED');
  const h={...(opt.headers||{}),apikey:key};if(!key.startsWith('eyJ'))delete h.Authorization;
  if(opt.contentType)h['Content-Type']=opt.contentType;
- const r=await fetcher(url,{method:(opt.method||'GET').toUpperCase(),headers:h,body:opt.payload,signal:AbortSignal.timeout(15000)});const text=await r.text();
+ const r=await fetcher(url,{method:(opt.method||'GET').toUpperCase(),headers:h,body:opt.payload,signal:AbortSignal.timeout(String(opt.method||'GET').toUpperCase()==='GET'?readTimeoutMs:15000)});const text=await r.text();
  return {getResponseCode:()=>r.status,getContentText:()=>text};
 }};
 async function _asyncArray(method,rows,callback,...args){
@@ -1408,7 +1408,11 @@ async function settleBoxingSeason_(x) {
     settled: false,
     reason: 'NOT_ENDED'
   };
-  const rank = (await boxingRanking_(x.seasonId, '')).all.slice(0, 10),
+  // Settlement never needs player build snapshots or ranks below the reward cutoff.
+  const rank = (await boxingSbQuery_('BoxingRanking', {
+    select: 'account_id,nickname', season_id: 'eq.' + x.seasonId,
+    order: 'damage.desc,submitted_at.asc', limit: 10
+  })).map(p => ({accountId:String(p.account_id||''),nickname:String(p.nickname||'冒險者')})),
     r = x.row;
   const existing = await boxingSbQuery_('BoxingRewards', {
     select: 'reward_id,account_id,rank',
@@ -1461,7 +1465,7 @@ async function settleEndedBoxingSeasons() {
     const now = Date.now(),
       ended = (await boxingSeasonRows_()).filter(x => now >= x.end),
       results = [];
-    await _asyncArray("forEach", ended, async x => results.push(await settleBoxingSeason_(x)));
+    await _asyncArray("forEach", ended, async x => results.push(await runJob('boxing_season',()=>settleBoxingSeason_(x))));
     const out = {
       ok: true,
       checked: ended.length,
@@ -5930,7 +5934,7 @@ async function dispatchGate411_(body){
  const action=String(body.action||''),mode=action.startsWith('relic/')?'Relic':action.startsWith('extreme/')?'Extreme':action.startsWith('arena/')?'Arena':action.startsWith('worldboss/')?'WorldBoss':/boxing/.test(action)?'Boxing':body.selection?.mode==='dungeon'?'Dungeon':null;
  if(mode&&Number(save.maxCleared||0)<Number(RPG411.cfg(EDGE_PLANNING.data,mode+'UnlockFloor',999)))throw Error('MODE_NOT_UNLOCKED');
 }
-return {dispatch:async(body)=>(await dispatchGate411_(body), dispatch411_(body)),read:async(body)=>doGet({parameter:body}),initialSave:makeInitialSave_,legacyHash:hashPassword_,boxingJobs:async()=>({boxing:await settleEndedBoxingSeasons()}),jobs:async()=>({boxing:await settleEndedBoxingSeasons(),worldboss:await cleanupExpiredWorldBossData()})};
+return {dispatch:async(body)=>(await dispatchGate411_(body), dispatch411_(body)),read:async(body)=>doGet({parameter:body}),initialSave:makeInitialSave_,legacyHash:hashPassword_,boxingJobs:async()=>({boxing:await settleEndedBoxingSeasons()}),jobs:async()=>({boxing:await settleEndedBoxingSeasons(),worldboss:await runJob('worldboss_cleanup',()=>cleanupExpiredWorldBossData())})};
 async function dispatch411_(body){return String(body.action||'').startsWith('quest/')?questApi368(body):String(body.action||'').startsWith('chaos/')?chaosApi332(body):String(body.action||'').startsWith('pet/')?petApi297(body):String(body.action||'').startsWith('relic/')?relic144Api(body):String(body.action||'').startsWith('extreme/')?extreme130Api(body):["battle/status","battle/cancel"].includes(body.action)?secureRecovery79(body):["battle/start","battle/finish"].includes(body.action)?secureBattle78(body):doPost({postData:{contents:JSON.stringify(body)}});}
 }
 
@@ -6145,7 +6149,7 @@ const traceActions446 = new Set([
 const activeRequests446 = new Map();
 export function makeGameApi(env,fetcher=fetch){return async req=>{
  const owner=crypto.randomUUID(),started=Date.now();
- let action='unknown',phase='request',responseStatus=0,lease=null,lastGuard=0;
+ let action='unknown',phase='request',responseStatus=0,lease=null,lastGuard=0,jobStarted=0;
  const trace=(event,fields={})=>console.info(JSON.stringify({event:'game_api446',kind:event,trace_id:owner,action,phase,elapsed_ms:Date.now()-started,...fields}));
  const origins=(env('GAME_ALLOWED_ORIGINS')||'').split(',').map(x=>x.trim()).filter(Boolean),origin=req.headers.get('Origin');
  const cors=origin&&origins.includes(origin)?{'Access-Control-Allow-Origin':origin,Vary:'Origin','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST,OPTIONS'}:{};
@@ -6160,7 +6164,8 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
  const headers={apikey:key,'Content-Type':'application/json',...(key.startsWith('eyJ')?{Authorization:'Bearer '+key}:{})};
  const remote=async(path,options={},timeoutMs=15000)=>{const r=await fetcher(base+path,{...options,headers:{...headers,...options.headers},signal:AbortSignal.timeout(timeoutMs)});const data=await r.json();if(!r.ok){const e=Error(String(data?.message||'DATABASE_REQUEST_FAILED'));e.code=data?.message||'DATABASE_REQUEST_FAILED';e.httpStatus=r.status;throw e;}return data};
  const rpc=(name,body)=>remote('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(body)});
- lease=createGameLease446({owner,log:trace,rpc:body=>remote('/rest/v1/rpc/game_edge_lock',{method:'POST',body:JSON.stringify(body)},3000)});
+ const newLease=()=>createGameLease446({owner,log:trace,rpc:body=>remote('/rest/v1/rpc/game_edge_lock',{method:'POST',body:JSON.stringify(body)},3000)});
+ lease=newLease();
  try{
   const raw=await req.text();if(raw.length>540000)return reply(413,{ok:false,error:'REQUEST_TOO_LARGE'});
   let body;try{body=JSON.parse(raw)}catch{return reply(400,{ok:false,error:'INVALID_REQUEST'})}
@@ -6209,11 +6214,11 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
    if(plans.length!==1||!plans[0].data_json?.data)throw Error('PLANNING_NOT_PUBLISHED');
    privateRows=publicActions.has(body.action)||readActions446.has(body.action)?[]:await remote('/rest/v1/game_runtime_config?select=name,rows');
   }
-  if(!publicActions.has(body.action)&&!readActions446.has(body.action)){
+  if(!cron&&!publicActions.has(body.action)&&!readActions446.has(body.action)){
    phase='lock_wait';await lease.acquire();lastGuard=Date.now();
   }
   phase='execute';
-  const guard=async()=>{if(Date.now()-started>80000)throw Error('EXECUTION_DEADLINE');if(lease.held&&Date.now()-lastGuard>5000){await lease.renew();lastGuard=Date.now()}};
+  const guard=async()=>{if(jobStarted&&Date.now()-jobStarted>8000)throw Error('JOB_EXECUTION_DEADLINE');if(Date.now()-started>80000)throw Error('EXECUTION_DEADLINE');if(lease.held&&Date.now()-lastGuard>5000){await lease.renew();lastGuard=Date.now()}};
   await guard();
   if(body.action==='battle/cancel'){if(!body.battleId)return reply(400,{ok:false,error:'BATTLE_NOT_FOUND'});return reply(200,await rpc('game_battle_cancel79',{p_account:actor.accountId,p_battle:body.battleId}));}
   // v11.37.17: authenticate actor above; award and save under one database transaction.
@@ -6224,12 +6229,25 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
    const result=await rpc('game_worldboss_chest_open',{p_account:actor.accountId,p_reward_id:rewardId,p_expected_revision:expected});
    return reply(200,result);
   }
-  const engine=makeEngine({base,key,token,actor,planning:plans[0].data_json,privateConfig:Object.fromEntries(privateRows.map(x=>[x.name,x.rows])),fetcher,guard});
+  // Each cron unit retains the SAME mutation lock as player writes, but releases
+  // between seasons and cleanup. No force-release or concurrent legacy writers.
+  const runJob=async(stage,work)=>{
+   await guard();lease=newLease();phase='job_lock_wait';trace('job_started',{job:stage});
+   try{
+    await lease.acquire();lastGuard=Date.now();jobStarted=Date.now();phase='job_'+stage;
+    const result=await work();trace('job_succeeded',{job:stage});return result;
+   }finally{
+    jobStarted=0;await lease.release();trace('job_completed',{job:stage,...lease.summary});
+    // An uncertain release must not be followed by another unit using this owner.
+    if(lease.summary.release_state==='unconfirmed')throw Error('LOCK_RELEASE_UNCONFIRMED');
+   }
+  };
+  const engine=makeEngine({base,key,token,actor,planning:plans[0].data_json,privateConfig:Object.fromEntries(privateRows.map(x=>[x.name,x.rows])),fetcher,guard,runJob,readTimeoutMs:cron?5000:15000});
   if(cron)return reply(200,{ok:true,...await (body.action==='system/boxingTick'?engine.boxingJobs():engine.jobs())});
   const data=await (publicActions.has(body.action)?engine.read(body):engine.dispatch(body));
   return reply(200,data);
  }catch(err){
-  const known=['SERVER_BUSY','LOCK_LOST','LOCK_ACQUIRE_UNCERTAIN','EXECUTION_DEADLINE'].includes(err?.message)?err.message:null;
+  const known=['SERVER_BUSY','LOCK_LOST','LOCK_ACQUIRE_UNCERTAIN','LOCK_RELEASE_UNCONFIRMED','EXECUTION_DEADLINE','JOB_EXECUTION_DEADLINE'].includes(err?.message)?err.message:null;
   trace('request_failed',{failure:known||(['TimeoutError','AbortError'].includes(err?.name)?err.name:err?.httpStatus?'upstream_http':'application'),upstream_status:Number(err?.httpStatus)||null});
   if(known==='SERVER_BUSY')return reply(429,{ok:false,error:'SERVER_BUSY',traceId:owner});
   return reply(503,{ok:false,error:String(known||err?.code||'GAME_API_FAILED'),message:String(err?.message||'GAME_API_FAILED'),traceId:owner});
