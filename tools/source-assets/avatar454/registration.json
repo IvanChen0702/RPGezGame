@@ -1,0 +1,868 @@
+{
+  "bodies": {
+    "body245_male_4_idle": {
+      "rect": {
+        "left": 85,
+        "top": 45,
+        "width": 246,
+        "height": 242
+      },
+      "scale": 0.6033057851239669,
+      "offset": [
+        69.58677685950413,
+        99
+      ],
+      "hand": [
+        207,
+        182
+      ],
+      "palm": [
+        210,
+        518
+      ]
+    },
+    "body245_male_5_idle": {
+      "rect": {
+        "left": 446,
+        "top": 41,
+        "width": 244,
+        "height": 246
+      },
+      "scale": 0.5934959349593496,
+      "offset": [
+        65.47154471544715,
+        99
+      ],
+      "hand": [
+        200,
+        182
+      ],
+      "palm": [
+        204,
+        514
+      ]
+    },
+    "body245_male_6_idle": {
+      "rect": {
+        "left": 820,
+        "top": 43,
+        "width": 238,
+        "height": 244
+      },
+      "scale": 0.5983606557377049,
+      "offset": [
+        58.8360655737705,
+        99
+      ],
+      "hand": [
+        189,
+        183
+      ],
+      "palm": [
+        197,
+        516
+      ]
+    },
+    "body245_male_7_idle": {
+      "rect": {
+        "left": 1187,
+        "top": 46,
+        "width": 243,
+        "height": 241
+      },
+      "scale": 0.6058091286307054,
+      "offset": [
+        61.39834024896267,
+        99
+      ],
+      "hand": [
+        200,
+        182
+      ],
+      "palm": [
+        200,
+        519
+      ]
+    },
+    "body245_male_4_attack": {
+      "rect": {
+        "left": 83,
+        "top": 367,
+        "width": 259,
+        "height": 243
+      },
+      "scale": 0.6008230452674898,
+      "offset": [
+        68.6954732510288,
+        99
+      ],
+      "hand": [
+        212,
+        137
+      ],
+      "palm": [
+        210,
+        323
+      ]
+    },
+    "body245_male_5_attack": {
+      "rect": {
+        "left": 447,
+        "top": 354,
+        "width": 267,
+        "height": 256
+      },
+      "scale": 0.5703125,
+      "offset": [
+        69.1484375,
+        99
+      ],
+      "hand": [
+        208,
+        143
+      ],
+      "palm": [
+        202,
+        319
+      ]
+    },
+    "body245_male_6_attack": {
+      "rect": {
+        "left": 816,
+        "top": 365,
+        "width": 258,
+        "height": 245
+      },
+      "scale": 0.5959183673469388,
+      "offset": [
+        56.80408163265305,
+        99
+      ],
+      "hand": [
+        196,
+        138
+      ],
+      "palm": [
+        197,
+        322
+      ]
+    },
+    "body245_male_7_attack": {
+      "rect": {
+        "left": 1189,
+        "top": 369,
+        "width": 248,
+        "height": 241
+      },
+      "scale": 0.6058091286307054,
+      "offset": [
+        62.609958506224075,
+        99
+      ],
+      "hand": [
+        201,
+        137
+      ],
+      "palm": [
+        200,
+        324
+      ]
+    },
+    "body245_male_4_cast": {
+      "rect": {
+        "left": 84,
+        "top": 702,
+        "width": 259,
+        "height": 248
+      },
+      "scale": 0.5887096774193549,
+      "offset": [
+        70.82258064516128,
+        99
+      ],
+      "hand": [
+        128,
+        153
+      ],
+      "palm": [
+        209,
+        121
+      ]
+    },
+    "body245_male_5_cast": {
+      "rect": {
+        "left": 441,
+        "top": 690,
+        "width": 270,
+        "height": 261
+      },
+      "scale": 0.5593869731800766,
+      "offset": [
+        67.24521072796935,
+        99
+      ],
+      "hand": [
+        127,
+        158
+      ],
+      "palm": [
+        201,
+        127
+      ]
+    },
+    "body245_male_6_cast": {
+      "rect": {
+        "left": 817,
+        "top": 701,
+        "width": 261,
+        "height": 249
+      },
+      "scale": 0.5863453815261044,
+      "offset": [
+        58.80722891566266,
+        99
+      ],
+      "hand": [
+        119,
+        154
+      ],
+      "palm": [
+        196,
+        122
+      ]
+    },
+    "body245_male_7_cast": {
+      "rect": {
+        "left": 1189,
+        "top": 702,
+        "width": 252,
+        "height": 248
+      },
+      "scale": 0.5887096774193549,
+      "offset": [
+        64.93548387096774,
+        99
+      ],
+      "hand": [
+        120,
+        154
+      ],
+      "palm": [
+        199,
+        121
+      ]
+    },
+    "body245_female_4_idle": {
+      "rect": {
+        "left": 98,
+        "top": 55,
+        "width": 214,
+        "height": 252
+      },
+      "scale": 0.5793650793650794,
+      "offset": [
+        81.26984126984127,
+        99
+      ],
+      "hand": [
+        195,
+        180
+      ],
+      "palm": [
+        201,
+        495
+      ]
+    },
+    "body245_female_5_idle": {
+      "rect": {
+        "left": 444,
+        "top": 50,
+        "width": 225,
+        "height": 258
+      },
+      "scale": 0.5658914728682171,
+      "offset": [
+        69.73643410852713,
+        99
+      ],
+      "hand": [
+        186,
+        181
+      ],
+      "palm": [
+        203,
+        488
+      ]
+    },
+    "body245_female_6_idle": {
+      "rect": {
+        "left": 819,
+        "top": 55,
+        "width": 218,
+        "height": 253
+      },
+      "scale": 0.5770750988142292,
+      "offset": [
+        63.63241106719367,
+        99
+      ],
+      "hand": [
+        180,
+        180
+      ],
+      "palm": [
+        195,
+        493
+      ]
+    },
+    "body245_female_7_idle": {
+      "rect": {
+        "left": 1189,
+        "top": 54,
+        "width": 225,
+        "height": 254
+      },
+      "scale": 0.5748031496062992,
+      "offset": [
+        67.40157480314961,
+        99
+      ],
+      "hand": [
+        186,
+        180
+      ],
+      "palm": [
+        196,
+        492
+      ]
+    },
+    "body245_female_4_attack": {
+      "rect": {
+        "left": 91,
+        "top": 378,
+        "width": 238,
+        "height": 243
+      },
+      "scale": 0.6008230452674898,
+      "offset": [
+        74.7037037037037,
+        99
+      ],
+      "hand": [
+        205,
+        137
+      ],
+      "palm": [
+        203,
+        315
+      ]
+    },
+    "body245_female_5_attack": {
+      "rect": {
+        "left": 440,
+        "top": 373,
+        "width": 259,
+        "height": 248
+      },
+      "scale": 0.5887096774193549,
+      "offset": [
+        64.34677419354838,
+        99
+      ],
+      "hand": [
+        204,
+        139
+      ],
+      "palm": [
+        205,
+        314
+      ]
+    },
+    "body245_female_6_attack": {
+      "rect": {
+        "left": 814,
+        "top": 381,
+        "width": 243,
+        "height": 240
+      },
+      "scale": 0.6083333333333333,
+      "offset": [
+        56.18333333333334,
+        99
+      ],
+      "hand": [
+        192,
+        136
+      ],
+      "palm": [
+        197,
+        316
+      ]
+    },
+    "body245_female_7_attack": {
+      "rect": {
+        "left": 1188,
+        "top": 380,
+        "width": 243,
+        "height": 241
+      },
+      "scale": 0.6058091286307054,
+      "offset": [
+        62.609958506224075,
+        99
+      ],
+      "hand": [
+        197,
+        136
+      ],
+      "palm": [
+        199,
+        316
+      ]
+    },
+    "body245_female_4_cast": {
+      "rect": {
+        "left": 84,
+        "top": 704,
+        "width": 251,
+        "height": 255
+      },
+      "scale": 0.5725490196078431,
+      "offset": [
+        74.00392156862746,
+        99
+      ],
+      "hand": [
+        128,
+        152
+      ],
+      "palm": [
+        201,
+        118
+      ]
+    },
+    "body245_female_5_cast": {
+      "rect": {
+        "left": 439,
+        "top": 696,
+        "width": 270,
+        "height": 263
+      },
+      "scale": 0.5551330798479087,
+      "offset": [
+        68.3916349809886,
+        99
+      ],
+      "hand": [
+        125,
+        155
+      ],
+      "palm": [
+        202,
+        122
+      ]
+    },
+    "body245_female_6_cast": {
+      "rect": {
+        "left": 816,
+        "top": 704,
+        "width": 255,
+        "height": 255
+      },
+      "scale": 0.5725490196078431,
+      "offset": [
+        62.5529411764706,
+        99
+      ],
+      "hand": [
+        118,
+        152
+      ],
+      "palm": [
+        194,
+        118
+      ]
+    },
+    "body245_female_7_cast": {
+      "rect": {
+        "left": 1188,
+        "top": 704,
+        "width": 254,
+        "height": 255
+      },
+      "scale": 0.5725490196078431,
+      "offset": [
+        67.13333333333334,
+        99
+      ],
+      "hand": [
+        117,
+        152
+      ],
+      "palm": [
+        196,
+        118
+      ]
+    }
+  },
+  "heads": {
+    "head245_male_4": {
+      "rect": {
+        "left": 68,
+        "top": 90,
+        "width": 387,
+        "height": 254
+      },
+      "scale": 0.37,
+      "offset": [
+        55.83,
+        16.019999999999996
+      ]
+    },
+    "head245_male_5": {
+      "rect": {
+        "left": 581,
+        "top": 96,
+        "width": 239,
+        "height": 248
+      },
+      "scale": 0.37,
+      "offset": [
+        82.47,
+        18.61
+      ]
+    },
+    "head245_male_6": {
+      "rect": {
+        "left": 993,
+        "top": 116,
+        "width": 249,
+        "height": 234
+      },
+      "scale": 0.37,
+      "offset": [
+        78.77,
+        25.269999999999996
+      ]
+    },
+    "head245_male_7": {
+      "rect": {
+        "left": 1427,
+        "top": 111,
+        "width": 239,
+        "height": 258
+      },
+      "scale": 0.37,
+      "offset": [
+        78.4,
+        23.049999999999997
+      ]
+    },
+    "head245_female_4": {
+      "rect": {
+        "left": 67,
+        "top": 499,
+        "width": 388,
+        "height": 303
+      },
+      "scale": 0.37,
+      "offset": [
+        55.46000000000001,
+        12.320000000000007
+      ]
+    },
+    "head245_female_5": {
+      "rect": {
+        "left": 520,
+        "top": 503,
+        "width": 301,
+        "height": 294
+      },
+      "scale": 0.37,
+      "offset": [
+        59.900000000000006,
+        14.170000000000002
+      ]
+    },
+    "head245_female_6": {
+      "rect": {
+        "left": 944,
+        "top": 533,
+        "width": 298,
+        "height": 260
+      },
+      "scale": 0.37,
+      "offset": [
+        60.64,
+        24.53
+      ]
+    },
+    "head245_female_7": {
+      "rect": {
+        "left": 1374,
+        "top": 554,
+        "width": 300,
+        "height": 243
+      },
+      "scale": 0.37,
+      "offset": [
+        58.790000000000006,
+        31.930000000000007
+      ]
+    }
+  },
+  "weapons": {
+    "spatulaGod": {
+      "grip": [
+        50,
+        149
+      ],
+      "rect": {
+        "left": 0,
+        "top": 0,
+        "width": 274,
+        "height": 274
+      }
+    },
+    "guardianMace": {
+      "grip": [
+        71,
+        140
+      ],
+      "rect": {
+        "left": 274,
+        "top": 0,
+        "width": 273,
+        "height": 274
+      }
+    },
+    "imperialSaw": {
+      "grip": [
+        41,
+        68
+      ],
+      "rect": {
+        "left": 547,
+        "top": 0,
+        "width": 274,
+        "height": 274
+      }
+    },
+    "sunkenAnchor": {
+      "grip": [
+        122,
+        48
+      ],
+      "rect": {
+        "left": 821,
+        "top": 0,
+        "width": 273,
+        "height": 274
+      }
+    },
+    "shuriken": {
+      "grip": [
+        96,
+        98
+      ],
+      "rect": {
+        "left": 1094,
+        "top": 0,
+        "width": 274,
+        "height": 274
+      }
+    },
+    "houndFang": {
+      "grip": [
+        119,
+        71
+      ],
+      "rect": {
+        "left": 1368,
+        "top": 0,
+        "width": 273,
+        "height": 274
+      }
+    },
+    "executionerAxe": {
+      "grip": [
+        52,
+        149
+      ],
+      "rect": {
+        "left": 1641,
+        "top": 0,
+        "width": 274,
+        "height": 274
+      }
+    },
+    "turguraWeapon": {
+      "grip": [
+        92,
+        94
+      ],
+      "rect": {
+        "left": 0,
+        "top": 274,
+        "width": 274,
+        "height": 273
+      }
+    },
+    "fastsliver": {
+      "grip": [
+        56,
+        145
+      ],
+      "rect": {
+        "left": 274,
+        "top": 274,
+        "width": 273,
+        "height": 273
+      }
+    },
+    "samuraiBlade": {
+      "grip": [
+        56,
+        147
+      ],
+      "rect": {
+        "left": 547,
+        "top": 274,
+        "width": 274,
+        "height": 273
+      }
+    },
+    "bahamutBlade": {
+      "grip": [
+        56,
+        144
+      ],
+      "rect": {
+        "left": 821,
+        "top": 274,
+        "width": 273,
+        "height": 273
+      }
+    },
+    "chronosArcaneStaff": {
+      "grip": [
+        54,
+        145
+      ],
+      "rect": {
+        "left": 1094,
+        "top": 274,
+        "width": 274,
+        "height": 273
+      }
+    },
+    "mirrorImageGreatsword": {
+      "grip": [
+        142,
+        50
+      ],
+      "rect": {
+        "left": 1368,
+        "top": 274,
+        "width": 273,
+        "height": 273
+      }
+    },
+    "mirrorMyriadStaff": {
+      "grip": [
+        59,
+        145
+      ],
+      "rect": {
+        "left": 1641,
+        "top": 274,
+        "width": 274,
+        "height": 273
+      }
+    },
+    "mirrorTwinSpellblade": {
+      "grip": [
+        96,
+        47
+      ],
+      "rect": {
+        "left": 0,
+        "top": 547,
+        "width": 274,
+        "height": 274
+      }
+    },
+    "astraGreatsword": {
+      "grip": [
+        135,
+        50
+      ],
+      "rect": {
+        "left": 274,
+        "top": 547,
+        "width": 273,
+        "height": 274
+      }
+    },
+    "astralLance": {
+      "grip": [
+        50,
+        145
+      ],
+      "rect": {
+        "left": 547,
+        "top": 547,
+        "width": 274,
+        "height": 274
+      }
+    },
+    "chaosSeverBlade": {
+      "grip": [
+        140,
+        48
+      ],
+      "rect": {
+        "left": 821,
+        "top": 547,
+        "width": 273,
+        "height": 274
+      }
+    },
+    "chaosSoulStaff": {
+      "grip": [
+        56,
+        147
+      ],
+      "rect": {
+        "left": 1094,
+        "top": 547,
+        "width": 274,
+        "height": 274
+      }
+    },
+    "chaosTwinBlade": {
+      "grip": [
+        136,
+        50
+      ],
+      "rect": {
+        "left": 1368,
+        "top": 547,
+        "width": 273,
+        "height": 274
+      }
+    },
+    "goldendragonWeapon1": {
+      "grip": [
+        56,
+        145
+      ],
+      "rect": {
+        "left": 1641,
+        "top": 547,
+        "width": 274,
+        "height": 274
+      }
+    }
+  }
+}
