@@ -1,11 +1,13 @@
 /* Local fixtures only; network writes are stubbed and all external requests are blocked. */
 const assert=require('assert/strict'),fs=require('fs'),path=require('path');
-const {chromium}=require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const browsers=require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const out=process.env.UI458_OUT||'/workspace/work/ui458/results';fs.mkdirSync(out,{recursive:true});
 (async()=>{
- const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+ const engine=process.env.GAME_TEST_ENGINE||'chromium';
+ const browser=await browsers[engine].launch(engine==='chromium'?{executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']}:{headless:true});
  const p=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
- p.on('pageerror',e=>errors.push(e.message));
+ let resizeWarnings=0;
+ p.on('pageerror',e=>{if(e.message==='ResizeObserver loop completed with undelivered notifications.')resizeWarnings++;else errors.push(e.message);});
  await p.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
  try{
  await p.goto('http://127.0.0.1:8443/',{waitUntil:'networkidle'});
@@ -62,7 +64,11 @@ const out=process.env.UI458_OUT||'/workspace/work/ui458/results';fs.mkdirSync(ou
  });
  assert(await p.locator('#petTrainButton458').isDisabled());assert.match(await p.locator('#petTrainingFunds458').innerText(),/強化石不足.*1/);
  await p.screenshot({path:path.join(out,'pet-insufficient.jpg'),type:'jpeg',quality:85});
- await p.evaluate(()=>{state.stones=5;render();});assert(await p.locator('#petTrainButton458').isEnabled());
+ await p.evaluate(()=>{bootstrapDataCache.PetTrainingCosts[0].StoneCost=100;state.stones=91;state.pets297[0].level=25;state.pets297[0].traits=state.pets297[0].traits.slice(0,1);petPaint297();});
+ assert(await p.locator('#petTrainButton458').isDisabled());assert.match(await p.locator('#petTrainingFunds458').innerText(),/強化石不足.*9/);
+ assert.equal(await p.locator('#petTrainButton458').evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(41, 41, 41)');
+ await p.screenshot({path:path.join(out,'pet-91-of-100.jpg'),type:'jpeg',quality:85});
+ await p.evaluate(()=>{bootstrapDataCache.PetTrainingCosts[0].StoneCost=5;state.pets297[0].level=100;state.pets297[0].traits=[0,1,2].map(i=>({traitId:'t'+i,quality:'common',stat:'hp',mode:'flat',value:10,locked:false}));state.stones=5;render();});assert(await p.locator('#petTrainButton458').isEnabled());
  await p.evaluate(()=>{state.pets297[0].traits[0].locked=true;petPaint297();});assert(await p.locator('#petTrainButton458').isDisabled());assert.match(await p.locator('#petTrainingFunds458').innerText(),/還差 5/);
  await p.evaluate(()=>{state.stones=10;petPaint297();});assert(await p.locator('#petTrainButton458').isEnabled());
  await p.evaluate(()=>{state.pets297[0].traits.forEach(t=>t.locked=true);petPaint297();});assert(await p.locator('#petTrainButton458').isDisabled());assert(!(await p.locator('#petTrainingFunds458').isVisible()));
@@ -92,6 +98,6 @@ const out=process.env.UI458_OUT||'/workspace/work/ui458/results';fs.mkdirSync(ou
  assert(await p.getByRole('button',{name:'確認上次結果',exact:true}).isEnabled());
  await p.evaluate(()=>petAction297());
  assert.equal(await p.evaluate(()=>fixture458.api),2,'recovery with zero stones must still query original receipt');assert.equal(await p.evaluate(()=>fixture458.preflight),0);assert.equal(await p.evaluate(()=>petPending297()),null);
- assert.deepEqual(errors,[]);console.log('Pet: insufficient/equal funds, lock costs, all locked, invalid costs, preflight race, last-stone training and zero-stone recovery PASS');
+ assert.deepEqual(errors,[]);if(resizeWarnings)console.log('Browser resize delivery warnings (layout assertions passed):',resizeWarnings);console.log('Pet: insufficient/equal funds, lock costs, all locked, invalid costs, preflight race, last-stone training and zero-stone recovery PASS');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
