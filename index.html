@@ -7404,7 +7404,9 @@ function townNavSync311_(){
 }
 function syncAchievementTabs313_(){
  if(state.page!=='achievements')return;
- const tabs=document.querySelector('#page .achievement-tabs94'),active=tabs?.querySelector('[aria-selected="true"]');
+ const panel=document.querySelector('#page .achievement-panel94'),count=document.getElementById('townAchievementCount313');
+ if(panel&&count)count.textContent=panel.dataset.achievementCount451||'';
+ const tabs=panel?.querySelector('.achievement-tabs94'),active=tabs?.querySelector('[aria-selected="true"]');
  if(tabs&&active)tabs.scrollLeft=Math.max(0,Math.min(tabs.scrollWidth-tabs.clientWidth,active.offsetLeft-tabs.offsetLeft-(tabs.clientWidth-active.offsetWidth)/2));
 }
 // The cursor is drawn from the authored atlas; no platform emoji or unrelated pointer.
@@ -18598,7 +18600,44 @@ let achievementCategory94_='level';
 const achievementCategories94_=[['level','等級成就'],['max_clear','通關成就'],['enemy_kill','討伐次數'],['perfect_clear','完美通關'],['max_round_damage','最高傷害'],['other','其他']];
 const achievementCategoryIcons97_={level:'✦',max_clear:'⚑',enemy_kill:'⚔',perfect_clear:'♛',max_round_damage:'ϟ',other:'◇'};
 function achievementCategoryOf94_(a){return achievementCategories94_.some(x=>x[0]===a.conditionType)?a.conditionType:'other';}
-function selectAchievementCategory94_(id){achievementCategory94_=id;render();}
+function selectAchievementCategory94_(id){
+ if(state.page!=='achievements'||!achievementCategories94_.some(([key])=>key===id))return;
+ const page=document.getElementById('page'),panel=page?.querySelector('.achievement-panel94');
+ const grid=panel?.querySelector('.achievement-grid'),tabs=panel?.querySelector('.achievement-tabs94');
+ if(!panel||!grid||!tabs){achievementCategory94_=id;render();return;}
+ const previous=achievementCategory94_;
+ try{
+  achievementCategory94_=id;
+  // Build first: a bad row must not discard the currently visible screen.
+  const template=document.createElement('template');template.innerHTML=renderAchievements();
+  const next=template.content.querySelector('.achievement-panel94');
+  const nextGrid=next?.querySelector('.achievement-grid'),nextTabs=next?.querySelector('.achievement-tabs94');
+  if(!nextGrid||!nextTabs)throw new Error('ACHIEVEMENT_MARKUP_INVALID');
+  // Keep the live panel, tab buttons, focus and scroll container across touch events.
+  for(const selector of ['.achievement-summary320','.achievement-hero407','.section-title']){
+   const old=panel.querySelector(selector),fresh=next.querySelector(selector);
+   if(old&&fresh&&old.innerHTML!==fresh.innerHTML)old.innerHTML=fresh.innerHTML;
+  }
+  const existing=new Map([...tabs.querySelectorAll('[data-achievement-tab451]')].map(button=>[button.dataset.achievementTab451,button]));
+  for(const fresh of [...nextTabs.children]){
+   const key=fresh.dataset.achievementTab451,old=existing.get(key);
+   if(old){old.classList.toggle('active',key===achievementCategory94_);old.setAttribute('aria-selected',String(key===achievementCategory94_));if(old.innerHTML!==fresh.innerHTML)old.innerHTML=fresh.innerHTML;existing.delete(key);}
+   else tabs.appendChild(fresh);
+  }
+  for(const old of existing.values())old.remove();
+  grid.replaceChildren(...nextGrid.childNodes);grid.scrollTop=0;
+  panel.dataset.achievementCount451=next.dataset.achievementCount451;
+  panel.querySelector('.achievement-error451')?.remove();
+  syncAchievementTabs313_();
+ }catch(error){
+  achievementCategory94_=previous;
+  // Diagnostic contains UI context only, never player saves or account credentials.
+  console.error('achievement tab switch failed',{category:id,view:viewMode_,width:innerWidth,height:innerHeight,errorName:error?.name||'Error'});
+  let notice=panel.querySelector('.achievement-error451');
+  if(!notice){notice=document.createElement('div');notice.className='notice achievement-error451';notice.setAttribute('role','status');tabs.before(notice);}
+  notice.textContent='成就切換失敗，已保留原畫面。請再點一次分類重試。';
+ }
+}
 function completedAchievements94_(){return new Set(Object.values(achievementTemplates).filter(a=>achievementProgress_(a)>=a.targetValue).map(a=>a.id));}
 let achievementToastQueue94_=[],achievementToastBusy94_=false;
 function notifyAchievements94_(before){
@@ -18619,16 +18658,16 @@ function recordLocalAchievementBattle94_(b,result){
  state.achievementMetrics=m;notifyAchievements94_(before);
 }
 function renderAchievements(){
- if(!achievementCategories94_.some(([id])=>id===achievementCategory94_))achievementCategory94_='level';
- const all=Object.values(achievementTemplates),list=all.filter(a=>achievementCategoryOf94_(a)===achievementCategory94_);
+ const all=Object.values(achievementTemplates);
+ if(!achievementCategories94_.some(([id])=>id===achievementCategory94_)||(achievementCategory94_==='other'&&!all.some(a=>achievementCategoryOf94_(a)==='other')))achievementCategory94_='level';
+ const list=all.filter(a=>achievementCategoryOf94_(a)===achievementCategory94_);
  const tabs=achievementCategories94_.filter(([id])=>id!=='other'||all.some(a=>achievementCategoryOf94_(a)==='other')).map(([id,label])=>{
   const rows=all.filter(a=>achievementCategoryOf94_(a)===id),pending=rows.some(achievementClaimable_);
-  return `<button role="tab" aria-selected="${achievementCategory94_===id}" class="${achievementCategory94_===id?'active':''}" onclick="selectAchievementCategory94_('${id}')"><i class="achievement-tab-icon97" aria-hidden="true">${flatIcon313_({level:'star',max_clear:'flag',enemy_kill:'swords',perfect_clear:'crown',max_round_damage:'bolt',other:'diamond'}[id])}</i><span class="achievement-tab-label313">${label}</span><span>${rows.length}</span>${pending?'<i class="achievement-category-dot94" aria-label="有未領獎勵"></i>':''}</button>`;
+  return `<button type="button" role="tab" data-achievement-tab451="${id}" aria-selected="${achievementCategory94_===id}" class="${achievementCategory94_===id?'active':''}" onclick="selectAchievementCategory94_('${id}')"><i class="achievement-tab-icon97" aria-hidden="true">${flatIcon313_({level:'star',max_clear:'flag',enemy_kill:'swords',perfect_clear:'crown',max_round_damage:'bolt',other:'diamond'}[id])}</i><span class="achievement-tab-label313">${label}</span><span>${rows.length}</span>${pending?'<i class="achievement-category-dot94" aria-label="有未領獎勵"></i>':''}</button>`;
  }).join('');
  const claimedCount320=list.filter(a=>!!state.claimedAchievements?.[a.id]).length,pendingCount320=list.filter(achievementClaimable_).length;
  const categoryIcon320={level:'star',max_clear:'flag',enemy_kill:'swords',perfect_clear:'crown',max_round_damage:'bolt',other:'diamond'}[achievementCategory94_];
- const windowCount313=document.getElementById('townAchievementCount313');if(windowCount313)windowCount313.textContent=`${list.length} / ${all.length} 項`;
- return `<div class="panel achievement-panel94"><div class="achievement-toolbar320">${townWindow311_?'':`<div class="section-title"><h3>成就</h3><span class="badge">${list.length} / ${all.length} 項</span></div>`}${viewMode_==='desktop'?`<div class="achievement-hero407"><i aria-hidden="true">${flatIcon313_(categoryIcon320)}</i><div><h3>${escapeHtml(achievementCategories94_.find(([k])=>k===achievementCategory94_)?.[1]||'成就')}</h3><small>已達成 ${claimedCount320+pendingCount320} / ${list.length}</small></div></div>`:'<div class="small achievement-intro320">達成成就後可在此手動領取獎勵。</div>'}<div class="achievement-summary320" aria-label="目前分類成就統計"><div><span>已領取</span><b>${claimedCount320}</b></div><div class="achievement-summary-pending320"><span>可領取</span><b>${pendingCount320}</b></div><div><span>進行中</span><b>${Math.max(0,list.length-claimedCount320-pendingCount320)}</b></div></div><div class="achievement-tabs94" role="tablist" aria-label="成就分類">${tabs}</div></div><div class="achievement-grid" tabindex="0" role="region" aria-label="成就列表">${list.length?list.map(a=>{
+ return `<div class="panel achievement-panel94" data-achievement-count451="${list.length} / ${all.length} 項"><div class="achievement-toolbar320">${townWindow311_?'':`<div class="section-title"><h3>成就</h3><span class="badge">${list.length} / ${all.length} 項</span></div>`}${viewMode_==='desktop'?`<div class="achievement-hero407"><i aria-hidden="true">${flatIcon313_(categoryIcon320)}</i><div><h3>${escapeHtml(achievementCategories94_.find(([k])=>k===achievementCategory94_)?.[1]||'成就')}</h3><small>已達成 ${claimedCount320+pendingCount320} / ${list.length}</small></div></div>`:'<div class="small achievement-intro320">達成成就後可在此手動領取獎勵。</div>'}<div class="achievement-summary320" aria-label="目前分類成就統計"><div><span>已領取</span><b>${claimedCount320}</b></div><div class="achievement-summary-pending320"><span>可領取</span><b>${pendingCount320}</b></div><div><span>進行中</span><b>${Math.max(0,list.length-claimedCount320-pendingCount320)}</b></div></div><div class="achievement-tabs94" role="tablist" aria-label="成就分類">${tabs}</div></div><div class="achievement-grid" tabindex="0" role="region" aria-label="成就列表">${list.length?list.map(a=>{
   const p=achievementProgress_(a),done=p>=a.targetValue,claimed=!!state.claimedAchievements?.[a.id],pct=Math.min(100,Math.floor(p/a.targetValue*100));
   return `<div class="achievement-card ${done&&!claimed?'claimable':''}" data-achievement-state320="${claimed?'claimed':done?'claimable':'ongoing'}"><div class="achievement-heading94"><div class="achievement-copy320"><span class="achievement-emblem320" aria-hidden="true">${flatIcon313_(claimed?'medal':categoryIcon320)}</span><div><b>${escapeHtml(a.name)}</b><div class="small">${escapeHtml(a.description)}</div></div></div>${claimed?'':`<span class="badge">${done?'已達成':'進行中'}</span>`}</div><div class="achievement-progress"><i style="width:${pct}%"></i></div><div class="small">進度：<b>${Math.min(p,a.targetValue).toLocaleString()} / ${a.targetValue.toLocaleString()}</b></div><div class="achievement-reward-row94"><div class="achievement-reward">${escapeHtml(achievementRewardText_(a))}</div>${claimed?'<button disabled>已領取</button>':done?`<button class="primary" id="achievementClaim_${escapeAttr(a.id)}" onclick="claimAchievement_('${escapeAttr(a.id)}',this)">領取獎勵</button>`:'<button disabled>尚未達成</button>'}</div></div>`;
  }).join(''):'<div class="empty">尚未設定此類成就。</div>'}</div></div>`;
