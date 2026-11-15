@@ -82,3 +82,8 @@ npm --prefix supabase/tests test
 ## 顯示查詢免全域鎖 453
 
 六條已審核的純讀取路徑移出全域鎖，保留身分驗證、回應格式與玩法解鎖；會補獎或建立資料的狀態查詢仍保留原鎖。詳見 [依賴審核與測試](review/read_isolation453.md)。只更新 game-api 的兩個原始碼檔，無 SQL migration 或前端變更。
+
+
+## 迷霧戰境 468
+
+完整模式、資料庫套用順序、開啟企劃開關及驗證見 [部署說明](../docs/competition468.md)。需先套用缺少的 465 基礎 schema，再套用 468 runtime；不可只合併前端或改 ready。確認逾時的 migration 不視為已執行。
