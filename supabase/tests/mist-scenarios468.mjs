@@ -261,3 +261,13 @@ assert.equal(moved.self.y,5);
 assert.equal(moved.self.energy,7);
 assert.equal(moved.cells.find(c=>c.x===5&&c.y===5).flag.own,true);
 console.log('Mist flag movement, isolated stats and private cosmetic projection passed');
+
+// v470: the shared battle HUD receives only the actor's full stats and public cosmetics.
+player('b').hidden_until=null;
+player('b').protected_until=null;
+r=await act('a','battle/start',{targetId:cell('b').id});
+assert.ok(r.battle.attacker.stats);
+assert.ok(r.battle.attacker.buff);
+assert.deepEqual(r.battle.defender.appearance,{sex:'female',suit:7,head:6,kind:'staff',glow:true});
+for(const key of ['stats','equipment','skills','passive','account','inventory'])assert.ok(!(key in r.battle.defender));
+console.log('Shared battle own HUD and opponent privacy passed');
