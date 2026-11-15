@@ -908,6 +908,18 @@ export async function reduceMist468(
       if (action === "battle/leave") p.runtime.lastBattle = null;
     } else fail("UNKNOWN_ACTION");
   }
+  // Cosmetic-only projection. No item IDs, stats or account IDs are shared with observers.
+  if (p && payload.appearance && typeof payload.appearance === "object") {
+    const a = payload.appearance;
+    p.runtime.appearance = {
+      sex: a.sex === "female" ? "female" : "male",
+      suit: Number.isInteger(a.suit) && a.suit >= 0 && a.suit <= 7 ? a.suit : 0,
+      head: Number.isInteger(a.head) && a.head >= 0 && a.head <= 7 ? a.head : 0,
+      kind: typeof a.kind === "string" && /^[A-Za-z][A-Za-z0-9]{0,40}$/.test(a.kind)
+        ? a.kind : "unarmed",
+      glow: a.glow === true,
+    };
+  }
   // Revision only changes when the player's persisted mode record changes.
   for (const [id, x] of Object.entries(w.players)) {
     const old = before.players?.[id];
@@ -922,6 +934,7 @@ export async function reduceMist468(
     input.save,
     input.rewards || [],
   );
+  result.stats = p ? core.snapshot(p).stats : null;
   const changed = (next, old, key) =>
     next.filter((x) => !old.some((y) => key(x) === key(y) && equal(x, y)));
   const reset = before.season?.id !== w.season.id;
@@ -987,6 +1000,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
               points: d.points,
               protected: ms(d.protected_until) > now,
               busy: !!d.battle_id,
+              appearance: d.runtime.appearance || null,
             };
         } else if (cell && cell.kind !== "player")
           o = {
@@ -1010,7 +1024,10 @@ export function projectMist468(w, account, now, ready, save, rewards) {
             own: f.owner_account === account,
             name: f.owner_account === account ? "我的旗幟" : "敵方旗幟",
           };
-        cells.push({ x, y, object: o });
+        cells.push({
+          x, y, object: o,
+          flag: f ? { own: f.owner_account === account } : null,
+        });
       }
   const ranked = Object.values(w.players).sort(
     (a, b) => b.points - a.points || b.kills - a.kills,
@@ -1085,6 +1102,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
           flags: w.flags.filter((f) => f.owner_account === account).length,
           battleId: p.battle_id,
           dead: !!p.runtime.dead,
+          appearance: p.runtime.appearance || null,
         }
       : null,
     cells,

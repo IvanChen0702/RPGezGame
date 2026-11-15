@@ -125,11 +125,35 @@ const fs = require("node:fs"),
       console.log("joining");
       await page.getByRole("button", { name: "參加本季", exact: true }).click();
       await page.waitForFunction(() => !!mist465_.data?.self);
+      await page.getByRole("tab", { name: "棋盤", exact: true }).click();
+      await page.getByRole("button", { name: /^插旗/ }).click();
+      await page.waitForFunction(() => mist465_.data.self.flags === 1 && !mist465_.loading);
+      const home = await page.evaluate(() => ({x:mist465_.data.self.x,y:mist465_.data.self.y}));
+      const step = await page.evaluate(() => {const s=mist465_.data.self;return mist465_.data.cells.find(c=>Math.abs(c.x-s.x)+Math.abs(c.y-s.y)===1&&!c.object);});
+      assert.ok(step, "spawn has reachable neighbor");
+      const tile=page.locator('.mist-cell465[data-x="'+step.x+'"][data-y="'+step.y+'"]');
+      assert.ok((await tile.getAttribute('class')).includes('reachable469'));
+      assert.equal(await tile.evaluate(e=>getComputedStyle(e).borderTopColor),'rgb(139, 227, 189)');
+      await tile.click();
+      await page.waitForFunction(({x,y})=>mist465_.data.self.x===x&&mist465_.data.self.y===y&&!mist465_.loading,step);
+      assert.equal(await page.evaluate(()=>mist465_.data.self.energy),8,'flag plus move costs two AP');
+      await page.locator('.mist-cell465[data-x="'+home.x+'"][data-y="'+home.y+'"]').click();
+      await page.waitForFunction(({x,y})=>mist465_.data.self.x===x&&mist465_.data.self.y===y&&!mist465_.loading,home);
+      assert.equal(await page.evaluate(()=>mist465_.data.self.flags),1,'moving onto own flag retains it');
+      await page.getByRole("button", {name:/^隱身/}).click();
+      await page.waitForFunction(()=>!!mist465_.data.self.hiddenUntil&&!mist465_.loading);
+      assert.equal(await page.evaluate(()=>mist465_.data.self.energy),4);
+      await page.waitForFunction(()=>document.querySelector('[data-mist-hero469="self"]')?.dataset.painted==='true');
+      await page.evaluate(()=>mistCenter465_());
+      const centered=await page.locator('.mist-cell465.self').evaluate(e=>{const r=e.getBoundingClientRect(),s=document.querySelector('.mist-map-scroll465').getBoundingClientRect();return r.top>=s.top&&r.bottom<=s.bottom&&r.left>=s.left&&r.right<=s.right;});
+      assert.ok(centered,'character remains inside map viewport after flag and movement');
+      await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-map469.png',fullPage:true});
       await page.getByRole("tab", { name: "行囊", exact: true }).click();
-      await page.getByRole("button", { name: "開啟補給", exact: true }).click();
+      await page.getByRole("button", { name: /^開啟補給/ }).click();
       await page.waitForFunction(
         () => mist465_.data.inventory.equipment.length === 4,
       );
+      await page.locator(".mist-bag-grid469 button").first().click();
       await page
         .getByRole("button", { name: "裝備", exact: true })
         .first()
@@ -141,13 +165,33 @@ const fs = require("node:fs"),
         () => Object.values(mist465_.data.equipment)[0].id,
       );
       assert.ok(equipmentId);
-      await page.locator(".mist-skill-config468 summary").click();
-      await page.getByRole("button", { name: "儲存技能", exact: true }).click();
+      await page.locator(".mist-skill469").nth(1).click();
+      await page.getByRole("button", { name: "選擇", exact: true }).first().click();
       await page.waitForFunction(() => !mist465_.loading);
       assert.equal(
         await page.evaluate(() => mist465_.data.skills.active[0]),
         "slash",
       );
+      await page.waitForFunction(()=>document.querySelector('[data-mist-hero469="self"]')?.dataset.painted==='true');
+      assert.equal(await page.locator('.mist-ability-grid469>div').count(),6);
+      await page.locator('#mistPanel465').evaluate(e=>e.scrollTop=0);
+      await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-bag469.png',fullPage:true});
+      const spawn=input.world.cells.find(c=>c.kind==='spawn');
+      const pawn=input.world.cells.find(c=>c.kind==='player'&&c.owner_account==='preview-adventurer');
+      input.world.cells=input.world.cells.filter(c=>c.id===pawn.id||!(c.x===spawn.x+1&&c.y===spawn.y));
+      Object.assign(pawn,{x:spawn.x+1,y:spawn.y});
+      await page.evaluate(()=>refreshMist465_());
+      await page.getByRole('tab',{name:'棋盤',exact:true}).click();
+      const warning=page.locator('.mist-cell465[data-x="'+spawn.x+'"][data-y="'+spawn.y+'"]');
+      assert.equal(await warning.locator('img').count(),0,'pending spawn must not reveal a monster sprite');
+      assert.equal(await warning.locator('.mist-summon469').count(),1);
+      assert.match(await warning.innerText(),/分鐘/);
+      await warning.click();
+      assert.equal(await page.getByRole('button',{name:'挑戰 · −1 體力',exact:true}).isDisabled(),true);
+      await page.waitForTimeout(250);
+      if(width<=900){const bounds=await page.locator('.mist-picker469').boundingBox();assert.ok(bounds.y>=0&&bounds.x>=0&&bounds.y+bounds.height<=height+1&&bounds.x+bounds.width<=width+1,'encounter dialog inside viewport: '+JSON.stringify(bounds));}
+      await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-summon469.png',fullPage:true});
+      await page.evaluate(()=>closeQuickPicker());
       input.now = "2026-11-16T01:31:00Z";
       await call("mist/status");
       const m = input.world.cells.find((c) => c.kind === "monster");
@@ -160,7 +204,7 @@ const fs = require("node:fs"),
       Object.assign(me, { x: m.x + 1, y: m.y });
       await page.evaluate(() => refreshMist465_());
       await page.getByRole("tab", { name: "棋盤", exact: true }).click();
-      await page.evaluate(({ x, y }) => mistSelect465_(x, y), m);
+      await page.evaluate(({ x, y }) => mistCellClick469_(x, y), m);
       await page
         .getByRole("button", { name: "挑戰 · −1 體力", exact: true })
         .click();

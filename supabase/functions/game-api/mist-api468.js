@@ -27,6 +27,7 @@ export async function handleMist468(rpc, account, body) {
     "passive",
     "skill",
     "expectedRevision",
+    "appearance",
   ];
   const payload = Object.fromEntries(
     keys.filter((k) => body[k] !== undefined).map((k) => [k, body[k]]),
