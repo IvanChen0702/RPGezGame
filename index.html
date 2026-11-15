@@ -16503,8 +16503,11 @@ function femaleHeroComposite220_(g,pose='idle'){
  q.save();q.beginPath();const outline245=sex==='female'?[[40,0],[198,0],[198,88],[171,103],[127,103],[109,85],[76,79],[40,74]]:[[91,0],[201,0],[201,89],[169,104],[124,102],[109,85],[91,70]];outline245.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();q.clip();if(suit<4)q.clearRect(0,0,256,110);q.restore();
  // v457: bodies are authored against the original collar/sole rig. Old heads stay fixed.
  const headDy457=hs>=4?-6:0;
- q.drawImage(hd,0,headDy457,256,256);
- c.heroFrame250_={pad:128,size:256,foot:spriteMetrics203_(im).foot,top:Math.min(spriteMetrics203_(im).top,spriteMetrics203_(hd).top+headDy457/256)};
+ // v461: restore water-hat face proportions around the authored chin,
+ // keeping the collar connection and body/weapon registration in place.
+ const headScale461=hs===4?1.18:1,headX461=145*(1-headScale461),headY461=110*(1-headScale461)+headDy457;
+ q.drawImage(hd,headX461,headY461,256*headScale461,256*headScale461);
+ c.heroFrame250_={pad:128,size:256,foot:spriteMetrics203_(im).foot,top:Math.min(spriteMetrics203_(im).top,spriteMetrics203_(hd).top*headScale461+headY461/256)};
  if(weapon)drawAttachedWeapon246_(q,weapon,im,g,pose,suit);
  heroCompositeCache228_.set(cacheKey245,c);if(heroCompositeCache228_.size>24)heroCompositeCache228_.delete(heroCompositeCache228_.keys().next().value);return c;
 }
