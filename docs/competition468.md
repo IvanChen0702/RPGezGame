@@ -4,7 +4,9 @@
 
 ## 部署狀態與開啟方式
 
-截至本次提交，正式站仍為前端 `b128cbc`、game-api v60。基礎 schema 的套用確認再次逾時，工具回報沒有執行；468 尚未套用或部署。不得把本文件／測試通過當成正式站已開賽。
+2026-11-16（台灣時間）已成功套用 `mist_world465` 與 `mist_runtime468`，並部署 game-api v61。線上驗證九張模式資料表的 RLS／ACL、三支 service-only RPC，以及 service_role 讀取企劃均通過。前端隨本 PR 合併至 main 後由 Cloudflare 部署。
+
+目前已發布企劃 `20261115-152949-8b8b7521` 的 `MistConfig.Enabled=false`，尚未開賽。現有 .gs 不需更換；須將來源表 Enabled 改為 TRUE 並經既有流程驗證／發布。工具未連接 Google Sheet，不能聲稱已修改來源表。
 
 依序完成：
 
