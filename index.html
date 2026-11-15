@@ -10328,7 +10328,16 @@ const skillTemplates={};
 
 // Planning effect keys v1. Parameterized keys; unknown keys remain inert.
 function fxSplit_(raw){return String(raw||'').split(/[\n,;|]+/).map(x=>x.trim()).filter(Boolean)}
+function equipmentParse462_(key){
+ let m;
+ if(m=key.match(/^fx_oncrit_damage_enemy_maxhp_physical_(\d+(?:\.\d+)?)_chance_(\d+(?:\.\d+)?)_lowhp_(\d+(?:\.\d+)?)_chance_(\d+(?:\.\d+)?)$/))return {type:'critMaxHp462',event:'oncrit',n:+m[1],chance:Math.min(100,+m[2])/100,threshold:Math.min(100,+m[3])/100,lowChance:Math.min(100,+m[4])/100};
+ if(m=key.match(/^fx_oncrit_patk_percent_battle_(\d+(?:\.\d+)?)$/))return {type:'critGrowth462',event:'oncrit',n:+m[1]};
+ if(m=key.match(/^fx_cast_no_cooldown_(\d+(?:\.\d+)?)$/))return {type:'noCooldown462',chance:Math.min(100,+m[1])/100};
+ if(m=key.match(/^fx_skip_cooldown_random_(\d+)$/))return {type:'skipCooldown462',event:'skip',n:Math.min(99,+m[1])};
+ return null;
+}
 function fxParse_(key){
+ const equipment462=equipmentParse462_(key);if(equipment462)return equipment462;
  const chaos=typeof chaosFxParse332_==='function'?chaosFxParse332_(key):null;if(chaos)return chaos;
  let m;
  if(m=key.match(/^fx_stat_(hp|def|patk|matk|crit|critDamage)_(flat|percent)_(-?\d+(?:\.\d+)?)$/))return {type:'stat',stat:m[1],mode:m[2],n:+m[3],condition:'always'};
@@ -10469,7 +10478,22 @@ async function fxEvent_(event,actor=null,target=null,extra=[]){
   const max=arena?actor.maxHp:battlePlayerStats().hp;
   const reportBefore=effectSnapshot44_(actor);let reportApplied=false;
   if(f.type==='cooldown'&&arena&&f.target==='enemy')reportBefore.cd={...(target?.cooldowns||{})};
-  if(f.type==='heal'){
+  if(f.type==='critGrowth462'){
+   const owner=actor||b;owner.equipmentPatkPct462=(Number(owner.equipmentPatkPct462)||0)+f.n;
+   if(arena)arenaRefreshConditionalStats_(actor);
+   effectNotice44_(key,actor,`爆擊造成傷害，物攻累計 +${owner.equipmentPatkPct462}%（本場戰鬥，採加算）。`,`物攻 +${owner.equipmentPatkPct462}%`);
+  }else if(f.type==='critMaxHp462'){
+   const enemy=arena?target:battleEnemy(b),enemyHp=arena?target?.hp:b.enemyHp;
+   if(!enemy||enemyHp<=0)continue;
+   const chance=(arena?actor.hp:b.playerHp)/max<f.threshold?f.lowChance:f.chance;if(Math.random()>=chance)continue;
+   const raw=Math.trunc(Number(arena?target.maxHp:enemy.hp)*f.n/100),def=arena?Number(target.stats.def||0)*(target.status?.armor_break?.turns>0?.7:1):effectiveEnemyDef_(enemy,b),hit=Math.max(1,Math.trunc(raw-def));
+   let actual=0;
+   if(arena){actual=arenaTakeDamage_(target,fxDamage_(hit,'physical',keys,fxArenaContext_(actor,target)),'equipmentProc462',actor);arenaEffectText_(target,`-${actual} 追加`,'damage');}
+   else{const missed=b.windDodged69;try{actual=await applyDirectDamageToEnemyLegacy122_(hit,'physical',effectSources44_(key),true);await phantomFlush122_(b);}finally{b.windDodged69=missed;}floatText(document.getElementById('enemyFx'),`-${actual} 追加`,'damage');}
+   damage+=actual;effectNotice44_(key,actor,`爆擊追加：敵人最大 HP ×${f.n}% = ${raw}，扣除防禦 ${def}，實際造成 ${actual} 物理傷害（觸發率 ${chance*100}%）。`,`追加傷害 ${actual}`);
+  }else if(f.type==='skipCooldown462'){
+   const name=randomOtherCooldown241_(null,f.n,actor);if(name)effectNotice44_(key,actor,`跳過回合，隨機技能【${name}】額外 CD -${f.n}。`,`${name} CD -${f.n}`);
+  }else if(f.type==='heal'){
    const raw=Math.trunc(max*f.n/100);const healed=arena?fxArenaHeal_(actor,raw):resolvePlayerHealing_(raw,max,'企劃效果').healed;
 
   }else if(f.type==='shield'){
@@ -10500,11 +10524,20 @@ async function fxEvent_(event,actor=null,target=null,extra=[]){
   }else if(f.type==='castDamage'){
    reportApplied=damage;
    if(arena){const raw=questArenaAtk368_(actor,f.kind==='physical'?'patk':'matk')*f.n/100,hit=Math.max(1,Math.trunc(raw-(f.kind==='physical'?Number(target.stats.def||0)*(target.status.armor_break?.turns>0?.7:1):0)));const p=actor.passive,s=actor.stats;let mult=1;if(!(actor.status?.forget?.turns>0)){if(p==='adventurerAptitude')mult=(f.kind==='physical'?s.patk>=s.matk:s.matk>=s.patk)?1.05:1;if(f.kind==='magic'&&p==='mageAptitude'&&s.matk>=25)mult=1.1;if(f.kind==='magic'&&p==='mageAptitudeII')mult=(s.matk>=300?1.15:1)*Number(actor.arcaneCastMultiplier||1);}damage+=await arenaHit_(actor,target,Math.trunc(hit*mult),f.kind);}
-   else{const stats=battlePlayerStats(),enemy=battleEnemy(b),raw=(f.kind==='physical'?stats.patk:stats.matk)*f.n/100,hit=f.kind==='physical'?applyAdventurerDamageBonus(Math.max(1,Math.trunc(raw-effectiveEnemyDef_(enemy,b))),'physical',stats):magicDamageAgainstEnemy(raw,enemy,stats);damage+=await applyDirectDamageToEnemy_(hit,f.kind,'企劃技能');applyWeaponOnHitEffect_(false);}
+   else{const stats=battlePlayerStats(),enemy=battleEnemy(b),raw=(f.kind==='physical'?stats.patk:stats.matk)*f.n/100,hit=f.kind==='physical'?applyAdventurerDamageBonus(Math.max(1,Math.trunc(raw-effectiveEnemyDef_(enemy,b))),'physical',stats):magicDamageAgainstEnemy(raw,enemy,stats);damage+=await applyDirectDamageToEnemy_(hit,f.kind,'企劃技能');await applyWeaponOnHitEffect_(false);}
   }
   effectEventReport44_(key,f,actor,target,reportBefore,f.type==='castDamage'?damage-reportApplied:reportApplied);
  }
  return damage;
+}
+function equipmentNoCooldown462_(skill,actor=null){
+ if(Number(skill?.cd??skill?.cooldown??0)<=0)return false;
+ let triggered=false;
+ for(const key of actor?fxArenaKeys_(actor):fxMainKeys_()){
+  const f=fxParse_(key);if(f?.type!=='noCooldown462'||Math.random()>=f.chance)continue;
+  triggered=true;effectNotice44_(key,actor,`施放【${skill.name}】觸發不進入冷卻（${f.chance*100}%）。`,`${skill.name} 不進冷卻`);
+ }
+ return triggered;
 }
 function fxExpireArenaBuff_(x,key){
  clearBalancedArenaBuff241_(x,key);
@@ -10517,6 +10550,10 @@ function fxExpireArenaBuff_(x,key){
 }
 function fxDescription_(key){
  const f=fxParse_(key);if(!f)return '';
+ if(f.type==='critMaxHp462')return `每次造成爆擊傷害時，${f.chance*100}% 機率額外造成敵人最大 HP ${f.n}% 的物理傷害；自身 HP 低於 ${f.threshold*100}% 時，機率提升至 ${f.lowChance*100}%。`;
+ if(f.type==='critGrowth462')return `每次造成爆擊傷害，物攻提升 ${f.n}%（本場戰鬥內持續累積，採加算，結束重置）。`;
+ if(f.type==='noCooldown462')return `每次施放技能時，${f.chance*100}% 機率該技能不進冷卻。`;
+ if(f.type==='skipCooldown462')return `主動跳過回合時，隨機一項冷卻中的主動技能額外 CD -${f.n}。`;
  if(f.type==='chaosShield')return `對護盾傷害 +${f.n}%（額外傷害不溢出至HP）`;
  if(f.type==='chaosBreak')return `主動擊破護盾恢復最大HP ${f.n}%，每回合最多一次`;
  if(f.type==='chaosRandom')return `施放技能後 ${f.n}% 機率隨機附加乏力或壓制1回合`;
@@ -21998,6 +22035,7 @@ function activeBattleBuffEffects_(){ensureBattleBuffs();return (state.currentBat
 function activeBattleShields_(){ensureBattleBuffs();return (state.currentBattle?.playerShields||[]).filter(x=>(x.turns||0)>0&&(x.hp||0)>0);}
 function battlePlayerStats(){
   const s=chaosPlayerStats332_({...totalStats()}),buffs=ensureBattleBuffs();
+  if(state.currentBattle?.equipmentPatkPct462>0)s.patk=Math.trunc(s.patk*(1+state.currentBattle.equipmentPatkPct462/100)+1e-8);
   if(buffs){
     if((buffs.patkTurns||0)>0)s.patk+=(buffs.patk||0);if((buffs.matkTurns||0)>0)s.matk+=(buffs.matk||0);if((buffs.defTurns||0)>0)s.def+=(buffs.def||0);
     if((buffs.omniTurns||0)>0){s.patk=Math.trunc(s.patk*(1+(buffs.patkRate||0)));s.matk=Math.trunc(s.matk*(1+(buffs.matkRate||0)));s.crit+=(buffs.crit||0);}
@@ -22113,7 +22151,7 @@ function worldBossDamageAmount_(amount,b=state.currentBattle){
 function worldBossDamageNote_(before,actual,source,b=state.currentBattle){
  if(b?.worldBoss&&actual<before)log(`【${String(b.worldBossSkillKey).trim()==='undead_dark_knight'?'死靈護甲':'深淵壓制'}】${source}：${before} → ${actual} 實際傷害。`);
 }
-async function applyDirectDamageToEnemyLegacy122_(amount,kind='physical',source='玩家攻擊'){
+async function applyDirectDamageToEnemyLegacy122_(amount,kind='physical',source='玩家攻擊',secondary462=false){
  const b=state.currentBattle;if(!b)return 0;
  b.windDodged69=false;
  if(orion108_(b)&&amount>0&&Math.random()<Math.max(0,Math.min(1,orionRow110_('orion_evasion',b)?.chance??0))){playSfx('evasion323');b.windDodged69=true;log(`【閃耀聖光】迴避${source}。`);orionFx111_('radiance');battleEffectText55_('enemy','閃耀聖光：迴避!','buff');return 0;}
@@ -22138,10 +22176,10 @@ async function applyDirectDamageToEnemyLegacy122_(amount,kind='physical',source=
   }
   actual=absorbRockShield_(actual,b);
   const landed117=actual>0;actual=mainEnemyDamage68_(b,actual);
-  if(b.orderSkillActive127)b.orderSkillDamage127=(b.orderSkillDamage127||0)+Math.max(0,Math.min(hpBefore,actual));
+  if(b.orderSkillActive127&&!secondary462)b.orderSkillDamage127=(b.orderSkillDamage127||0)+Math.max(0,Math.min(hpBefore,actual));
   if(landed117&&b.enemyHp>0)triGainCharge117_(b);
   if(rockBoss_(b))updateRockPhase_(b,battleEnemy(b));
-  const stolen=Math.trunc(Math.min(hpBefore,actual)*Math.min(100,fxSum_(keys,'lifesteal'))/100);if(stolen>0){const restored=resolvePlayerHealing_(stolen,battlePlayerStats().hp,'吸血').healed;const k=keys.find(k=>fxParse_(k)?.type==='lifesteal');effectNotice44_(k,null,`有效傷害 ${Math.min(hpBefore,actual)}，吸血計算 ${stolen}，實際恢復 ${restored} HP。`,`吸血 +${restored}`);}if(Math.min(hpBefore,actual)>0)await fxEvent_('onhit',null,null,fxSkillKeys_(b.fxActiveSkillId));
+  const stolen=secondary462?0:Math.trunc(Math.min(hpBefore,actual)*Math.min(100,fxSum_(keys,'lifesteal'))/100);if(stolen>0){const restored=resolvePlayerHealing_(stolen,battlePlayerStats().hp,'吸血').healed;const k=keys.find(k=>fxParse_(k)?.type==='lifesteal');effectNotice44_(k,null,`有效傷害 ${Math.min(hpBefore,actual)}，吸血計算 ${stolen}，實際恢復 ${restored} HP。`,`吸血 +${restored}`);}if(!secondary462&&Math.min(hpBefore,actual)>0)await fxEvent_('onhit',null,null,fxSkillKeys_(b.fxActiveSkillId));
   b.playerTurnDirectDamage=(b.playerTurnDirectDamage||0)+actual;
   const reflectRate=b.worldBoss&&String(b.worldBossSkillKey)==='ancient_xuanwu'?.35:enemyReflectRate_(b);
   if(actual>0&&reflectRate>0){
@@ -22462,6 +22500,7 @@ async function skipPlayerTurn(){
   playSfx('click');
   render();
   log('你選擇跳過本回合。');
+  await fxEvent_('skip');
   finishArcaneRound_(false);
   await wait(350);
 
@@ -22506,10 +22545,10 @@ function applyTriggeredStatusEffect_(effectKey,crit=false,sourceName='裝備效�
   return null;
 }
 
-function applyWeaponOnHitEffect_(crit=false){
+async function applyWeaponOnHitEffect_(crit=false,actualDamage462=0){
   if(!state.currentBattle||state.currentBattle.windDodged69)return;
   const extra=fxSkillKeys_(state.currentBattle.fxActiveSkillId);
-  if(crit)void fxEvent_('oncrit',null,null,extra).catch(console.error);
+  if(crit&&actualDamage462>0)await fxEvent_('oncrit',null,null,extra);
 
   // v11.18.1：所有已裝備部位的 onhit/oncrit EffectKey 都獨立判定。
   // 因此武器15%冰凍 + 減速戒指5%冰凍不是20%合併，而是兩次獨立骰。
@@ -22658,7 +22697,7 @@ async function useSkill(i){
      dmg=await applyDirectDamageToEnemy_(dmg,'physical',sk.name);updateBattleNumbers();hitFx(ec);
      floatText(document.getElementById('enemyFx'),`-${dmg}${crit?' 爆擊!':''}`,'damage');
      log(`【${sk.name}】${label}造成 ${dmg} 物理傷害${crit?'（爆擊）':''}。`);
-     applyWeaponOnHitEffect_(crit);return dmg;
+     await applyWeaponOnHitEffect_(crit,dmg);if(b.equipmentPatkPct462>0)s.patk=battlePlayerStats().patk;return dmg;
    };
    const first=await hitPhysical(firstMult,'第一擊');
    let second=0;
@@ -22678,7 +22717,7 @@ async function useSkill(i){
    playSfx(crit?'crit':'physical');drawRay(pc,ec,'physical');slashFx(ec);await wait(420);
    dmg=await applyDirectDamageToEnemy_(dmg,'physical',sk.name);updateBattleNumbers();hitFx(ec);floatText(document.getElementById('enemyFx'),`-${dmg}${crit?' 爆擊!':''}`,'damage');
    log(`你使用【${sk.name}】造成 ${dmg} 物理傷害${crit?'（爆擊）':''}。`);
-   applyWeaponOnHitEffect_(crit);
+   await applyWeaponOnHitEffect_(crit,dmg);if(b.equipmentPatkPct462>0)s.patk=battlePlayerStats().patk;
    // 增強體能III：僅【砍擊】可追加第二擊；PATK>=300 且敵方有效 DEF < PATK*25%。
    // 第二擊固定 PATK×150% 再扣有效 DEF，並獨立進行爆擊判定；整個砍擊最多兩段。
    if(id==='slash' && !passiveSuppressed_() && state.passive?.[0]==='enhancedConstitutionIII' && s.patk>=300 && b.enemyHp>0 && b.playerHp>0){
@@ -22692,14 +22731,14 @@ async function useSkill(i){
        followDmg=await applyDirectDamageToEnemy_(followDmg,'physical',`${sk.name}・增強體能III追加`);updateBattleNumbers();hitFx(ec);
        floatText(document.getElementById('enemyFx'),`-${followDmg}${followCrit?' 爆擊!':''}`,'damage');
        log(`【增強體能III】敵方防禦 ${enemyDefNow} < 自身物攻 ${s.patk} ×25%，【砍擊】追加造成 ${followDmg} 物理傷害${followCrit?'（爆擊）':''}。`);
-       applyWeaponOnHitEffect_(followCrit);
+       await applyWeaponOnHitEffect_(followCrit,followDmg);if(b.equipmentPatkPct462>0)s.patk=battlePlayerStats().patk;
      }
    }
  }else if(sk.kind==='magic'){
    let raw=s.matk*sk.mult,dmg=magicDamageAgainstEnemy(raw,e,s);
    setBattleVisual('魔法傷害計算',`魔攻 ${s.matk} × ${Math.round(sk.mult*100)}%${enemyMagicReduction_(e)>0?` × ${Math.round((1-enemyMagicReduction_(e))*100)}%（敵方魔法減傷）`:''}${adventurerBonusText('magic',s)} = <strong>${dmg}</strong>。`);
    playSfx('magic');drawRay(pc,ec,'magic');await wait(420);dmg=await applyDirectDamageToEnemy_(dmg,'magic',sk.name);updateBattleNumbers();hitFx(ec);floatText(document.getElementById('enemyFx'),`-${dmg}`,'magic');
-   log(`你使用【${sk.name}】造成 ${dmg} 魔法傷害。`);applyWeaponOnHitEffect_(false);
+   log(`你使用【${sk.name}】造成 ${dmg} 魔法傷害。`);await applyWeaponOnHitEffect_(false);
  }else if(sk.kind==='magicBurst'){
    const stacks=mageAptitudeIIActive_()?arcaneStacksValue_(b.arcaneStacks):0;
    const hits=stacks+Math.max(1,Math.trunc(Number(sk.hits??2)));
@@ -22710,7 +22749,7 @@ async function useSkill(i){
      setBattleVisual(`${sk.name}・第 ${hit}/${hits} 擊`,`魔導 ${stacks} 層保留，魔攻 ${s.matk} × ${Math.round(Number(sk.mult??2)*100)}%，本擊預計 <strong>${dmg}</strong> 魔法傷害。`);
      playSfx('magic');drawRay(pc,ec,'magic');bossElementFx55_(ec,'arcane');await wait(300);
      dmg=await applyDirectDamageToEnemy_(dmg,'magic',sk.name);
-     applyWeaponOnHitEffect_(false);updateBattleNumbers();hitFx(ec);
+     await applyWeaponOnHitEffect_(false);updateBattleNumbers();hitFx(ec);
      floatText(document.getElementById('enemyFx'),`-${dmg} (${hit}/${hits})`,'magic');
      log(`【${sk.name}】第 ${hit}/${hits} 擊造成 ${dmg} 魔法傷害。`);await wait(220);
    }
@@ -22722,7 +22761,7 @@ async function useSkill(i){
      playSfx('magic');drawRay(pc,ec,'magic');await wait(300);dmg=await applyDirectDamageToEnemy_(dmg,'magic',sk.name);total+=dmg;
     // 魔法多段攻擊本身不進行物理爆擊判定，因此每 HIT 只觸發 onhit 類武器效果。
     // 不引用不存在的 crit，避免第一擊後 ReferenceError 導致戰鬥 busy 永遠卡住。
-    applyWeaponOnHitEffect_(false);
+    await applyWeaponOnHitEffect_(false);
     updateBattleNumbers();hitFx(ec);floatText(document.getElementById('enemyFx'),`-${dmg}`,'magic');await wait(220);
      if(b.enemyHp<=0)break;
    }
@@ -22772,7 +22811,7 @@ async function useSkill(i){
    total=await applyDirectDamageToEnemy_(total,crit?'hybrid':'physical',sk.name);updateBattleNumbers();hitFx(ec);floatText(document.getElementById('enemyFx'),`-${total}${crit?' 魔劍爆擊!':''}`,'damage');
    if(crit){const shield=Math.max(1,Math.trunc(total*Number(sk.shieldMult??.15)));addBattleShield_({id:'magicSlashIIShield',name:sk.name||'魔力斬擊II護盾',hp:shield,max:shield,turns:Math.max(1,Number(sk.duration||1)),noRetaliate:true});updateBattleNumbers();floatText(document.getElementById('playerFx'),`護盾 +${shield}`,'buff');log(`【${sk.name}】爆擊追加 ${magic} 魔法傷害，並獲得 ${shield} 護盾。`);}else log(`【${sk.name}】未爆擊，造成 ${physical} 物理傷害。`);
    setBattleVisual(sk.name,crit?`${magicSwordsmanIIBonus?'【魔劍士的資質II】物攻係數提升至 200%。<br>':''}物理 ${physical} + 爆擊追加魔法 ${magic} = <strong>${total}</strong>；獲得總實際傷害 ${Math.round(Number(sk.shieldMult??.15)*100)}% 護盾。`:`${magicSwordsmanIIBonus?'【魔劍士的資質II】物攻係數提升至 200%。<br>':''}本次未爆擊，造成 <strong>${physical}</strong> 物理傷害。`);
-   applyWeaponOnHitEffect_(crit);
+   await applyWeaponOnHitEffect_(crit,total);if(b.equipmentPatkPct462>0)s.patk=battlePlayerStats().patk;
  }else if(sk.kind==='magicSlash'){
    const crit=critRoll();
    const physicalBase=applyAdventurerDamageBonus(Math.max(1,Math.trunc(s.patk*(sk.physicalMult||.3)-effectiveEnemyDef_(e,b))),'physical',s);
@@ -22783,7 +22822,7 @@ async function useSkill(i){
    total=await applyDirectDamageToEnemy_(total,crit?'hybrid':'physical',sk.name);updateBattleNumbers();hitFx(ec);floatText(document.getElementById('enemyFx'),`-${total}${crit?' 魔劍爆擊!':''}`,'damage');
    setBattleVisual('魔力斬擊',crit?`物理 ${physical} + 爆擊追加魔法 ${magic} = <strong>${total}</strong>。`:`本次未爆擊，造成 <strong>${physical}</strong> 物理傷害。`);
    log(`【魔力斬擊】造成 ${physical} 物理傷害${crit?`，並追加 ${magic} 魔法傷害`:''}。`);
-   applyWeaponOnHitEffect_(crit);
+   await applyWeaponOnHitEffect_(crit,total);if(b.equipmentPatkPct462>0)s.patk=battlePlayerStats().patk;
  }else if(sk.kind==='bloodSlash'){
    const crit=critRoll();
    const normal=applyAdventurerDamageBonus(Math.max(1,Math.trunc(s.patk*Number(sk.mult??2)-effectiveEnemyDef_(e,b))),'physical',s);
@@ -22793,7 +22832,7 @@ async function useSkill(i){
    playSfx('physical');drawRay(pc,ec,'physical');slashFx(ec);updateBattleNumbers();hitFx(ec);
    floatText(document.getElementById('enemyFx'),`-${dmg}${crit?' 爆擊!':''}`,'damage');if(r.healed>0)floatText(document.getElementById('playerFx'),`+${r.healed}`,'heal');
    setBattleVisual('噬血斬擊',`造成 <strong>${dmg}</strong> 物理傷害，恢復 ${r.healed} HP。`);
-   log(`【噬血斬擊】造成 ${dmg} 傷害並恢復 ${r.healed} HP。`);applyWeaponOnHitEffect_(crit);
+   log(`【噬血斬擊】造成 ${dmg} 傷害並恢復 ${r.healed} HP。`);await applyWeaponOnHitEffect_(crit,dmg);if(b.equipmentPatkPct462>0)s.patk=battlePlayerStats().patk;
  }else if(sk.kind==='fullPreparation'){
    const buffs=ensureBattleBuffs(),shield=Math.max(1,Math.trunc(s.hp*(sk.shieldHpMult||.2)));
    addBattleShield_({id:'fullPreparationShield',name:'萬全準備',hp:shield,max:shield,turns:sk.duration||3,noRetaliate:true});
@@ -22832,13 +22871,13 @@ async function useSkill(i){
    playSfx('magic');setBattleVisual(sk.name,`魔攻 ${s.matk} × ${Math.round(Number(sk.mult??5)*100)}% = <strong>${dmg}</strong>，附加【燃燒】1層，並有 ${Math.round(stunChance*100)}% 機率【暈眩】1回合。`);
    drawRay(pc,ec,'magic');await wait(420);dmg=await applyDirectDamageToEnemy_(dmg,'magic',sk.name);applyBattleStatus_('enemy','burning',{stacks:1});
    const stunned=Math.random()<stunChance&&applyBattleStatus_('enemy','stun',{duration:1});updateBattleNumbers();hitFx(ec);
-   floatText(document.getElementById('enemyFx'),`-${dmg} / 燃燒+1${stunned?' / 暈眩':''}`,'magic');log(`【${sk.name}】造成 ${dmg} 魔法傷害，敵人燃燒 +1${stunned?'，並陷入【暈眩】1回合':''}。`);applyWeaponOnHitEffect_(false);
+   floatText(document.getElementById('enemyFx'),`-${dmg} / 燃燒+1${stunned?' / 暈眩':''}`,'magic');log(`【${sk.name}】造成 ${dmg} 魔法傷害，敵人燃燒 +1${stunned?'，並陷入【暈眩】1回合':''}。`);await applyWeaponOnHitEffect_(false);
  }else if(sk.kind==='explosiveMagic'){
    let dmg=magicDamageAgainstEnemy(s.matk*sk.mult,e,s);
    playSfx('magic');
    setBattleVisual('爆裂魔彈',`魔攻 ${s.matk} × ${Math.round(Number(sk.mult??1.5)*100)}%${enemyMagicReduction_(e)>0?` × ${Math.round((1-enemyMagicReduction_(e))*100)}%（敵方魔法減傷）`:''} = <strong>${dmg}</strong>，並賦予敵人【燃燒】1 層。`);
    drawRay(pc,ec,'magic');await wait(420);dmg=await applyDirectDamageToEnemy_(dmg,'magic',sk.name);applyBattleStatus_('enemy','burning',{stacks:1});updateBattleNumbers();hitFx(ec);
-   floatText(document.getElementById('enemyFx'),`-${dmg} / 燃燒+1`,'magic');log(`爆裂魔彈造成 ${dmg} 魔法傷害，敵人燃燒 ${b.enemyBurning} 層。`);applyWeaponOnHitEffect_(false);
+   floatText(document.getElementById('enemyFx'),`-${dmg} / 燃燒+1`,'magic');log(`爆裂魔彈造成 ${dmg} 魔法傷害，敵人燃燒 ${b.enemyBurning} 層。`);await applyWeaponOnHitEffect_(false);
  }
 
  if(sk.kind!=='fx')await fxEvent_('cast',null,null,fxSkillKeys_(id));
@@ -22849,7 +22888,8 @@ async function useSkill(i){
  if(b.playerHp<=0){loseBattle();state.battleVisual.busy=false;save();render();return;}
  finishArcaneRound_(__usedAttackSkill);
  const petNoCd297=petAllowed297()&&Number(sk.cd||0)>0&&petRolls297(state,'noCooldown',Math.random).some(Boolean);
- b.cooldowns[sk.name]=petNoCd297?0:Number(sk.cd||0)+(relicCurse144_('cooldown',b)?1:0);
+ const skillCooldown462=Number(sk.cd||0)+(relicCurse144_('cooldown',b)?1:0),equipmentNoCd462=equipmentNoCooldown462_({...sk,cd:skillCooldown462});
+ b.cooldowns[sk.name]=petNoCd297||equipmentNoCd462?0:skillCooldown462;
  if(petNoCd297)log('【同行寵物】'+sk.name+'不進入冷卻。');
  if((b.healBlockTurns||0)>0)b.healBlockTurns--;
  await wait(600);
@@ -25798,7 +25838,8 @@ function arenaRefreshConditionalStats_(x){
  x.baseCritDamage=base;x.stats.critDamage=base+(active?bonus:0)+Object.entries(x.balanceDeltas241||{}).reduce((n,[key,d])=>n+(x.buff?.[key]>0?Number(d.critDamage||0):0),0);
  if(active&&!x._fullHpCritDamageShown){x._fullHpCritDamageShown=true;arenaLog_(`${x.name} 的裝備效果觸發：滿血時爆擊傷害 +${bonus}%。`);arenaEffectText_(x,`爆擊傷害 +${bonus}%`,'buff',80)}
  if(!active)x._fullHpCritDamageShown=false;
- const original={...x.stats},target=x===arenaBattle_?.attacker?arenaBattle_?.defender:arenaBattle_?.attacker,activeKeys=[];
+ const original={...x.stats};if(x.equipmentPatkPct462>0)x.stats.patk=Math.trunc(x.stats.patk*(1+x.equipmentPatkPct462/100)+1e-8);
+ const target=x===arenaBattle_?.attacker?arenaBattle_?.defender:arenaBattle_?.attacker,activeKeys=[];
  const buffPatk=arenaEffectNumber_(x,'buff_patk_flat_',0);
  if(buffPatk>0&&emptyMirrorArenaHasBuff_(x)){x.stats.patk+=buffPatk;activeKeys.push(`buff_patk_flat_${buffPatk}`)}
  const dual=arenaEffectNumber_(x,'balanced_dual_attack_',0),hi=Math.max(x.stats.patk,x.stats.matk),lo=Math.min(x.stats.patk,x.stats.matk);
@@ -26422,14 +26463,14 @@ async function arenaHit_(actor,target,amount,visualKind='physical',text=''){
  amount=fxDamage_(amount,visualKind==='magic'?'magic':'physical',keys,fxArenaContext_(actor,target));if(text)text=text.replace(/^-\d+/,`-${amount}`);
  await arenaVisual_(actor,target,visualKind,text||`-${Math.max(0,Math.trunc(amount))}`);
  effectModifierReport44_(keys,'damage',actor,modifierBefore44,amount,fxArenaContext_(actor,target),visualKind==='magic'?'magic':'physical');
- const got=arenaTakeDamage_(target,amount,'damage',actor);
+ const got=arenaTakeDamage_(target,amount,'damage',actor);let extraDamage462=0;
  chaosBreakHeal332_(shield144,arenaShieldTotal60_(target),actor);
  if(got>0||shield144>(target.shields||[]).reduce((n,s)=>n+s.hp,0))goldenHeal144_(golden144,actor);
  if(got<=0&&shield144>arenaShieldTotal60_(target)&&!actor.attackMissed241)await chaosFxEvent332_('onhit',actor,target,fxSkillKeys_(actor.fxActiveSkillId));
  if(actor.orderSkillActive127)actor.orderSkillDamage127=(actor.orderSkillDamage127||0)+got;
- if(got>0){const steal=Math.trunc(got*Math.min(100,fxSum_(keys,'lifesteal'))/100);const restored=fxArenaHeal_(actor,steal);if(steal>0)effectNotice44_(keys.find(k=>fxParse_(k)?.type==='lifesteal'),actor,`有效傷害 ${got}，吸血計算 ${steal}，實際恢復 ${restored} HP。`,`吸血 +${restored}`);await fxEvent_('onhit',actor,target,fxSkillKeys_(actor.fxActiveSkillId));if(visualKind==='crit')await fxEvent_('oncrit',actor,target,fxSkillKeys_(actor.fxActiveSkillId));}
+ if(got>0){const steal=Math.trunc(got*Math.min(100,fxSum_(keys,'lifesteal'))/100);const restored=fxArenaHeal_(actor,steal);if(steal>0)effectNotice44_(keys.find(k=>fxParse_(k)?.type==='lifesteal'),actor,`有效傷害 ${got}，吸血計算 ${steal}，實際恢復 ${restored} HP。`,`吸血 +${restored}`);await fxEvent_('onhit',actor,target,fxSkillKeys_(actor.fxActiveSkillId));if(visualKind==='crit')extraDamage462+=await fxEvent_('oncrit',actor,target,fxSkillKeys_(actor.fxActiveSkillId));}
  arenaProcOnHitEffects_(actor,target,visualKind==='crit');
- render();return got
+ render();return got+extraDamage462
 }
 function arenaStatus_(target,id,turns=2,stacks=1){if(id==='block'){target.status.block={turns:1,stacks:1};playSfx('gainBuff226',{side:target===arenaBattle_?.attacker?'player':'enemy'});return;}const cur=target.status[id]||{turns:0,stacks:0};cur.turns=Math.max(cur.turns,Math.max(1,Number(turns)||1));cur.stacks=statusDef_(id)?.stackable===false?1:Math.max(1,cur.stacks+Math.max(1,Number(stacks)||1));target.status[id]=cur;if(statusDef_(id)?.category==='debuff')playSfx('debuff');else if(statusDef_(id)?.category==='buff')playSfx('gainBuff226',{side:target===arenaBattle_?.attacker?'player':'enemy'})}
 function arenaMageAptitudeIIActive_(actor){return actor?.passive==='mageAptitudeII'&&!(Number(actor.status?.forget?.turns||0)>0)}
@@ -26454,7 +26495,7 @@ async function arenaUseLegacy127_(actor,target,id){
  let dmg=0,crit=false,heal=0,total=0;
  const arenaPassiveMult=(damageKind)=>{const p=actor.passive,s=actor.stats;if(p==='adventurerAptitude')return damageKind==='physical'?(s.patk>=s.matk?1.05:1):(s.matk>=s.patk?1.05:1);if(p==='mageAptitude'&&damageKind==='magic'&&s.matk>=25)return 1.10;if(p==='mageAptitudeII'&&damageKind==='magic'&&arenaMageAptitudeIIActive_(actor))return (s.matk>=300?1.15:1)*Number(actor.arcaneCastMultiplier||1);return 1};
  const effectiveDef=()=>Number(target.stats.def||0)*(target.status.armor_break?.turns>0?.7:1);
- const phys=(mult=Number(sk.mult??1))=>{arenaRefreshPair46_(actor,target);let n=Math.max(1,Math.trunc(questArenaAtk368_(actor,'patk')*mult-effectiveDef()));crit=Math.random()<Math.max(0,Math.min(1,Number(actor.stats.crit||0)/100));if(crit)n=Math.max(1,Math.trunc(n*(1+Number(actor.stats.critDamage||100)/100)));return Math.max(1,Math.trunc(n*arenaPassiveMult('physical')))};
+ const phys=(mult=Number(sk.mult??1))=>{arenaRefreshPair46_(actor,target);let n=Math.max(1,Math.trunc(questArenaAtk368_(actor,'patk')*mult-effectiveDef()));crit=Math.random()<Math.max(0,Math.min(1,Number(actor.stats.crit||0)/100));actor.lastPhysicalCrit462=crit;if(crit)n=Math.max(1,Math.trunc(n*(1+Number(actor.stats.critDamage||100)/100)));return Math.max(1,Math.trunc(n*arenaPassiveMult('physical')))};
  const mag=(mult=Number(sk.mult??1))=>{arenaRefreshPair46_(actor,target);return Math.max(1,Math.trunc(questArenaAtk368_(actor,'matk')*mult*arenaPassiveMult('magic')))};
  actor.chaosBlockAction332=false;actor.attackMissed241=false;actor.fxActiveSkillId=id;
  if(['godspeedSlash','heavenlyThunder','enchantedBlade'].includes(kind)){total=await questArenaSkill368_(actor,target,id,sk,phys,mag);
@@ -26546,7 +26587,7 @@ async function arenaUseLegacy127_(actor,target,id){
  const statusId=String(sk.statusId||sk.status||'').trim().toLowerCase();
  if(statusId&&target.hp>0){const chance=Math.max(0,Math.min(1,Number(sk.statusChance??sk.chance??1)));if(Math.random()<chance&&arenaTryStatus_(actor,target,statusId,Number(sk.statusDuration??sk.duration??2),Number(sk.statusStacks??1)))arenaLog_(`${target.name} 陷入【${statusDef_(statusId)?.name||statusId}】。`)}
 
- if(Number(sk.cd??sk.cooldown)>0){actor.cooldowns[name]=Number(sk.cd??sk.cooldown);arenaEffectText_(actor,`${name} CD ${Number(sk.cd??sk.cooldown)}`,'buff')}
+ if(Number(sk.cd??sk.cooldown)>0){actor.cooldowns[name]=equipmentNoCooldown462_(sk,actor)?0:Number(sk.cd??sk.cooldown);if(actor.cooldowns[name]>0)arenaEffectText_(actor,`${name} CD ${actor.cooldowns[name]}`,'buff')}
  arenaFinishArcaneRound_(actor,isAttackSkill_(sk));
  return total
 }
@@ -26766,7 +26807,7 @@ async function arenaSkipTurn_(){
  if(diceFlight141_(b.attacker)){await diceFlight141_(b.attacker);if(arenaBattle_!==b||b.finished)return;}
  b.actionBusy=true;render();
  try{
-   arenaLog_('玩家跳過回合。');arenaFinishArcaneRound_(b.attacker,false);arenaTick_(b.attacker);render();await wait(1000);
+   arenaLog_('玩家跳過回合。');if(arenaCanAct_(b.attacker))await fxEvent_('skip',b.attacker,b.defender);arenaFinishArcaneRound_(b.attacker,false);arenaTick_(b.attacker);render();await wait(1000);
    await arenaDefenderTurn_();if(arenaHasDead59_(b)){await arenaFinish_();return}
    arenaEndRoundToPlayer_();if(b.turn>=b.maxTurns){await arenaFinish_();return}
  }finally{if(arenaBattle_&&!arenaBattle_.finished)arenaBattle_.actionBusy=false}
@@ -27870,7 +27911,7 @@ async function questMainSkill368_(id,sk,s){
   const kind=magic?'magic':'physical';playSfx(kind);drawRay(pc,ec,kind);if(!magic)slashFx(ec);await wait(280);
   dmg=await applyDirectDamageToEnemy_(dmg,kind,sk.name);
   if(!b.windDodged69){
-   applyWeaponOnHitEffect_(crit);
+   await applyWeaponOnHitEffect_(crit,dmg);if(b.equipmentPatkPct462>0)s.patk=battlePlayerStats().patk;
    if(magic)questThunderProc368_(sid=>{if(b.enemyHp>0)applyBattleStatus_('enemy',sid,{duration:1});},()=>{if(mageAptitudeIIActive_()){b.arcaneStacks=Math.min(3,Number(b.arcaneStacks||0)+1);refreshArcaneUi_();}});
   }
   floatText(document.getElementById('enemyFx'),`-${dmg} (${hit+1}/${sk.hits})`,magic?'magic':'damage');log(`【${sk.name}】第${hit+1}擊：${dmg}${b.windDodged69?'（迴避）':''}。`);updateBattleNumbers();await wait(160);
@@ -27886,7 +27927,7 @@ async function questArenaSkill368_(actor,target,id,sk,phys,mag){let total=0;
  if(id==='godspeedSlash'&&!(actor.status?.enhancement_lock?.turns>0))actor.buff.godspeedSlash368=2;
  for(let hit=0;hit<sk.hits&&actor.hp>0&&target.hp>0;hit++){
   const magic=id==='heavenlyThunder',dmg=magic?mag(2):phys(1.5);actor.attackMissed241=false;
-  total+=await arenaHit_(actor,target,dmg,magic?'magic':'physical',`-${dmg}`);
+  total+=await arenaHit_(actor,target,dmg,magic?'magic':actor.lastPhysicalCrit462?'crit':'physical',`-${dmg}`);
   if(magic&&!actor.attackMissed241)questThunderProc368_(sid=>{if(target.hp>0)arenaTryStatus_(actor,target,sid,1,1);},()=>{if(arenaMageAptitudeIIActive_(actor))actor.arcaneStacks=Math.min(3,Number(actor.arcaneStacks||0)+1);});
   arenaLog_(`【${sk.name}】第${hit+1}擊${actor.attackMissed241?'被迴避':''}。`);render();await wait(220);
  }

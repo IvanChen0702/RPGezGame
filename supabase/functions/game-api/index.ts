@@ -6081,7 +6081,16 @@ function fxMainKeys_(){
 }
 function fxSkillKeys_(id){return fxSplit_(skillTemplates?.[id]?.effectKey).filter(k=>fxParse_(k))}
 function fxSplit_(raw){return String(raw||'').split(/[\n,;|]+/).map(x=>x.trim()).filter(Boolean)}
+function equipmentParse462_(key){
+ let m;
+ if(m=key.match(/^fx_oncrit_damage_enemy_maxhp_physical_(\d+(?:\.\d+)?)_chance_(\d+(?:\.\d+)?)_lowhp_(\d+(?:\.\d+)?)_chance_(\d+(?:\.\d+)?)$/))return {type:'critMaxHp462',event:'oncrit',n:+m[1],chance:Math.min(100,+m[2])/100,threshold:Math.min(100,+m[3])/100,lowChance:Math.min(100,+m[4])/100};
+ if(m=key.match(/^fx_oncrit_patk_percent_battle_(\d+(?:\.\d+)?)$/))return {type:'critGrowth462',event:'oncrit',n:+m[1]};
+ if(m=key.match(/^fx_cast_no_cooldown_(\d+(?:\.\d+)?)$/))return {type:'noCooldown462',chance:Math.min(100,+m[1])/100};
+ if(m=key.match(/^fx_skip_cooldown_random_(\d+)$/))return {type:'skipCooldown462',event:'skip',n:Math.min(99,+m[1])};
+ return null;
+}
 function fxParse_(key){
+ const equipment462=equipmentParse462_(key);if(equipment462)return equipment462;
  let m;
  if(m=key.match(/^fx_stat_(hp|def|patk|matk|crit|critDamage)_(flat|percent)_(-?\d+(?:\.\d+)?)$/))return {type:'stat',stat:m[1],mode:m[2],n:+m[3],condition:'always'};
  if(m=key.match(/^fx_stat_(def|patk|matk|crit|critDamage)_(flat|percent)_(-?\d+(?:\.\d+)?)_(fullhp|lowhp|no_buff|has_buff|enemy_debuff)$/))return {type:'stat',stat:m[1],mode:m[2],n:+m[3],condition:m[4]};
