@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node permissions438.mjs && node permissions440.mjs && node presence439.mjs && node --test lease446.mjs && node worldboss448.mjs && node jobs452.mjs && node read-paths453.mjs",
     "test:lease": "node --test lease446.mjs",
-    "test:worldboss": "node worldboss448.mjs"
+    "test:worldboss": "node worldboss448.mjs",
+    "test:competition": "node mist465.mjs && node retirement465.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.16"

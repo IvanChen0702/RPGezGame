@@ -48,6 +48,7 @@ function harness(config = {}) {
       if (config.invalidLockReply) return json({ error: 'unexpected' });
       return json(same);
     }
+    if (path === '/rest/v1/rpc/game_mist_observe465') return json({ok:true,ready:true,self:null});
     if (path === '/rest/v1/rpc/game_battle_status79') return json({ ok: true, accountId: body.p_account, revision: 7 });
     if (path === '/rest/v1/rpc/game_battle_cancel79') { operations.push(body); return json({ ok: true, revision: 8 }); }
     if (path === '/rest/v1/rpc/game_worldboss_chest_open') { operations.push(body); return json({ ok: true, award: { gold: 10 }, revision: 8 }); }
@@ -235,4 +236,21 @@ test('six display reads finish while a live mutation retains its lease',async()=
 test('read failure does not acquire, renew or release another request lease',async()=>{
  const h=harness({owner:'writer',operationError:true});assert.equal((await h.request('arena/ranking')).status,503);
  assert.equal(h.owner,'writer');assert.equal(h.acquires,0);assert.equal(h.releases,0);
+});
+
+test('mist status uses the verified actor, bypasses the global lease and stays closed',async()=>{
+ const h=harness({owner:'writer'}),res=await h.request('mist/status',{accountId:'forged-account'}),data=await res.json();
+ assert.equal(res.status,200);assert.equal(data.ready,false);
+ const call=h.calls.find(x=>x.path.endsWith('game_mist_observe465'));
+ assert.ok(call.body.p_account.includes('account-a'));assert.notEqual(call.body.p_account,'forged-account');
+ assert.equal(h.acquires,0);assert.equal(h.releases,0);assert.equal(h.owner,'writer');
+});
+test('mist mutations cannot start an unfinished season',async()=>{
+ const h=harness(),res=await h.request('mist/move',{x:1,y:2});
+ assert.equal((await res.json()).error,'MIST_NOT_OPEN');assert.equal(h.acquires,0);
+ assert.equal(h.calls.some(x=>x.path.includes('/rpc/')),false);
+});
+for(const config of [{anonymous:true},{disabled:true},{unlinked:true},{unauthorized:true}])test('mist rejects invalid identity '+Object.keys(config)[0],async()=>{
+ const h=harness(config);assert.notEqual((await h.request('mist/status')).status,200);
+ assert.equal(h.calls.some(x=>x.path.includes('/rpc/')),false);
 });

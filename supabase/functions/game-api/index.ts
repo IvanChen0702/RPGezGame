@@ -1264,7 +1264,9 @@ function boxingCalendar137_(source, nowMs=Date.now()){
  const template=enabled.find(r=>String(r.SeasonID||'').trim()==='2026-W42');
  if(!template)throw new Error('BOXING_FIXED_REWARDS_MISSING:2026-W42');
  const legacy=enabled.map(row=>({row,seasonId:String(row.SeasonID||'').trim(),start:boxingTaipeiTime_(row.StartAt),end:boxingTaipeiTime_(row.EndAt)})).filter(x=>x.seasonId&&Number.isFinite(x.start)&&Number.isFinite(x.end)&&x.start<anchor&&x.seasonId!=='2026-W42');
- for(let start=anchor;start<=Math.max(anchor,monday)+week;start+=week){
+ // v465: W46 is the final season. Keep all past rows for settlement and claims.
+ const finalStart=Date.UTC(2026,10,8,16); // 2026-11-09 00:00 Asia/Taipei
+ for(let start=anchor;start<=Math.min(finalStart,Math.max(anchor,monday)+week);start+=week){
   const day=new Date(start+offset), thursday=new Date(Date.UTC(day.getUTCFullYear(),day.getUTCMonth(),day.getUTCDate()+3));
   const year=thursday.getUTCFullYear(), first=Date.UTC(year,0,1), isoWeek=Math.ceil(((thursday.getTime()-first)/86400000+1)/7);
   const seasonId=year+'-W'+String(isoWeek).padStart(2,'0'), end=start+week-3600000;
@@ -6151,7 +6153,7 @@ const traceActions446 = new Set([
  'save/get','save/set','auction/list','auction/create','auction/cancel','auction/buy','auction/my-sales','auction/claim',
  'battle/status','battle/cancel','battle/start','battle/finish','worldboss/status','worldboss/ranking','worldboss/reward/check',
  'worldboss/start','worldboss/submit','worldboss/chest/open','redeem/claim','login-gift/status','login-gift/checkin','login-gift/ack',
- 'achievement/claim','boxing/status','boxing/ranking','boxing/start','boxing/submit','boxing/history','boxing/reward/claim',
+ 'mist/status','achievement/claim','boxing/status','boxing/ranking','boxing/start','boxing/submit','boxing/history','boxing/reward/claim',
  'arena/status','arena/defense/upload','arena/matches','arena/battle/start','arena/battle/submit','arena/revenge/list','arena/reports',
  'arena/ranking','arena/reward/claim','quest/status','quest/activity','quest/boxing-start','quest/boxing-finish','quest/openEgg',
  'quest/seen','quest/accept','quest/claim','chaos/catalog','chaos/open','system/tick','system/boxingTick',
@@ -6216,6 +6218,13 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
    if(body.action==='profile/avatar/set'&&!present)return reply(503,{ok:false,error:'AVATAR_PROFILE_WRITE_FAILED'});
    return reply(200,{ok:true,accountId:String(actor.accountId),avatarId:present?value:1,avatarSet:present});
   }
+  // v465: independent service-only read; never acquires the global mutation lease.
+  // Exploration RPCs remain internal until combat/loot/settlement are complete.
+  if(body.action==='mist/status'){
+   const data=await rpc('game_mist_observe465',{p_account:actor.accountId});
+   return reply(200,{...data,ready:false,message:data.ok?'戰境準備中。正式開放後即可參加，不會預先消耗體力。':'通關主線第 1 層後開放。'});
+  }
+  if(body.action.startsWith('mist/'))return reply(200,{ok:false,error:'MIST_NOT_OPEN',message:'戰境尚未開放參賽。'});
   // Recovery reads keep their SQL save-row lock, authentication and owner filter.
   phase='read';
   if(body.action==='battle/status')return reply(200,await rpc('game_battle_status79',{p_account:actor.accountId,p_battle:body.battleId||null,p_request:body.requestId||null,p_consume:body.consumeRequestId||null}));
