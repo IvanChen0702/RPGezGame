@@ -1056,6 +1056,10 @@ export function projectMist468(w, account, now, ready, save, rewards) {
           maxTurns: b.combat.maxTurns,
           attacker: {
             name: b.combat.attacker.name,
+            stats: b.combat.attacker.stats,
+            buff: b.combat.attacker.buff || {},
+            passive: b.combat.attacker.passive,
+            arcaneStacks: b.combat.attacker.arcaneStacks || 0,
             hp: b.combat.attacker.hp,
             maxHp: b.combat.attacker.maxHp,
             skills: b.combat.attacker.skills,
@@ -1065,6 +1069,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
           },
           defender: {
             name: b.combat.defender.name,
+            appearance: b.defender ? w.players[b.defender]?.runtime?.appearance || null : null,
             hp: b.combat.defender.hp,
             maxHp: b.combat.defender.maxHp,
             status: b.combat.defender.status,
