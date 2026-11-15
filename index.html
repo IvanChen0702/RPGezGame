@@ -13645,12 +13645,19 @@ function enhancementHtml(level){
   const n=Math.max(0,Math.min(10,Number(level)||0));
   return n>0?`<span class="enhance-text enhance-${n}">+${n}</span>`:'';
 }
-// v11.20.0：裝備等級為純顯示值，不寫入裝備 instance。
-// 優先使用掉落來源；1~9 共用掉落視為 Lv.1、11~19 共用掉落視為 Lv.11；
-// 其餘使用最早掉落關卡。若沒有掉落來源則採商店 UnlockFloor，最後保底 Lv.1。
+// Display-only planning rating; never a wear requirement or a combat stat.
+function equipmentPlanningLevel464_(row){
+ const raw=row?.['等級']??row?.Level;
+ if(raw==null||String(raw).trim()===''||!['number','string'].includes(typeof raw))return null;
+ const value=Number(raw);return Number.isInteger(value)&&value>=1&&value<=100?value:null;
+}
+// Older packages without a rating retain their original source-based display.
 function equipmentLevel_(itemOrTemplate){
   const templateId=typeof itemOrTemplate==='string' ? itemOrTemplate : String(itemOrTemplate?.template||itemOrTemplate?.id||'');
   if(!templateId)return 1;
+  if(typeof itemOrTemplate==='object'&&itemOrTemplate?.forge172||templateId.startsWith('forge172_'))return null;
+  const rating=itemTemplates[templateId]?.equipmentLevel464;
+  if(Number.isInteger(rating)&&rating>=1&&rating<=100)return rating;
   const floors=[];
   for(const [floorKey,stage] of Object.entries(onlineStages||{})){
     const floor=Math.trunc(Number(floorKey));
@@ -13669,7 +13676,7 @@ function equipmentLevel_(itemOrTemplate){
   if(shopFloors.length)return Math.min(...shopFloors);
   return 1;
 }
-function equipmentLevelText_(itemOrTemplate){return `Lv.${equipmentLevel_(itemOrTemplate)}`;}
+function equipmentLevelText_(itemOrTemplate){const level=equipmentLevel_(itemOrTemplate);return level==null?'Lv.未評定':`Lv.${level}`;}
 // v11.30.8：技能顯示等級唯一來源為目前 bootstrap 的 ShopEntries.UnlockFloor。
 // 不讀 Skills、不讀玩家等級、不解析 Notes，也不使用舊內建技能資料作 fallback。
 function skillLevel_(id){
@@ -14113,6 +14120,7 @@ function applyEquipmentRows_(rows){
       rarity:String(r.Rarity||prev.rarity||'一般'),
       slot:String(r.Slot||prev.slot||'special'),
       price:Number(r.BasePrice??prev.price??0)||0,
+      equipmentLevel464:equipmentPlanningLevel464_(r),
       stats,
       sockets:Math.max(0,Math.trunc(Number(r.BaseSockets??prev.sockets??0)||0)),
       effect:String(r.EffectKey||prev.effect||'')||undefined,
