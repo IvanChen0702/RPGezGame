@@ -26,6 +26,7 @@ function harness(config = {}) {
     }
     if (path === '/rest/v1/game_identity_links') return json(config.unlinked ? [] : [{ legacy_account_id: new URL(url).searchParams.get('auth_user_id') }]);
     if (path === '/rest/v1/Accounts') return json([{ disabled: !!config.disabled }]);
+    if (path === '/rest/v1/PlayerSaves') return json([{progress:config.mistLocked?0:1,epoch:411}]);
     if (path === '/rest/v1/GameDataCurrent') {
       if (config.planningError) throw Error('private database detail');
       return json([{ data_json: { data: {} } }]);
@@ -48,6 +49,7 @@ function harness(config = {}) {
       if (config.invalidLockReply) return json({ error: 'unexpected' });
       return json(same);
     }
+    if (path === '/rest/v1/rpc/game_mist_observe465') return json({ok:true,ready:true,self:null});
     if (path === '/rest/v1/rpc/game_battle_status79') return json({ ok: true, accountId: body.p_account, revision: 7 });
     if (path === '/rest/v1/rpc/game_battle_cancel79') { operations.push(body); return json({ ok: true, revision: 8 }); }
     if (path === '/rest/v1/rpc/game_worldboss_chest_open') { operations.push(body); return json({ ok: true, award: { gold: 10 }, revision: 8 }); }
@@ -85,7 +87,7 @@ function harness(config = {}) {
     })
   };
   vm.createContext(context); vm.runInContext(wrapper + '\nthis.handler = makeGameApi;', context);
-  const api = context.handler(env, fetcher);
+  const api = context.handler(k=>k==='MIST_SCHEMA465_READY'?(config.mistSchemaReady?'true':undefined):env(k), fetcher);
   const request = (action = 'battle/start', extra = {}, account = 'account-a') => api(new Request('https://edge.test', {
     method: 'POST', headers: { Origin: 'https://game.test', Authorization: 'Bearer ' + account, ...(action.startsWith('system/') ? { 'x-game-cron-secret': 'test-only-cron' } : {}) },
     body: JSON.stringify({ action, requestId: 'stable-request-123', ...extra })
@@ -235,4 +237,28 @@ test('six display reads finish while a live mutation retains its lease',async()=
 test('read failure does not acquire, renew or release another request lease',async()=>{
  const h=harness({owner:'writer',operationError:true});assert.equal((await h.request('arena/ranking')).status,503);
  assert.equal(h.owner,'writer');assert.equal(h.acquires,0);assert.equal(h.releases,0);
+});
+
+test('mist status uses the verified actor, bypasses the global lease and stays closed',async()=>{
+ const h=harness({owner:'writer',mistSchemaReady:true}),res=await h.request('mist/status',{accountId:'forged-account'}),data=await res.json();
+ assert.equal(res.status,200);assert.equal(data.ready,false);
+ const call=h.calls.find(x=>x.path.endsWith('game_mist_observe465'));
+ assert.ok(call.body.p_account.includes('account-a'));assert.notEqual(call.body.p_account,'forged-account');
+ assert.equal(h.acquires,0);assert.equal(h.releases,0);assert.equal(h.owner,'writer');
+});
+test('mist mutations cannot start an unfinished season',async()=>{
+ const h=harness(),res=await h.request('mist/move',{x:1,y:2});
+ assert.equal((await res.json()).error,'MIST_NOT_OPEN');assert.equal(h.acquires,0);
+ assert.equal(h.calls.some(x=>x.path.includes('/rpc/')),false);
+});
+for(const config of [{anonymous:true},{disabled:true},{unlinked:true},{unauthorized:true}])test('mist rejects invalid identity '+Object.keys(config)[0],async()=>{
+ const h=harness(config);assert.notEqual((await h.request('mist/status')).status,200);
+ assert.equal(h.calls.some(x=>x.path.includes('/rpc/')),false);
+});
+
+test('mist preparing entrance works without the exploration schema and reads only owned progress',async()=>{
+ const h=harness({owner:'writer'}),data=await(await h.request('mist/status',{accountId:'forged'})).json();
+ assert.equal(data.ok,true);assert.equal(data.ready,false);assert.equal(data.self,null);assert.equal(h.acquires,0);
+ assert.equal(h.calls.some(x=>x.path.includes('/rpc/')),false);
+ const locked=harness({mistLocked:true});assert.equal((await(await locked.request('mist/status')).json()).error,'MIST_NOT_UNLOCKED');
 });

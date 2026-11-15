@@ -1,0 +1,24 @@
+window.previewOriginalRender465=render;
+window.installMistPreview465=function(planning,view='desktop'){
+ document.querySelectorAll('#accountOverlay,#bootLoading279,#initialEntry45').forEach(e=>e.remove());
+ document.body.classList.remove('login-required-lock');
+ state=defaultState();state.page='mist';state.maxCleared=1;initialEntryShown45_=true;
+ cloudMeta={accountId:'preview-adventurer',nickname:'冒險者',sessionToken:'preview-only'};
+ bootstrapDataCache=planning.data;viewModePreference_=view;applyViewMode_();isCloudLoggedIn=()=>true;save=()=>{};
+ const cells=[];
+ for(const [cx,cy] of [[4,6],[6,7],[9,9]])for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(!cells.some(c=>c.x===cx+dx&&c.y===cy+dy))cells.push({x:cx+dx,y:cy+dy,object:null});
+ const put=(x,y,o)=>{const c=cells.find(c=>c.x===x&&c.y===y);if(c)c.object=o;};
+ put(5,6,{kind:'monster',id:'preview-wolf',name:'荊棘野狼',art:'normal-6'});
+ put(3,5,{kind:'chest',id:'preview-chest',name:'重生補給箱'});
+ put(5,5,{kind:'supply',name:'補給站'});
+ put(6,7,{kind:'flag',own:true,name:'我的旗幟'});
+ put(9,9,{kind:'flag',own:true,name:'我的旗幟'});
+ put(8,8,{kind:'monster',id:'preview-elite',name:'熔金守衛',art:'elite-2',elite:true});
+ put(7,7,{kind:'forge',name:'鐵匠鋪'});
+ put(3,7,{kind:'player',id:'preview-opponent',name:'霧中的旅人',points:12,hp:183});
+ const eq=planning.data.Equipment.filter(r=>r.ItemID!=='gmsword').slice(0,4).map((r,i)=>({id:'item-'+i,name:r.Name,template:r.ItemID,kind:'equipment',enhance:i+1,starter:i<2}));
+ window.previewMistData465={ok:true,ready:true,size:16,season:{label:'第 1 賽季 · 預覽'},self:{x:4,y:6,hp:183,maxHp:300,energy:7,points:12,kills:3,flags:2,revision:1},cells,equipment:{},inventory:{equipment:eq,gems:[],chests:[]},pendingLoot:[],ranking:[{rank:1,nickname:'北境旅人',points:42,kills:11},{rank:2,nickname:'夜行者',points:36,kills:8},{rank:3,nickname:'冒險者',points:12,kills:3}],reports:[{title:'守住了你的位置',description:'你擊退了霧中的旅人，獲得 3 分。',points:12,result:'win',time:'本季 · 14:30'}]};
+ mist465_={tab:'entry',bag:'equipment',data:previewMistData465,error:'',loading:false,pending:null,selection:{x:5,y:6},owner:cloudMeta.accountId,preview:true};
+ render=()=>{document.getElementById('page').innerHTML=renderMist465_();};
+ render();
+};

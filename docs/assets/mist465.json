@@ -1,0 +1,327 @@
+{
+  "quality": 85,
+  "files": [
+    {
+      "path": "assets/images/backgrounds/mist/entrance465.webp",
+      "width": 1774,
+      "height": 443,
+      "alpha": false,
+      "sourceSHA256": "d1f75a4cd4f70347de7711aea4af73a07f948b77adce557cea367a7d9099eb28",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1774,
+        "height": 443
+      },
+      "sha256": "ef6b7dca5b6e4030d7ce6aaa0457c838d109e5da697254959ff1c056c0b841ed"
+    },
+    {
+      "path": "assets/images/backgrounds/mist/battle465.webp",
+      "width": 1774,
+      "height": 444,
+      "alpha": false,
+      "sourceSHA256": "d1f75a4cd4f70347de7711aea4af73a07f948b77adce557cea367a7d9099eb28",
+      "crop": {
+        "left": 0,
+        "top": 443,
+        "width": 1774,
+        "height": 444
+      },
+      "sha256": "7b128877220dd17d6262de5ffdf5edfcf6c16e4ec357835853284058e6eb95c3"
+    },
+    {
+      "path": "assets/images/ui/mist/flag-blue465.webp",
+      "width": 197,
+      "height": 479,
+      "alpha": true,
+      "sourceSHA256": "a9f8caa3f6b049ec90e5c1f15ace6734d0424e14b53ecccde4813c8c2a19a91d",
+      "crop": {
+        "left": 137,
+        "top": 0,
+        "width": 199,
+        "height": 724
+      },
+      "sha256": "7861a54c7e67b49b5fd4e2efa16cd7afda898ae7008d253aeb80048c54634f85"
+    },
+    {
+      "path": "assets/images/ui/mist/flag-red465.webp",
+      "width": 197,
+      "height": 477,
+      "alpha": true,
+      "sourceSHA256": "a9f8caa3f6b049ec90e5c1f15ace6734d0424e14b53ecccde4813c8c2a19a91d",
+      "crop": {
+        "left": 539,
+        "top": 0,
+        "width": 199,
+        "height": 724
+      },
+      "sha256": "43a61db18557a724f75db54417f66a4397705760a2a71e6bd82dd442b2ad1b79"
+    },
+    {
+      "path": "assets/images/ui/mist/forge465.webp",
+      "width": 406,
+      "height": 479,
+      "alpha": true,
+      "sourceSHA256": "a9f8caa3f6b049ec90e5c1f15ace6734d0424e14b53ecccde4813c8c2a19a91d",
+      "crop": {
+        "left": 854,
+        "top": 0,
+        "width": 408,
+        "height": 724
+      },
+      "sha256": "f77dbe2038397e10297f6e42e389b2b0740537967047c5d32b4c7b47454f7ac0"
+    },
+    {
+      "path": "assets/images/ui/mist/supply465.webp",
+      "width": 318,
+      "height": 377,
+      "alpha": true,
+      "sourceSHA256": "a9f8caa3f6b049ec90e5c1f15ace6734d0424e14b53ecccde4813c8c2a19a91d",
+      "crop": {
+        "left": 1352,
+        "top": 0,
+        "width": 319,
+        "height": 724
+      },
+      "sha256": "75453b1862184c074385745a8382bf7dd04de3474cebbbb3a24ce5ceca59b7fe"
+    },
+    {
+      "path": "assets/images/ui/mist/chest465.webp",
+      "width": 282,
+      "height": 226,
+      "alpha": true,
+      "sourceSHA256": "a9f8caa3f6b049ec90e5c1f15ace6734d0424e14b53ecccde4813c8c2a19a91d",
+      "crop": {
+        "left": 1784,
+        "top": 0,
+        "width": 284,
+        "height": 724
+      },
+      "sha256": "e2a9d349b1cad5b34d293e690d6c6948222f524df3a6320c093db366c8e77bac"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-1465.webp",
+      "width": 271,
+      "height": 214,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 38,
+        "top": 53,
+        "width": 274,
+        "height": 228
+      },
+      "sha256": "a22b818a7d16e6e5d38404958815b74f7adc941fd1e5c4f913db4dd93d4f30d5"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-2465.webp",
+      "width": 264,
+      "height": 190,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 334,
+        "top": 53,
+        "width": 266,
+        "height": 228
+      },
+      "sha256": "123737feeb1fd1cdf41166f447f9e3fad9f4c62d19c7c86b783e4ab41ebdabe1"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-3465.webp",
+      "width": 288,
+      "height": 177,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 624,
+        "top": 53,
+        "width": 290,
+        "height": 228
+      },
+      "sha256": "6abbe7ce5abb2b0f2bea0075040215c33a32e247e9e4367a83d44fb94e8db6b0"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-4465.webp",
+      "width": 242,
+      "height": 222,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 938,
+        "top": 53,
+        "width": 244,
+        "height": 228
+      },
+      "sha256": "e31288c18c2c40b02479ba0550e625fdc3b04123086587b193799a20ec7ff4b6"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-5465.webp",
+      "width": 285,
+      "height": 201,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 1228,
+        "top": 53,
+        "width": 287,
+        "height": 228
+      },
+      "sha256": "b08049ce05400e167d30d3202339ac3c75096b86e88e0560199fce252611d931"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-6465.webp",
+      "width": 280,
+      "height": 188,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 31,
+        "top": 360,
+        "width": 282,
+        "height": 209
+      },
+      "sha256": "092849b039d58cf3d0a83e3689af1f4560b4e02142b7d623065aa136dc6283dd"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-7465.webp",
+      "width": 254,
+      "height": 207,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 338,
+        "top": 360,
+        "width": 256,
+        "height": 209
+      },
+      "sha256": "e30ca6b4ff1650b93463f262d830d511eef5862b46eb67d829a289fc39b7603b"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-8465.webp",
+      "width": 254,
+      "height": 207,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 633,
+        "top": 360,
+        "width": 256,
+        "height": 209
+      },
+      "sha256": "06b60bb71c9c0ab5240d5a07445170cfd657a77dd5128bcfd41834461c79053f"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-9465.webp",
+      "width": 257,
+      "height": 197,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 940,
+        "top": 360,
+        "width": 259,
+        "height": 209
+      },
+      "sha256": "e369d14e830a0a521f26c8e45ccfd5adb54cbb14da8de5a8af26bdd4c0ee6a5b"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/normal-10465.webp",
+      "width": 263,
+      "height": 203,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 1250,
+        "top": 360,
+        "width": 265,
+        "height": 209
+      },
+      "sha256": "c31935c23303004ef9aaf5e7633fe500257766bcea8c3caba2572639243cc521"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/elite-1465.webp",
+      "width": 300,
+      "height": 300,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 15,
+        "top": 642,
+        "width": 302,
+        "height": 313
+      },
+      "sha256": "b7bd0dfe8cf593de3ed46aeb1499863508f420045dde4150e9e4c6489d50005d"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/elite-2465.webp",
+      "width": 284,
+      "height": 292,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 326,
+        "top": 642,
+        "width": 286,
+        "height": 313
+      },
+      "sha256": "1ad4f6d84b4c4a23150928ae8dc7f8113a0ae4b94bcb2c8bb12836ef20bc2665"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/elite-3465.webp",
+      "width": 304,
+      "height": 287,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 615,
+        "top": 642,
+        "width": 306,
+        "height": 313
+      },
+      "sha256": "e82b4fcc73c175bebb8532d25a481c2fb55685cc9c3e437f4b8d2a067a02c2c3"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/elite-4465.webp",
+      "width": 271,
+      "height": 303,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 930,
+        "top": 642,
+        "width": 273,
+        "height": 313
+      },
+      "sha256": "6c6281d649b0fe333f1c37c9b3f0f791360dcde0a63121863562fbcaae093d98"
+    },
+    {
+      "path": "assets/images/characters/enemies/mist/elite-5465.webp",
+      "width": 298,
+      "height": 306,
+      "alpha": true,
+      "sourceSHA256": "fdf5fb72ba2d53fa5330571fe2218a0393ea0e101274b4252fced462c61118c8",
+      "crop": {
+        "left": 1217,
+        "top": 642,
+        "width": 300,
+        "height": 313
+      },
+      "sha256": "e46f1978156da1d5094bdace8f72f53081e968d88b1ecfbb564aef426d9f9618"
+    },
+    {
+      "path": "assets/images/backgrounds/mist/board465.webp",
+      "width": 1254,
+      "height": 1254,
+      "alpha": false,
+      "sourceSHA256": "d70089745c288c42205e9a9a664b9d2465e2d288559343bd3082bfd9916b6622",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1254,
+        "height": 1254
+      },
+      "sha256": "d4bb0a94f1e65ec4d59a3e7223a6a5e7311d5575cf0dd63b298b8fd9b8d50557"
+    }
+  ]
+}
