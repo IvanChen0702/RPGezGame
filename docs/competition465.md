@@ -46,12 +46,13 @@
 
 ## 部署與驗證
 
-只套用本次兩支 migration，不重播歷史 436／438：
+不重播歷史 436／438。2026-11-15 部署狀態：
 
-1. 20261115140245_mist_world465.sql
-2. 20261115141736_retire_boxing465.sql（核對基底企劃版本，原子更新企劃與進度）
-3. 部署 game-api（verify_jwt=false，保留內部 Supabase Auth 認證）
-4. 發布前端
+1. `20261115141736_retire_boxing465.sql` 已套用；企劃版本為 `20261115-144045-competition465`。目前無正在進行第 4 階段、需搬移 baseline 的帳號；0／2／3 次保留情境已用隔離資料驗證。
+2. game-api v60 已部署，保留 verify_jwt=false 與內部 Supabase Auth 認證。
+3. 新模式 schema 的 `20261115140245_mist_world465.sql` 兩次套用均被客戶端取消，工具回報沒有執行，仍待套用。不要宣稱探索 RPC 已在線上。
+4. `MIST_SCHEMA465_READY` 未設為 true 時，準備中入口僅投影讀取自己存檔的進度／epoch，完全不依賴新表，也不啟用新模式寫入。未建表不會造成入口載入失敗。
+5. 未來套用新模式 schema 後可設定該旗標測試視野讀取；它不會解除 ready=false，也不能代替完整對戰／掉落／結算實作。
 
 測試：
 - npm --prefix supabase/tests test

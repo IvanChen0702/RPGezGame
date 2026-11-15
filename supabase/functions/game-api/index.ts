@@ -6221,7 +6221,15 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
   // v465: independent service-only read; never acquires the global mutation lease.
   // Exploration RPCs remain internal until combat/loot/settlement are complete.
   if(body.action==='mist/status'){
-   const data=await rpc('game_mist_observe465',{p_account:actor.accountId});
+   let data;
+   if(env('MIST_SCHEMA465_READY')==='true')data=await rpc('game_mist_observe465',{p_account:actor.accountId});
+   else{
+    // The preparing entrance can ship before the independent exploration schema.
+    // Project only progress fields; never download or expose the full save here.
+    const saves=await remote('/rest/v1/PlayerSaves?account_id=eq.'+encodeURIComponent(actor.accountId)+'&select=progress:save_json-%3EmaxCleared,epoch:save_json-%3EmainProgressEpoch');
+    const unlocked=saves.length===1&&Number(saves[0].progress)>=1&&Number(saves[0].epoch)===411;
+    data=unlocked?{ok:true,self:null,cells:[],ranking:[],reports:[]}:{ok:false,error:'MIST_NOT_UNLOCKED'};
+   }
    return reply(200,{...data,ready:false,message:data.ok?'戰境準備中。正式開放後即可參加，不會預先消耗體力。':'通關主線第 1 層後開放。'});
   }
   if(body.action.startsWith('mist/'))return reply(200,{ok:false,error:'MIST_NOT_OPEN',message:'戰境尚未開放參賽。'});
