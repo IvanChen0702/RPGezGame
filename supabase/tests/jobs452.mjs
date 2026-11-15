@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
 let source=readFileSync(new URL('../functions/game-api/index.ts',import.meta.url),'utf8');
-source=source.slice(0,source.indexOf('// v446: only audited')).replace(/^import .*lease446.ts';\n/m,'').replaceAll('export function ','function ');
+source=source.slice(0,source.indexOf('// v446: only audited')).replace(/^import .*lease446.ts';\n/m,'').replace(/^import .*mist-api468.js';\n/m,'').replaceAll('export function ','function ');
 class Clock extends Date {static now(){return Date.UTC(2026,10,14);}}
 const context={Date:Clock,crypto:webcrypto,TextEncoder,TextDecoder,Uint8Array,Uint32Array,URL,Response,AbortSignal,console:{log(){},warn(){}}};
 vm.createContext(context);vm.runInContext(source+'\nthis.factory=makeEngine;',context);

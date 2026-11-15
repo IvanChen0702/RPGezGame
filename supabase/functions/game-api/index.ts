@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { handleMist468 } from './mist-api468.js';
 import { createGameLease446, retainGameRequest446 } from './lease446.ts';
 /* Shared planning compiler and migration. No game-content fallback. */
 (function(g){
@@ -6153,7 +6154,7 @@ const traceActions446 = new Set([
  'save/get','save/set','auction/list','auction/create','auction/cancel','auction/buy','auction/my-sales','auction/claim',
  'battle/status','battle/cancel','battle/start','battle/finish','worldboss/status','worldboss/ranking','worldboss/reward/check',
  'worldboss/start','worldboss/submit','worldboss/chest/open','redeem/claim','login-gift/status','login-gift/checkin','login-gift/ack',
- 'mist/status','achievement/claim','boxing/status','boxing/ranking','boxing/start','boxing/submit','boxing/history','boxing/reward/claim',
+ 'mist/status','mist/join','mist/respawn','mist/move','mist/flag','mist/unflag','mist/hide','mist/chest/open','mist/loot/take','mist/loot/discard','mist/equip','mist/unequip','mist/discard','mist/gem/insert','mist/gem/remove','mist/skills','mist/forge','mist/supply','mist/reports/read','mist/battle/start','mist/battle/turn','mist/battle/leave','mist/reward/claim','achievement/claim','boxing/status','boxing/ranking','boxing/start','boxing/submit','boxing/history','boxing/reward/claim',
  'arena/status','arena/defense/upload','arena/matches','arena/battle/start','arena/battle/submit','arena/revenge/list','arena/reports',
  'arena/ranking','arena/reward/claim','quest/status','quest/activity','quest/boxing-start','quest/boxing-finish','quest/openEgg',
  'quest/seen','quest/accept','quest/claim','chaos/catalog','chaos/open','system/tick','system/boxingTick',
@@ -6217,6 +6218,14 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
    const value=Number(rows?.[0]?.avatar_id),present=Number.isInteger(value)&&value>=1&&value<=12;
    if(body.action==='profile/avatar/set'&&!present)return reply(503,{ok:false,error:'AVATAR_PROFILE_WRITE_FAILED'});
    return reply(200,{ok:true,accountId:String(actor.accountId),avatarId:present?value:1,avatarSet:present});
+  }
+  if(body.action.startsWith('mist/')&&env('MIST_RUNTIME468_ENABLED')!=='false'){
+   if(body.action==='mist/reward/claim')return reply(200,await rpc('game_mist_reward_claim468',{p_account:actor.accountId,p_season:String(body.seasonId||''),p_expected_revision:Number(body.expectedSaveRevision)||null}));
+   return reply(200,await handleMist468(rpc,actor.accountId,body));
+  }
+  // Run mode housekeeping outside the legacy mutation lease; no player save is touched.
+  if(cron&&body.action==='system/tick'&&env('MIST_RUNTIME468_ENABLED')!=='false'){
+   phase='mist_housekeeping';try{const result=await handleMist468(rpc,null,{action:'system/mistTick'});if(!result.ok)trace('mist_tick_retry');}catch(_){trace('mist_tick_failed');}
   }
   // v465: independent service-only read; never acquires the global mutation lease.
   // Exploration RPCs remain internal until combat/loot/settlement are complete.

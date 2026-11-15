@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { webcrypto } from 'node:crypto';
 import test from 'node:test';
+import {handleMist468} from '../functions/game-api/mist-api468.js';
+const mistPlanning468=JSON.parse(readFileSync(new URL('./fixtures/mist468-planning.json',import.meta.url)));mistPlanning468.MistConfig.find(r=>r.Key==='Enabled').Value=true;
 
 const root = new URL('../functions/game-api/', import.meta.url);
 const helperSource = readFileSync(new URL('lease446.ts', root), 'utf8');
@@ -11,7 +13,7 @@ const source = readFileSync(new URL('index.ts', root), 'utf8');
 const wrapper = source.slice(source.indexOf('// v446: only audited'), source.indexOf('// Log interrupted phases')).replace('export function', 'function');
 const read453=['arena/ranking','arena/revenge/list','arena/reports','boxing/ranking','worldboss/ranking','auction/my-sales'];
 const deferred = () => { let resolve; const promise = new Promise(r => resolve = r); return { promise, resolve }; };
-const env = key => ({ GAME_ALLOWED_ORIGINS: 'https://game.test', SUPABASE_URL: 'https://db.test', SUPABASE_SERVICE_ROLE_KEY: 'test-only-key', GAME_CRON_SECRET: 'test-only-cron' })[key];
+const env = key => ({ MIST_RUNTIME468_ENABLED:'false', GAME_ALLOWED_ORIGINS: 'https://game.test', SUPABASE_URL: 'https://db.test', SUPABASE_SERVICE_ROLE_KEY: 'test-only-key', GAME_CRON_SECRET: 'test-only-cron' })[key];
 function harness(config = {}) {
   const logs = [], calls = [], operations = [];
   let owner = config.owner || null, acquires = 0, releases = 0, time = Date.now();
@@ -49,6 +51,8 @@ function harness(config = {}) {
       if (config.invalidLockReply) return json({ error: 'unexpected' });
       return json(same);
     }
+    if(path==='/rest/v1/rpc/game_mist_load468'){if(config.mistTickError)throw Error('private mode failure');return json({world:{revision:0,meta:{},season:null,players:{},cells:[],flags:[]},now:'2026-11-16T01:00:00Z',planning:{data:mistPlanning468,dataVersion:'test'},save:{skillsOwned:['slash'],equippedSkills:['slash'],passive:[]},rewards:[],nickname:'Test'});}
+    if(path==='/rest/v1/rpc/game_mist_commit468')return json(body.p_result);
     if (path === '/rest/v1/rpc/game_mist_observe465') return json({ok:true,ready:true,self:null});
     if (path === '/rest/v1/rpc/game_battle_status79') return json({ ok: true, accountId: body.p_account, revision: 7 });
     if (path === '/rest/v1/rpc/game_battle_cancel79') { operations.push(body); return json({ ok: true, revision: 8 }); }
@@ -57,7 +61,7 @@ function harness(config = {}) {
   };
   class Clock extends Date { static now() { return time; } }
   const context = {
-    Response, Request, AbortSignal, crypto: webcrypto, Date: Clock,
+    handleMist468, Response, Request, AbortSignal, crypto: webcrypto, Date: Clock,
     console: { info: line => logs.push(JSON.parse(line)) },
     createGameLease446: opts => createGameLease446({ ...opts, now: () => time, sleep: async ms => { time += ms; } }),
     makeEngine: ({ guard, actor, runJob, readTimeoutMs, readOnly }) => ({
@@ -87,7 +91,7 @@ function harness(config = {}) {
     })
   };
   vm.createContext(context); vm.runInContext(wrapper + '\nthis.handler = makeGameApi;', context);
-  const api = context.handler(k=>k==='MIST_SCHEMA465_READY'?(config.mistSchemaReady?'true':undefined):env(k), fetcher);
+  const api = context.handler(k=>k==='MIST_RUNTIME468_ENABLED'&&config.mistRuntime?'true':k==='MIST_SCHEMA465_READY'?(config.mistSchemaReady?'true':undefined):env(k), fetcher);
   const request = (action = 'battle/start', extra = {}, account = 'account-a') => api(new Request('https://edge.test', {
     method: 'POST', headers: { Origin: 'https://game.test', Authorization: 'Bearer ' + account, ...(action.startsWith('system/') ? { 'x-game-cron-secret': 'test-only-cron' } : {}) },
     body: JSON.stringify({ action, requestId: 'stable-request-123', ...extra })
@@ -261,4 +265,20 @@ test('mist preparing entrance works without the exploration schema and reads onl
  assert.equal(data.ok,true);assert.equal(data.ready,false);assert.equal(data.self,null);assert.equal(h.acquires,0);
  assert.equal(h.calls.some(x=>x.path.includes('/rpc/')),false);
  const locked=harness({mistLocked:true});assert.equal((await(await locked.request('mist/status')).json()).error,'MIST_NOT_UNLOCKED');
+});
+
+// The new route uses the same verified identity and never enters the global mutation lease.
+test('mist runtime join ignores forged identity, client equipment/stats and busy global lease',async()=>{
+ const h=harness({mistRuntime:true,owner:'another-player'}),res=await h.request('mist/join',{requestId:crypto.randomUUID(),accountId:'forged',hp:999999,equipment:{weapon:'gmSword'}}),d=await res.json();
+ assert.equal(res.status,200);assert.equal(d.ok,true);assert.equal(d.ready,true);assert.equal(d.self.energy,10);assert.deepEqual(d.equipment,{});assert.ok(d.self.hp<999999);
+ const load=h.calls.find(c=>c.path.endsWith('game_mist_load468'));assert.ok(load.body.p_account.includes('account-a'));assert.notEqual(load.body.p_account,'forged');assert.equal(h.acquires,0);assert.equal(h.owner,'another-player');
+});
+for(const cfg of [{anonymous:true},{disabled:true},{unlinked:true},{unauthorized:true}])test('mist runtime cannot bypass authentication '+Object.keys(cfg)[0],async()=>{
+ const h=harness({...cfg,mistRuntime:true});assert.notEqual((await h.request('mist/join',{requestId:crypto.randomUUID()})).status,200);assert.equal(h.calls.some(c=>c.path.includes('/rpc/')),false);
+});
+test('mist runtime requires idempotency id before database mutations',async()=>{
+ const h=harness({mistRuntime:true}),d=await(await h.request('mist/join')).json();assert.equal(d.error,'MIST_REQUEST_REQUIRED');assert.equal(h.calls.some(c=>c.path.includes('/rpc/')),false);
+});
+test('mist housekeeping failure does not prevent existing settlement/cleanup jobs',async()=>{
+ const h=harness({mistRuntime:true,mistTickError:true});assert.equal((await h.request('system/tick')).status,200);assert.deepEqual(h.operations,['boxing_season','worldboss_cleanup']);assert.ok(h.logs.some(l=>l.kind==='mist_tick_failed'));assert.ok(!JSON.stringify(h.logs).includes('private mode failure'));
 });

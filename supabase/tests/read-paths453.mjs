@@ -12,7 +12,7 @@ class Clock extends Date{constructor(...args){super(...(args.length?args:[fixed]
 function factory(text){
  const context={Date:Clock,crypto:webcrypto,TextEncoder,TextDecoder,Uint8Array,Uint32Array,URL,Response,AbortSignal,console};
  vm.createContext(context);
- vm.runInContext(text.slice(0,text.indexOf('// v446: only audited')).replace(/^import .*lease446.ts';\n/m,'').replaceAll('export function ','function ')+'\nthis.factory=makeEngine;',context);
+ vm.runInContext(text.slice(0,text.indexOf('// v446: only audited')).replace(/^import .*lease446.ts';\n/m,'').replace(/^import .*mist-api468.js';\n/m,'').replaceAll('export function ','function ')+'\nthis.factory=makeEngine;',context);
  return context.factory;
 }
 const currentFactory=factory(source),oldFactory=factory(baseline);
