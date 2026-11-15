@@ -234,3 +234,30 @@ await act("a", "battle/leave", { battleId: r.battle.id });
 console.log(
   "Mist PvP death/drop/revenge, inventory, HP, supply, monster recovery and closed-mode scenarios passed",
 );
+
+// v469: cosmetic projection is bounded and cannot alter combat stats or expose inventory.
+data.MistConfig.find((r) => r.Key === "Enabled").Value = true;
+reset();
+await act('a','join');await act('b','join');
+position('a',5,5);position('b',6,5);
+player('b').protected_until=null;
+const look={sex:'female',suit:7,head:6,kind:'staff',glow:true,account:'private',equipment:['private'],stats:{hp:999999}};
+let cosmetic=await act('b','status',{appearance:look});
+assert.notEqual(cosmetic.stats.hp,999999);
+let observer=await act('a','status');
+const seen=observer.cells.find(c=>c.object?.kind==='player').object;
+assert.deepEqual(seen.appearance,{sex:'female',suit:7,head:6,kind:'staff',glow:true});
+assert.ok(!('stats' in seen)&&!('equipment' in seen)&&!('account' in seen));
+await act('b','hide');
+observer=await act('a','status');
+assert.ok(!observer.cells.some(c=>c.object?.kind==='player'));
+input.world.cells=input.world.cells.filter(c=>!(c.x===5&&c.y===6));
+await act('a','flag');
+let moved=await act('a','move',{x:5,y:6});
+assert.equal(moved.self.y,6);
+assert.equal(moved.self.flags,1);
+moved=await act('a','move',{x:5,y:5});
+assert.equal(moved.self.y,5);
+assert.equal(moved.self.energy,7);
+assert.equal(moved.cells.find(c=>c.x===5&&c.y===5).flag.own,true);
+console.log('Mist flag movement, isolated stats and private cosmetic projection passed');

@@ -65,6 +65,19 @@ assert.equal(a.self.energy, 10);
 assert.ok([4, 6].includes(a.cells.length));
 assert.ok(a.starter);
 assert.equal(a.ready, true);
+// Real SQL persistence: flag insertion must not lock the player in place.
+const origin469={x:a.self.x,y:a.self.y};
+a=await act('a','flag');
+const step469=a.cells.find(c=>Math.abs(c.x-a.self.x)+Math.abs(c.y-a.self.y)===1&&!c.object);
+assert.ok(step469);
+a=await act('a','move',{x:step469.x,y:step469.y});
+assert.equal(a.ok,true);assert.equal(a.self.x,step469.x);assert.equal(a.self.y,step469.y);
+a=await act('a','move',origin469);
+assert.equal(a.ok,true);assert.equal(a.self.flags,1);
+await act('a','unflag',origin469);
+// Restore test energy only, so the existing combat assertions stay independent.
+await db.exec("update mist_players465 set energy=10 where account_id='a'");
+a=await status('a');
 let first = await one(
   'select save_json from "PlayerSaves" where account_id=$1',
   ["a"],
