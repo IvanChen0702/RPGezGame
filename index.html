@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<style>@layer desktopViewport421;</style>
+<style>@layer mistLayout466,desktopViewport421;</style>
 <script id="planning-rules411">
 /* Shared planning compiler and migration. No game-content fallback. */
 (function(g){
@@ -31679,7 +31679,7 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
  .mist-side-controls465{display:flex;flex-direction:column;gap:10px}.mist-side465>.mist-notice465{grid-column:1/-1}
  .mist-action-row465{grid-template-columns:1fr}.mist-map-toolbar465{font-size:12px}
  .mist-section465{padding:12px}.mist-items465{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.mist-item465{padding:8px}.mist-equipped465{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.mist-equipped465>div{padding:8px 4px;font-size:11px}
- #page .mode-grid349:has(.mode-mist349){overflow:auto;max-height:calc(100dvh - 260px);overscroll-behavior:contain;grid-auto-rows:minmax(170px,auto)}
+
 }
 /* Shared legacy button rules use !important; square map geometry must win. */
 #app #page .mist465 .mist-board465{--mist-cell-bg:linear-gradient(#51605e44,#1d292855),url('assets/images/backgrounds/mist/board465.webp') center/190px 190px;--mist-cell-line:#66736d;--tile-size:36px;grid-auto-rows:var(--tile-size);align-items:stretch}
@@ -31689,6 +31689,55 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
 #app #page .mist465 .mist-cell465 img{width:90%!important;height:90%!important;min-width:0!important;min-height:0!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important}
 @media(max-width:900px){#app #page .mist465 .mist-board465{--tile-size:54px}.mist-map-scroll465{max-height:286px}}
 @media(prefers-reduced-motion:reduce){.mist465 *{scroll-behavior:auto!important;animation:none!important}}
+
+/* v466: bounded content scrolling survives status refreshes and tab changes. */
+@layer mistLayout466 {
+ html body #app #page:has(.mist465){min-height:0!important;overflow:hidden!important}
+ html body #app #page>.viewport-screen:has(.mist465){height:100%!important;min-height:0!important;max-height:100%!important;display:flex!important;overflow:hidden!important;padding:0!important}
+ html body #app #page .mist465{display:flex!important;flex-direction:column!important;flex:1 1 0%!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0 auto!important;overflow:hidden!important;padding:0!important}
+ html body #app #page .mist465>:is(.mist-top465,.mist-tabs465,.mist-error465,.mist-preview-label465){flex:none!important}
+ html body #app #page .mist465>.mist-content465{flex:1 1 0%!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#9a8150 #181c21;scroll-padding-block:12px;-webkit-overflow-scrolling:touch}
+ html body #app #page .mist465>.mist-tabs465{gap:5px!important;padding:8px!important;overflow-x:auto!important}
+ html body #app #page .mist465>.mist-tabs465 button{flex:1 0 auto!important;min-width:44px!important;min-height:40px!important;padding:6px 8px!important;font-size:13px!important}
+ html body #app #page .mist465 .mist-entry465{display:block!important;min-height:0!important}
+ html body #app #page .mist465 .mist-gate465{min-height:300px!important;padding:28px!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:24px!important;background-position:center!important}
+ html body #app #page .mist465 .mist-gate465:before{background:linear-gradient(90deg,#071019d9,transparent 65%),linear-gradient(0deg,#071019f5,transparent 90%)!important}
+ html body #app #page .mist465 .mist-gate-copy465{max-width:540px!important;z-index:1}
+ html body #app #page .mist465 .mist-gate-copy465 h3{font-size:clamp(24px,3vw,36px)!important;letter-spacing:4px!important;line-height:1.4!important;margin:9px 0!important}
+ html body #app #page .mist465 .mist-gate-copy465 p{font-size:13px!important;line-height:1.8!important}
+ html body #app #page .mist465 .mist-entry-side465{position:relative!important;flex:0 1 290px!important;min-width:220px!important;max-width:320px!important;padding:0!important;gap:10px!important;background:none!important;z-index:1}
+ html body #app #page .mist465 .mist-entry-side465>button{width:100%!important;margin:0!important;min-height:44px!important}
+ html body #app #page .mist465 .mist-entry-side465 .mist-notice465{padding:10px 12px!important;background:#152029dd!important;border-color:#7d704d!important}
+ html body #app #page .mist465 .mist-facts466{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:16px;color:#c8bc9e;font-size:12px}
+ html body #app #page .mist465 .mist-highlights466{gap:20px!important;padding:20px!important;background:linear-gradient(#1b242b,#181c21)!important}
+ html body #app #page .mist465 .mist-highlights466 .mist-rule465{display:flex!important;align-items:center!important;gap:14px!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important}
+ html body #app #page .mist465 .mist-highlights466 img{float:none!important;flex:0 0 46px!important;width:46px!important;height:66px!important;object-fit:contain!important;margin:0!important}
+ html body #app #page .mist465 .mist-highlights466 h3{font-size:15px!important;margin:0 0 5px!important}
+ html body #app #page .mist465 .mist-highlights466 p{font-size:12px!important;line-height:1.8!important}
+ html body #app #page .mist465 .mist-section465:has(details){padding:0 20px 18px!important}
+ html body #app #page .mist465 summary{padding:13px 2px;border-top:1px solid #625436;cursor:pointer;color:#d9c393;font-size:13px}
+ html body #app #page .mist465 details>.mist-rules465{grid-template-columns:repeat(2,minmax(0,1fr))!important;padding:4px 0!important}
+ /* Only the three competitive entries change; other battle categories retain their layout. */
+ html.mobile-ui body #app #page .mode-grid349:has(.mode-mist349){height:auto!important;min-height:0!important;max-height:none!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-rows:150px!important;gap:10px!important;overflow:visible!important;padding:2px 2px 10px!important}
+ html.mobile-ui body #app #page .mode-grid349:has(.mode-mist349) .mode-card349{height:150px!important;min-height:0!important;grid-template-columns:43% minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;display:grid!important}
+ html.mobile-ui body #app #page .mode-grid349:has(.mode-mist349) .mode-scene352{height:100%!important;min-height:0!important}
+ html.mobile-ui body #app #page .mode-grid349:has(.mode-mist349) .mode-copy349{min-height:0!important;padding:16px 12px!important;justify-content:center!important;gap:9px!important;border-top:0!important;border-left:1px solid #a78c4c55!important}
+ html.mobile-ui body #app #page .mode-grid349:has(.mode-mist349) .mode-tag349{margin:6px!important;padding:4px!important;font-size:9px!important;max-width:calc(100% - 12px)!important}
+ html.mobile-ui body #app #page .mode-grid349:has(.mode-mist349) .mode-title352{font-size:20px!important}
+ html.mobile-ui body #app #page .mode-grid349:has(.mode-mist349) .mode-status352{font-size:12px!important;line-height:1.7!important}
+ @media(max-width:900px){
+  html body #app #page .mist465 .mist-top465{padding:10px 12px!important}
+  html body #app #page .mist465 .mist-gate465{min-height:0!important;flex-direction:column!important;align-items:stretch!important;gap:18px!important;padding:24px 18px 18px!important;background-position:58% center!important}
+  html body #app #page .mist465 .mist-gate-copy465 h3{font-size:26px!important;letter-spacing:3px!important}
+  html body #app #page .mist465 .mist-entry-side465{flex:none!important;min-width:0!important;max-width:none!important;gap:8px!important}
+  html body #app #page .mist465 .mist-entry-side465 small{font-size:11px!important;text-align:center!important}
+  html body #app #page .mist465 .mist-facts466{font-size:11px!important;gap:5px 10px!important;margin-top:12px!important}
+  html body #app #page .mist465 .mist-highlights466{grid-template-columns:1fr!important;padding:16px 18px!important;gap:14px!important}
+  html body #app #page .mist465 .mist-highlights466 img{height:46px!important}
+  html body #app #page .mist465 details>.mist-rules465{grid-template-columns:1fr!important}
+  html body #app #page .mist465 .mist-section465:has(details){padding:0 18px 16px!important}
+ }
+}
 </style>
 <script id="mist-world465">
 /* v465: isolated mode view model. No formal save/equipment mutations. */
@@ -31713,7 +31762,14 @@ async function openMist465_(){
 function mistDraw465_(){
  if(state.page!=='mist')return;
  const el=document.getElementById('page'),scroll=el?.querySelector('.mist-map-scroll465'),pos=scroll?{x:scroll.scrollLeft,y:scroll.scrollTop}:null;
- if(!el)return;el.innerHTML=renderMist465_();if(pos){const next=el.querySelector('.mist-map-scroll465');if(next){next.scrollLeft=pos.x;next.scrollTop=pos.y;}}
+ if(!el)return;
+ // Keep the viewport wrapper created by render(); replacing #page removed its scroll owner.
+ const current=el.querySelector('.mist465'),panel=el.querySelector('#mistPanel465');
+ const sameTab=panel?.getAttribute('aria-labelledby')==='mistTab-'+mist465_.tab;
+ const top=sameTab?panel.scrollTop:0,expanded=sameTab&&!!panel?.querySelector('details[open]');
+ if(current)current.outerHTML=renderMist465_();else{el.innerHTML=renderMist465_();viewportOrganize24_();}
+ const nextPanel=el.querySelector('#mistPanel465');if(expanded)nextPanel?.querySelector('details')?.setAttribute('open','');if(nextPanel)nextPanel.scrollTop=top;
+ if(pos){const next=el.querySelector('.mist-map-scroll465');if(next){next.scrollLeft=pos.x;next.scrollTop=pos.y;}}
 }
 async function refreshMist465_(){
  if(mist465_.loading||mist465_.preview)return;
@@ -31754,11 +31810,11 @@ function mistRewards465_(){
 }
 function mistEntry465_(){
  const d=mist465_.data,s=d?.self;
- return '<div class="mist-entry465"><div class="mist-gate465"><div class="mist-gate-copy465"><div class="mist-tag465">迷霧之中，旗幟就是你的眼睛</div><h3>迷霧戰境</h3><p>從邊境踏入未知。尋寶、奪旗，或伏擊下一位旅人。<br>帶走的只有勝利；留下的，是下一場的傳說。</p></div></div><aside class="mist-entry-side465"><h3>每週重啟的生存競技</h3><div><div class="mist-line465"><span>起始地圖</span><b>16 × 16・可擴張</b></div><div class="mist-line465"><span>隨身視野</span><b>3 × 3</b></div><div class="mist-line465"><span>體力</span><b>10 / 每小時 +1</b></div><div class="mist-line465"><span>賽季結算</span><b>週日 23:00</b></div></div><p class="small">基礎能力重新起跑，只能攜帶已解鎖技能。裝備與寶石在戰境取得，不可攜出。</p>'+
- (!d?.ready?'<div class="mist-notice465">'+escapeHtml(d?.message||'戰境準備中。可先查看規則與獎勵，正式開放後即可參加。')+'</div>':'')+
- '<button class="primary" '+(!mistCanAct465_()?'disabled':'')+' onclick="'+(s?"mistTab465_('map')":"mistCommand465_('join')")+'">'+(mist465_.loading?'讀取戰境…':s?'繼續探索':d?.ready?'參加本季':'戰境準備中')+'</button><small>通關主線第 1 層開放。時間均為台灣時間。</small></aside></div>'+
- '<div class="mist-rules465"><section class="mist-rule465"><img src="'+mistAsset465_('object','chest')+'" alt=""><h3>從零開始尋寶</h3><p>出生獲得專屬補給箱：頭部、防具、武器、特殊裝備各一件。一般怪 +1 分；菁英 +2 分，並保證傳說裝備箱。</p></section><section class="mist-rule465"><img src="'+mistAsset465_('object','flag-blue')+'" alt=""><h3>建立你的視野</h3><p>最多插 3 把旗，各提供 3 × 3 視野。移動、戰鬥、插旗消耗 1 體力；拔敵旗 2 點；隱身 3 點，持續一小時。</p></section><section class="mist-rule465"><img src="'+mistAsset465_('object','supply')+'" alt=""><h3>活著才有下一步</h3><p>戰後 HP 保留。補給站每日擇一：恢復 30% HP 或取得寶石。鐵匠鋪每花 1 體力可將一件裝備強化至 +10。</p></section></div>'+
- '<section class="mist-section465"><details><summary>查看死亡、對戰與賽季規則</summary><div class="mist-rules465"><section class="mist-rule465"><h3>死亡與重生</h3><p>死亡清空身上裝備、背包與旗子。擊殺者從可掉落的出戰裝備取得 1～3 件；重生補給不會掉落。積分保留，主動挑戰失敗另扣 3 分，最低為 0。重生滿血，體力不重置。</p></section><section class="mist-rule465"><h3>每次決定都有代價</h3><p>相鄰才可發起戰鬥。最多 30 回合，平局保留最後 HP；體力不退。雙方同時死亡則回出生點、裝備全消失，不加減積分。對同一玩家的 6 小時限制期間允許一次復仇。</p></section><section class="mist-rule465"><h3>每週重新出發</h3><p>出生保護一小時，移動或主動開戰即解除。週日 23:00 停止新行動，23:10 結束未完成戰鬥，週一 00:00 重啟。排名依積分、玩家擊殺數排序，同分同擊殺數並列。</p></section></div></details></section>';
+ return '<div class="mist-entry465"><div class="mist-gate465"><div class="mist-gate-copy465"><div class="mist-tag465">每週重啟的生存競技</div><h3>迷霧之中<br>立下你的旗幟</h3><p>尋寶、奪旗，或伏擊下一位旅人。<br>只帶上你的技能，從邊境重新出發。</p><div class="mist-facts466"><span>16 × 16 戰境</span><span>3 × 3 視野</span><span>週日 23:00 結算</span></div></div><aside class="mist-entry-side465">'+
+ (!d?.ready?'<div class="mist-notice465">'+escapeHtml(d?.message||'戰境準備中。開放前可先查看玩法與獎勵。')+'</div>':'<p>裝備在戰境取得，戰後 HP 保留。<br>每一步，都可能遇見新的對手。</p>')+
+ '<button class="primary" '+(!mistCanAct465_()?'disabled':'')+' onclick="'+(s?"mistTab465_('map')":"mistCommand465_('join')")+'">'+(mist465_.loading?'讀取戰境…':s?'繼續探索':d?.ready?'參加本季':'戰境準備中')+'</button><small>通關主線第 1 層開放 · 台灣時間</small></aside></div></div>'+
+ '<div class="mist-rules465 mist-highlights466"><section class="mist-rule465"><img src="'+mistAsset465_('object','chest')+'" alt=""><div><h3>尋寶，武裝自己</h3><p>出生補給四件裝備；擊敗菁英，取得傳說寶箱。</p></div></section><section class="mist-rule465"><img src="'+mistAsset465_('object','flag-blue')+'" alt=""><div><h3>插旗，掌握視野</h3><p>最多三把旗。體力上限 10，每小時恢復 1 點。</p></div></section><section class="mist-rule465"><img src="'+mistAsset465_('object','supply')+'" alt=""><div><h3>補給，再走一步</h3><p>戰後不會補滿 HP。尋找補給站與鐵匠鋪，延續旅程。</p></div></section></div>'+
+ '<section class="mist-section465"><details><summary>完整玩法與賽季規則</summary><div class="mist-rules465"><section class="mist-rule465"><h3>探索與補給</h3><p>出生專屬箱提供頭部、防具、武器、特殊裝備各一件，不能攜出戰境。一般怪 +1 分；菁英 +2 分並保證傳說裝備箱。每把旗提供 3 × 3 視野。移動、戰鬥、插旗各花 1 體力；拔敵旗 2 點；隱身 3 點、持續一小時。補給站每日擇一：恢復 30% HP 或取得寶石；鐵匠鋪每花 1 體力強化一件裝備至 +10。</p></section><section class="mist-rule465"><h3>死亡與重生</h3><p>死亡清空身上裝備、背包與旗子。擊殺者從可掉落的出戰裝備取得 1～3 件；重生補給不會掉落。積分保留，主動挑戰失敗另扣 3 分，最低為 0。重生滿血，體力不重置。</p></section><section class="mist-rule465"><h3>每次決定都有代價</h3><p>相鄰才可發起戰鬥。最多 30 回合，平局保留最後 HP；體力不退。雙方同時死亡則回出生點、裝備全消失，不加減積分。對同一玩家的 6 小時限制期間允許一次復仇。</p></section><section class="mist-rule465"><h3>每週重新出發</h3><p>出生保護一小時，移動或主動開戰即解除。週日 23:00 停止新行動，23:10 結束未完成戰鬥，週一 00:00 重啟。排名依積分、玩家擊殺數排序，同分同擊殺數並列。</p></section></div></details></section>';
 }
 function mistCellArt465_(o){
  if(!o)return '';if(o.kind==='self')return '<span class="mist-self465" aria-hidden="true">♟</span><span class="mist-cell-mark465">你</span>';
