@@ -10,7 +10,8 @@ const index=ctx.catalogSourceIndex463_(data),get=(id,kind='EQUIPMENT')=>ctx.cata
 assert.equal(get('shared').length,6,'all six overlapping sources retained');
 assert(!index.has('EQUIPMENT:disabled'));assert(!index.has('EQUIPMENT:bad'));assert(!index.has('EQUIPMENT:zero'));assert(!index.has('EQUIPMENT:privateItem'));
 assert(get('other').some(s=>s.label.includes('測試寶盒')&&s.detail.includes('10%')&&s.detail.includes('非單件機率')));
-assert(get('shared').find(s=>s.route==='dungeon').detail.includes('簡單 1%／困難 10%'));
+assert.equal(get('shared').find(s=>s.route==='dungeon').detail,'');
+assert.equal(get('shared').find(s=>s.label==='成就｜打倒守衛').detail,'');
 assert.equal(get('login')[0].label,'新玩家每日登入');assert(get('login')[0].detail.includes('第 7 天'));assert.equal(get('login')[0].route,'');
 assert.equal(get('repeat')[0].label,'常駐累積登入');assert.equal(get('shortSword')[0].label,'新角色初始裝備');
 assert.equal(get('gem','GEM').find(s=>s.label.includes('世界王')).route,'');

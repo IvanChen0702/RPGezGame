@@ -19600,8 +19600,7 @@ function catalogSourceIndex463_(boot=bootstrapDataCache||dataLoadManager.getPers
  for(const r of rows('DungeonBosses')){
   const diffs=rows('DungeonDifficulties').filter(x=>x.BossID===r.BossID&&Number(x.DropRate)>0);
   if(!diffs.length)continue;
-  const detail=diffs.map(x=>`${({easy:'簡單',normal:'普通',hard:'困難'})[x.Difficulty]||x.Difficulty} ${pct(x.DropRate)}`).join('／');
-  add('EQUIPMENT',r.RewardEquipmentID,'副本｜'+(r.Name||r.BossID),`通關掉落率：${detail}｜${dungeonTimeLabel_({startAt:r.StartAt,endAt:r.EndAt})}`,'dungeon');
+  add('EQUIPMENT',r.RewardEquipmentID,'副本｜'+(r.Name||r.BossID),'','dungeon');
  }
  for(const r of rows('WorldBossPool')){if(r.Weight!=null&&!(Number(r.Weight)>0))continue;add('GEM',r.RewardGemID,'世界 BOSS｜'+(r.Name||r.BossID),'討伐獎勵寶箱，領取資格與機率依當期設定');add('EQUIPMENT',r.RewardEquipmentID,'世界 BOSS｜'+(r.Name||r.BossID),'討伐獎勵，依當期設定');}
  const relicEnabled=(boot.RelicConfig||[]).find(x=>x.Key==='Enabled');
@@ -19614,7 +19613,7 @@ function catalogSourceIndex463_(boot=bootstrapDataCache||dataLoadManager.getPers
  if((boot.Gems||[]).some(x=>x.GemID==='goldenDragon')&&(boot.RelicPools||[]).length)add('GEM','goldenDragon','遺物探險','第 10 層王關寶箱｜成功撤離後領取','relic');
  for(const r of rows('Achievements')){
   const condition=String(r.ConditionType||'').toLowerCase(),login=['cumulative_login','累積登入'].includes(condition),recurring=['recurring_login','常駐累積登入'].includes(condition);
-  add(type(r.RewardType),r.RewardID,login?'新玩家每日登入':recurring?'常駐累積登入':'成就｜'+(r.Name||r.AchievementID),login||recurring?`累積登入第 ${Number(r.TargetValue)} 天｜${r.Name||''}`:String(r.Description||''));
+  add(type(r.RewardType),r.RewardID,login?'新玩家每日登入':recurring?'常駐累積登入':'成就｜'+(r.Name||r.AchievementID),login||recurring?`累積登入第 ${Number(r.TargetValue)} 天｜${r.Name||''}`:'');
  }
  for(const r of rows('QuestRewards')){const q=rows('Quests').find(q=>q.QuestID===r.QuestID);if(q)add(type(r.Type),r.ContentID,'任務｜'+(q.Name||q.QuestID),`${r.Timing==='accept'?'接取':'完成'}任務獎勵${r.ChoiceGroup?'（擇一領取）':''}`);}
  for(const r of rows('ArenaRewards'))for(const [kind,column] of [['EQUIPMENT','EquipmentID'],['GEM','GemID']])add(kind,r[column],'競技場賽季獎勵',`第 ${r.RankMin}～${r.RankMax} 名${r.SeasonID?'｜賽季 '+r.SeasonID:''}`);
