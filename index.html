@@ -31697,8 +31697,31 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
  html body #app #page .mist465{display:flex!important;flex-direction:column!important;flex:1 1 0%!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0 auto!important;overflow:hidden!important;padding:0!important}
  html body #app #page .mist465>:is(.mist-top465,.mist-tabs465,.mist-error465,.mist-preview-label465){flex:none!important}
  html body #app #page .mist465>.mist-content465{flex:1 1 0%!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#9a8150 #181c21;scroll-padding-block:12px;-webkit-overflow-scrolling:touch}
- html body #app #page .mist465>.mist-tabs465{gap:5px!important;padding:8px!important;overflow-x:auto!important}
- html body #app #page .mist465>.mist-tabs465 button{flex:1 0 auto!important;min-width:44px!important;min-height:40px!important;padding:6px 8px!important;font-size:13px!important}
+ /* v467: utility controls belong in the heading; content tabs read as a single rail. */
+ html body #app #page .mist465 .mist-tools467{display:flex!important;align-items:center!important;gap:8px!important;flex:none!important}
+ html body #app #page .mist465 .mist-tools467 button{height:40px!important;min-height:40px!important;margin:0!important;box-shadow:none!important;transform:none!important}
+ html body #app #page .mist465 .mist-refresh467{display:grid!important;place-items:center!important;width:44px!important;min-width:44px!important;padding:9px!important;background:transparent!important;border:1px solid transparent!important;border-radius:4px!important;color:#bbae90!important}
+ html body #app #page .mist465 .mist-refresh467 svg{width:19px!important;height:19px!important;display:block!important}
+ html body #app #page .mist465 .mist-refresh467:hover:not(:disabled){background:#ffffff08!important;border-color:#84704c!important;color:#f0d69c!important}
+ html body #app #page .mist465 .mist-refresh467:disabled{color:#766f61!important;cursor:wait!important}
+ html body #app #page .mist465 .mist-return467{padding:7px 12px!important;border:1px solid #736044!important;border-radius:4px!important;background:#23231f!important;color:#d5c6a7!important;font-size:13px!important}
+ html body #app #page .mist465>.mist-tabs467{gap:0!important;padding:0 16px!important;overflow-x:auto!important;background:#171a1d!important;border-bottom:1px solid #655638!important}
+ html body #app #page .mist465>.mist-tabs467 button{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;flex:0 0 116px!important;min-width:0!important;min-height:48px!important;margin:0!important;padding:10px 16px!important;font-size:14px!important;letter-spacing:2px!important;line-height:1.4!important;border:0!important;border-radius:0!important;border-image:none!important;background:transparent!important;color:#a69d89!important;box-shadow:none!important;transform:none!important;white-space:nowrap!important}
+ html body #app #page .mist465>.mist-tabs467 button svg{flex:none!important;width:17px!important;height:17px!important;opacity:.75!important}
+ html body #app #page .mist465>.mist-tabs467 button::before{display:none!important}
+ html body #app #page .mist465>.mist-tabs467 button::after{content:""!important;position:absolute!important;left:16px!important;right:16px!important;bottom:0!important;height:2px!important;background:transparent!important}
+ html body #app #page .mist465>.mist-tabs467 button[aria-selected=true]{color:#f2d69c!important;background:linear-gradient(0deg,#b8954b20,transparent 85%)!important;font-weight:700!important}
+ html body #app #page .mist465>.mist-tabs467 button[aria-selected=true]::after{background:#c9a763!important}
+ html body #app #page .mist465>.mist-tabs467 button[aria-selected=true] svg{opacity:1!important}
+ html body #app #page .mist465>.mist-tabs467 button:hover:not([aria-selected=true]){color:#e0cda7!important;background:#ffffff05!important}
+ html body #app #page .mist465>.mist-tabs467 button:focus-visible{outline:1px solid #cfb575!important;outline-offset:-4px!important}
+ @media(max-width:900px){
+  html body #app #page .mist465>.mist-tabs467{padding:0 5px!important}
+  html body #app #page .mist465>.mist-tabs467 button{flex:1 1 0%!important;padding:10px 3px!important;gap:5px!important;font-size:13px!important;letter-spacing:1px!important}
+  html body #app #page .mist465>.mist-tabs467 button::after{left:9px!important;right:9px!important}
+  html body #app #page .mist465>.mist-tabs467 button svg{width:15px!important;height:15px!important}
+  html body #app #page .mist465 .mist-tools467{gap:4px!important}
+ }
  html body #app #page .mist465 .mist-entry465{display:block!important;min-height:0!important}
  html body #app #page .mist465 .mist-gate465{min-height:300px!important;padding:28px!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:24px!important;background-position:center!important}
  html body #app #page .mist465 .mist-gate465:before{background:linear-gradient(90deg,#071019d9,transparent 65%),linear-gradient(0deg,#071019f5,transparent 90%)!important}
@@ -31874,8 +31897,8 @@ function mistReports465_(){
 function renderMist465_(){
  const d=mist465_.data;
  return '<section class="mist465" aria-label="迷霧戰境">'+(mist465_.preview?'<div class="mist-preview-label465">介面預覽 · 示範資料 · 不影響正式角色</div>':'')+
- '<header class="mist-top465"><div class="mist-brand465"><img src="'+mistAsset465_('object','flag-blue')+'" alt=""><div><div class="mist-tag465">競技模式 · '+escapeHtml(d?.season?.label||'全新戰境')+'</div><h2>迷霧戰境</h2></div></div><button onclick="setPage(\'combatHub\')">返回</button></header>'+
- '<nav class="mist-tabs465" role="tablist" aria-label="戰境頁籤">'+mistTabs465_.map(([k,label])=>'<button id="mistTab-'+k+'" role="tab" aria-selected="'+(mist465_.tab===k)+'" aria-controls="mistPanel465" onclick="mistTab465_(\''+k+'\')">'+label+'</button>').join('')+'<button aria-label="更新戰境資料" '+(mist465_.loading?'disabled':'')+' onclick="refreshMist465_()">↻</button></nav>'+
+ '<header class="mist-top465"><div class="mist-brand465"><img src="'+mistAsset465_('object','flag-blue')+'" alt=""><div><div class="mist-tag465">競技模式 · '+escapeHtml(d?.season?.label||'全新戰境')+'</div><h2>迷霧戰境</h2></div></div><div class="mist-tools467" role="group" aria-label="戰境工具"><button class="mist-refresh467" aria-label="更新戰境資料" title="更新戰境資料" aria-busy="'+mist465_.loading+'" '+(mist465_.loading?'disabled':'')+' onclick="refreshMist465_()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M19 11a7 7 0 0 0-12-4M5 13a7 7 0 0 0 12 4"/></svg></button><button class="mist-return467" onclick="setPage(\'combatHub\')">返回</button></div></header>'+
+ '<nav class="mist-tabs465 mist-tabs467" role="tablist" aria-label="戰境頁籤">'+mistTabs465_.map(([k,label])=>'<button id="mistTab-'+k+'" role="tab" aria-selected="'+(mist465_.tab===k)+'" aria-controls="mistPanel465" onclick="mistTab465_(\''+k+'\')">'+(k==='map'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/></svg>':flatIcon313_({entry:'flag',bag:'bag',ranking:'crown',reports:'book'}[k]))+'<span>'+label+'</span></button>').join('')+'</nav>'+
  (mist465_.error?'<div class="mist-error465" role="alert"><span>'+escapeHtml(mist465_.error)+'</span>'+(mist465_.pending?'<button '+(mist465_.loading?'disabled':'')+' onclick="mistRetry465_()">重試同筆操作</button>':'')+'</div>':'')+
  '<div id="mistPanel465" class="mist-content465" role="tabpanel" aria-labelledby="mistTab-'+mist465_.tab+'">'+(mist465_.tab==='map'?mistMap465_():mist465_.tab==='bag'?mistBagView465_():mist465_.tab==='ranking'?mistRanking465_():mist465_.tab==='reports'?mistReports465_():mistEntry465_())+'</div></section>';
 }
