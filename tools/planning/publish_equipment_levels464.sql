@@ -1,0 +1,37 @@
+BEGIN;
+DO $publish$
+DECLARE
+ oldrow public."GameDataCurrent"%ROWTYPE;
+ ratings jsonb := '{"gmSword":100,"event01":21,"starterBlade1":44,"starterArmor1":35,"starterCrown1":44,"berserkerRing":46,"gloryArmor1":73,"gloryArmor0":75,"heroCrown1":49,"heroCrown0":47,"berserkerCrown1":48,"berserkerCrown0":47,"berserkerSword":60,"luckyWeapon1":71,"luckyWeapon2":76,"luckyWeapon3":91,"luckyWeapon4":58,"luckyWeapon5":58,"luckyWeapon6":63,"judgment":71,"lichRing":47,"coreOverclockPlugin":69,"twilightSword":56,"phantomLegendCloak":75,"shortSword":1,"magicBranch":1,"longSword":3,"clothArmorA":4,"clothArmorB":3,"leatherHat":1,"glasses":2,"critRing":4,"ironRingSpecial":3,"chainArmor":4,"bracer":1,"apprenticeRobe":1,"samuraiBlade":15,"natureStaff":22,"reflectArmor":18,"naturalBracelet":4,"naturalRing":7,"shuriken":6,"mageHat":3,"apprenticeMageBracer":4,"soldierArmor":6,"magicRing":1,"powerRing":5,"mindsEye":16,"houndFang":20,"dragonsteelSword":12,"arcaneBlade":10,"hawkEyeRing":7,"dragonScaleArmorShop":13,"modernShield":23,"graveSword":17,"soulStaff":16,"executionRing":13,"boneArmorShop":27,"necromancerCharmShop":20,"dragonLeatherHat":9,"dragonClawRing":21,"dragonScaleBracer":12,"azureRobe":12,"arcaneRing":22,"wyvernGlasses":11,"dragonGuardArmor":24,"iceCrystalRing":27,"blackScaleArmor":15,"twinDragonRing":28,"bahamutBlade":31,"bahamutStaff":31,"bahamutEye":24,"graveHelm":15,"boneRing":18,"spiritVeil":27,"soulRing":29,"cryptArmor":37,"graveGauntlet":20,"necromancerRobe":26,"executionerAxe":30,"forgottenCharm":31,"plagueRing":31,"frostBoneArmor":29,"archmageSkull":27,"azraelScythe":49,"azraelGrimoire":48,"azraelCrown":38,"imperialVisor":29,"cityCharm":30,"dragonSealRing":39,"shadowBracer":44,"imperialRobe":40,"ironGuardArmor":44,"jadeMask":39,"judgmentRing":41,"dragonVeinCharm":40,"royalGuardGauntlet":41,"empressCrown":47,"imperialDragonArmor":51,"imperialDragonRing":53,"guardianMace":28,"warhawkHelm":22,"arcaneCirclet":24,"fortressHelm":34,"dragonScholarLens":35,"warriorScaleMail":25,"arcaneWardRobe":37,"bloodsteelBracer":37,"manaConduit":41,"berserkSignet":31,"sorcererRing":31,"bastionRing":29,"gearHoundFang":27,"pulseLens":21,"sawbladeArm":30,"reactorArmor":26,"nullGuardHelm":39,"plasmaRing":26,"bloodDriveArmor":25,"disruptorCharm":47,"imperialSaw":30,"emperorBreaker":43,"emperorCore":56,"orichalcumCrown":64,"empireZeroRing":62,"abyssCoralBlade":51,"tidecallerRobe":53,"anglerCrown":44,"leviathanScale":52,"sirenPendant":58,"trenchGauntlet":50,"krakenEyeRing":53,"frostPearlCirclet":59,"sunkenAnchor":43,"neptisTrident":53,"abyssalCrown":65,"leviathanHeart":67,"oceanSovereignRing":72,"starfallSaber":53,"nebulaMantle":57,"oracleLens":54,"riftBracelet":63,"cometRing":61,"gravityPlate":60,"voidMageCrown":58,"eclipseCharm":60,"astralLance":47,"astraGreatsword":58,"celestialObserverCrown":71,"singularityCore":76,"eclipseSovereignRing":73,"clockworkBlade":45,"eternalKnightArmor":69,"timeSandCrown":63,"ironJudgmentGauntlet":64,"arcaneDevourerRing":64,"timeMirrorArmor":62,"twinbladeSignet":64,"eternalSentinelHelm":65,"judgmentCore":70,"chronosPhysicalBlade":68,"chronosArcaneStaff":68,"chronosSpellblade":64,"slowTimeRing":54,"mirrorRebirthRing":50,"mirrorCurseHood":56,"mirrorShieldArmor":61,"mirrorLifePendant":57,"mirrorJealousBlade":51,"mirrorFateGrimoire":55,"mirrorReflectionBracer":58,"mirrorMyriadRing":61,"mirrorGateMask":58,"mirrorImageGreatsword":68,"mirrorMyriadStaff":67,"mirrorTwinSpellblade":65,"mirrorFormlessArmor":83,"mirrorReverseCrown":68,"mirrorReflectionRing":67,"assassinRing":35,"fortuneBell":10,"spatulaGod":56,"magicBranchII":59,"fastsliver":39,"vturtle":85,"thalessiahead":90,"turguraWeapon":95,"terraxArmor":89,"velskasp":85,"erebetisWeapon":94,"aurionSp":70,"reysaanWeapon":71,"velasienRing":72,"tysseviaRing":81,"regestaScale":87,"goldendragonWeapon1":90,"goldendragonWeapon2":80,"goldendragonWeapon3":80,"forgeBlank172":1,"chaosSeverBlade":80,"chaosSoulStaff":72,"chaosTwinBlade":82,"chaosFateCrown":75,"chaosDevourArmor":87,"chaosBarrierCore":48,"chaosCurseRing":66}'::jsonb;
+ updated_equipment jsonb;
+ next_package jsonb;
+ stamp timestamptz := clock_timestamp();
+ next_version text;
+BEGIN
+ SELECT * INTO STRICT oldrow FROM public."GameDataCurrent" WHERE channel='production' FOR UPDATE;
+ IF oldrow.version <> '20261115-025005-88a30006' THEN RAISE EXCEPTION 'PLANNING_VERSION_CHANGED'; END IF;
+ IF jsonb_array_length(oldrow.data_json->'data'->'Equipment') <> 206
+ OR (SELECT count(DISTINCT r->>'ItemID') FROM jsonb_array_elements(oldrow.data_json->'data'->'Equipment') r) <> 206
+ OR EXISTS(SELECT 1 FROM jsonb_array_elements(oldrow.data_json->'data'->'Equipment') r WHERE NOT (ratings ? (r->>'ItemID')))
+ THEN RAISE EXCEPTION 'EQUIPMENT_IDS_CHANGED'; END IF;
+ IF EXISTS(SELECT 1 FROM jsonb_array_elements(oldrow.data_json->'data'->'Equipment') r WHERE
+   (r ? '等級' AND nullif(r->>'等級','') IS NOT NULL AND r->'等級' <> ratings->(r->>'ItemID'))
+   OR (r ? 'Level' AND nullif(r->>'Level','') IS NOT NULL AND r->'Level' <> ratings->(r->>'ItemID')))
+ THEN RAISE EXCEPTION 'EXISTING_LEVEL_CONFLICT'; END IF;
+ SELECT jsonb_agg(r.value || jsonb_build_object('等級',ratings->(r.value->>'ItemID')) ORDER BY r.ord)
+ INTO updated_equipment FROM jsonb_array_elements(oldrow.data_json->'data'->'Equipment') WITH ORDINALITY r(value,ord);
+ next_version := to_char(stamp AT TIME ZONE 'UTC','YYYYMMDD-HH24MISS') || '-level464';
+ next_package := jsonb_set(oldrow.data_json,'{data,Equipment}',updated_equipment)
+   || jsonb_build_object('dataVersion',next_version,'generatedAt',stamp);
+ IF (next_package->'data')-'Equipment' <> (oldrow.data_json->'data')-'Equipment' THEN RAISE EXCEPTION 'UNEXPECTED_OTHER_TABLE_CHANGE'; END IF;
+ INSERT INTO public."GameDataVersions" (version,published_at,published_by,data_json)
+ SELECT oldrow.version,oldrow.published_at,'level464-prechange-backup',oldrow.data_json
+ WHERE NOT EXISTS(SELECT 1 FROM public."GameDataVersions" WHERE version=oldrow.version);
+ INSERT INTO public."GameDataVersions" (version,published_at,published_by,data_json)
+ VALUES(next_version,stamp,'equipment-level464-approved',next_package);
+ UPDATE public."GameDataCurrent" SET version=next_version,published_at=stamp,data_json=next_package WHERE channel='production';
+END $publish$;
+COMMIT;
+SELECT version,jsonb_array_length(data_json->'data'->'Equipment') AS equipment_count,
+ (SELECT count(*) FROM jsonb_array_elements(data_json->'data'->'Equipment') r WHERE jsonb_typeof(r->'等級')='number' AND (r->>'等級')::integer BETWEEN 1 AND 100) AS rated_count
+FROM public."GameDataCurrent" WHERE channel='production';
