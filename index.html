@@ -9744,6 +9744,9 @@ html:not(.battle398) #battleStage .effect-icon398{display:none!important}
 #app #page #battleStage .pixel-background456{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;image-rendering:auto;filter:none}
 html.mobile-ui .pixel-background456{display:none!important}
 </style>
+<style id="catalog-sources463">
+.catalog-sources463{min-width:0;overflow-wrap:anywhere}.catalog-sources463>ul{margin:8px 0;padding-left:18px}.catalog-sources463 li+li{margin-top:9px}.catalog-sources463 li>strong{display:block;color:#e4cf9c;font-weight:600}.catalog-sources463 li>span{display:block;margin-top:3px;font-size:.9em;line-height:1.5}.catalog-actions{display:flex;flex-wrap:wrap;gap:6px}.catalog-actions>button{max-width:100%;white-space:normal}
+</style>
 </head>
 <body>
 <style id="bootStyle279">
@@ -19571,6 +19574,84 @@ function catalogInflictIds_(tpl){
   return [...new Set(out)];
 }
 function catalogStatusName_(id){if(id==='stun')return '暈眩';if(id==='paralysis')return '麻痺';const d=statusDef_(id);return d?.name||id}
+// Public planning only: never expose private redeem-code configuration in the catalog.
+function catalogSourceIndex463_(boot=bootstrapDataCache||dataLoadManager.getPersistentCache('bootstrap')||{}){
+ const index=new Map(),enabled=r=>r&&r.Enabled!==false&&!['false','0','no'].includes(String(r.Enabled).trim().toLowerCase());
+ const rows=name=>(boot[name]||[]).filter(enabled),type=v=>({ITEM:'EQUIPMENT',裝備:'EQUIPMENT',寶石:'GEM'})[String(v||'').trim().toUpperCase()]||String(v||'').trim().toUpperCase();
+ const add=(kind,id,label,detail='',route='',target='')=>{id=String(id||'').trim();if(!id||!['EQUIPMENT','GEM'].includes(kind))return;const key=kind+':'+id,list=index.get(key)||[],entry={label,detail,route,target};if(!list.some(x=>JSON.stringify(x)===JSON.stringify(entry)))list.push(entry);index.set(key,list);};
+ const pct=n=>Number.isFinite(Number(n))?Number((Number(n)*100).toFixed(4))+'%':'依當期設定';
+ for(const [floor,stage] of Object.entries(onlineStages||{})){
+  if(stage?.enabled===false||Number(floor)<1)continue;const e=enemyTemplates?.[stage.enemyId];if(!e)continue;
+  for(const id of e.drops||[])add('EQUIPMENT',id,'主線第 '+floor+' 關',e.name||stage.enemyId,'main',String(floor));
+  if(e.boss&&e.bossGem)add('GEM',e.bossGem,'主線第 '+floor+' 關',`${e.name||stage.enemyId}｜首次符合掉落條件必得，後續 1%`,'main',String(floor));
+ }
+ // New-character equipment is granted by both defaultState and the server's account initializer.
+ if((boot.Equipment||[]).some(r=>r.ItemID==='shortSword'))add('EQUIPMENT','shortSword','新角色初始裝備','建立角色時取得');
+ const shops=rows('ShopEntries');
+ for(const r of shops){const price=r.Price!==''&&r.Price!=null&&Number.isFinite(Number(r.Price))?`${Number(r.Price).toLocaleString()} 金幣｜`:'';add(type(r.ContentType),r.ContentID,'商店購買',`${price}解鎖關卡 ${Number(r.UnlockFloor)||1}`,'shop',String(r.ContentID));}
+ const boxes=rows('GiftBoxes'),tiers=rows('GiftBoxTiers');
+ for(const r of rows('GiftBoxRewards')){
+  const kind=type(r.ContentType),box=boxes.find(x=>x.BoxID===r.BoxID),tier=tiers.find(x=>x.BoxID===r.BoxID&&x.TierID===r.TierID);
+  if(!box||!tier||!(Number(r.Weight)>0)||!(Number(tier.Probability)>0))continue;
+  const shop=shops.find(x=>String(x.ContentID)===String(r.BoxID));
+  const detail=`${tier.Name||tier.TierID}獎項｜此級距機率 ${pct(tier.Probability)}（非單件機率）${kind==='EQUIPMENT'?`｜${Number(r.Sockets)||0} 洞`:''}${shop?`｜商店解鎖關卡 ${Number(shop.UnlockFloor)||1}`:'｜販售／發放依當期公告'}`;
+  for(const id of String(r.ContentIDs||'').split(',').map(x=>x.trim()).filter(Boolean))add(kind,id,'寶盒抽取｜'+(box.Name||box.BoxID),detail,'shop',String(box.BoxID));
+ }
+ for(const r of rows('DungeonBosses')){
+  const diffs=rows('DungeonDifficulties').filter(x=>x.BossID===r.BossID&&Number(x.DropRate)>0);
+  if(!diffs.length)continue;
+  const detail=diffs.map(x=>`${({easy:'簡單',normal:'普通',hard:'困難'})[x.Difficulty]||x.Difficulty} ${pct(x.DropRate)}`).join('／');
+  add('EQUIPMENT',r.RewardEquipmentID,'副本｜'+(r.Name||r.BossID),`通關掉落率：${detail}｜${dungeonTimeLabel_({startAt:r.StartAt,endAt:r.EndAt})}`,'dungeon');
+ }
+ for(const r of rows('WorldBossPool')){if(r.Weight!=null&&!(Number(r.Weight)>0))continue;add('GEM',r.RewardGemID,'世界 BOSS｜'+(r.Name||r.BossID),'討伐獎勵寶箱，領取資格與機率依當期設定');add('EQUIPMENT',r.RewardEquipmentID,'世界 BOSS｜'+(r.Name||r.BossID),'討伐獎勵，依當期設定');}
+ const relicEnabled=(boot.RelicConfig||[]).find(x=>x.Key==='Enabled');
+ for(const r of rows('RelicPools')){
+  // RelicPools uses an explicit opt-in, unlike most public tables.
+  if(!['true','1','yes'].includes(String(r.Enabled).toLowerCase()))continue;
+  const pool=String(r.PoolType||'').toUpperCase(),kind=pool==='GEM'?'GEM':['EQUIPMENT','WEAPON','BOSS_EQUIPMENT'].includes(pool)?'EQUIPMENT':'';
+  add(kind,r.ContentID,'遺物探險',`${pool==='BOSS_EQUIPMENT'?'第 10 層王關寶箱':'第 4、5、7、8 層詛咒寶箱'}抽取池｜成功撤離後領取${relicEnabled&&!['true','1','yes'].includes(String(relicEnabled.Value).toLowerCase())?'｜目前未開放':''}`,'relic');
+ }
+ if((boot.Gems||[]).some(x=>x.GemID==='goldenDragon')&&(boot.RelicPools||[]).length)add('GEM','goldenDragon','遺物探險','第 10 層王關寶箱｜成功撤離後領取','relic');
+ for(const r of rows('Achievements')){
+  const condition=String(r.ConditionType||'').toLowerCase(),login=['cumulative_login','累積登入'].includes(condition),recurring=['recurring_login','常駐累積登入'].includes(condition);
+  add(type(r.RewardType),r.RewardID,login?'新玩家每日登入':recurring?'常駐累積登入':'成就｜'+(r.Name||r.AchievementID),login||recurring?`累積登入第 ${Number(r.TargetValue)} 天｜${r.Name||''}`:String(r.Description||''));
+ }
+ for(const r of rows('QuestRewards')){const q=rows('Quests').find(q=>q.QuestID===r.QuestID);if(q)add(type(r.Type),r.ContentID,'任務｜'+(q.Name||q.QuestID),`${r.Timing==='accept'?'接取':'完成'}任務獎勵${r.ChoiceGroup?'（擇一領取）':''}`);}
+ for(const r of rows('ArenaRewards'))for(const [kind,column] of [['EQUIPMENT','EquipmentID'],['GEM','GemID']])add(kind,r[column],'競技場賽季獎勵',`第 ${r.RankMin}～${r.RankMax} 名${r.SeasonID?'｜賽季 '+r.SeasonID:''}`);
+ for(const r of rows('BoxingSeasons_SCHEMA')){let rewards;try{rewards=boxingRankRewards106_(r);}catch{continue;}for(const reward of rewards)add(type(reward.type),reward.id,'拳擊機賽季獎勵',`賽季 ${r.SeasonID}｜第 ${reward.rankMin}～${reward.rankMax} 名`);}
+ for(const [table,label] of [['ExtremeStageRewards','極限挑戰通關獎勵'],['ExtremeRankRewards','極限挑戰排行獎勵']])for(const r of rows(table))add(type(r.RewardType),r.RewardID,label,table==='ExtremeStageRewards'?`第 ${r.Stage} 層`:`第 ${r.RankMin}～${r.RankMax} 名`);
+ return index;
+}
+function catalogSources463_(kind,id,index=catalogSourceIndex463_()){
+ return index.get(kind+':'+id)||[{label:'其他｜序號、不定期活動',detail:'目前公開企劃未列出取得管道；是否發放與取得條件請依公告確認。',route:'',target:''}];
+}
+function catalogSourceHtml463_(sources){
+ return '<div class="catalog-meta catalog-sources463"><b>取得方式</b><ul>'+sources.map(s=>`<li><strong>${escapeHtml(s.label)}</strong>${s.detail?`<span>${escapeHtml(s.detail)}</span>`:''}</li>`).join('')+'</ul></div>';
+}
+function catalogSourceActions463_(sources){
+ const seen=new Set();return '<div class="catalog-actions">'+sources.filter(s=>{const key=s.route==='shop'?'shop':s.route+':'+s.target;if(!s.route||seen.has(key))return false;seen.add(key);return true;}).map(s=>{
+  const label=({shop:'前往商店',relic:'前往遺物探險',dungeon:'進副本大廳'})[s.route]||`前往 ${s.target}F`;
+  return `<button type="button" onclick="catalogTravel463_(${escapeAttr(JSON.stringify(s.route))},${escapeAttr(JSON.stringify(s.target||''))})">${label}</button>`;
+ }).join('')+'</div>';
+}
+async function catalogTravel463_(route,target=''){
+ if(!['main','shop','relic','dungeon'].includes(route))return;
+ if(loginRequiredActive_()){enforceLoginRequired_();return;}
+ if(activeBattleNow()||state.currentBattle&&!state.currentBattle.lost||defeatResultSnapshot_||arenaBattle_&&!arenaBattle_.finished){toast('戰鬥尚未結束，請先確認戰鬥結果。');return;}
+ if(route==='main')return catalogGoFloor_(Number(target));
+ if(['relic','dungeon'].includes(route)&&!requireModeUnlocked258_(route))return;
+ closeModal();prepareTooltipHide_();hideItem404_();
+ if(townWindow311_)closeTownWindow311_(false);
+ if(route==='shop'){
+  const boot=bootstrapDataCache||{},box=(boot.GiftBoxes||[]).some(r=>String(r.BoxID)===target),item=itemTemplates[target];
+  mobileShopModeTab_='buy';state.shopTab=box?'utility':'equipment';if(box)shopConsumableSubTab_='gift';else if(item)state.shopEquipSubTab=shopEquipmentSubTab_({template:target});
+  if(viewMode_==='desktop'){state.page='town';render();return openFacility402_('shop');}
+  return setPage('shop');
+ }
+ if(route==='dungeon')return openDungeonLobby25_();
+ return openRelic144_();
+}
+
 function catalogDropFloors_(templateId){
   const floors=[];
   for(const [fk,st] of Object.entries(onlineStages||{})){
@@ -19611,7 +19692,7 @@ function catalogFilterCount184_(){return [catalogSlotFilter_,catalogRarityFilter
 function catalogToggleFilters184_(){catalogFiltersOpen184_=!catalogFiltersOpen184_;render();document.getElementById('catalog-filter-toggle184')?.focus({preventScroll:true});}
 function catalogClearFilters184_(){catalogSlotFilter_=catalogRarityFilter_=catalogImmunityFilter_=catalogInflictFilter_='all';render();}
 function renderEquipmentCatalog39_(){
-  const {all,list}=catalogEquipmentEntries41_();
+  const {all,list}=catalogEquipmentEntries41_(),sourceIndex463=catalogSourceIndex463_();
   const rarities=[...new Set(all.map(x=>String(x.rarity||'一般')))].sort();
   const immunities=[...new Set(['paralysis',...all.flatMap(catalogImmunityIds_)])].sort();
   const inflicts=[...new Set(['stun',...all.flatMap(catalogInflictIds_)])].sort();
@@ -19624,7 +19705,7 @@ function renderEquipmentCatalog39_(){
       <label>免疫效果<select onchange="setCatalogFilter_('immunity',this.value)">${opts(immunities,catalogImmunityFilter_,catalogStatusName_)}</select></label>
       <label>可造成效果<select onchange="setCatalogFilter_('inflict',this.value)">${opts(inflicts,catalogInflictFilter_,catalogStatusName_)}</select></label>
     </div>${catalogFilterCount184_()?'<button type="button" class="catalog-filter-reset184" onclick="catalogClearFilters184_()">清除篩選</button>':''}</div>
-    <div class="catalog-grid">${list.map(t=>{const floors=catalogDropFloors_(t.id),eff=itemEffectDescription_({template:t.id,effect:t.effect}),source=floors.length?`主線：${floors.map(f=>`第 ${f} 關`).join('、')}`:'非主線／商店／其他來源';return `<div class="catalog-card"><div><b>${rarityNameHtml({...t,enhance:0})}</b> <span class="badge">${escapeHtml(slotName(t.slot||''))}</span></div>${catalogSortValue179_(t)}<div class="catalog-meta">掉落來源：${escapeHtml(source)}</div>${eff?`<div class="catalog-effect">${escapeHtml(eff)}</div>`:''}<div class="catalog-actions">${floors.length?floors.map(f=>`<button onclick="catalogGoFloor_(${f})">前往 ${f}F</button>`).join(' '):''}</div></div>`}).join('')||'<div class="small">沒有符合篩選條件的裝備。</div>'}</div></div>`;
+    <div class="catalog-grid">${list.map(t=>{const sources=catalogSources463_('EQUIPMENT',t.id,sourceIndex463),eff=itemEffectDescription_({template:t.id,effect:t.effect});return `<div class="catalog-card" data-catalog-equipment463="${escapeAttr(t.id)}"><div><b>${rarityNameHtml({...t,enhance:0})}</b> <span class="badge">${escapeHtml(slotName(t.slot||''))}</span></div>${catalogSortValue179_(t)}${catalogSourceHtml463_(sources)}${eff?`<div class="catalog-effect">${escapeHtml(eff)}</div>`:''}${catalogSourceActions463_(sources)}</div>`}).join('')||'<div class="small">沒有符合篩選條件的裝備。</div>'}</div></div>`;
 }
 
 let catalogTab39_='equipment';
@@ -19637,20 +19718,8 @@ function catalogTabKey39_(event){
  if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
  event.preventDefault();setCatalogTab39_(event.key==='Home'?'equipment':event.key==='End'?'gems':catalogTab39_==='equipment'?'gems':'equipment');
 }
-function catalogGemSources39_(id){
- const out=[],boot=bootstrapDataCache||dataLoadManager.getPersistentCache('bootstrap')||{};
- const enabled=r=>r?.Enabled!==false&&String(r?.Enabled).toLowerCase()!=='false';
- for(const [key,stage] of Object.entries(onlineStages||{})){
-  if(stage?.enabled===false)continue;
-  const enemy=enemyTemplates?.[stage.enemyId];
-  if(enemy?.boss&&String(enemy.bossGem||'')===id)out.push(`主線第 ${Number(key)} 關｜${enemy.name||stage.enemyId}（首次符合掉落條件必得，後續 1%）`);
- }
- for(const row of boot.WorldBossPool||[])if(enabled(row)&&String(row.RewardGemID||'')===id)out.push(`世界 BOSS｜${row.Name||row.BossID}寶箱（取得資格與機率依當期設定）`);
- for(const row of boot.ShopEntries||[])if(enabled(row)&&String(row.ContentType||'').toLowerCase()==='gem'&&String(row.ContentID||'')===id)out.push(`商店｜${row.DisplayName||gemTemplates[id]?.name||id}（解鎖關卡 ${Number(row.UnlockFloor)||1}）`);
- for(const row of boot.Achievements||[])if(enabled(row)&&String(row.RewardType||'').toLowerCase()==='gem'&&String(row.RewardID||'')===id)out.push(`成就｜${row.Name||row.AchievementID}`);
- for(const [table,label] of [['ArenaRewards','競技場'],['BoxingRewards','拳擊機']])for(const row of boot[table]||[])if(enabled(row)&&String(row.GemID||'')===id)out.push(`${label}賽季獎勵｜第 ${row.RankMin}～${row.RankMax} 名`);
- return [...new Set(out)];
-}
+function catalogGemSources39_(id){return catalogSources463_('GEM',id).map(s=>s.label+(s.detail?'｜'+s.detail:''));}
+
 function catalogGemCard39_(id){
  const gem={...gemTemplates[id],template:id},name=gemDisplayName(gem);
  return `<button type="button" class="gem-pick-card catalog-gem39" data-catalog-gem421="${escapeAttr(id)}" onclick="openCatalogGem39_(${escapeAttr(JSON.stringify(id))})" aria-label="查看${escapeAttr(name)}的詳細資訊與取得方式"><span class="gem-pick-visual">${objectArt202_(gem,'gem')||`<span class="gem-pick-stone gem-shape-${gemPickerShape_(gem)}" style="--gem:${escapeAttr(gemVisualColor_(gem))}"></span>`}</span><span class="gem-pick-name" style="${gemNameStyle_(gem)}">${escapeHtml(name)}</span>${catalogSortValue179_(gem)}<span class="catalog-gem-hint39">能力與取得方式 ›</span></button>`;
@@ -19666,12 +19735,12 @@ function renderCatalog_(){
 }
 function openCatalogGem39_(id){
  if(!gemTemplates[id])return;
- const gem={...gemTemplates[id],template:id},sources=catalogGemSources39_(id);
+ const gem={...gemTemplates[id],template:id},sources=catalogSources463_('GEM',id);
  document.getElementById('modalTitle').textContent=viewMode_==='desktop'?'寶石資訊':gemDisplayName(gem);
- const sourceList=sources.length?`<ul>${sources.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`:'<p class="small">目前企劃資料未列出取得來源；活動或序號發放以公告為準。</p>';
+ const sourceList=catalogSourceHtml463_(sources)+catalogSourceActions463_(sources);
  document.getElementById('modalBody').innerHTML=viewMode_==='desktop'
-  ?gearTip404_(gem,true)+'<section class="group404"><h4>取得方式</h4>'+sourceList+'</section>'
-  :`<div class="catalog-gem-detail39"><div class="gem-pick-visual">${objectArt202_(gem,'gem')||`<span class="gem-pick-stone gem-shape-${gemPickerShape_(gem)}" style="--gem:${escapeAttr(gemVisualColor_(gem))}"></span>`}</div><h3>寶石能力</h3><p>${escapeHtml(gemStatsText(gem))}</p><h3>取得方式</h3>${sourceList}</div>`;
+  ?gearTip404_(gem,true)+'<section class="group404">'+sourceList+'</section>'
+  :`<div class="catalog-gem-detail39"><div class="gem-pick-visual">${objectArt202_(gem,'gem')||`<span class="gem-pick-stone gem-shape-${gemPickerShape_(gem)}" style="--gem:${escapeAttr(gemVisualColor_(gem))}"></span>`}</div><h3>寶石能力</h3><p>${escapeHtml(gemStatsText(gem))}</p>${sourceList}</div>`;
  document.getElementById('modal').classList.add('open');
 }
 
