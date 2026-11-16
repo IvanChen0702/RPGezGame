@@ -20,7 +20,7 @@ for(const [view,width,height] of [['desktop',1440,900],['desktop',1366,650],['mo
   await page.evaluate(t=>mistTab465_(t),tab);await page.waitForTimeout(150);
   const geometry=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth,tiles:document.querySelectorAll('.mist-cell465').length,bad:[...document.querySelectorAll('.mist465 img')].filter(x=>!x.complete||!x.naturalWidth).map(x=>x.src)}));
   assert.ok(geometry.scroll<=width+2,'page horizontal overflow: '+JSON.stringify({view,width,tab,geometry}));assert.deepEqual(geometry.bad,[],'missing art');
-  if(tab==='map'){assert.equal(geometry.tiles,256);await page.getByRole('button',{name:'5,7 你的位置',exact:true}).click();assert.equal(await page.locator('.mist-cell465.selected').count(),1);await page.evaluate(()=>mistSelect465_(5,6));const dims=await page.locator('.mist-cell465').first().boundingBox();assert.ok(Math.abs(dims.width-dims.height)<1,'map tiles must stay square');}
+  if(tab==='map'){assert.equal(geometry.tiles,256);await page.getByRole('button',{name:'5,7 你的位置',exact:true}).click();assert.equal(await page.locator('#mistPrep474 [role="dialog"]').count(),1);await page.getByRole('button',{name:'關閉整備',exact:true}).click();await page.evaluate(()=>mistSelect465_(5,6));const dims=await page.locator('.mist-cell465').first().boundingBox();assert.ok(Math.abs(dims.width-dims.height)<1,'map tiles must stay square');}
   if(width!==360)await page.screenshot({path:path.join(out,view+'-'+tab+'.png'),fullPage:true});
  }
  // Exercise the real render wrapper and async redraw, not only raw preview HTML.

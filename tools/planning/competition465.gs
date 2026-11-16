@@ -1,6 +1,7 @@
 /** Approved competition planning. No publish, player writes, or triggers. */
 const MIST_PLANNING465={
   "MistConfig": [
+{"Key": "FlagScoreMinutes", "Value": 180, "Description": "每面旗幟存續計分週期（分鐘）"},{"Key": "FlagScorePoints", "Value": 1, "Description": "每面旗幟每期積分"},{"Key": "RemoveEnemyFlagPoints", "Value": 3, "Description": "拔除敵方旗幟積分"},
     {
       "Key": "Enabled",
       "Value": false

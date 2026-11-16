@@ -1,0 +1,270 @@
+{
+  "source": "turn_based_rpg_online_database_v1 (1).xlsx",
+  "baseVersion": "20261115-214526-5e77d066",
+  "changes": [
+    {
+      "DialogueID": "xi_secret_1_offer_3",
+      "QuestID": "xi_secret_1",
+      "before": "先帶指定魔攻武器給我。要能交付的，我會拆開研究。",
+      "Text": "先帶 1 把聚魂法杖給我。要能交付的，交出去就不會退還；我會拆開研究。"
+    },
+    {
+      "DialogueID": "xi_secret_2_offer_0",
+      "QuestID": "xi_secret_2",
+      "before": "接著是兩種指定王關寶石，各一顆。",
+      "Text": "接著交給我地獄魔人寶石、地獄犬寶石各 1 顆。兩種都要，別拿兩顆一樣的來考驗我的耐心。"
+    },
+    {
+      "DialogueID": "xi_secret_3_offer_0",
+      "QuestID": "xi_secret_3",
+      "before": "去討伐個幾隻指定魔法系怪物。",
+      "Text": "接下委託後，討伐龍紋祭司 5 隻。這次除了打贏，也記一下牠們施法的節奏。"
+    },
+    {
+      "DialogueID": "xi_secret_4_offer_0",
+      "QuestID": "xi_secret_4",
+      "before": "這次研究需要指定魔攻武器，拿來當作參考。",
+      "Text": "這次交給我 1 本不死王秘典，當作研究材料。交付後會消耗，先把你自己要用的留好。"
+    },
+    {
+      "DialogueID": "xi_secret_4_offer_1",
+      "QuestID": "xi_secret_4",
+      "before": "終於不用拆了。",
+      "Text": "連書都收走？我以為這次只是借妳看。"
+    },
+    {
+      "DialogueID": "xi_secret_4_offer_2",
+      "QuestID": "xi_secret_4",
+      "before": "你很失望嗎？我可以調整。",
+      "Text": "我會做很多筆記。寫完以後，原作者可能也認不出來。"
+    },
+    {
+      "DialogueID": "xi_secret_4_offer_3",
+      "QuestID": "xi_secret_4",
+      "before": "完全沒有。",
+      "Text": "那我先確認沒把常用的那本交出去。"
+    },
+    {
+      "DialogueID": "xi_secret_4_offer_4",
+      "QuestID": "xi_secret_4",
+      "before": "實際體會一次，會比較清楚魔力經過哪裡。",
+      "Text": "很好。研究要動腦，交材料也一樣。"
+    },
+    {
+      "DialogueID": "xi_secret_4_complete_0",
+      "QuestID": "xi_secret_4",
+      "before": "做得不錯。手給我，看看有沒有燙傷。",
+      "Text": "秘典收到了。這幾頁的魔力痕跡正好能用來對照。"
+    },
+    {
+      "DialogueID": "xi_secret_4_complete_1",
+      "QuestID": "xi_secret_4",
+      "before": "……我只是希望最後一課能準時開始。",
+      "Text": "……不是我迫不及待，只是最後一課最好準時開始。"
+    },
+    {
+      "DialogueID": "xi_secret_5_offer_0",
+      "QuestID": "xi_secret_5",
+      "before": "最後，擊敗指定BOSS 2次。",
+      "Text": "最後，接下委託後擊敗深淵海皇・涅普提斯 2 次。"
+    },
+    {
+      "DialogueID": "xi_secret_5_offer_2",
+      "QuestID": "xi_secret_5",
+      "before": "第一次可能靠運氣，第二次可能剛好。第三次，你應該能告訴我自己怎麼贏的。",
+      "Text": "第一次算，但第二次要讓我看出你知道自己怎麼贏的。不能每次都把答案寫成運氣。"
+    },
+    {
+      "DialogueID": "xi_secret_5_offer_3",
+      "QuestID": "xi_secret_5",
+      "before": "當然，你也可以連續幸運三次。我會稍微嫉妒。",
+      "Text": "當然，你也可以連續幸運兩次。我會稍微嫉妒。"
+    },
+    {
+      "DialogueID": "kazama_secret_1_offer_5",
+      "QuestID": "kazama_secret_1",
+      "before": "先帶指定物攻武器過來，交給我當教具。我們從重心和出手開始。",
+      "Text": "先交給我 1 把處刑巨斧當教具，交付後不會退還。我們從重心和出手開始。"
+    },
+    {
+      "DialogueID": "kazama_secret_2_offer_0",
+      "QuestID": "kazama_secret_2",
+      "before": "去討伐個幾隻指定近戰怪物，留意自己什麼時候開始急。",
+      "Text": "接下委託後，討伐零域守衛 5 隻。留意自己什麼時候開始急。"
+    },
+    {
+      "DialogueID": "kazama_secret_3_offer_0",
+      "QuestID": "kazama_secret_3",
+      "before": "任一\"武器\"成功強化三次。",
+      "Text": "接下委託後，武器成功強化累計 3 次。不一定要同一把，失敗不算，別把它哭成成功。"
+    },
+    {
+      "DialogueID": "kazama_secret_5_offer_0",
+      "QuestID": "kazama_secret_5",
+      "before": "最後，擊敗指定BOSS三次，活著回來找我。",
+      "Text": "最後，接下委託後擊敗龍城女帝 3 次，活著回來找我。"
+    },
+    {
+      "DialogueID": "yexian_secret_1_offer_7",
+      "QuestID": "yexian_secret_1",
+      "before": "帶指定物攻、魔攻裝備各一件，選你願意交付的。",
+      "Text": "交給我深淵珊瑚刃、墜星軍刀各 1 把。兩種都要，交付後會消耗，選你願意交出的。"
+    },
+    {
+      "DialogueID": "yexian_secret_2_offer_0",
+      "QuestID": "yexian_secret_2",
+      "before": "下一步，指定寶石2顆。",
+      "Text": "下一步，交付龍王寶石、不死王寶石各 1 顆。不是任選兩顆。"
+    },
+    {
+      "DialogueID": "yexian_secret_3_offer_0",
+      "QuestID": "yexian_secret_3",
+      "before": "指定近戰、魔法系怪物各5隻。觀察牠們怎麼抓距離，什麼時候追、什麼時候退。",
+      "Text": "接下委託後，討伐星軌處刑者、重力巨神各 5 隻。觀察牠們怎麼抓距離，什麼時候追、什麼時候退。"
+    },
+    {
+      "DialogueID": "yexian_secret_4_offer_0",
+      "QuestID": "yexian_secret_4",
+      "before": "完成一次裝備強化，再鑲嵌一顆寶石。有不清楚的先問。",
+      "Text": "接下委託後，嘗試裝備強化 1 次，再完成寶石鑲嵌 1 次。強化不要求成功，也不限制部位；有不清楚的先問。"
+    },
+    {
+      "DialogueID": "yexian_secret_5_offer_0",
+      "QuestID": "yexian_secret_5",
+      "before": "最後，開始兩位指定BOSS挑戰。",
+      "Text": "最後，接下委託後擊敗龍城女帝 5 次、星蝕觀測者・阿斯特拉 1 次。兩個目標都要完成。"
+    },
+    {
+      "DialogueID": "yexian_secret_5_complete_0",
+      "QuestID": "yexian_secret_5",
+      "before": "第二次那一步，退得不錯。",
+      "Text": "女帝那幾場的步伐穩多了，對上觀測者也沒有亂掉。"
+    },
+    {
+      "DialogueID": "lily_enhance_offer_5",
+      "QuestID": "lily_enhance",
+      "before": "好啦，不鬧你。這五顆強化石拿去，先試著強化一次\"武器\"。",
+      "Text": "好啦，不鬧你。接受委託後這五顆強化石拿去，試著強化任一把武器 1 次；成功或失敗都算，別跑去強化帽子。"
+    },
+    {
+      "DialogueID": "lily_socket_offer_4",
+      "QuestID": "lily_socket",
+      "before": "鑲上去能加十點HP。去鑲嵌介面，挑好位置再放。",
+      "Text": "鑲上去能加十點 HP。接受委託後，替任一件裝備鑲嵌寶石 1 次就算完成；這顆拿去用，別拿來當糖吃。"
+    },
+    {
+      "DialogueID": "xi_secret_1_progress_0",
+      "QuestID": "xi_secret_1",
+      "before": "缺材料就找材料，缺休息就去休息。弄錯順序通常比較花時間。",
+      "Text": "交付聚魂法杖 1 把。我等材料，不是在等你跟貓聊天。"
+    },
+    {
+      "DialogueID": "xi_secret_2_progress_0",
+      "QuestID": "xi_secret_2",
+      "before": "缺材料就找材料，缺休息就去休息。弄錯順序通常比較花時間。",
+      "Text": "交付地獄魔人寶石、地獄犬寶石各 1 顆。我等材料，不是在等你跟貓聊天。"
+    },
+    {
+      "DialogueID": "xi_secret_3_progress_0",
+      "QuestID": "xi_secret_3",
+      "before": "缺材料就找材料，缺休息就去休息。弄錯順序通常比較花時間。",
+      "Text": "接取後討伐龍紋祭司 5 隻。我等材料，不是在等你跟貓聊天。"
+    },
+    {
+      "DialogueID": "xi_secret_4_progress_0",
+      "QuestID": "xi_secret_4",
+      "before": "缺材料就找材料，缺休息就去休息。弄錯順序通常比較花時間。",
+      "Text": "交付不死王秘典 1 本。我等材料，不是在等你跟貓聊天。"
+    },
+    {
+      "DialogueID": "xi_secret_5_progress_0",
+      "QuestID": "xi_secret_5",
+      "before": "缺材料就找材料，缺休息就去休息。弄錯順序通常比較花時間。",
+      "Text": "接取後擊敗深淵海皇・涅普提斯 2 次。我等材料，不是在等你跟貓聊天。"
+    },
+    {
+      "DialogueID": "kazama_secret_1_progress_0",
+      "QuestID": "kazama_secret_1",
+      "before": "卡在哪裡？說來聽聽。你不講，我就只能猜你想來陪我聊天。",
+      "Text": "交付處刑巨斧 1 把。先看清楚，別練得很認真，項目卻不對！"
+    },
+    {
+      "DialogueID": "kazama_secret_2_progress_0",
+      "QuestID": "kazama_secret_2",
+      "before": "卡在哪裡？說來聽聽。你不講，我就只能猜你想來陪我聊天。",
+      "Text": "接取後討伐零域守衛 5 隻。先看清楚，別練得很認真，項目卻不對！"
+    },
+    {
+      "DialogueID": "kazama_secret_3_progress_0",
+      "QuestID": "kazama_secret_3",
+      "before": "卡在哪裡？說來聽聽。你不講，我就只能猜你想來陪我聊天。",
+      "Text": "接取後武器成功強化累計 3 次。先看清楚，別練得很認真，項目卻不對！"
+    },
+    {
+      "DialogueID": "kazama_secret_4_progress_0",
+      "QuestID": "kazama_secret_4",
+      "before": "卡在哪裡？說來聽聽。你不講，我就只能猜你想來陪我聊天。",
+      "Text": "完成競技場對戰結算 3 次，不限勝負；先前已累積的任務進度保留。先看清楚，別練得很認真，項目卻不對！"
+    },
+    {
+      "DialogueID": "kazama_secret_5_progress_0",
+      "QuestID": "kazama_secret_5",
+      "before": "卡在哪裡？說來聽聽。你不講，我就只能猜你想來陪我聊天。",
+      "Text": "接取後擊敗龍城女帝 3 次。先看清楚，別練得很認真，項目卻不對！"
+    },
+    {
+      "DialogueID": "yexian_secret_1_progress_0",
+      "QuestID": "yexian_secret_1",
+      "before": "卡住就說卡在哪裡。點頭裝懂，通常要多走一趟。",
+      "Text": "交付深淵珊瑚刃、墜星軍刀各 1 把。一項一項來，別急著證明自己看得很快。"
+    },
+    {
+      "DialogueID": "yexian_secret_2_progress_0",
+      "QuestID": "yexian_secret_2",
+      "before": "卡住就說卡在哪裡。點頭裝懂，通常要多走一趟。",
+      "Text": "交付龍王寶石、不死王寶石各 1 顆。一項一項來，別急著證明自己看得很快。"
+    },
+    {
+      "DialogueID": "yexian_secret_3_progress_0",
+      "QuestID": "yexian_secret_3",
+      "before": "卡住就說卡在哪裡。點頭裝懂，通常要多走一趟。",
+      "Text": "接取後討伐星軌處刑者、重力巨神各 5 隻。一項一項來，別急著證明自己看得很快。"
+    },
+    {
+      "DialogueID": "yexian_secret_4_progress_0",
+      "QuestID": "yexian_secret_4",
+      "before": "卡住就說卡在哪裡。點頭裝懂，通常要多走一趟。",
+      "Text": "接取後嘗試任意裝備強化 1 次、完成寶石鑲嵌 1 次；強化不限成功。一項一項來，別急著證明自己看得很快。"
+    },
+    {
+      "DialogueID": "yexian_secret_5_progress_0",
+      "QuestID": "yexian_secret_5",
+      "before": "卡住就說卡在哪裡。點頭裝懂，通常要多走一趟。",
+      "Text": "接取後擊敗龍城女帝 5 次、星蝕觀測者・阿斯特拉 1 次。一項一項來，別急著證明自己看得很快。"
+    },
+    {
+      "DialogueID": "lily_partner_progress_0",
+      "QuestID": "lily_partner",
+      "before": "有哪裡不懂就問。站在這裡看我，不會自己完成喔。",
+      "Text": "通關主線第 5 層；已經通過也算。記不住就看任務目標，別把我當會走路的記事本。"
+    },
+    {
+      "DialogueID": "lily_enhance_progress_0",
+      "QuestID": "lily_enhance",
+      "before": "有哪裡不懂就問。站在這裡看我，不會自己完成喔。",
+      "Text": "接取後嘗試武器強化 1 次，成功或失敗都算。記不住就看任務目標，別把我當會走路的記事本。"
+    },
+    {
+      "DialogueID": "lily_socket_progress_0",
+      "QuestID": "lily_socket",
+      "before": "有哪裡不懂就問。站在這裡看我，不會自己完成喔。",
+      "Text": "接取後替任意裝備鑲嵌寶石 1 次。記不住就看任務目標，別把我當會走路的記事本。"
+    },
+    {
+      "DialogueID": "xi_research_progress_0",
+      "QuestID": "xi_research",
+      "before": "缺材料就找材料，缺休息就去休息。弄錯順序通常比較花時間。",
+      "Text": "交付天然手環、天然戒指各 1 件。我等材料，不是在等你跟貓聊天。"
+    }
+  ]
+}
