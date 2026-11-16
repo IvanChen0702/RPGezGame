@@ -28340,16 +28340,22 @@ questDrawPlayer370=function(art,dialog){
 questDecorate368();
 </script><script data-ui373="quest-repair">// v373: task UI uses the game's existing panels, tabs, icons and authoritative transactions.
 function questDescription373(q){
- const custom=String(q.Description||q.description||q.Summary||'').trim();if(custom)return custom;
- const descriptions={
-  lily_ready:'第一次出門前，先聽莉莉交代冒險須知。完成對話即可獲得紅藥水5罐，不需要戰鬥。',
-  lily_partner:'通過主線第20層後，回城鎮找莉莉，從小雞、靈鹿、布偶貓寵物蛋中選擇一顆。已通關第20層的玩家也可以直接回任務。',
-  lily_enhance:'接取後先獲得5顆強化石。前往背包的強化頁，選一把武器進行至少一次強化；不要求強化成功。完成後回來找莉莉，領取強化石500顆。接取前的強化不計入這次任務。',
-  lily_socket:'接取後先獲得「莉莉的藍水晶」（HP＋10）。前往背包的鑲嵌頁，將任意一顆寶石鑲入裝備的空孔。完成後回來找莉莉，領取傳說之槌3個。接取前的鑲嵌不計入這次任務。',
-  xi_research:'希需要兩件裝備作為魔法研究素材。備齊下方指定物品後回來交付；符合條件的裝備有多件時，可以自己選擇要交出的那件。',
-  kazama_status:'聽風間說明異常效果的應對方式。完成對話後即可獲得摩登盾牌＋10。'
- };
- return descriptions[q.QuestID]||`完成${questNpcNames368[q.NPCID]||'委託人'}交代的目標，再回城鎮交付任務。${(q.objectives||[]).some(g=>String(g.Type).startsWith('deliver_'))?'交付素材時會讓你選擇實際要交出的物品，確認後才會扣除。':''}`;
+ const custom=[q.Description,q.description,q.Summary].map(x=>String(x||'').trim()).find(Boolean);if(custom)return custom;
+ // v480: descriptions and goal rows share the published objectives. Do not duplicate
+ // floor, count, reward or item values in per-quest HTML fallbacks.
+ const goals=Array.isArray(q.objectives)?q.objectives:(questDataUi368().QuestObjectives||[]).filter(g=>g.QuestID===q.QuestID);
+ if(!goals.length)return '任務目標尚未載入，請重新讀取任務資料。';
+ const objectives=goals.map(g=>{
+  const label=questGoalLabel368(g),quantity=Number(g.Quantity)||1;
+  if(g.Type==='main_clear')return label+'（已通關也算）';
+  if(g.Type==='dialogue')return label;
+  if(String(g.Type).startsWith('deliver_'))return (label.startsWith('交付')?'':'交付 ')+label+' ×'+quantity;
+  if(g.Type==='enhance_level')return label+' ×'+quantity+'（現有裝備符合也算）';
+  return '接取後'+label+' ×'+quantity;
+ }).join('；');
+ const npc=questNpcNames368[q.NPCID]||'委託人';
+ const delivery=goals.some(g=>String(g.Type).startsWith('deliver_'))?'交付時可選擇實際物品，確認後才會扣除。':'';
+ return objectives+'。'+(goals.every(g=>g.Type==='dialogue')?'完成對話即可完成此項委託。':'完成目標後，回城鎮找'+npc+'交付任務。')+delivery;
 }
 function questCondition373(q){
  const prerequisite=questCache368?.quests?.find(x=>x.QuestID===q.Prerequisite)?.Name||q.Prerequisite;
@@ -28359,7 +28365,7 @@ function questCondition373(q){
 function questGoalsHtml373(q){return (q.objectives||[]).map(g=>`<div class="quest-journal-goal369"><span>${escapeHtml(questGoalLabel368(g))}</span><b class="${Number(g.progress)>=Number(g.Quantity)||q.status==='completed'?'quest-done373':''}">${q.status==='completed'?g.Quantity:g.progress||0} / ${g.Quantity}</b></div>`).join('');}
 function questRewardsHtml373(q,timing='complete'){
  const rewards=questDataUi368().QuestRewards.filter(r=>r.QuestID===q.QuestID&&r.Timing===timing);
- return rewards.map(r=>`<div class="quest-reward373"><span class="quest-reward-icon373">${questRewardArt368(r)}</span><span>${escapeHtml(questRewardName368(r))}${r.Enhance?` ＋${r.Enhance}`:''}<small>×${r.Quantity}${r.ChoiceGroup?' · 三選一':''}</small></span></div>`).join('');
+ return rewards.map(r=>`<div class="quest-reward373"><span class="quest-reward-icon373">${questRewardArt368(r)}</span><span>${escapeHtml(questRewardName368(r))}${r.Enhance?` ＋${r.Enhance}`:''}<small>×${r.Quantity}${r.ChoiceGroup?' · '+rewards.filter(x=>x.ChoiceGroup===r.ChoiceGroup).length+' 選 1':''}</small></span></div>`).join('');
 }
 // The canvas contains the local and online players; names live in the DOM people layer.
 questTownLayers371=function(){
