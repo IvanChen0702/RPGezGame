@@ -150,14 +150,14 @@ export async function reduceMist468(
     p.hidden_until = null;
     return at;
   }
-  function report(p, result, title, description) {
+  function report(p, result, title, description, position = null) {
     const r = {
       id: uuid(),
       season_id: w.season.id,
       account_id: p.account_id,
       created_at: iso(now),
       result,
-      summary: { title, description, points: p.points },
+      summary: { title, description, points: p.points, position: position ? {x: position.x, y: position.y} : null },
       read_at: null,
     };
     additions.reports.push(r);
@@ -284,7 +284,7 @@ export async function reduceMist468(
         const points = delta * flagRule476('FlagScorePoints', 1);
         owner.points += points;
         cursors[key] = periods;
-        report(owner, 'flag_score', '旗幟駐守得分', `旗幟 ${f.x + 1},${f.y + 1} 駐守累積 +${points} 分。`);
+        report(owner, 'flag_score', '旗幟駐守得分', `旗幟 ${f.x + 1},${f.y + 1} 駐守累積 +${points} 分。`, f);
       }
     }
   }
@@ -329,6 +329,8 @@ export async function reduceMist468(
       });
   }
   function finishBattle(b, forced = false) {
+    // Capture encounter position before death/respawn removes the target cell.
+    const position = b.position || w.cells.find(x => x.id === b.target) || null;
     const a = w.players[b.attacker],
       d = b.defender ? w.players[b.defender] : null,
       A = b.combat.attacker,
@@ -416,6 +418,7 @@ export async function reduceMist468(
             mutual: "雙方同時倒下",
             draw: "30 回合結束，平局",
           }[result],
+      position,
     );
     if (d)
       report(
@@ -433,6 +436,7 @@ export async function reduceMist468(
             : result === "mutual"
               ? "雙方同時倒下。"
               : "對戰平局。",
+        position,
       );
     a.runtime.lastBattle = b.id;
     if (d) d.runtime.lastBattle = b.id;
@@ -719,7 +723,9 @@ export async function reduceMist468(
         spend(p, c("RemoveEnemyFlagCost"));
         const points = flagRule476('RemoveEnemyFlagPoints', 3);
         p.points += points;
-        report(p, 'flag_capture', '拔除敵方旗幟', `拔除 ${f.x + 1},${f.y + 1} 的敵方旗幟，+${points} 分。`);
+        report(p, 'flag_capture', '拔除敵方旗幟', `拔除 ${f.x + 1},${f.y + 1} 的敵方旗幟，+${points} 分。`, f);
+        const owner = w.players[f.owner_account];
+        if (owner) report(owner, 'flag_lost', '旗幟被拔除', `${p.nickname} 拔除了你在 ${f.x + 1},${f.y + 1} 的旗幟，駐守時間已重置。`, f);
         p.hidden_until = null;
       }
       w.flags = w.flags.filter((x) => x !== f);
@@ -729,7 +735,7 @@ export async function reduceMist468(
       p.hidden_until = iso(now + c("HideMinutes") * 60000);
     } else if (action === "chest/open") {
       const box = p.runtime.starter;
-      let items, name;
+      let items, name, legendary = false;
       if (box?.id === payload.chestId && !box.opened) {
         if (!adjacent(at, box.position) && !(at.x === box.position.x && at.y === box.position.y))
           fail("NOT_ADJACENT");
@@ -743,10 +749,11 @@ export async function reduceMist468(
         p.pending_loot = p.pending_loot.filter(x => x !== b);
         items = b.contents || [rollEquipment(null, b.legendary)];
         name = b.name || "戰利品寶箱";
+        legendary = !!b.legendary;
       }
       for (const item of items) award(p, item);
       // The receipt survives refresh/network loss; animation acknowledgement never rolls loot.
-      (p.runtime.chestReveals471 ||= []).push({id: payload.chestId, name, items: clone(items)});
+      (p.runtime.chestReveals471 ||= []).push({id: payload.chestId, name, legendary, items: clone(items)});
     } else if (action === "chest/confirm") {
       const reveal = (p.runtime.chestReveals471 || []).find(x => x.id === payload.chestId);
       if (!reveal) fail("ITEM_MISSING");
@@ -932,6 +939,7 @@ export async function reduceMist468(
         attacker: account,
         defender: d?.account_id || null,
         target: target.id,
+        position: {x: target.x, y: target.y},
         monster,
         combat,
         deadline: iso(now + c("BattleTimeoutMinutes") * 60000),
@@ -997,6 +1005,7 @@ export async function reduceMist468(
     input.rewards || [],
   );
   result.energyRules = { initial:c('EnergyInitial'), cap:c('EnergyCap'), recoveryMinutes:c('EnergyRecoveryMinutes') };
+  if (result.self) result.self.energyNextAt = p.energy < c('EnergyCap') ? iso(ms(p.energy_at) + c('EnergyRecoveryMinutes') * 60000) : null;
   result.flagRules = {
     minutes: flagRule476('FlagScoreMinutes', 180),
     points: flagRule476('FlagScorePoints', 1),
@@ -1189,6 +1198,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
       title: r.summary.title,
       description: r.summary.description,
       points: r.summary.points,
+      position: r.summary.position || null,
       unread: !r.read_at,
     })),
     equipment: p?.equipment || {},

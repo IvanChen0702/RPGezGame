@@ -16,6 +16,7 @@ try{for(const [view,width,height] of [['desktop',1440,900],['mobile',390,844]]){
  await p.getByRole('tab',{name:'棋盤',exact:true}).click();await p.waitForFunction(()=>!!mist465_.pending&&!mist465_.loading);
  assert.equal(input.world.players['preview-adventurer'].inventory.equipment.length,4);
  await p.getByRole('button',{name:'重試同筆操作',exact:true}).click();await p.waitForSelector('#mistChest471');
+ assert.match(await p.locator('#mistChest471 .g431-pose0').getAttribute('src'),/equipment-chest479/);
  // Reload during the actual shared ceremony; the server retains the very same four items.
  const ids=input.world.players['preview-adventurer'].inventory.equipment.map(x=>x.id);
  await setup();await p.waitForSelector('#mistChest471');await p.locator('#mistChest471 .g431-skip').click();
@@ -44,6 +45,13 @@ try{for(const [view,width,height] of [['desktop',1440,900],['mobile',390,844]]){
  assert.equal(await p.evaluate(()=>mist465_.data.battle.result),'win');
  await p.locator('#mistChest471 .g431-skip').click();await p.locator('#mistChest471 [data-keep471]').click();await p.waitForSelector('#mistChest471',{state:'detached'});
  assert.equal(await p.evaluate(()=>mist465_.data.inventory.chests.length),0,'battle chest auto opened');
+ input.world.players['preview-adventurer'].inventory.chests.push({id:'legendary479',kind:'chest',name:'傳說裝備寶箱',legendary:true});
+ await p.evaluate(()=>refreshMist465_());await p.waitForSelector('#mistChest471.g431-open');
+ assert.match(await p.locator('#mistChest471 .g431-pose0').getAttribute('src'),/legendary-chest479/);
+ assert.match(await p.locator('#mistChest471 .g431-pose2').getAttribute('src'),/legendary-chest-open479/);
+ assert.equal(await p.locator('#mistChest471 .g431-chest img').evaluateAll(es=>es.every(e=>e.complete&&e.naturalWidth>0)),true);
+ await p.screenshot({path:`/workspace/work/mist465-preview/${engine}-${width}-legendary479.png`,fullPage:true});
+ await p.locator('#mistChest471 .g431-skip').click();await p.locator('#mistChest471 [data-keep471]').click();await p.waitForSelector('#mistChest471',{state:'detached'});
  assert.deepEqual(errors,[]);await p.close();console.log(engine,view,'opening/confirmation lost replies, reload during ceremony, exact-once equip and respawn passed');
 }}finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

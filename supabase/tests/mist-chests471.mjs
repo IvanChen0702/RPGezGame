@@ -28,7 +28,7 @@ assert.equal(d.equipment.head.id,'new-head');assert.equal(d.equipment.weapon.id,
 assert.ok(d.pendingLoot.some(x=>x.id===old.id),'displaced gear preserved even with full bag');assert.ok(d.self.hp/d.self.maxHp<=ratio+.01,'no free heal');
 // Legacy and elite boxes are opened through the same endpoint; kept items remain mode-owned.
 p=input.world.players.a;p.inventory.chests=[{id:'elite',kind:'chest',name:'傳說寶箱',legendary:true}];
-d=await call('chest/open',{chestId:'elite'});assert.equal(d.chestReveals471[0].items[0].rarity,'傳說');
+d=await call('chest/open',{chestId:'elite'});assert.equal(d.chestReveals471[0].items[0].rarity,'傳說');assert.equal(d.chestReveals471[0].legendary,true,'legendary presentation survives reload');assert.equal((await call('status')).chestReveals471[0].legendary,true);
 const gained=d.chestReveals471[0].items[0].id;
 d=await call('chest/confirm',{chestId:'elite',choice:'keep'});assert.ok(d.pendingLoot.some(x=>x.id===gained));
 assert.deepEqual(input.save,{skillsOwned:['slash'],equippedSkills:['slash'],passive:[]});
