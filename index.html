@@ -6840,7 +6840,7 @@ function pulsePortal402_(c,t){
 }
 function lobby402_(){
  const modes=['main','worldboss','dungeon','arena'].flatMap(battleModeCards349_),keys=['map','boss','arena','mount','portal','relic','gear','box','arena'],current=modes.find(x=>x.id===portalChoice402_)||modes[0];
- return '<div class="lobby402"><div><h3>戰鬥入口</h3><div class="modes402">'+modes.map((m,i)=>'<button aria-pressed="'+(m===current)+'" onclick="portalChoice402_=\''+m.id+'\';replaceBattleBody349_()">'+icon402_(keys[i])+'<span><b>'+escapeHtml(m.title)+'</b><small>'+escapeHtml(modeUnlocked258_(m.id)?m.note:modeUnlockMessage258_(m.id))+'</small></span></button>').join('')+'</div></div><aside style="--scene:url(\''+sceneUrl351_(entranceTheme351_(current.id))+'\')"><div><h2>'+escapeHtml(current.title)+'</h2><p>'+escapeHtml(current.status)+'</p><button class="primary" '+(modeUnlocked258_(current.id)?'':'disabled')+' onclick="activateMode352_(this,\''+current.id+'\')">'+(modeUnlocked258_(current.id)?'進入'+current.title:'尚未解鎖')+'</button></div></aside></div>';
+ return '<div class="lobby402"><div><h3>戰鬥入口</h3><div class="modes402">'+modes.map((m,i)=>'<button aria-pressed="'+(m===current)+'" onclick="portalChoice402_=\''+m.id+'\';replaceBattleBody349_()">'+icon402_(keys[i])+'<span><b>'+modeTitle473_(m)+'</b><small>'+escapeHtml(modeUnlocked258_(m.id)?m.note:modeUnlockMessage258_(m.id))+'</small></span></button>').join('')+'</div></div><aside style="--scene:url(\''+sceneUrl351_(entranceTheme351_(current.id))+'\')"><div><h2>'+modeTitle473_(current)+'</h2><p>'+escapeHtml(current.status)+'</p><button class="primary" '+(modeUnlocked258_(current.id)?'':'disabled')+' onclick="activateMode352_(this,\''+current.id+'\')">'+(modeUnlocked258_(current.id)?'進入'+current.title:'尚未解鎖')+'</button></div></aside></div>';
 }
 function marketRail402_(tabs,active,handler){
  return '<nav class="rail402">'+tabs.map(([id,key,title])=>'<button type="button" title="'+title+'" aria-label="'+title+'" aria-pressed="'+(active===id)+'" onclick="'+handler+'(\''+id+'\')">'+icon402_(key)+'<small>'+title+'</small></button>').join('')+'</nav>';
@@ -8680,6 +8680,7 @@ html.mobile-ui body #app #mainNav button[data-page]>span:not(.nav-glyph){positio
 .battle349 .mode-fit351>svg,.battle349 .mode-fit351>img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center bottom!important;}
 .mode-card349[data-stance352=ground] .mode-creature349::after{content:''!important;position:absolute!important;left:50%!important;bottom:-2px!important;translate:-50% 0!important;width:74px!important;height:7px!important;border-radius:50%!important;background:#040b0daa!important;filter:blur(2px)!important;z-index:0!important;}
 .mode-card349 .mode-copy349{position:relative!important;display:flex!important;flex-direction:column!important;gap:5px!important;padding:14px 16px!important;min-height:76px!important;background:linear-gradient(#171b17,#11130f)!important;border-top:1px solid #a78c4c55!important;}
+.mode-test473{display:inline-block;white-space:nowrap;font-size:.75em}
 .mode-title352{display:block!important;font-size:clamp(19px,1.8vw,28px)!important;font-weight:800!important;line-height:1.3!important;color:#fff1d6!important;}
 .mode-status352{display:block!important;font-size:12px!important;line-height:1.5!important;color:#d9cbb0!important;}
 /* Discard the old icon+label grid; the SVG now gets the whole square. */
@@ -17497,13 +17498,14 @@ function battleStage349_(floor){
  const f=Math.trunc(Number(floor)),max=Math.max(0,Math.trunc(Number(state.maxCleared)||0)),exists=mainStageExists_(f),boss=!!onlineStages[f]?.boss;
  return {floor:f,exists,boss,cleared:exists&&f<=max,locked:!exists||f>max+1,canStart:exists&&f<=max+1&&!(max<10&&f<=max),max};
 }
+function modeTitle473_(mode){return mode.id==='mist'?'迷霧戰境<wbr><span class="mode-test473">（測試階段）</span>':escapeHtml(mode.title);}
 function battleModeCards349_(group=mobilePrepareModeTab_){
  const max=Number(state.maxCleared)||0,total=Math.max(0,mainRouteInfo47_(true).high-50);
  const cards={
  main:[{id:'story',title:'主線關卡',note:'10 章・第 1–50 關',status:`已通關 ${Math.min(50,max)} / 50`,art:1,icon:'story',action:'openStory349_(false)'},{id:'challenge',title:'挑戰關卡',note:'第 51 關起・BOSS 挑戰',status:max>=50?`已通關 ${Math.min(total,Math.max(0,max-50))} / ${total}`:'通關第 50 關後開放',art:9,icon:'boss',action:'openStory349_(true)'}],
  worldboss:[{id:'worldboss',title:'世界 BOSS',note:'全服共同討伐',status:'查看討伐狀態與獎勵',art:3,icon:'boss',action:'openWorldBoss_()'},{id:'extreme',title:'極限挑戰',note:'無限試煉・挑戰排行',status:'挑戰你的最高紀錄',art:8,icon:'special',action:'openExtreme130()'}],
  dungeon:[{id:'dungeon',title:'副本關卡',note:'限時討伐・特殊規則',status:'選擇難度與副本',art:5,icon:'dungeon',action:'openDungeonLobby25_()'},{id:'relic',title:'遺物探險',note:'單人探索・隨機事件',status:'深入遺跡或帶走戰利品',art:6,icon:'story',action:'openRelic144_()'}],
- arena:[{id:'arena',title:'競技場',note:'玩家幻影・賽季競技',status:'查看配對與防守配置',art:7,icon:'arena',action:'openArena_()'},{id:'boxing',title:'拳擊機',note:'最後一季・保留領獎',status:Date.now()<Date.UTC(2026,10,15,15)?'本季結束後停止入場':'已停止入場・仍可領取獎勵',art:2,icon:'arena',action:'openBoxingMachine_()'},{id:'mist',title:'迷霧戰境',note:'探索・奪旗・生存競技',status:Number(state.maxCleared||0)>=1?'全新戰境・查看模式':'通關主線第 1 層開放',art:6,icon:'arena',action:'openMist465_()'}]
+ arena:[{id:'arena',title:'競技場',note:'玩家幻影・賽季競技',status:'查看配對與防守配置',art:7,icon:'arena',action:'openArena_()'},{id:'boxing',title:'拳擊機',note:'最後一季・保留領獎',status:Date.now()<Date.UTC(2026,10,15,15)?'本季結束後停止入場':'已停止入場・仍可領取獎勵',art:2,icon:'arena',action:'openBoxingMachine_()'},{id:'mist',title:'迷霧戰境（測試階段）',note:'探索・奪旗・生存競技',status:Number(state.maxCleared||0)>=1?'全新戰境・查看模式':'通關主線第 1 層開放',art:6,icon:'arena',action:'openMist465_()'}]
  };
  return cards[group]||cards.main;
 }
@@ -17517,7 +17519,7 @@ function battleModeArt349_(id){
  const keys={story:'family_bat',challenge:'main_boss100',worldboss:'world_darkTree',extreme:'extreme_slime',dungeon:'dungeon_darkWitch',relic:'family_ghost',arena:'family_knight',boxing:'boxing_dummy'},key=keys[id]||'family_ghost',src=PIXEL_ART202_[key],m=artBounds351_[src],nativeSize=m?Math.min(m[0],m[1]):128,lowResolution=nativeSize<=256,limit=viewMode_==='mobile'&&lowResolution?Math.max(24,Math.floor(Math.min(128,(m?m[4]-m[2]:90)*.8))):m?Math.min(520,nativeSize):128,ratio=m?(m[4]-m[2])/(m[5]-m[3]):1;
  return `<span class="mode-fit351" data-native356="${nativeSize}" data-lowres356="${lowResolution}" style="--figure-max351:${limit}px;--figure-ratio352:${ratio}">${modeFigure352_(key)}</span>`;
 }
-function battleCardsHtml349_(){return `<div class="mode-grid349">${battleModeCards349_().map(c=>`<button type="button" class="mode-card349 mode-${c.id}349" data-mode352="${c.id}" data-stance352="${['story','challenge','relic'].includes(c.id)?'float':'ground'}" style="--entry-art:url('${sceneUrl351_(entranceTheme351_(c.id))}')" onclick="activateMode352_(this,'${c.id}')" aria-label="進入${escapeHtml(c.title)}"><span class="mode-scene352" aria-hidden="true"><span class="mode-art349"></span><span class="mode-creature349">${battleModeArt349_(c.id)}</span><span class="mode-tag349">${battleIcon349_(c.icon)}<span>${escapeHtml(c.note)}</span></span></span><span class="mode-copy349"><span class="mode-title352">${escapeHtml(c.title)}</span><span class="mode-status352">${escapeHtml(c.status)}</span></span></button>`).join('')}</div>`;}
+function battleCardsHtml349_(){return `<div class="mode-grid349">${battleModeCards349_().map(c=>`<button type="button" class="mode-card349 mode-${c.id}349" data-mode352="${c.id}" data-stance352="${['story','challenge','relic'].includes(c.id)?'float':'ground'}" style="--entry-art:url('${sceneUrl351_(entranceTheme351_(c.id))}')" onclick="activateMode352_(this,'${c.id}')" aria-label="進入${escapeHtml(c.title)}"><span class="mode-scene352" aria-hidden="true"><span class="mode-art349"></span><span class="mode-creature349">${battleModeArt349_(c.id)}</span><span class="mode-tag349">${battleIcon349_(c.icon)}<span>${escapeHtml(c.note)}</span></span></span><span class="mode-copy349"><span class="mode-title352">${modeTitle473_(c)}</span><span class="mode-status352">${escapeHtml(c.status)}</span></span></button>`).join('')}</div>`;}
 let modeEntryBusy352_=false;
 async function activateMode352_(button,id){
  if(modeEntryBusy352_)return;
