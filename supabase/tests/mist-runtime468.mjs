@@ -107,6 +107,11 @@ assert.equal(
     .error,
   "MIST_REQUEST_REUSED",
 );
+assert.deepEqual((await status('a')).chestReveals471[0].items.map(x=>x.id),ids);
+const confirmPayload={action:'mist/chest/confirm',requestId:crypto.randomUUID(),expectedRevision:a.self.revision,chestId:payload.chestId,choice:'keep'};
+a=await handleMist468(rpc,'a',confirmPayload);
+assert.equal(a.chestReveals471.length,0);
+assert.deepEqual(await handleMist468(rpc,'a',confirmPayload),a,'SQL receipt replays confirmation without awarding twice');
 a = await act("a", "equip", { itemId: ids[2] });
 assert.ok(a.equipment.weapon);
 assert.equal(a.inventory.equipment.length, 3);

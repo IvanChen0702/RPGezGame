@@ -4,6 +4,11 @@ export function createMistCombat468(data,random){
  const base={hp:Number(cfg.BaseHP),def:Number(cfg.BaseDEF),patk:Number(cfg.BasePATK),matk:Number(cfg.BaseMATK),crit:Number(cfg.BaseCrit),critDamage:Number(cfg.BaseCritDamage||100)};
  if(Object.values(base).some(n=>!Number.isFinite(n))||base.hp<=0)throw Error('MIST_BASE_CONFIG_INVALID');
  let pending468=[];
+ // Presentation events are recorded from the same combat hooks as the browser.
+ // Only public combat state is copied; opponent stats/equipment/AI never leave the server.
+ function side471(x){return x===arenaBattle_?.attacker?'attacker':x===arenaBattle_?.defender?'defender':x;}
+ function frame471(){const pick=(a,own)=>({hp:a.hp,maxHp:a.maxHp,status:a.status||{},shields:(a.shields||[]).map(s=>({id:s.id,name:s.name,hp:s.hp,turns:s.turns})),...(own?{stats:a.stats,buff:a.buff||{},cooldowns:a.cooldowns||{},arcaneStacks:a.arcaneStacks||0}:{})});return structuredClone({attacker:pick(arenaBattle_.attacker,true),defender:pick(arenaBattle_.defender,false)});}
+ function record471(type,detail={}){if(!arenaBattle_?.events471)return;const events=arenaBattle_.events471;if(events.length>=512)return;events.push({type,...detail,frame:frame471()});}
  function fxEvent_(...args){const p=fxEventCore468_(...args);pending468.push(p);return p;}
  async function drain468(){for(let i=0;pending468.length;i++){if(i>1000)throw Error('MIST_EFFECT_LOOP');const tasks=pending468;pending468=[];await Promise.all(tasks);}}
 
@@ -147,8 +152,8 @@ function orderDispelArena127_(actor,target){
 }
 function arenaEffectKeys_(x){return [...new Set(arenaEffectEntries46_(x).map(e=>e.key))]}
 function statusDef_(id){const def=statusEffects[id]||defaultStatusEffects[id]||{id,name:id,category:'debuff',defaultDuration:1};return id==='block'?{...def,category:'buff',durationType:'trigger',defaultDuration:0,stackable:false,maxStacks:1,description:'下一段有效傷害降低90%，觸發後消失；不隨回合到期，最多持有一個。'}:def;}
-function arenaEffectText_(){}
-function arenaLog_(s){arenaBattle_.log.push(String(s));}
+function arenaEffectText_(x,text,type='buff'){record471('float',{target:side471(x),text,kind:type});}
+function arenaLog_(s){arenaBattle_.log.push(String(s));record471('log',{text:String(s)});}
 function arenaRefreshPair46_(actor,target){arenaRefreshConditionalStats_(actor);if(target)arenaRefreshConditionalStats_(target)}
 function arenaRefreshConditionalStats_(x){
  if(!x)return;
@@ -437,7 +442,7 @@ async function arenaUseLegacy127_(actor,target,id){
  arenaFinishArcaneRound_(actor,isAttackSkill_(sk));
  return total
 }
-function pixelCast192_(){}
+function pixelCast192_(side,sk){record471('cast',{actor:side==='player'?'attacker':'defender',skillId:sk.id||Object.keys(skillTemplates).find(id=>skillTemplates[id]===sk),name:sk.name});}
 function arenaSide_(x){return x===arenaBattle_?.attacker?'attacker':'defender'}
 function arenaPrepareArcaneForSkill_(actor,sk){
  actor.arcaneCastMultiplier=1;if(sk?.kind==='magicBurst'||!arenaMageAptitudeIIActive_(actor)||!isMagicAttackSkill_(sk))return;
@@ -448,7 +453,7 @@ function arenaPrepareArcaneForSkill_(actor,sk){
 function arenaMageAptitudeIIActive_(actor){return actor?.passive==='mageAptitudeII'&&!(Number(actor.status?.forget?.turns||0)>0)}
 function isMagicAttackSkill_(sk){return !!sk&&(fxSplit_(sk.effectKey).some(k=>{const f=fxParse_(k);return f?.type==='castDamage'&&f.kind==='magic'})||['heavenlyThunder','magic','magicMulti','magicBurst','explosiveMagic','explosiveMagicII','magicSlash','magicSlashII','buffMatk','buffMatkII'].includes(sk.kind));}
 function arcaneStacksValue_(value){return Math.max(0,Math.min(3,Math.trunc(Number(value)||0)))}
-function render(){}
+function render(){record471('state');}
 function questArenaAtk368_(actor,stat){const id=stat==='patk'?'weakness':'suppression';return Number(actor.stats[stat]||0)*(actor.status?.[id]?.turns>0?Number(statusDef_(id).value??.2):1);}
 async function questArenaSkill368_(actor,target,id,sk,phys,mag){let total=0;
  if(id==='enchantedBlade'){
@@ -487,9 +492,9 @@ function arenaAddShield60_(x,sh){
  const entry={...sh,id:String(sh.id||'shield'),name:String(sh.name||'護盾'),hp,max:hp,turns:Math.max(1,Number(sh.turns)||1)};
  shields.push(entry);playSfx('shield',{sample:entry.id==='magicShield'||entry.kind==='magic'?'magicShield':'shield'});refreshArenaShields111_();return entry;
 }
-function playSfx(){}
+function playSfx(name){record471('sound',{name});}
 function refreshArenaShields111_(){}
-function arenaVisual_(){}
+function arenaVisual_(actor,target,kind,text='',impactDelay=320){record471('visual',{actor:side471(actor),target:side471(target),kind,text,impactDelay,skillId:actor.fxActiveSkillId||null});}
 async function arenaHit_(actor,target,amount,visualKind='physical',text=''){
  actor.attackMissed241=false;
  const evade241=actor.hp>0&&target.hp>0&&amount>0&&!(target.status?.invincible?.turns>0)?attackEvasion281_(target):null;if(evade241){playSfx('evasion323');actor.attackMissed241=true;arenaLog_(`${target.name}【${evade241.name}】迴避攻擊。`);arenaEffectText_(target,'迴避！','buff');return 0;}
@@ -703,8 +708,8 @@ function reflectEffect56_(keys=[]){
  }
  return {key,percent,rate:percent/100};
 }
-function reflectAttackFx56_(){}
-function arenaCombatantEl_(){}
+function reflectAttackFx56_(actor,target){record471('reflect',{actor,target});}
+function arenaCombatantEl_(x){return side471(x);}
 async function fxEventCore468_(event,actor=null,target=null,extra=[]){
  const arena=!!actor,b=state.currentBattle;if(!arena&&!b)return 0;
  await chaosFxEvent332_(event,actor,target,extra);
@@ -836,7 +841,7 @@ async function orderFlush127_(b=state.currentBattle){
  }}finally{b.orderFlushing127=false;}
 }
 function orderBoss127_(b=state.currentBattle){return !!b&&(enemyBehaviors[b.enemyKey]||[]).some(x=>x.action==='order_law');}
-function wait(){}
+function wait(ms){record471('wait',{ms});}
 function floatText(){}
 function randomOtherCooldown241_(id,amount,actor=null){
  const ids=actor?actor.skills:state.equippedSkills,cd=actor?actor.cooldowns:state.currentBattle?.cooldowns;
@@ -924,9 +929,9 @@ async function useBalancedArena241_(actor,target,id,sk){
  }
  arenaLog_(`${actor.name} 使用【${sk.name}】：${detail}`);await arenaVisual_(actor,target,kind==='healPercentRegen'?'heal':'buff',sk.name);render();await wait(300);return true;
 }
-function arenaFx_(){}
-function healFx(){}
-function bossElementFx55_(){}
+function arenaFx_(side,text,cls=''){record471('float',{target:side,text,kind:cls});}
+function healFx(target){record471('heal',{target});}
+function bossElementFx55_(target,theme){record471('element',{target,theme});}
 function arenaHasDead59_(b=arenaBattle_){return !!b&&(b.attacker.hp<=0||b.defender.hp<=0);}
 function equipmentNoCooldown462_(skill,actor=null){
  if(Number(skill?.cd??skill?.cooldown??0)<=0)return false;
@@ -1038,7 +1043,7 @@ function diceRoll141_(values,random=Math.random){
  const faces=[],raw=values.reduce((sum,pct)=>{const face=Math.min(6,Math.max(1,Math.floor(random()*6)+1));faces.push(face);return sum+(face>=4?1:-1)*pct;},0),wins=faces.filter(n=>n>=4).length;
  return {faces,wins,losses:faces.length-wins,raw,pct:Math.max(-100,raw)};
 }
-function queueDiceVisual141_(){}
+function queueDiceVisual141_(owner,result,actor){record471('dice',{actor:side471(actor),result:JSON.parse(JSON.stringify(result))});}
 function arenaRegen_(x){
  const turns=Number(x.regenTurns),amount=Number(x.regenRate241)>0?Math.trunc(x.maxHp*x.regenRate241):Number(x.regen);
  if(!Number.isFinite(turns)||turns<1||!Number.isFinite(amount)||amount<0||amount===0&&!(Number(x.regenRate241)>0)){x.regenTurns=0;x.regen=0;x.regenRate241=0;return;}
@@ -1279,12 +1284,12 @@ function resolveItemTemplateStats_(item){
  function snapshot(p){const eq=equipment(Object.values(p.equipment||{}).filter(Boolean));return {name:p.nickname,stats:arenaStatsFrom_(null,eq,p.skills?.passive||null),skills:p.skills?.active||[],passive:p.skills?.passive||null,equipmentList:eq,ai:(p.skills?.active||[]).map((skill,i)=>({skill,priority:i+1,condition:'ALWAYS'}))};}
  function actor(s,hp){return {name:s.name,stats:{...s.stats},baseCritDamage:s.stats.critDamage||100,hp:Math.max(0,Math.min(s.stats.hp,hp??s.stats.hp)),maxHp:s.stats.hp,skills:[...(s.skills||[])],passive:s.passive||null,equipmentList:s.equipmentList||[],equipment:{},ai:s.ai||[],status:{},buff:{},cooldowns:{},regen:0,regenTurns:0,firstDebuffDurationReduced:false};}
  function create(a,d,ahp,dhp,maxTurns=30){arenaBattle_={attacker:actor(a,ahp),defender:actor(d,dhp),turn:1,maxTurns,finished:false,log:[],attackerDamage:0,defenderDamage:0};return arenaBattle_;}
- async function act(a,t,id){arenaRefreshConditionalStats_(a);arenaRefreshConditionalStats_(t);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
+ async function act(a,t,id){record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaRefreshConditionalStats_(t);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
   if(arenaCanAct_(a)){if(id==='skip'){await fxEvent_('skip',a,t);arenaFinishArcaneRound_(a,false);arenaLog_(a.name+' 跳過回合。');}
    else if(id){if(!a.skills.includes(id)||!skillTemplates[id]||(a.cooldowns[skillTemplates[id].name]||0)>0)throw Error('MIST_SKILL_UNAVAILABLE');await arenaUse_(a,t,id);}
    else {const loss=await arenaHit_(a,t,Math.max(1,Math.trunc(a.stats.patk-t.stats.def)),'physical');arenaLog_(a.name+' 普通攻擊造成 '+loss+' 傷害。');}}
   await drain468();arenaTick_(a);await drain468();}
- async function turn(b,id,monster=null){arenaBattle_=structuredClone(b);const a=arenaBattle_.attacker,d=arenaBattle_.defender;
+ async function turn(b,id,monster=null){arenaBattle_=structuredClone(b);arenaBattle_.events471=[];const a=arenaBattle_.attacker,d=arenaBattle_.defender;
   if(monster&&arenaBattle_.turn===1&&!d.monsterOpened468){d.monsterOpened468=true;if(['opening_shield','elite_golem'].includes(monster.Ability))arenaAddShield60_(d,{id:'mist-opening',name:'開場護盾',hp:monster.Ability==='elite_golem'?monster.Value:Math.floor(d.maxHp*monster.Multiplier),turns:99});if(monster.Ability==='first_hit_guard')d.mistFirstGuard468=monster.Multiplier;}
   if(arenaBattle_.finished)throw Error('MIST_BATTLE_FINISHED');await act(a,d,id);
   if(a.hp>0&&d.hp>0){if(monster)await monsterAct468(monster,d,a,arenaBattle_.turn);else await act(d,a,arenaChooseAi_(d,a));}
@@ -1293,7 +1298,7 @@ function resolveItemTemplateStats_(item){
   arenaBattle_.log=arenaBattle_.log.slice(-120);return arenaBattle_;
  }
  async function monsterAct468(m,a,t,round){
-  arenaRefreshConditionalStats_(a);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
+  record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
   if(arenaCanAct_(a)){
    const magic=Number(m.MATK)>Number(m.PATK),kind=magic?'magic':'physical';
    const hit=async(mult,bonus=1)=>{const raw=magic?a.stats.matk:a.stats.patk;const loss=await arenaHit_(a,t,Math.max(1,Math.trunc((raw*mult-(magic?0:t.stats.def))*bonus)),kind);arenaLog_(a.name+' 攻擊造成 '+loss+(magic?' 魔法':' 物理')+'傷害。');return loss;};

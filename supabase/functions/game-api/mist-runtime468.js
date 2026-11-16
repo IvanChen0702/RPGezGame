@@ -269,6 +269,7 @@ export async function reduceMist468(
     p.hidden_until = null;
     p.protected_until = null;
     p.runtime.starter = null;
+    p.runtime.chestReveals471 = [];
     p.runtime.dead = true;
     w.flags = w.flags.filter((f) => f.owner_account !== p.account_id);
     w.cells = w.cells.filter(
@@ -577,6 +578,7 @@ export async function reduceMist468(
     action !== "battle/turn" &&
     action !== "battle/leave" &&
     action !== "reports/read" &&
+    !["chest/open", "chest/confirm"].includes(action) &&
     !seasonOpen
   )
     fail("NOT_OPEN");
@@ -696,22 +698,46 @@ export async function reduceMist468(
       p.hidden_until = iso(now + c("HideMinutes") * 60000);
     } else if (action === "chest/open") {
       const box = p.runtime.starter;
+      let items, name;
       if (box?.id === payload.chestId && !box.opened) {
-        if (
-          !adjacent(at, box.position) &&
-          !(at.x === box.position.x && at.y === box.position.y)
-        )
+        if (!adjacent(at, box.position) && !(at.x === box.position.x && at.y === box.position.y))
           fail("NOT_ADJACENT");
-        for (const slot of ["head", "armor", "weapon", "special"])
-          award(p, rollEquipment(slot, false, true));
+        items = ["head", "armor", "weapon", "special"].map(slot => rollEquipment(slot, false, true));
+        name = "出生補給";
         box.opened = true;
       } else {
-        const b = p.inventory.chests.find((x) => x.id === payload.chestId);
+        const b = [...p.inventory.chests, ...p.pending_loot.filter(x => x.kind === "chest")].find(x => x.id === payload.chestId);
         if (!b) fail("ITEM_MISSING");
-        p.inventory.chests = p.inventory.chests.filter((x) => x !== b);
-        for (const item of b.contents || [rollEquipment(null, b.legendary)])
-          award(p, item);
+        p.inventory.chests = p.inventory.chests.filter(x => x !== b);
+        p.pending_loot = p.pending_loot.filter(x => x !== b);
+        items = b.contents || [rollEquipment(null, b.legendary)];
+        name = b.name || "戰利品寶箱";
       }
+      for (const item of items) award(p, item);
+      // The receipt survives refresh/network loss; animation acknowledgement never rolls loot.
+      (p.runtime.chestReveals471 ||= []).push({id: payload.chestId, name, items: clone(items)});
+    } else if (action === "chest/confirm") {
+      const reveal = (p.runtime.chestReveals471 || []).find(x => x.id === payload.chestId);
+      if (!reveal) fail("ITEM_MISSING");
+      if (payload.choice === "equip") {
+        const used = new Set();
+        for (const reward of reveal.items) {
+          const item = [...p.inventory.equipment, ...p.pending_loot].find(x => x.id === reward.id && x.kind === "equipment");
+          if (!item) continue; // An older client may already have equipped or discarded it.
+          const slot = item.slot === "ring"
+            ? activeSlots.find(k => k.startsWith("ring") && !used.has(k) && !p.equipment[k]) || activeSlots.find(k => k.startsWith("ring") && !used.has(k))
+            : item.slot;
+          if (!activeSlots.includes(slot) || used.has(slot)) continue;
+          used.add(slot);
+          p.inventory.equipment = p.inventory.equipment.filter(x => x.id !== item.id);
+          p.pending_loot = p.pending_loot.filter(x => x.id !== item.id);
+          const prior = p.equipment[slot];
+          p.equipment[slot] = item;
+          if (prior) award(p, prior);
+        }
+        stats(p); // Keep the current HP ratio; changing equipment never heals for free.
+      }
+      p.runtime.chestReveals471 = p.runtime.chestReveals471.filter(x => x !== reveal);
     } else if (action === "loot/take" || action === "loot/discard") {
       const x = p.pending_loot.find((x) => x.id === payload.itemId);
       if (!x) fail("ITEM_MISSING");
@@ -1078,6 +1104,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
             shields: b.combat.defender.shields || [],
           },
           log: b.combat.log,
+          events471: b.combat.events471 || [],
         }
       : null;
   return {
@@ -1124,6 +1151,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
     equipment: p?.equipment || {},
     inventory: p?.inventory || {},
     pendingLoot: p?.pending_loot || [],
+    chestReveals471: p?.runtime.chestReveals471 || [],
     skills: p?.skills || {},
     ownedSkills: save?.skillsOwned || [],
     starter:

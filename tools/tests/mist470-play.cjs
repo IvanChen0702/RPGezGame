@@ -34,6 +34,7 @@ const fs = require("node:fs"),
       ["mobile", 360, 640],
       ["mobile", 844, 390],
     ]) {
+      if(process.env.WIDTH&&Number(process.env.WIDTH)!==width)continue;
       let input = {
         world: {
           revision: 0,
@@ -130,6 +131,11 @@ const fs = require("node:fs"),
       await page.getByRole("button", { name: "參加本季", exact: true }).click();
       await page.waitForFunction(() => !!mist465_.data?.self);
       await page.getByRole("tab", { name: "棋盤", exact: true }).click();
+      await page.waitForSelector('#mistChest471 .g431-skip:not([hidden])');
+      await page.locator('#mistChest471 .g431-skip').click();
+      await page.locator('#mistChest471 [data-keep471]').click();
+      await page.waitForSelector('#mistChest471',{state:'detached'});
+      assert.equal(await page.evaluate(()=>mist465_.data.inventory.equipment.length),4);
       await page.getByRole("button", { name: /^插旗/ }).click();
       await page.waitForFunction(() => mist465_.data.self.flags === 1 && !mist465_.loading);
       const home = await page.evaluate(() => ({x:mist465_.data.self.x,y:mist465_.data.self.y}));
@@ -153,20 +159,44 @@ const fs = require("node:fs"),
       assert.ok(centered,'character remains inside map viewport after flag and movement');
       await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-map469.png',fullPage:true});
       await page.getByRole("tab", { name: "行囊", exact: true }).click();
-      await page.getByRole("button", { name: /^開啟出生補給箱/ }).click();
-      await page.waitForFunction(
-        () => mist465_.data.inventory.equipment.length === 4,
-      );
+      const choose=async(last=true)=>{if(view==='mobile'){await page.locator('.quick-option-actions button')[last?'last':'first']().click();}else{await page.locator('.pick-tile401')[last?'last':'first']().click();await page.locator('.pick-card401 footer .primary').click();}};
+      await page.locator('.paperdoll-slot204').first().scrollIntoViewIfNeeded();await page.waitForTimeout(120);
       await page.locator('.paperdoll-slot204').first().click();
-      await page.locator('.pick-tile401').last().click();
-      await page.locator('.pick-card401 footer .primary').click();
+      await page.getByRole('menuitem',{name:'更換',exact:true}).click();
+      await choose();
       await page.waitForFunction(()=>Object.keys(mist465_.data.equipment).length===1);
       await page.waitForTimeout(100);
       const tabs=await page.locator('.mist-preparation470>.inventory-main-tabs button').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {x:r.x,w:r.width};}));
       assert.equal(tabs.length,4);assert.ok(tabs.every(r=>r.x>=0&&r.x+r.w<=width+1),'all preparation tabs fit');
       await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-loadout470.png',fullPage:true});
+      const centred=await page.evaluate(()=>{const board=document.querySelector('.paperdoll204').getBoundingClientRect(),canvas=document.querySelector('.paperdoll-hero204>canvas').getBoundingClientRect();return Math.abs(board.x+board.width/2-canvas.x-canvas.width/2)<2;});assert.ok(centred,'character canvas centred on equipment stage');
+      const avatar=await page.locator('.paperdoll-hero204>canvas').first().elementHandle();
+      await page.evaluate(()=>refreshMist465_());
+      assert.ok(await avatar.evaluate(e=>e.isConnected),'status refresh keeps live character animation');
+      await page.getByRole('button',{name:'女性冒險者',exact:true}).click();
+      await page.waitForFunction(()=>document.querySelector('.paperdoll-hero204>canvas').dataset.avatarSex220==='female');
+      assert.equal(await page.locator('.paperdoll-weapon250').count(),1,'sex switch retains one renderer');
+      await page.getByRole('button',{name:'男性冒險者',exact:true}).click();
+      // The same desktop hover / mobile hold gate used by normal preparation.
+      const slotTip=page.locator('.paperdoll-slot204').first();await slotTip.scrollIntoViewIfNeeded();await page.waitForTimeout(120);
+      if(view==='mobile'){
+        const r=await slotTip.boundingBox();
+        await slotTip.dispatchEvent('pointerdown',{pointerId:471,pointerType:'touch',isPrimary:true,clientX:r.x+r.width/2,clientY:r.y+r.height/2,bubbles:true});
+        await page.waitForTimeout(550);
+        assert.equal(await page.locator('#prepareHoverTip.touch-info260.show').count(),1,'native mobile hold shows equipment detail');
+        await slotTip.dispatchEvent('pointerup',{pointerId:471,pointerType:'touch',isPrimary:true,bubbles:true});
+        await slotTip.dispatchEvent('click',{bubbles:true});
+        assert.equal(await page.locator('#equipMenu206').count(),0,'release after long hold does not open manage/change');
+        await page.evaluate(()=>{equipmentClickBlock260_=null;prepareTooltipHide_();});
+      }else{
+        await page.mouse.move(0,0);await slotTip.hover();assert.equal(await page.locator('#prepareHoverTip.show').count(),1,'native desktop hover shows equipment detail');
+      }
+
+
+
+      await page.locator('.paperdoll-slot204').first().scrollIntoViewIfNeeded();await page.waitForTimeout(120);
       await page.locator('.paperdoll-slot204').first().click();
-      await page.getByRole('button',{name:'管理目前裝備',exact:true}).click();
+      await page.getByRole('menuitem',{name:'管理',exact:true}).click();
       assert.equal(await page.locator('.item-manager307').count(),1);
       await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-manager470.png',fullPage:true});
       await page.evaluate(()=>closeModal());
@@ -175,16 +205,15 @@ const fs = require("node:fs"),
       );
       assert.ok(equipmentId);
       await page.getByRole('button',{name:'技能',exact:true}).click();
-      await page.locator('.arena-change-btn').nth(1).click();
-      await page.locator('.pick-tile401').first().click();
-      await page.locator('.pick-card401 footer .primary').click();
+      await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-skills471.png',fullPage:true});
+      await page.locator('.prepare-skills-area .quick-slot').nth(1).click();
+      await choose(false);
       await page.waitForFunction(()=>!mist465_.loading);
-      await page.locator('.arena-change-btn').nth(1).click();
-      await page.locator('.pick-tile401').last().click();
-      await page.locator('.pick-card401 footer .primary').click();
+      await page.locator('.prepare-skills-area .quick-slot').nth(1).click();
+      await choose();
       await page.waitForFunction(()=>mist465_.data.skills.active[0]==='slash'&&!mist465_.loading);
       await page.getByRole('button',{name:'能力',exact:true}).click();
-      assert.equal(await page.locator('.defense-stat331').count(),6);
+      assert.equal(await page.locator('.prepare-ability-area .stat-talent-row').count(),6);
       await page.getByRole('button',{name:'背包',exact:true}).click();
       await page.waitForTimeout(250);
       await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-bag470.png',fullPage:true});
@@ -200,7 +229,6 @@ const fs = require("node:fs"),
       input.world.cells=input.world.cells.filter(c=>c===playerCell||!(c.x===forge.x&&c.y===forge.y-1));
       Object.assign(playerCell,{x:forge.x,y:forge.y-1});
       player.inventory.gems=[{id:crypto.randomUUID(),kind:'gem',template:data.Gems[0].GemID}];
-      player.inventory.chests=[{id:crypto.randomUUID(),kind:'chest',name:'裝備寶箱',legendary:false}];
       await page.evaluate(()=>refreshMist465_());
       await page.evaluate(id=>mistItem469_(id,'equipped'),equipmentId);
       const energyBeforeForge=player.energy;dropReply=true;
@@ -222,11 +250,16 @@ const fs = require("node:fs"),
       await page.getByRole('button',{name:'鑲嵌寶石',exact:true}).click();
       assert.equal(await page.getByRole('button',{name:'丟棄寶石',exact:true}).count(),1);
       await page.evaluate(()=>closeModal());
-      await page.evaluate(()=>mistBagCategory470_('chests'));
-      await page.locator('.cell402').first().click();
-      await page.locator('.trade402 button:visible').click();
-      await page.locator('#modal').getByRole('button',{name:'開啟寶箱',exact:true}).click();
+      assert.equal(await page.getByRole('button',{name:'寶箱',exact:true}).count(),0,'chest category removed');
+      input.world.players['preview-adventurer'].inventory.chests=[{id:crypto.randomUUID(),kind:'chest',name:'裝備寶箱',legendary:false}];
+      await page.evaluate(()=>refreshMist465_());
+      await page.waitForSelector('#mistChest471 .g431-skip:not([hidden])');
+      await page.locator('#mistChest471 .g431-skip').click();
+      await page.locator('#mistChest471 [data-keep471]').click();
+      await page.waitForSelector('#mistChest471',{state:'detached'});
       await page.waitForFunction(()=>!mist465_.loading&&mist465_.data.inventory.chests.length===0);
+      input.save.skillsOwned.push('magicMissileIII');
+      assert.equal((await call('mist/skills',{expectedRevision:input.world.players['preview-adventurer'].revision,active:['slash','magicMissileIII'],passive:'adventurerAptitude'})).ok,true);
       input.now = "2026-11-16T01:31:00Z";
       await call("mist/status");
       const m = input.world.cells.find((c) => c.kind === "monster");
@@ -244,6 +277,9 @@ const fs = require("node:fs"),
         .getByRole("button", { name: "挑戰 · −1 體力", exact: true })
         .click();
       await page.waitForSelector(".mist-shared470");
+      const testBattle=input.world.meta.battles[input.world.players['preview-adventurer'].battle_id];
+      testBattle.combat.defender.hp=testBattle.combat.defender.maxHp=10000;
+      await page.evaluate(()=>refreshMist465_());
       await page.waitForTimeout(500);
       assert.deepEqual(errors, [], "play errors before combat");
       if (view === "mobile")
@@ -265,17 +301,29 @@ const fs = require("node:fs"),
         "hero actually painted",
       );
       assert.equal(await page.evaluate(()=>artImage202_(enemyArtKey202_()).naturalWidth>0),true,'shared monster art loaded');
+      assert.equal(await page.locator('#enemyHpBar111 #enemyHpText').count(),1,'private enemy stats do not break shared HP positioning');
       assert.ok(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth + 2,
         ),
         "no horizontal overflow",
       );
+      await page.evaluate(()=>{window.pixelProof471={shots:[],monster:[],hero:[]};const attack=pixelAttack192_;pixelAttack192_=function(...args){const result=attack(...args);const e=skillEvent386_(pixelStage192_,pixelSide192_(args[0]),performance.now());if(e)pixelProof471.shots.push({side:e.side,visual:e.visual386,index:e.shots386.length,canvas:pixelStage192_.canvas.isConnected});return result;};const monster=pixelDrawMonster192_;pixelDrawMonster192_=function(c,a,t,action){if(action)pixelProof471.monster.push(action.type);return monster(c,a,t,action);};const hero=pixelDrawHero192_;pixelDrawHero192_=function(c,a,g,t,action,...rest){if(action)pixelProof471.hero.push({side:a.side,type:action.type});return hero(c,a,g,t,action,...rest);};window.playback471=[];const original=arenaVisual_;arenaVisual_=async(...args)=>{playback471.push({actor:arenaSide_(args[0]),target:arenaSide_(args[1]),kind:args[2],hp:arenaBattle_.defender.hp,finished:arenaBattle_.finished});return original(...args);};});
+      dropReply=true;
       await page
         .getByRole("button")
         .filter({ has: page.locator("b", { hasText: "砍擊" }) })
         .click();
-      await page.waitForFunction(() => !mist465_.loading&&!mistAnimating470_);
+      await page.waitForFunction(()=>!!mist465_.pending&&!mist465_.loading);
+      assert.equal(await page.evaluate(()=>playback471.length),0,'unconfirmed turn does not invent attacks');
+      await page.getByRole('button',{name:'重試同筆操作',exact:true}).click();
+      await page.waitForFunction(() => !mist465_.loading&&!mistAnimating470_&&!mistPresentation471_);
+      const played=await page.evaluate(()=>({events:mist465_.data.battle.events471.filter(e=>e.type==='visual').map(e=>({actor:e.actor,target:e.target,kind:e.kind})),actual:playback471,finalHP:mist465_.data.battle.defender.hp}));
+      assert.ok(played.events.length>=2,'both sides have authoritative attack events');
+      assert.deepEqual(played.actual.map(({actor,target,kind})=>({actor,target,kind})),played.events,'all real attack motions play in order');
+      assert.ok(played.actual.every(x=>!x.finished),'result is not shown before attacks finish');
+      assert.ok(played.actual[0].hp>played.finalHP,'first attack starts before HP is deducted');
+
       assert.ok(
         await page.evaluate(
           () =>
@@ -293,6 +341,18 @@ const fs = require("node:fs"),
           "-combat470.png",
         fullPage: true,
       });
+      await page.getByRole('button').filter({has:page.locator('b',{hasText:'魔法彈III'})}).click();
+      await page.waitForFunction(()=>mistAnimating470_);
+      await page.waitForTimeout(200);
+      await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-magic471.png',fullPage:true});
+      await page.waitForFunction(()=>!mist465_.loading&&!mistAnimating470_);
+      const multi=await page.evaluate(()=>({expected:mist465_.data.battle.events471.filter(e=>e.type==='visual'&&e.actor==='attacker'&&e.kind==='magic').length,actual:playback471.filter(e=>e.actor==='attacker'&&e.kind==='magic').length}));
+      assert.equal(multi.expected,4,'magic missile III has all four hits');assert.equal(multi.actual,4,'every magical hit is animated');
+      const proof=await page.evaluate(()=>pixelProof471);
+      assert.deepEqual(proof.shots.filter(x=>x.side==='player'&&x.visual==='missile').map(x=>x.index),[1,2,3,4],'four real projectiles are queued on the live shared canvas');
+      assert.ok(proof.monster.some(x=>x==='attack'||x==='magic'),'monster action really renders on animation frames');
+      assert.ok(proof.monster.includes('hit'),'monster hit reaction really renders');
+      assert.ok(proof.hero.some(x=>x.side==='player'&&x.type==='hit'),'player hit reaction really renders');
       // Same battle survives page status refresh; timeout keeps the result screen/nav rule.
       const id = await page.evaluate(() => mist465_.data.battle.id);
       await page.evaluate(() => refreshMist465_());

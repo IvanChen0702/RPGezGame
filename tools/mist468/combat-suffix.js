@@ -3,12 +3,12 @@
  function snapshot(p){const eq=equipment(Object.values(p.equipment||{}).filter(Boolean));return {name:p.nickname,stats:arenaStatsFrom_(null,eq,p.skills?.passive||null),skills:p.skills?.active||[],passive:p.skills?.passive||null,equipmentList:eq,ai:(p.skills?.active||[]).map((skill,i)=>({skill,priority:i+1,condition:'ALWAYS'}))};}
  function actor(s,hp){return {name:s.name,stats:{...s.stats},baseCritDamage:s.stats.critDamage||100,hp:Math.max(0,Math.min(s.stats.hp,hp??s.stats.hp)),maxHp:s.stats.hp,skills:[...(s.skills||[])],passive:s.passive||null,equipmentList:s.equipmentList||[],equipment:{},ai:s.ai||[],status:{},buff:{},cooldowns:{},regen:0,regenTurns:0,firstDebuffDurationReduced:false};}
  function create(a,d,ahp,dhp,maxTurns=30){arenaBattle_={attacker:actor(a,ahp),defender:actor(d,dhp),turn:1,maxTurns,finished:false,log:[],attackerDamage:0,defenderDamage:0};return arenaBattle_;}
- async function act(a,t,id){arenaRefreshConditionalStats_(a);arenaRefreshConditionalStats_(t);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
+ async function act(a,t,id){record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaRefreshConditionalStats_(t);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
   if(arenaCanAct_(a)){if(id==='skip'){await fxEvent_('skip',a,t);arenaFinishArcaneRound_(a,false);arenaLog_(a.name+' 跳過回合。');}
    else if(id){if(!a.skills.includes(id)||!skillTemplates[id]||(a.cooldowns[skillTemplates[id].name]||0)>0)throw Error('MIST_SKILL_UNAVAILABLE');await arenaUse_(a,t,id);}
    else {const loss=await arenaHit_(a,t,Math.max(1,Math.trunc(a.stats.patk-t.stats.def)),'physical');arenaLog_(a.name+' 普通攻擊造成 '+loss+' 傷害。');}}
   await drain468();arenaTick_(a);await drain468();}
- async function turn(b,id,monster=null){arenaBattle_=structuredClone(b);const a=arenaBattle_.attacker,d=arenaBattle_.defender;
+ async function turn(b,id,monster=null){arenaBattle_=structuredClone(b);arenaBattle_.events471=[];const a=arenaBattle_.attacker,d=arenaBattle_.defender;
   if(monster&&arenaBattle_.turn===1&&!d.monsterOpened468){d.monsterOpened468=true;if(['opening_shield','elite_golem'].includes(monster.Ability))arenaAddShield60_(d,{id:'mist-opening',name:'開場護盾',hp:monster.Ability==='elite_golem'?monster.Value:Math.floor(d.maxHp*monster.Multiplier),turns:99});if(monster.Ability==='first_hit_guard')d.mistFirstGuard468=monster.Multiplier;}
   if(arenaBattle_.finished)throw Error('MIST_BATTLE_FINISHED');await act(a,d,id);
   if(a.hp>0&&d.hp>0){if(monster)await monsterAct468(monster,d,a,arenaBattle_.turn);else await act(d,a,arenaChooseAi_(d,a));}
@@ -17,7 +17,7 @@
   arenaBattle_.log=arenaBattle_.log.slice(-120);return arenaBattle_;
  }
  async function monsterAct468(m,a,t,round){
-  arenaRefreshConditionalStats_(a);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
+  record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
   if(arenaCanAct_(a)){
    const magic=Number(m.MATK)>Number(m.PATK),kind=magic?'magic':'physical';
    const hit=async(mult,bonus=1)=>{const raw=magic?a.stats.matk:a.stats.patk;const loss=await arenaHit_(a,t,Math.max(1,Math.trunc((raw*mult-(magic?0:t.stats.def))*bonus)),kind);arenaLog_(a.name+' 攻擊造成 '+loss+(magic?' 魔法':' 物理')+'傷害。');return loss;};
