@@ -1,0 +1,50 @@
+{
+  "quality": 85,
+  "files": [
+    {
+      "path": "assets/images/ui/mist/equipment-chest479.webp",
+      "source": "exec-9346f156-d7ca-4799-9bd2-7faf6ffc2252.png",
+      "sha256": "a505eb33786c62fc4d676293f285d655d3f122e10dc4669923d7151983d9d615",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sourceSHA256": "c27c0464d12a0652fe98a71af5cb767cd6451c5a03626a2b7c000461770408da"
+    },
+    {
+      "path": "assets/images/ui/mist/legendary-chest479.webp",
+      "source": "exec-9346f156-d7ca-4799-9bd2-7faf6ffc2252.png",
+      "sha256": "35b0c4ecfcee3a2318741d69cf9fa7d4e76e9c951713c7d40b32c884ccaabe22",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sourceSHA256": "c27c0464d12a0652fe98a71af5cb767cd6451c5a03626a2b7c000461770408da"
+    },
+    {
+      "path": "assets/images/ui/mist/equipment-chest-open479.webp",
+      "source": "exec-5615eeca-8aad-4afd-9ba9-258c61e0d970.png",
+      "sha256": "266cbbf24ef70c73fdba0482c10dfae7359c9e19e2e8fc2557d6d604fe863c1d",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sourceSHA256": "ddbefd6f98d3b1c1a1fbe421175ab8e13f4750144fec065ddb47231428e1f6a7"
+    },
+    {
+      "path": "assets/images/ui/mist/legendary-chest-open479.webp",
+      "source": "exec-5615eeca-8aad-4afd-9ba9-258c61e0d970.png",
+      "sha256": "2e7e475258f59ed9efec0ee25cb88b815708c8577af9a7bafcf196ca0f610762",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sourceSHA256": "ddbefd6f98d3b1c1a1fbe421175ab8e13f4750144fec065ddb47231428e1f6a7"
+    },
+    {
+      "path": "assets/images/ui/mist/board-frame479.webp",
+      "source": "exec-7146b864-483f-4104-a46e-71bc4a0206a5.png",
+      "sha256": "a9ddfbfadf05c6331e3aaa6e4b3235ed7d1f82e4e14ffe10c515e960afee4ca6",
+      "width": 1536,
+      "height": 1024,
+      "alpha": true,
+      "sourceSHA256": "2fdbd5398789bc434e147af4eda2cee34ad8369164abcee94e08c661e5c4323f"
+    }
+  ]
+}
