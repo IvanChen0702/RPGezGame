@@ -199,6 +199,7 @@ assert.equal(
   (await status("a")).self.energy + (await status("b")).self.energy,
   aBefore.self.energy + bBefore.self.energy - 1,
 );
+const flagPlanted476=Date.parse(now);
 const c = await act("c", "join"),
   duplicate = {
     action: "mist/flag",
@@ -219,7 +220,11 @@ assert.equal((await act("a", "hide")).error, "MIST_NOT_OPEN");
 now = "2026-11-22T15:11:00.000Z";
 await status("a");
 let rewards = (await status("a")).rewards;
-assert.equal(rewards[0].quantity, 100);
+// Player c retained a flag all week and now outranks a through passive scoring.
+const flagTotal476=Math.floor((Date.parse('2026-11-22T15:00:00Z')-flagPlanted476)/10800000);
+assert.equal((await status('c')).self.points,flagTotal476);
+assert.equal((await status('c')).self.points,flagTotal476,'SQL cursor persists across repeated reads');
+assert.equal(rewards[0].quantity, 80);
 const season = rewards[0].seasonId;
 now = "2026-11-22T16:00:00.000Z";
 a = await status("a");
@@ -230,7 +235,7 @@ let claim = await rpc("game_mist_reward_claim468", {
   p_season: season,
   p_expected_revision: 1,
 });
-assert.equal(claim.save.consumables.luckyBox, 102);
+assert.equal(claim.save.consumables.luckyBox, 82);
 assert.equal(claim.revision, 2);
 claim = await rpc("game_mist_reward_claim468", {
   p_account: "a",
@@ -238,7 +243,7 @@ claim = await rpc("game_mist_reward_claim468", {
   p_expected_revision: 1,
 });
 assert.equal(claim.duplicate, true);
-assert.equal(claim.save.consumables.luckyBox, 102);
+assert.equal(claim.save.consumables.luckyBox, 82);
 await db.exec("reset role;set role authenticated");
 await assert.rejects(
   () => rpc("game_mist_load468", { p_account: "a" }),

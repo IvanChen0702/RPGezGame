@@ -261,6 +261,33 @@ export async function reduceMist468(
     );
     return s;
   }
+  // Cursors live in the same optimistic transaction as points and flag deletion.
+  // Include creation time so a replacement at the same coordinates starts anew.
+  const flagKey476 = (f) => [f.season_id, f.x, f.y, f.created_at].join('/');
+  const flagRule476 = (key, fallback) => {
+    const n = Number(liveCfg[key] ?? fallback);
+    if (!Number.isSafeInteger(n) || n < 1) fail("CONFIG_INVALID:" + key);
+    return n;
+  };
+  function scoreFlags476() {
+    if (!w.season || w.season.status === 'SETTLED') return;
+    const cursors = w.meta.flagScores476 ||= {};
+    const cutoff = Math.min(now, ms(w.season.closes_at));
+    const interval = flagRule476('FlagScoreMinutes', 180) * 60000;
+    for (const f of w.flags) {
+      const owner = w.players[f.owner_account];
+      if (!owner || owner.runtime.dead) continue;
+      const key = flagKey476(f);
+      const periods = Math.max(0, Math.floor((cutoff - ms(f.created_at)) / interval));
+      const delta = periods - (cursors[key] || 0);
+      if (delta > 0) {
+        const points = delta * flagRule476('FlagScorePoints', 1);
+        owner.points += points;
+        cursors[key] = periods;
+        report(owner, 'flag_score', '旗幟駐守得分', `旗幟 ${f.x + 1},${f.y + 1} 駐守累積 +${points} 分。`);
+      }
+    }
+  }
   function clearDead(p) {
     p.equipment = {};
     p.inventory = { equipment: [], gems: [], chests: [] };
@@ -488,6 +515,7 @@ export async function reduceMist468(
     const f = choose(empty(false));
     w.cells.push(freshCell(f.x, f.y, "forge", null, { name: "鐵匠鋪" }));
   }
+  scoreFlags476();
   // Finish interrupted combat before settling or entering another season.
   for (const b of Object.values(w.meta.battles))
     if (
@@ -689,6 +717,9 @@ export async function reduceMist468(
         if (!adjacent(at, f) && !(at.x === f.x && at.y === f.y))
           fail("NOT_ADJACENT");
         spend(p, c("RemoveEnemyFlagCost"));
+        const points = flagRule476('RemoveEnemyFlagPoints', 3);
+        p.points += points;
+        report(p, 'flag_capture', '拔除敵方旗幟', `拔除 ${f.x + 1},${f.y + 1} 的敵方旗幟，+${points} 分。`);
         p.hidden_until = null;
       }
       w.flags = w.flags.filter((x) => x !== f);
@@ -946,6 +977,11 @@ export async function reduceMist468(
       glow: a.glow === true,
     };
   }
+  if (w.meta.flagScores476) {
+    const alive = new Set(w.flags.map(flagKey476));
+    for (const key of Object.keys(w.meta.flagScores476))
+      if (!alive.has(key)) delete w.meta.flagScores476[key];
+  }
   // Revision only changes when the player's persisted mode record changes.
   for (const [id, x] of Object.entries(w.players)) {
     const old = before.players?.[id];
@@ -960,6 +996,12 @@ export async function reduceMist468(
     input.save,
     input.rewards || [],
   );
+  result.flagRules = {
+    minutes: flagRule476('FlagScoreMinutes', 180),
+    points: flagRule476('FlagScorePoints', 1),
+    removePoints: flagRule476('RemoveEnemyFlagPoints', 3),
+    closesAt: w.season.closes_at,
+  };
   result.stats = p ? core.snapshot(p).stats : null;
   const changed = (next, old, key) =>
     next.filter((x) => !old.some((y) => key(x) === key(y) && equal(x, y)));
@@ -1052,7 +1094,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
           };
         cells.push({
           x, y, object: o,
-          flag: f ? { own: f.owner_account === account } : null,
+          flag: f ? { own: f.owner_account === account, createdAt: f.created_at } : null,
         });
       }
   const ranked = Object.values(w.players).sort(

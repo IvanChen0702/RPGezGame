@@ -6947,10 +6947,10 @@ window.addEventListener('blur',hideItem404_);window.addEventListener('resize',hi
 function asGear402_(item,gem=false){
  return {item404:item,type404:gem?'gem':'equipment',key:String(item.id),name:gem?gemDisplayName(item):item.name,art:objectArt202_(item,gem?'gem':'equipment'),tile:gem?'':equipmentTileBody208_(item,'',true),info:pickerDetail401_(gem?'gem':'equipment',item),kind:gem?'寶石':slotName(item.slot)};
 }
-function market402_({title,rail,tabs='',filters='',rows=[],footer='',owner=false,empty='此分類目前沒有物品。',multi=false}){
+function market402_({title,rail,tabs='',filters='',rows=[],footer='',owner=false,minSlots=null,empty='此分類目前沒有物品。',multi=false}){
  marketRows402_=rows;const selected=rows.find(r=>r.key===marketKey402_)||rows[0];marketSelected402_=selected;
  const cells=rows.map((r,i)=>'<button type="button" class="cell402" data-market-index404="'+i+'" aria-pressed="'+(selected===r)+'" aria-label="'+escapeAttr(r.name)+'" onclick="marketPick402_('+i+')">'+(r.tile||'<span class="tile-art204">'+r.art+'</span><span class="tile-name204">'+escapeHtml(r.name)+'</span>')+(multi?'<i class="check402 '+(shopBulkSellSelected_.has(r.key)?'on':'')+'">'+(shopBulkSellSelected_.has(r.key)?'✓':'')+'</i>':'')+'</button>').join('');
- const blanks='<i class="empty402"></i>'.repeat(Math.max(0,(owner?20:24)-rows.length));
+ const blanks='<i class="empty402"></i>'.repeat(Math.max(0,(minSlots??(owner?20:24))-rows.length));
  const detail=selected?itemHeader404_(selected,selected.accessory404||'')+'<div class="info402">'+selected.info+'</div><div class="trade402">'+(selected.price==null?'':'<div class="gold402">'+icon402_('coin')+goldNumber331_(selected.price)+' 金幣</div>')+(selected.input?'<label>上架售價<input id="auctionAsk402" type="number" min="1" step="1" value="'+escapeAttr(auctionDraft402_.get(selected.key)||'')+'" oninput="auctionDraft402_.set(marketSelected402_.key,this.value)"></label>':'')+(selected.act?'<button class="primary" '+(selected.disabled?'disabled':'')+' onclick="marketAction402_(this)">'+escapeHtml(selected.label)+'</button>':'')+'</div>':'<div class="idle402">'+icon402_('gem')+'<span>物品資訊</span></div>';
  return '<div class="market402">'+rail+'<section class="stock402">'+tabs+'<header><h3>'+title+'</h3><small>'+rows.length+' 件</small></header><div class="filters402">'+filters+'</div><div class="tiles402">'+cells+blanks+'</div>'+(!rows?'<small>'+empty+'</small>':'')+footer+'</section><aside class="detail402">'+detail+'</aside>'+(owner?'<aside class="keeper402" data-face="'+keeperMood402_+'"><div></div><b>雜貨店闆娘</b><p>'+keeperLines402_[keeperMood402_]+'</p></aside>':'')+'</div>';
 }
@@ -6968,7 +6968,7 @@ function auction402_(){
 }
 const bagTabs402_=[['equipment','gear','裝備'],['consumable','potion','消耗品'],['gem','gem','寶石'],['pet','pet','寵物']];
 let bagList402_=localStorage.getItem('rpg_view204_inventory')==='list',bagQuery402_='';
-function changeBagLayout402_(){bagList402_=!bagList402_;localStorage.setItem('rpg_view204_inventory',bagList402_?'list':'grid');render()}
+function changeBagLayout402_(){bagList402_=!bagList402_;localStorage.setItem('rpg_view204_inventory',bagList402_?'list':'grid');if(typeof mistPrep474_!=='undefined'&&mistPrep474_){mistRefreshPrep474_();return;}render()}
 function filterBag402_(value){
  bagQuery402_=value;const host=document.querySelector('.tiles402');if(!host)return;
  const q=value.trim().toLocaleLowerCase();
@@ -28088,7 +28088,13 @@ function questLine368(){const d=questDialog368;if(!d)return;document.querySelect
 }
 function questRefuse368(){questConversation368(questDialog368.questId,'refuse');}
 async function questAccept368(){if(questBusy368)return;const d=questDialog368;if(!d)return;try{await questMutation368('quest/accept',{questId:d.questId});await questRefresh368();const q=questCache368.quests.find(x=>x.QuestID===d.questId);if(q.objectives.every(g=>g.Type==='dialogue')){await questMutation368('quest/claim',{questId:q.QuestID,selected:{},choices:{}});await questRefresh368();questBusy368=false;questClose368();questAutoNext368=0;questAuto368();}else{toast('已接受委託。');questConversation368(d.questId,'accepted');}}catch(e){questUiError368(e);}}
-function questGoalLabel368(g){if(g.Label)return String(g.Label);const id=g.TargetID,name=itemTemplates[id]?.name||gemTemplates[id]?.name||enemyTemplates[id]?.name||id;return ({dialogue:'完成對話',main_clear:`通關第${id}層`,enhance:g.Slot==='weapon'?'強化武器至少一次':'完成裝備強化',enhance_success:'成功強化裝備',socket:'寶石鑲嵌',deliver_equipment:`交付 ${name}`,deliver_gem:`交付 ${name}`,kill:`討伐 ${name}`,craft:`製作 ${name==='*'?'武器':name}`,battle:`完成 ${id} 戰鬥結算`,enhance_level:`裝備達到＋${g.MinEnhance}`})[g.Type]||g.Type;}
+function questGoalLabel368(g){
+ const id=g.TargetID,slot=({weapon:'武器',head:'頭部裝備',armor:'防具',special:'特殊裝備',ring:'戒指'})[g.Slot]||'裝備';
+ const pool=g.Type==='kill'?enemyTemplates:g.Type==='deliver_gem'?gemTemplates:itemTemplates;
+ const name=pool[id]?.name||id,level=Number(g.MinEnhance)>0?'（強化至少＋'+Number(g.MinEnhance)+'）':'';
+ if(g.Label)return String(g.Label)+(g.Type==='deliver_equipment'?level:'');
+ return ({dialogue:'完成對話',main_clear:`通關第 ${id} 層`,enhance:`嘗試強化${slot}（成功或失敗皆可）`,enhance_success:`成功強化${slot}`,socket:'完成寶石鑲嵌',deliver_equipment:`交付 ${name}${level}`,deliver_gem:`交付 ${name}`,kill:`討伐 ${name}`,craft:`製作 ${id==='*'?slot:name}`,battle:`完成 ${({arena:'競技場',main:'主線',boxing:'拳擊機'})[id]||id} 戰鬥結算`,enhance_level:`${slot}達到＋${Number(g.MinEnhance)||0}`})[g.Type]||g.Type;
+}
 function questRewardName368(r){return r.Type==='GOLD'?'金幣':r.Type==='STONE'?'強化石':r.ContentID==='lilyBlueCrystal368'?'莉莉的藍水晶':({chickEgg368:'小雞寵物蛋',spiritDeerEgg368:'靈鹿寵物蛋',ragdollEgg368:'布偶貓寵物蛋'})[r.ContentID]||skillTemplates[r.ContentID]?.name||itemTemplates[r.ContentID]?.name||gemTemplates[r.ContentID]?.name||r.ContentID;}
 function questRewardArt368(r){return r.Type==='SKILL'?skillArt198_(r.ContentID):r.Type==='GOLD'?coinArt208_():r.Type==='STONE'?objectArt202_('stonePack10','item'):objectArt202_(r.ContentID,r.Type==='EQUIPMENT'?'equipment':r.Type==='GEM'?'gem':'item');}
 function questDelivery368(){document.querySelector('.quest-window368').classList.add('is-delivery368');const d=questDialog368,q=questCache368.quests.find(x=>x.QuestID===d.questId),data=questDataUi368();const body=document.querySelector('.quest-content368');document.querySelector('#questTitle368').textContent=q.Name;
@@ -31794,7 +31800,7 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
  #page .mist465 .mist-action469 small{display:block;font-size:11px;color:#a9a28e;font-weight:400;margin-top:4px}
  #page .mist465 .mist-explore-summary469{display:flex;align-items:center;flex-wrap:wrap;gap:7px 18px;font-size:12px;color:#b5c1bd;padding:2px 4px}
  #page .mist465 .mist-explore-summary469 b{color:#91d4ba}
- #page .mist465 .mist-world465{padding:0!important;grid-template-columns:minmax(0,1fr) 280px!important;gap:14px!important}
+ #page .mist465 .mist-world465{padding:0!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important}
  #page .mist465 .mist-map-scroll465{position:relative!important;height:clamp(280px,47vh,520px)!important;max-height:none!important;overflow:auto!important;overscroll-behavior:contain;touch-action:pan-x pan-y;border:1px solid #756447!important;border-radius:5px!important;background:#080f14!important}
  #page .mist465 .mist-board465{--tile:58px!important;grid-template-columns:repeat(var(--map-size),var(--tile))!important;grid-auto-rows:var(--tile)!important;width:max-content!important;padding:10px!important;gap:2px!important}
  #page .mist465 .mist-cell465{position:relative!important;width:var(--tile)!important;min-width:0!important;height:var(--tile)!important;min-height:0!important;padding:0!important;margin:0!important;aspect-ratio:1!important;border:1px solid #536568!important;border-radius:3px!important;background:linear-gradient(#28453a55,#132a2655),url('assets/images/backgrounds/mist/board465.webp') center/180px!important;box-shadow:inset 0 0 16px #07110e88!important;overflow:hidden!important}
@@ -31836,7 +31842,7 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
  }
  /* Keep the board and encounter column level; movement remains on highlighted cells. */
  @media(min-width:901px){
-  #page .mist465 .mist-world465{grid-template-columns:minmax(0,1fr) 300px!important;align-items:stretch!important}
+  #page .mist465 .mist-world465{grid-template-columns:minmax(0,1fr)!important;align-items:stretch!important}
   #page .mist465 .mist-map-section465{display:flex;flex-direction:column;min-height:0;border-right:0}
   #page .mist465 .mist-map-scroll465{flex:1 1 0px;contain:size;height:0!important;min-height:clamp(280px,43vh,480px)!important}
   #page .mist465 .mist-side465{padding:0!important}
@@ -31895,13 +31901,46 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
  }
  @media(max-height:480px){#page .mist-preparation470{height:auto;min-height:100%}#quickPicker[data-mist470] .pick-card401 article{height:90px!important}}
 }
+
+@layer mistLayout466 {
+ #page .mist-hp474{position:relative;min-width:190px;flex:0 1 250px;height:26px;border:1px solid #596853;border-radius:5px;background:#0b1418;overflow:hidden;color:#fff}
+ #page .mist-hp474>i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#265f50,#68b98d);transition:width .2s}
+ #page .mist-hp474>span{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:700;text-shadow:0 1px 3px #000}
+ #mistPrep474{z-index:12000!important;padding:12px!important}
+ #mistPrep474>.modal-box{width:min(1180px,100%)!important;height:min(760px,calc(100dvh - 24px))!important;max-height:calc(100dvh - 24px)!important;padding:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ #mistPrep474 .mist-prep-heading474{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px;flex:none;padding:12px 16px;border-bottom:1px solid #756447;background:linear-gradient(#303238,#202226)}
+ #mistPrep474 .mist-prep-heading474 h2{font-size:20px!important;margin:0!important}
+ #mistPrep474 .mist-prep-heading474 button{min-height:40px;min-width:44px}
+ #mistPrep474 .mist-prep-body474{min-height:0;flex:1;overflow:hidden}
+ #mistPrep474 .mist-prep-error474:empty{display:none}
+ #mistPrep474 .mist-prep-error474{padding:8px 12px;color:#efbd9e;flex:none}
+ #mistPrep474 .mist-loadout474{display:grid!important;grid-template-columns:minmax(0,1fr) 280px!important;gap:12px!important;height:100%!important;min-height:430px!important;align-items:start!important}
+ #mistPrep474 .mist-loadout474>.prepare-equip-area{height:100%!important;min-height:430px!important}
+ #mistPrep474 .paperdoll204{grid-template-columns:minmax(70px,110px) minmax(0,1fr) minmax(70px,110px)!important;grid-template-rows:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+ #mistPrep474 .paperdoll-slot204{width:100%!important;height:100%!important;min-height:0!important;max-height:none!important}
+ #mistPrep474 .mist-ability469{padding:14px!important;margin:0!important}
+ #mistPrep474 .mist-ability-grid469>div{display:flex;justify-content:space-between;border-bottom:1px solid #c9b17a22;padding:8px 0;gap:10px;font-size:14px}
+ #mistPrep474 .mist-ability-grid469 b{color:#edcf91}
+ #mistPrep474 .mist-preparation470>.inventory-main-tabs button{width:auto!important;flex:1 1 auto!important}
+ #mistPrep474 .tiles402{grid-template-columns:repeat(5,minmax(0,1fr))!important;align-content:start!important}
+ @media(max-width:900px){
+  #mistPrep474{padding:6px!important}
+  #mistPrep474>.modal-box{height:calc(100dvh - 12px)!important;max-height:calc(100dvh - 12px)!important}
+  #mistPrep474 .mist-loadout474{grid-template-columns:minmax(0,1fr)!important;height:auto!important}
+  #mistPrep474 .mist-loadout474>.prepare-equip-area{height:430px!important;min-height:430px!important}
+  #mistPrep474 .paperdoll204{grid-template-columns:76px minmax(0,1fr) 76px!important}
+  #mistPrep474 .mist-ability-grid469{display:grid;grid-template-columns:1fr 1fr;column-gap:14px}
+  #mistPrep474 .mist-ability-grid469>div{font-size:12px}
+  #mistPrep474 .mist-preparation470>.inventory-main-tabs button{font-size:12px!important;padding:7px 5px!important;white-space:normal!important}
+ }
+}
 </style>
 
 <script id="mist-world465">
 /* v465: isolated mode view model. No formal save/equipment mutations. */
 PIXEL_BACKGROUNDS203_.mist465=assetSrc393_('assets/images/backgrounds/mist/entrance465.webp');
 let mist465_={tab:'entry',bag:'equipment',data:null,error:'',loading:false,pending:null,selection:null,owner:null,preview:false};
-const mistTabs465_=[['entry','戰境'],['map','棋盤'],['bag','行囊'],['ranking','排行'],['reports','戰報']];
+const mistTabs465_=[['entry','戰境'],['map','棋盤'],['ranking','排行'],['reports','戰報']];
 function mistId465_(id){return String(id||'').replace(/[^A-Za-z0-9_-]/g,'');}
 function mistAsset465_(kind,id){
  id=mistId465_(id);
@@ -31942,7 +31981,7 @@ async function refreshMist465_(){
  catch(e){if(owner===cloudMeta.accountId)mist465_.error=e.message||'連線失敗，請稍後重試。';}
  finally{if(owner===cloudMeta.accountId){mist465_.loading=false;mistDraw465_();void mistAutoChest471_();}}
 }
-function mistTab465_(tab){if(document.getElementById('modal')?.dataset.mist470)closeModal();if(document.querySelector('.mist-picker469,#quickPicker[data-mist470]'))closeQuickPicker();if(!mistTabs465_.some(x=>x[0]===tab))return;mist465_.tab=tab;mistDraw465_();if(tab==='map'){requestAnimationFrame(mistCenter465_);void mistAutoChest471_(true);}}
+function mistTab465_(tab){if(tab==='bag'){mistOpenPrep474_('bag');return;}mistClosePrep474_(false);if(document.getElementById('modal')?.dataset.mist470)closeModal();if(document.querySelector('.mist-picker469,#quickPicker[data-mist470]'))closeQuickPicker();if(!mistTabs465_.some(x=>x[0]===tab))return;mist465_.tab=tab;mistDraw465_();if(tab==='map'){requestAnimationFrame(mistCenter465_);void mistAutoChest471_(true);}}
 function mistCenter465_(){const e=document.querySelector('.mist-cell465.self'),s=document.querySelector('.mist-map-scroll465');if(e&&s){const r=e.getBoundingClientRect(),v=s.getBoundingClientRect();s.scrollLeft+=r.left-v.left-(s.clientWidth-r.width)/2;s.scrollTop+=r.top-v.top-(s.clientHeight-r.height)/2;}}
 function mistSelect465_(x,y){mist465_.selection={x,y};mistDraw465_();document.querySelector('.mist-cell465.selected')?.focus({preventScroll:true});}
 function mistMapKey465_(event,x,y){const step={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[event.key];if(!step)return;event.preventDefault();const size=Number(mist465_.data?.size)||16;mistSelect465_(Math.max(0,Math.min(size-1,x+step[0])),Math.max(0,Math.min(size-1,y+step[1])));document.querySelector('.mist-cell465.selected')?.scrollIntoView({block:'nearest',inline:'nearest'});}
@@ -31978,10 +32017,17 @@ function mistEntry465_(){
  (!d?.ready?'<div class="mist-notice465">'+escapeHtml(d?.message||'戰境準備中。開放前可先查看玩法與獎勵。')+'</div>':'<p>裝備在戰境取得，戰後 HP 保留。<br>每一步，都可能遇見新的對手。</p>')+
  '<button class="primary" '+(!mistCanAct465_()?'disabled':'')+' onclick="'+(s?"mistTab465_('map')":"mistCommand465_('join')")+'">'+(mist465_.loading?'讀取戰境…':s?'繼續探索':d?.ready?'參加本季':'戰境準備中')+'</button><small>通關主線第 1 層開放 · 台灣時間</small></aside></div></div>'+
  '<div class="mist-rules465 mist-highlights466"><section class="mist-rule465"><img src="'+mistAsset465_('object','chest')+'" alt=""><div><h3>尋寶，武裝自己</h3><p>出生補給四件裝備；擊敗菁英，取得傳說寶箱。</p></div></section><section class="mist-rule465"><img src="'+mistAsset465_('object','flag-blue')+'" alt=""><div><h3>插旗，掌握視野</h3><p>最多三把旗。體力上限 10，每小時恢復 1 點。</p></div></section><section class="mist-rule465"><img src="'+mistAsset465_('object','supply')+'" alt=""><div><h3>補給，再走一步</h3><p>戰後不會補滿 HP。尋找補給站與鐵匠鋪，延續旅程。</p></div></section></div>'+
- '<section class="mist-section465"><details><summary>完整玩法與賽季規則</summary><div class="mist-rules465"><section class="mist-rule465"><h3>探索與補給</h3><p>出生專屬箱提供頭部、防具、武器、特殊裝備各一件，不能攜出戰境。一般怪 +1 分；菁英 +2 分並保證傳說裝備箱。每把旗提供 3 × 3 視野。移動、戰鬥、插旗各花 1 體力；拔敵旗 2 點；隱身 3 點、持續一小時。補給站每日擇一：恢復 30% HP 或取得寶石；鐵匠鋪每花 1 體力強化一件裝備至 +10。</p></section><section class="mist-rule465"><h3>死亡與重生</h3><p>死亡清空身上裝備、背包與旗子。擊殺者從可掉落的出戰裝備取得 1～3 件；重生補給不會掉落。積分保留，主動挑戰失敗另扣 3 分，最低為 0。重生滿血，體力不重置。</p></section><section class="mist-rule465"><h3>每次決定都有代價</h3><p>相鄰才可發起戰鬥。最多 30 回合，平局保留最後 HP；體力不退。雙方同時死亡則回出生點、裝備全消失，不加減積分。對同一玩家的 6 小時限制期間允許一次復仇。</p></section><section class="mist-rule465"><h3>每週重新出發</h3><p>出生保護一小時，移動或主動開戰即解除。週日 23:00 停止新行動，23:10 結束未完成戰鬥，週一 00:00 重啟。排名依積分、玩家擊殺數排序，同分同擊殺數並列。</p></section></div></details></section>';
+ '<section class="mist-section465"><details><summary>完整玩法與賽季規則</summary><div class="mist-rules465"><section class="mist-rule465"><h3>探索與補給</h3><p>出生專屬箱提供頭部、防具、武器、特殊裝備各一件，不能攜出戰境。一般怪 +1 分；菁英 +2 分並保證傳說裝備箱。每把旗提供 3 × 3 視野，每存續 3 小時 +1 分；拔除敵旗 +3 分。旗幟被拔除或死亡後計時歸零。移動、戰鬥、插旗各花 1 體力；拔敵旗 2 點；隱身 3 點、持續一小時。補給站每日擇一：恢復 30% HP 或取得寶石；鐵匠鋪每花 1 體力強化一件裝備至 +10。</p></section><section class="mist-rule465"><h3>死亡與重生</h3><p>死亡清空身上裝備、背包與旗子。擊殺者從可掉落的出戰裝備取得 1～3 件；重生補給不會掉落。積分保留，主動挑戰失敗另扣 3 分，最低為 0。重生滿血，體力不重置。</p></section><section class="mist-rule465"><h3>每次決定都有代價</h3><p>相鄰才可發起戰鬥。最多 30 回合，平局保留最後 HP；體力不退。雙方同時死亡則回出生點、裝備全消失，不加減積分。對同一玩家的 6 小時限制期間允許一次復仇。</p></section><section class="mist-rule465"><h3>每週重新出發</h3><p>出生保護一小時，移動或主動開戰即解除。週日 23:00 停止新行動，23:10 結束未完成戰鬥，週一 00:00 重啟。排名依積分、玩家擊殺數排序，同分同擊殺數並列。</p></section></div></details></section>';
 }
 
 
+function mistFlagTime476_(createdAt){
+ const rules=mist465_.data?.flagRules||{},interval=(Number(rules.minutes)||180)*60;
+ const end=Math.min(Date.now(),Date.parse(rules.closesAt)||Infinity),elapsed=Math.max(0,Math.floor((end-Date.parse(createdAt))/1000)||0);
+ const duration=n=>Math.floor(n/3600)+'時 '+Math.floor(n%3600/60)+'分 '+n%60+'秒';
+ return '存續 '+duration(elapsed)+' · '+(end<Date.now()-1000?'本季計分已結束':'下次 +'+(Number(rules.points)||1)+' 分：'+duration(interval-elapsed%interval));
+}
+setInterval(()=>{if(document.hidden)return;document.querySelectorAll('[data-flag-time476]').forEach(n=>n.textContent=mistFlagTime476_(n.dataset.flagTime476));},1000);
 function mistTarget465_(cell,selected,adj){
  const s=mist465_.data?.self,o=cell?.object,can=mistCanAct465_(),coord=selected?(selected.x+1)+','+(selected.y+1):'選取一格';
  let name='探索未知',desc='點選附近的格子，查看遭遇、設施或移動方向。',action='',art='';
@@ -31992,14 +32038,16 @@ function mistTarget465_(cell,selected,adj){
   art=mistCellArt465_(o);desc=o.description||'';
   if(o.kind==='player'){desc=(o.busy?'交戰中 · ':'')+'積分 '+Number(o.points||0)+' · 剩餘 HP '+Number(o.hp||0)+(o.protected?' · 出生保護中':'');action='<button '+(!can||!adj||o.protected||o.busy||s.energy<1?'disabled':'')+' onclick="mistCommand465_(\'battle/start\',{targetId:\''+mistId465_(o.id)+'\'})">發起挑戰 · −1 體力</button>';}
   else if(o.kind==='monster'){if(o.countdown)name='召喚中的魔法陣';desc=(o.elite?'擊敗 +2 分 · 保證傳說寶箱':'擊敗 +1 分 · 裝備寶箱')+(o.countdown?' · '+o.countdown+' 後出現':'');action='<button '+(!can||!adj||s.energy<1||o.countdown||o.busy?'disabled':'')+' onclick="mistCommand465_(\'battle/start\',{targetId:\''+mistId465_(o.id)+'\'})">挑戰 · −1 體力</button>';}
-  else if(o.kind==='flag'){desc=o.own?'提供周圍 3 × 3 視野，撤回不消耗體力。':'可在相鄰格拔除此旗，消耗 2 體力。';action='<button '+(!can||(!adj&&!(s.x===cell.x&&s.y===cell.y))||(!o.own&&s.energy<2)?'disabled':'')+' onclick="mistCommand465_(\'unflag\',{x:'+cell.x+',y:'+cell.y+'})">'+(o.own?'撤回旗幟':'拔旗 · −2 體力')+'</button>';}
+  else if(o.kind==='flag'){desc=o.own?'提供周圍 3 × 3 視野，撤回不消耗體力。':'可在相鄰格拔除此旗，消耗 2 體力並獲得 3 積分。';action='<button '+(!can||(!adj&&!(s.x===cell.x&&s.y===cell.y))||(!o.own&&s.energy<2)?'disabled':'')+' onclick="mistCommand465_(\'unflag\',{x:'+cell.x+',y:'+cell.y+'})">'+(o.own?'撤回旗幟':'拔旗 · −2 體力')+'</button>';}
   else if(o.kind==='supply'){const nearby=Math.abs(s.x-cell.x)<=1&&Math.abs(s.y-cell.y)<=1,disabled=!can||!nearby||s.suppliedToday;desc='每日 00:00 移位並重置使用次數。今天只能選擇一種補給。';action='<button '+(disabled?'disabled':'')+' onclick="mistCommand465_(\'supply\',{choice:\'heal\'})">恢復 30% HP</button><button '+(disabled?'disabled':'')+' onclick="mistCommand465_(\'supply\',{choice:\'gem\'})">取得隨機寶石</button>';}
   else if(o.kind==='forge'){desc='到相鄰格後，每花 1 體力可選一件裝備直接強化到 +10。';action='<button '+(!adj?'disabled':'')+' onclick="closeModal();mistPane470_(\'equip\')">選擇強化裝備</button>';}
   else if(o.kind==='chest'){desc='只有你能看見。重生補給不可成為玩家擊殺掉落。';action='<button '+(!can||!adj?'disabled':'')+' onclick="mistCommand465_(\'chest/open\',{chestId:\''+mistId465_(o.id)+'\'})">開啟補給箱</button>';}
  }
  if(selected&&selected.x===s.x&&selected.y===s.y){name='你的位置';desc='點擊青綠亮框可移動；插旗不會限制移動。';if(o?.kind!=='flag')action='';}
+ if(cell?.flag?.createdAt)desc+=' · 每 '+(mist465_.data?.flagRules?.minutes||180)+' 分鐘 +'+(mist465_.data?.flagRules?.points||1)+' 分';
+ if((o?.kind==='flag'||cell?.flag)&&selected&&!mistMoveReason469_(selected.x,selected.y))action+='<button onclick="mistCommand465_(\'move\',{x:'+selected.x+',y:'+selected.y+'})">移動至此 · −1 體力</button>';
  if(cell?.flag&&o?.kind!=='flag')action+='<button '+(!can||(!adj&&!(s.x===cell.x&&s.y===cell.y))||(!cell.flag.own&&s.energy<2)?'disabled':'')+' onclick="mistCommand465_(\'unflag\',{x:'+cell.x+',y:'+cell.y+'})">'+(cell.flag.own?'撤回旗幟':'拔旗 · −2 體力')+'</button>';
- return '<section class="mist-target465"><div class="mist-target-art465">'+art+'</div><div class="mist-target-copy465"><small>'+escapeHtml(coord)+'</small><h3>'+escapeHtml(name)+'</h3><p>'+escapeHtml(desc)+'</p>'+action+'</div></section>';
+ return '<section class="mist-target465"><div class="mist-target-art465">'+art+'</div><div class="mist-target-copy465"><small>'+escapeHtml(coord)+'</small><h3>'+escapeHtml(name)+'</h3><p>'+escapeHtml(desc)+'</p>'+(cell?.flag?.createdAt?'<p data-flag-time476="'+escapeAttr(cell.flag.createdAt)+'">'+escapeHtml(mistFlagTime476_(cell.flag.createdAt))+'</p>':'')+action+'</div></section>';
 }
 function mistBagView465_(){return mistInventory468_();}
 function mistRanking465_(){
@@ -32032,7 +32080,7 @@ async function mistDiscard468_(action,id,kind){if(await gameConfirm_('確定丟�
 
 function mistRewardsClaim468_(){return (mist465_.data?.rewards||[]).map(r=>'<div class="mist-notice465">'+escapeHtml(r.seasonId)+' · 第 '+r.rank+' 名 · '+rankRewardLootHtml_('consumable',r.id,r.quantity)+'<button onclick="mistClaim468_(\''+mistId465_(r.seasonId)+'\')">領取獎勵</button></div>').join('');}
 async function mistClaim468_(seasonId){if(!beginServerMutation_('戰境領獎'))return;try{const pre=await ensureTransactionCloudMatch_('戰境領獎'),before=clone(state),context=characterCloudReadContext_();let d;try{d=await apiPostRevisionMutation_('mist/reward/claim',{seasonId,expectedSaveRevision:pre.revision},{maxRetry:0});}catch(e){d=await apiPost('save/get',{}, {silentLoading:true,maxRetry:0});if(!d.save?.serverReceipts?.mist?.includes(seasonId))throw e;}if(!d.save?.serverReceipts?.mist?.includes(seasonId))throw Error('獎勵入帳尚未確認');applyVerifiedTransactionSave_({...d,_readContext:context,_minimumRevision:pre.revision},before,'mist');toast('迷霧戰境獎勵已入帳。');await refreshMist465_();}catch(e){toast(transactionErrorText_(e,'戰境領獎'));}finally{endServerMutation_();}}
-setInterval(()=>{if((state.page==='mist'||mistSharedBattle470_())&&!document.hidden&&!mist465_.preview&&!mist465_.loading&&!mist465_.pending&&!mistAnimating470_&&!document.querySelector('#equipMenu206,#quickPicker[data-mist470],#modal[data-mist470].open,#mistChest471'))refreshMist465_();},20000);
+setInterval(()=>{if((state.page==='mist'||mistSharedBattle470_())&&!document.hidden&&!mist465_.preview&&!mist465_.loading&&!mist465_.pending&&!mistAnimating470_&&!document.querySelector('#equipMenu206,#quickPicker[data-mist470],#modal[data-mist470].open,#mistPrep474,#mistChest471'))refreshMist465_();},20000);
 
 const mistSlots469_=[['head','頭部'],['armor','防具'],['weapon','武器'],['special','特殊'],['ring1','戒指 1'],['ring2','戒指 2'],['ring3','戒指 3'],['ring4','戒指 4']];
 const mistOutfitBase469_=heroOutfit445_;
@@ -32043,14 +32091,23 @@ async function mistPaintCanvas469_(canvas,g){if(!canvas||canvas.dataset.painting
 function mistPaint469_(){if(state.page!=='mist')return;const d=mist465_.data;for(const canvas of document.querySelectorAll('[data-mist-hero469]')){const key=canvas.dataset.mistHero469;const o=d?.cells?.find(c=>c.object?.id===key)?.object;const g=key==='self'?pixelGear192_('player',{equipment:Object.values(d?.equipment||{}).filter(Boolean),sex:avatarSex220_()}):mistGear469_(o?.appearance);void mistPaintCanvas469_(canvas,g);}const board=document.querySelector('.mist-paperdoll469');if(board&&!board.dataset.background262)decoratePrepareBackground262_(board);}
 function mistCellArt465_(o){if(!o)return '';if(o.countdown)return '<span class="mist-summon469" aria-hidden="true"></span><span class="mist-cell-mark465">'+escapeHtml(o.countdown)+'</span>';if(o.kind==='self'||o.kind==='player')return '<canvas width="160" height="160" data-mist-hero469="'+(o.kind==='self'?'self':mistId465_(o.id))+'" aria-label="'+escapeAttr(o.kind==='self'?'你的角色形象':o.name+'的角色形象')+'"></canvas><span class="mist-cell-mark465">'+(o.kind==='self'?'你':'玩家')+'</span>';const image=o.kind==='monster'?mistAsset465_('enemy',o.art):mistAsset465_('object',o.kind==='flag'?(o.own?'flag-blue':'flag-red'):o.kind);return '<img src="'+escapeAttr(image)+'" alt="" draggable="false">'+(o.elite?'<span class="mist-cell-mark465">菁英</span>':o.countdown?'<span class="mist-cell-mark465">'+escapeHtml(o.countdown)+'</span>':'');}
 function mistMoveReason469_(x,y){const d=mist465_.data,s=d?.self,c=d?.cells?.find(c=>c.x===x&&c.y===y);if(!s||s.dead)return '請先參加或重生';if(!d.ready)return '目前未開放新行動';if(s.battleId)return '交戰中';if(mist465_.pending||mist465_.loading)return '資料同步中';if(x<0||y<0||x>=d.size||y>=d.size)return '已到達地圖邊界';if(Math.abs(s.x-x)+Math.abs(s.y-y)!==1)return x===s.x&&y===s.y?'你目前的位置':'只能上下左右移動一格';if(!c)return '此格仍在迷霧中';if(c.object&&c.object.kind!=='flag')return '此格已被占用';if(d.pendingLoot?.length)return '請先處理戰利品';if(s.energy<1)return '體力不足';return '';}
-function mistCellClick469_(x,y){if(mistChestNeeded471_()){void mistAutoChest471_(true);return;}const reason=mistMoveReason469_(x,y);mist465_.selection={x,y};if(!reason){void mistCommand465_('move',{x,y});return;}mistSelect465_(x,y);const o=mist465_.data?.cells?.find(c=>c.x===x&&c.y===y)?.object;if(o||x===mist465_.data.self.x&&y===mist465_.data.self.y){if(matchMedia('(max-width:900px)').matches){const c=mist465_.data.cells.find(c=>c.x===x&&c.y===y),s=mist465_.data.self;mistModal469_('此處情報',mistTarget465_(c,{x,y},Math.abs(s.x-x)+Math.abs(s.y-y)===1));queueMicrotask(mistPaint469_);}}else toast(reason);}
+function mistCellClick469_(x,y){
+ if(mistChestNeeded471_()){void mistAutoChest471_(true);return;}
+ const d=mist465_.data,s=d?.self;if(!s)return;
+ if(x===s.x&&y===s.y){mistOpenPrep474_('equip');return;}
+ const c=d.cells?.find(c=>c.x===x&&c.y===y),o=c?.object,reason=mistMoveReason469_(x,y);mist465_.selection={x,y};
+ if(o||c?.flag){mistSelect465_(x,y);mistModal469_('此處情報',mistTarget465_(c,{x,y},Math.abs(s.x-x)+Math.abs(s.y-y)===1));queueMicrotask(mistPaint469_);return;}
+ if(!reason){void mistCommand465_('move',{x,y});return;}
+ mistSelect465_(x,y);toast(reason);
+}
+
 function mistJump469_(selector){const p=document.getElementById('mistPanel465'),e=p?.querySelector(selector);if(p&&e)p.scrollTop+=e.getBoundingClientRect().top-p.getBoundingClientRect().top-48;}
 function mistStats469_(){const d=mist465_.data,s=d?.self,t=d?.stats;if(!s)return '';return '<section class="panel mist-ability469"><div class="section-title"><h3>玩家能力</h3><span class="badge">戰境出裝</span></div><div class="mist-ability-grid469">'+[['hp','♡','HP'],['def','♧','防禦'],['patk','⚔','物攻'],['matk','♙','魔攻'],['crit','✧','爆擊'],['critDamage','ϟ','爆擊傷害']].map(([k,icon,l])=>'<div><span>'+battleIcon199_(k)+' '+l+'</span><b>'+ (k==='hp'?Math.ceil(s.hp)+' / '+s.maxHp:t?Math.round(Number(t[k])||0)+(k==='crit'||k==='critDamage'?'%':''):'讀取中')+'</b></div>').join('')+'</div><small>僅計入戰境裝備、寶石與出戰技能。</small></section>';}
-function mistActions469_(){const d=mist465_.data,s=d.self,can=mistCanAct465_(),busy=s.battleId?'交戰中':mist465_.loading||mist465_.pending?'同步中':!d.ready?'未開放':'',here=d.cells?.find(c=>c.x===s.x&&c.y===s.y),hasFlag=!!here?.flag||here?.object?.kind==='flag',hidden=Date.parse(s.hiddenUntil||'')>Date.now();const button=(title,icon,action,args,cost,reason='')=>'<button class="mist-action469" '+(!can||reason||s.energy<cost?'disabled':'')+' onclick="mistCommand465_(\''+action+'\','+escapeAttr(JSON.stringify(args))+')">'+icon+'<span>'+title+'<small>'+(busy||reason||(s.energy<cost?'體力不足':cost?'體力 −'+cost+(action==='flag'?' · '+s.flags+'/3':''):'不消耗體力'))+'</small></span></button>';return '<section class="mist-actions469" aria-label="戰境行動">'+button('插旗',flatIcon313_('flag'),'flag',{},1,hasFlag?'此格已有旗幟':s.flags>=3?'已達三面旗上限':'')+button(hidden?'隱身中':'隱身',skillArt198_('shadowThrust'),'hide',{},3,hidden?'效果中，可移動':'')+(d.starter?button('開啟補給箱','<img src="'+mistAsset465_('object','chest')+'" alt="">','chest/open',{chestId:d.starter.id},0,Math.abs(s.x-d.starter.position.x)+Math.abs(s.y-d.starter.position.y)>1?'請先靠近出生補給':''):'')+'<button class="mist-action469" onclick="mistTab465_(\'bag\')">'+flatIcon313_('bag')+'<span>裝備與技能<small>裝備・能力・技能</small></span></button></section>';}
+function mistActions469_(){const d=mist465_.data,s=d.self,can=mistCanAct465_(),busy=s.battleId?'交戰中':mist465_.loading||mist465_.pending?'同步中':!d.ready?'未開放':'',here=d.cells?.find(c=>c.x===s.x&&c.y===s.y),hasFlag=!!here?.flag||here?.object?.kind==='flag',hidden=Date.parse(s.hiddenUntil||'')>Date.now();const button=(title,icon,action,args,cost,reason='')=>'<button class="mist-action469" '+(!can||reason||s.energy<cost?'disabled':'')+' onclick="mistCommand465_(\''+action+'\','+escapeAttr(JSON.stringify(args))+')">'+icon+'<span>'+title+'<small>'+(busy||reason||(s.energy<cost?'體力不足':cost?'體力 −'+cost+(action==='flag'?' · '+s.flags+'/3':''):'不消耗體力'))+'</small></span></button>';return '<section class="mist-actions469" aria-label="戰境行動">'+button('插旗',flatIcon313_('flag'),'flag',{},1,hasFlag?'此格已有旗幟':s.flags>=3?'已達三面旗上限':'')+button(hidden?'隱身中':'隱身',skillArt198_('shadowThrust'),'hide',{},3,hidden?'效果中，可移動':'')+(d.starter?button('開啟補給箱','<img src="'+mistAsset465_('object','chest')+'" alt="">','chest/open',{chestId:d.starter.id},0,Math.abs(s.x-d.starter.position.x)+Math.abs(s.y-d.starter.position.y)>1?'請先靠近出生補給':''):'')+'<button class="mist-action469" onclick="mistOpenPrep474_(\'equip\')">'+flatIcon313_('shield')+'<span>整備<small>背包・技能・裝備</small></span></button></section>';}
 function mistMap465_(){const d=mist465_.data,s=d?.self;if(s?.dead)return mistRespawn468_();if(!s)return mistStatus465_('參加賽季後，這裡會顯示你的探索範圍與旗幟視野。');const size=Math.max(16,Math.min(256,Math.trunc(Number(d.size)||16))),cells=new Map((d.cells||[]).map(c=>[c.x+','+c.y,c])),selected=mist465_.selection;let html='';for(let y=0;y<size;y++)for(let x=0;x<size;x++){const c=cells.get(x+','+y),self=s.x===x&&s.y===y,visible=!!c||self,o=self?{kind:'self'}:c?.object,reachable=!mistMoveReason469_(x,y);html+='<button type="button" class="mist-cell465 '+(!visible?'fog ':'')+(self?'self ':'')+(reachable?'reachable469 ':'')+(selected?.x===x&&selected?.y===y?'selected':'')+'" data-x="'+x+'" data-y="'+y+'" aria-label="'+(x+1)+','+(y+1)+' '+escapeAttr(self?'你的位置':!visible?'迷霧':o?.name||'空地')+(reachable?'，可移動':'')+'" aria-pressed="'+(selected?.x===x&&selected?.y===y)+'" tabindex="'+((selected?selected.x===x&&selected.y===y:self)?0:-1)+'" onkeydown="mistMapKey465_(event,'+x+','+y+')" onclick="mistCellClick469_('+x+','+y+')">'+(visible?mistCellArt465_(o):'')+(reachable?'<span class="mist-step469" aria-hidden="true">'+(x>s.x?'›':x<s.x?'‹':y>s.y?'⌄':'⌃')+'</span>':'')+'</button>';}
  const c=selected?cells.get(selected.x+','+selected.y):null,adj=selected&&Math.abs(s.x-selected.x)+Math.abs(s.y-selected.y)===1;
  queueMicrotask(mistPaint469_);
- return '<div class="mist-explore469">'+mistActions469_()+(d.pendingLoot?.length?'<button onclick="mistTab465_(\'bag\')">待處理戰利品 '+d.pendingLoot.length+' 件 · 點此收納後繼續移動</button>':'')+'<div class="mist-explore-summary469"><b>HP '+Math.ceil(s.hp)+' / '+s.maxHp+'</b><span>體力 '+s.energy+' / 10</span><span>'+s.points+' 積分</span>'+(s.protectedUntil&&Date.parse(s.protectedUntil)>Date.now()?'<span>出生保護中 · 移動即解除</span>':'')+'</div><div class="mist-world465"><section class="mist-map-section465"><div class="mist-map-toolbar465"><span>位置 '+(s.x+1)+','+(s.y+1)+' · 點擊亮框移動</span><button onclick="mistCenter465_()">回到我的位置</button></div><div class="mist-selection469" role="status" aria-live="polite">'+(selected?'已選 '+(selected.x+1)+','+(selected.y+1)+' · '+escapeHtml(c?.object?.name||mistMoveReason469_(selected.x,selected.y)||'點擊此格移動，消耗 1 體力'):'亮框為可移動格；點擊敵人或設施可查看操作。')+'</div><div class="mist-map-scroll465" tabindex="0" aria-label="探索地圖，可向四方捲動"><div class="mist-board465" style="--map-size:'+size+'">'+html+'</div></div><div class="mist-map-legend465"><span>青綠亮框：可移動</span><span>金框：目前選取</span><span>深色：迷霧</span></div></section><aside class="mist-side465">'+mistTarget465_(c,selected,adj)+mistStats469_()+(d.pendingLoot?.length?'<div class="mist-notice465">待處理戰利品 '+d.pendingLoot.length+' 件，處理後才能移動。<button onclick="mistTab465_(\'bag\')">處理戰利品</button></div>':'')+'</aside></div></div>';}
+ return '<div class="mist-explore469">'+mistActions469_()+(d.pendingLoot?.length?'<button onclick="mistTab465_(\'bag\')">待處理戰利品 '+d.pendingLoot.length+' 件 · 點此收納後繼續移動</button>':'')+'<div class="mist-explore-summary469">'+mistHp474_(s)+'<span>體力 '+s.energy+' / 10</span><span>'+s.points+' 積分</span>'+(s.protectedUntil&&Date.parse(s.protectedUntil)>Date.now()?'<span>出生保護中 · 移動即解除</span>':'')+'</div><div class="mist-world465"><section class="mist-map-section465"><div class="mist-map-toolbar465"><span>位置 '+(s.x+1)+','+(s.y+1)+' · 點擊亮框移動</span><button onclick="mistCenter465_()">回到我的位置</button></div><div class="mist-selection469" role="status" aria-live="polite">'+(selected?'已選 '+(selected.x+1)+','+(selected.y+1)+' · '+escapeHtml(c?.object?.name||mistMoveReason469_(selected.x,selected.y)||'點擊此格移動，消耗 1 體力'):'亮框為可移動格；點擊敵人或設施可查看操作。')+'</div><div class="mist-map-scroll465" tabindex="0" aria-label="探索地圖，可向四方捲動"><div class="mist-board465" style="--map-size:'+size+'">'+html+'</div></div><div class="mist-map-legend465"><span>青綠亮框：可移動</span><span>金框：目前選取</span><span>深色：迷霧</span></div></section></div></div>';}
 
 
 
@@ -32171,28 +32228,64 @@ function bindPrepareSource471_(overlay,values,source){
 }
 function mistEquipmentSource470_(){const d=mist465_.data;return {items:Object.values(d.equipment||{}).filter(Boolean),id:(slot,i)=>d.equipment?.[slot==='ring'?'ring'+(i+1):slot]?.id,manage:id=>mistItem469_(id,'equipped'),change:(slot,i)=>mistEquipPicker469_(slot==='ring'?'ring'+(i+1):slot),snapshot:{equipment:Object.values(d.equipment||{}).filter(Boolean),sex:avatarSex220_()}};}
 
+// Reuse normal preparation/bag components in a separate dialog above the board.
+let mistPrep474_=null;
+function mistHp474_(s){const hp=Math.max(0,Math.ceil(Number(s.hp)||0)),max=Math.max(1,Number(s.maxHp)||1),pct=Math.min(100,hp/max*100);return '<div class="mist-hp474" role="progressbar" aria-label="目前 HP" aria-valuemin="0" aria-valuemax="'+max+'" aria-valuenow="'+hp+'"><i style="width:'+pct+'%"></i><span>HP '+hp+' / '+max+'</span></div>';}
+function mistOpenPrep474_(pane='equip'){
+ if(state.page!=='mist'||!mist465_.data?.self||mist465_.data.self.dead||mist465_.data.self.battleId)return;
+ const next=['bag','skills','equip'].includes(pane)?pane:'equip';
+ if(!mistPrep474_){const map=document.querySelector('.mist-map-scroll465');mistPrep474_={owner:cloudMeta.accountId,focus:document.activeElement,map:map?{x:map.scrollLeft,y:map.scrollTop}:null};}
+ if(mistUi470_.pane!==next)document.querySelector('#mistPrep474 .preparation-panels')?.scrollTo(0,0);
+ mistUi470_.pane=next;mistRefreshPrep474_();
+}
+function mistClosePrep474_(restore=true){
+ if(!mistPrep474_&&!document.getElementById('mistPrep474'))return;
+ const old=mistPrep474_;mistPrep474_=null;prepareTooltipHide_();hideItem404_();closeEquipMenu206_();
+ document.getElementById('mistPrep474')?.remove();document.querySelector('.mist465')?.removeAttribute('inert');
+ if(restore){(old?.focus?.isConnected?old.focus:document.querySelector('.mist-actions469 button:last-child'))?.focus({preventScroll:true});void mistAutoChest471_();}
+}
+function mistRefreshPrep474_(){
+ if(!mistPrep474_)return;
+ const d=mist465_.data;
+ if(state.page!=='mist'||mistPrep474_.owner!==cloudMeta.accountId||!d?.self||d.self.dead||d.self.battleId){mistClosePrep474_(false);return;}
+ let host=document.getElementById('mistPrep474'),created=!host;
+ if(!host){host=document.createElement('div');host.id='mistPrep474';host.className='ui-confirm-overlay';host.innerHTML='<section class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mistPrepTitle474"><header class="mist-prep-heading474"><h2 id="mistPrepTitle474">戰境整備</h2><button aria-label="關閉整備" onclick="mistClosePrep474_()">✕</button></header><div class="mist-prep-body474"></div><div class="mist-prep-error474" role="alert"></div></section>';document.getElementById('page').append(host);questTrap369(host,mistClosePrep474_);host.addEventListener('click',e=>{if(e.target===host)mistClosePrep474_();});}
+ document.querySelector('.mist465')?.setAttribute('inert','');
+ const map=document.querySelector('.mist-map-scroll465');if(map&&mistPrep474_.map){map.scrollLeft=mistPrep474_.map.x;map.scrollTop=mistPrep474_.map.y;}
+ const signature=JSON.stringify([mistUi470_,d.equipment,d.inventory,d.pendingLoot,d.skills,d.ownedSkills,d.stats,d.self.hp,d.self.maxHp,mist465_.error,!!mist465_.loading,!!mist465_.pending,bagList402_]);
+ if(host.dataset.signature===signature)return;
+ const scrolls=[...host.querySelectorAll('.preparation-panels,.tiles402')].map(n=>[n.classList.contains('tiles402')?'.tiles402':'.preparation-panels',n.scrollTop]);
+ const key=JSON.stringify(d.equipment||{}),board=host.querySelector('.paperdoll204'),keep=host.dataset.equipment===key&&mistUi470_.pane==='equip'?board:null;
+ host.querySelector('.mist-prep-body474').innerHTML=mistInventory468_();
+ if(keep){const area=host.querySelector('.prepare-equip-area');if(area){area.querySelectorAll('.quick-slot-row').forEach(n=>n.remove());area.querySelector('.panel').append(keep);}}
+ host.dataset.signature=signature;host.dataset.equipment=key;
+ host.querySelector('.mist-prep-error474').innerHTML=escapeHtml(mist465_.error||'')+(mist465_.pending?'<button onclick="mistRetry465_()">重試本次操作</button>':'');
+ decorateEquipViews205_(host);finishUi206_();decorateItemBorders_(host);
+ queueMicrotask(()=>{mistPaint469_();for(const [selector,top]of scrolls){const node=host.querySelector(selector);if(node)node.scrollTop=top;}if(created)host.querySelector('[aria-label="關閉整備"]').focus({preventScroll:true});});
+}
+
 function mistInventory468_(){
  const d=mist465_.data;if(!d?.self)return mistStatus465_('參加賽季後可管理戰境行囊。');if(d.self.dead)return mistRespawn468_();
- const pane=mistUi470_.pane,tabs=inventoryCategoryTabs397_([['equip','裝備'],['ability','能力'],['skills','技能'],['bag','背包']],pane,'mistPane470_','戰境整備',false);
+ const pane=mistUi470_.pane,tabs=inventoryCategoryTabs397_([['bag','背包'],['skills','技能'],['equip','目前裝備＋能力值']],pane,'mistPane470_','戰境整備',false);
  let body='';
  if(pane==='bag')body=mistBag470_();
- else if(pane==='ability')body='<section class="prepare-ability-area"><div class="panel"><div class="section-title"><h3>戰境能力</h3><span class="badge">HP '+Math.ceil(d.self.hp)+' / '+d.self.maxHp+'</span></div>'+[['hp','HP'],['def','防禦'],['patk','物攻'],['matk','魔攻'],['crit','爆擊'],['critDamage','爆擊傷害']].map(([key,label])=>prepareTalentRow(key,label,d.stats[key]+(key.startsWith('crit')?'%':''),'戰境裝備與技能',true)).join('')+'</div></section>';
  else if(pane==='skills')body='<section class="prepare-skills-area shared-arena-skills328"><div class="panel"><div class="section-title"><h3>目前技能</h3><span class="badge">點擊欄位調整</span></div>'+prepareSkillSlotButton('passive',0,'被動技',d.skills)+[0,1,2].map(i=>prepareSkillSlotButton('active',i,'主動技 '+(i+1),d.skills)).join('')+'<p class="small">使用已解鎖技能；戰境內可切換，禁止消耗品。</p></div></section>';
  else body='<section class="prepare-equip-area" data-equipment-source="mist"><div class="panel"><div class="section-title"><h3>戰境裝備配置</h3><button onclick="mistPane470_(\'bag\')">'+backpackIcon293_()+' 背包</button></div><div class="loadout-row"><span class="small">主動開戰時更新防守配置</span></div>'+mistSlots469_.map(([key,label])=>'<div class="quick-slot quick-slot-row"><span class="quick-slot-label">'+label+'</span></div>').join('')+'</div></section>';
+ if(pane==='equip')body='<div class="mist-loadout474">'+body+mistStats469_()+'</div>';
  return '<section class="preparation-screen mist-preparation470">'+tabs+(d.pendingLoot?.length?'<button class="primary" onclick="mistUi470_.bag=\'pending\';mistPane470_(\'bag\')">待收戰利品 '+d.pendingLoot.length+' 件</button>':'')+'<div class="preparation-panels">'+body+'</div></section>';
 }
-function mistPane470_(pane){if(mistUi470_.pane!==pane){const scroller=document.querySelector('.mist-preparation470 .preparation-panels');if(scroller)scroller.scrollTop=0;}mistUi470_.pane=pane;mist465_.tab='bag';mistDraw465_();}
-function mistBagCategory470_(tab){mistUi470_.bag=tab;marketKey402_=null;mistDraw465_();}
-function mistBagFilter470_(slot){mistUi470_.slot=slot;mistDraw465_();}
+function mistPane470_(pane){mistOpenPrep474_(pane==='ability'?'equip':pane);}
+function mistBagCategory470_(tab){mistUi470_.bag=tab;marketKey402_=null;bagQuery402_='';mistRefreshPrep474_();}
+function mistBagFilter470_(slot){mistUi470_.slot=slot;mistRefreshPrep474_();}
 function mistBag470_(){
  const d=mist465_.data,tab=['equipment','gems','pending'].includes(mistUi470_.bag)?mistUi470_.bag:'equipment',pending=tab==='pending',gem=tab==='gems';
  const entries=[['equipment','gear','裝備'],['gems','gem','寶石'],...(d.pendingLoot?.length?[['pending','wallet','戰利品']]:[])];
  const rail=marketRail402_(entries,tab,'mistBagCategory470_');
  const items=(pending?d.pendingLoot:d.inventory?.[tab]||[]).filter(x=>tab!=='equipment'||mistUi470_.slot==='all'||x.slot===mistUi470_.slot);
  const rows=items.map(x=>({...x.kind==='chest'?{key:x.id,name:x.name,art:'<img src="'+mistAsset465_('object','chest')+'" alt="">',kind:'戰境寶箱',info:'<p>開啟後取得戰境專用裝備，不能攜出。</p>'}:asGear402_(x,x.kind==='gem'),label:pending?'收取／丟棄':x.kind==='chest'?'開啟寶箱':x.kind==='gem'?'鑲嵌寶石':'管理裝備',act:()=>mistItem469_(x.id,pending?'pending':'bag')}));
- return bag402_({title:'戰境行囊 · '+(pending?items.length+' 件待收取':(d.inventory?.[tab]?.length||0)+' / 10 格'),rail,rows,filters:(tab==='equipment'?filter402_(mistUi470_.slot,marketCats402_.slice(0,-1),'mistBagFilter470_'):'')+'<input class="find402" type="search" aria-label="搜尋背包物品" placeholder="搜尋名稱、能力或效果" oninput="filterBag402_(this.value)"><button onclick="changeBagLayout402_()">'+(bagList402_?'棋盤':'條列')+'</button>',empty:'尚未取得這類戰境物品。'});
+ return bag402_({minSlots:15,title:'戰境行囊 · '+(pending?items.length+' 件待收取':(d.inventory?.[tab]?.length||0)+' / 10 格'),rail,rows,filters:(tab==='equipment'?filter402_(mistUi470_.slot,marketCats402_.slice(0,-1),'mistBagFilter470_'):'')+'<input class="find402" type="search" aria-label="搜尋背包物品" placeholder="搜尋名稱、能力或效果" oninput="filterBag402_(this.value)"><button onclick="changeBagLayout402_()">'+(bagList402_?'棋盤':'條列')+'</button>',empty:'尚未取得這類戰境物品。'});
 }
-function mistDecorate470_(){if(state.page!=='mist')return;const page=document.getElementById('page');decorateEquipViews205_(page);finishUi206_();finishUi210_();mistPaint469_();}
+function mistDecorate470_(){if(state.page!=='mist'){mistClosePrep474_(false);return;}mistRefreshPrep474_();const page=document.getElementById('page');decorateEquipViews205_(page);finishUi206_();finishUi210_();mistPaint469_();}
 function mistEquipPicker469_(slot){
  const d=mist465_.data,key=slot.startsWith('ring')?'ring':slot,current=d.equipment[slot],items=d.inventory.equipment.filter(x=>x.slot===key);
  openPrepareEquipPicker(key,slot.startsWith('ring')?Number(slot.slice(4))-1:null,{type:'equipment',title:'替換'+mistSlots469_.find(x=>x[0]===slot)[1],values:[null,...(current?[current]:[]),...items],current:current?.id,favorites:false,unavailable:x=>!mistCanAct465_()||(x?x.id===current?.id:!current||d.inventory.equipment.length>=10),apply:async x=>{await mistDo469_(x?'equip':'unequip',x?{itemId:x.id,slot}:{slot});mistPickerError470_();}});document.getElementById('quickPicker').dataset.mist470='true';
@@ -32225,7 +32318,7 @@ arenaOpenSkillPicker_=function(mode,kind,index=0){return mode==='mist'?mistSkill
 let mistChestBusy471_=false;
 function mistChestNeeded471_(){const d=mist465_.data;return !!(d?.starter&&d?.self&&Math.abs(d.self.x-d.starter.position.x)+Math.abs(d.self.y-d.starter.position.y)<=1||d?.chestReveals471?.length||d?.inventory?.chests?.length||d?.pendingLoot?.some(x=>x.kind==='chest'));}
 async function mistAutoChest471_(includeStarter=false){
- if(mistChestBusy471_||mistAnimating470_||mistPresentation471_||mist465_.loading||mist465_.pending||mist465_.error||mist465_.preview||document.querySelector('#mistChest471,#quickPicker,.modal.open,.gift-overlay101'))return;
+ if(mistChestBusy471_||mistAnimating470_||mistPresentation471_||mist465_.loading||mist465_.pending||mist465_.error||mist465_.preview||document.querySelector('#mistChest471,#mistPrep474,#quickPicker,.modal.open,.gift-overlay101'))return;
  if(state.page!=='mist'&&!mistSharedBattle470_())return;
  const d=mist465_.data;if(!d?.self||d.self.dead||d.self.battleId)return;
  const receipt=d.chestReveals471?.[0],chest=d.inventory?.chests?.[0]||d.pendingLoot?.find(x=>x.kind==='chest');

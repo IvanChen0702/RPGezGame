@@ -1,0 +1,13 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync('index.html','utf8');
+const start=html.indexOf('function questGoalLabel368('),end=html.indexOf('\nfunction questRewardName368',start);
+const c={itemTemplates:{book:{name:'秘典'}},gemTemplates:{},enemyTemplates:{boss:{name:'海皇'}}};vm.createContext(c);vm.runInContext(html.slice(start,end),c);
+const label=c.questGoalLabel368;
+assert.equal(label({Type:'enhance_success',Slot:'weapon'}),'成功強化武器');
+assert.equal(label({Type:'enhance',Slot:'weapon'}),'嘗試強化武器（成功或失敗皆可）');
+assert.equal(label({Type:'enhance',Slot:'*'}),'嘗試強化裝備（成功或失敗皆可）');
+assert.equal(label({Type:'kill',TargetID:'boss'}),'討伐 海皇');
+assert.equal(label({Type:'battle',TargetID:'arena',Label:'完成競技場對戰結算'}),'完成競技場對戰結算');
+assert.equal(label({Type:'deliver_equipment',TargetID:'book',MinEnhance:3}),'交付 秘典（強化至少＋3）');
+assert.equal(label({Type:'deliver_equipment',Label:'秘典',MinEnhance:3}),'秘典（強化至少＋3）');
+console.log('Quest goal labels: enhancement attempts/success/weapon restrictions, labels and minimum level passed');
