@@ -31661,8 +31661,6 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
 .mist-target-art465 img{height:115px;max-width:85%;object-fit:contain;filter:drop-shadow(0 5px 4px #0008)}
 .mist-target-copy465{padding:14px}.mist-target-copy465 h3{margin-bottom:7px!important}.mist-target-copy465 p{font-size:12px;line-height:1.8;color:#c0c5c8}
 .mist-target-copy465 button{width:100%;margin-top:12px}
-.mist-direction465{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mist-direction465 button:first-child{grid-column:2}.mist-direction465 button:nth-child(2){grid-column:1}
-.mist-directions-label465{font-size:12px;color:#b6b4ac;text-align:center}
 .mist-action-row465{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mist-section465{padding:20px}.mist-section465>h3{margin-bottom:16px!important}
 .mist-empty465{padding:45px 20px;text-align:center;color:#b8b6ae;line-height:1.9}
@@ -31833,6 +31831,22 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
   #page .mist465 .mist-explore-summary469{font-size:11px;gap:4px 10px}
   #page .mist465 .mist-ability-grid469{grid-template-columns:1fr 1fr;column-gap:16px}
   #page .mist465 .mist-ability-grid469>div{font-size:12px;padding:6px 0}
+ }
+ /* Keep the board and encounter column level; movement remains on highlighted cells. */
+ @media(min-width:901px){
+  #page .mist465 .mist-world465{grid-template-columns:minmax(0,1fr) 300px!important;align-items:stretch!important}
+  #page .mist465 .mist-map-section465{display:flex;flex-direction:column;min-height:0;border-right:0}
+  #page .mist465 .mist-map-scroll465{flex:1 1 0px;contain:size;height:0!important;min-height:clamp(280px,43vh,480px)!important}
+  #page .mist465 .mist-side465{padding:0!important}
+  #page .mist465 .mist-target-art465{height:128px!important}
+  #page .mist465 .mist-target-copy465{padding:10px 6px 4px!important}
+  #page .mist465 .mist-target-copy465 p{margin:4px 0}
+  #page .mist465 .mist-target-copy465 button{margin-top:8px!important}
+  #page .mist465 .mist-ability469{margin:0!important;padding:12px!important}
+  #page .mist465 .mist-ability469 .section-title{margin-bottom:6px}
+  #page .mist465 .mist-ability-grid469{grid-template-columns:1fr 1fr;column-gap:14px}
+  #page .mist465 .mist-ability-grid469>div{font-size:12px;padding:6px 0}
+  #page .mist465 .mist-ability469>small{display:block;margin-top:8px;font-size:11px}
  }
  @media(prefers-reduced-motion:no-preference){.mist-summon469{animation:mistSummon469 2s ease-in-out infinite alternate}@keyframes mistSummon469{to{filter:brightness(1.35);box-shadow:0 0 14px #beb4ff,inset 0 0 14px #a99df5}}}
 }
@@ -32034,7 +32048,7 @@ function mistActions469_(){const d=mist465_.data,s=d.self,can=mistCanAct465_(),b
 function mistMap465_(){const d=mist465_.data,s=d?.self;if(s?.dead)return mistRespawn468_();if(!s)return mistStatus465_('參加賽季後，這裡會顯示你的探索範圍與旗幟視野。');const size=Math.max(16,Math.min(256,Math.trunc(Number(d.size)||16))),cells=new Map((d.cells||[]).map(c=>[c.x+','+c.y,c])),selected=mist465_.selection;let html='';for(let y=0;y<size;y++)for(let x=0;x<size;x++){const c=cells.get(x+','+y),self=s.x===x&&s.y===y,visible=!!c||self,o=self?{kind:'self'}:c?.object,reachable=!mistMoveReason469_(x,y);html+='<button type="button" class="mist-cell465 '+(!visible?'fog ':'')+(self?'self ':'')+(reachable?'reachable469 ':'')+(selected?.x===x&&selected?.y===y?'selected':'')+'" data-x="'+x+'" data-y="'+y+'" aria-label="'+(x+1)+','+(y+1)+' '+escapeAttr(self?'你的位置':!visible?'迷霧':o?.name||'空地')+(reachable?'，可移動':'')+'" aria-pressed="'+(selected?.x===x&&selected?.y===y)+'" tabindex="'+((selected?selected.x===x&&selected.y===y:self)?0:-1)+'" onkeydown="mistMapKey465_(event,'+x+','+y+')" onclick="mistCellClick469_('+x+','+y+')">'+(visible?mistCellArt465_(o):'')+(reachable?'<span class="mist-step469" aria-hidden="true">'+(x>s.x?'›':x<s.x?'‹':y>s.y?'⌄':'⌃')+'</span>':'')+'</button>';}
  const c=selected?cells.get(selected.x+','+selected.y):null,adj=selected&&Math.abs(s.x-selected.x)+Math.abs(s.y-selected.y)===1;
  queueMicrotask(mistPaint469_);
- return '<div class="mist-explore469">'+mistActions469_()+(d.pendingLoot?.length?'<button onclick="mistTab465_(\'bag\')">待處理戰利品 '+d.pendingLoot.length+' 件 · 點此收納後繼續移動</button>':'')+'<div class="mist-explore-summary469"><b>HP '+Math.ceil(s.hp)+' / '+s.maxHp+'</b><span>體力 '+s.energy+' / 10</span><span>'+s.points+' 積分</span>'+(s.protectedUntil&&Date.parse(s.protectedUntil)>Date.now()?'<span>出生保護中 · 移動即解除</span>':'')+'</div><div class="mist-world465"><section class="mist-map-section465"><div class="mist-map-toolbar465"><span>位置 '+(s.x+1)+','+(s.y+1)+' · 點擊亮框移動</span><button onclick="mistCenter465_()">回到我的位置</button></div><div class="mist-selection469" role="status" aria-live="polite">'+(selected?'已選 '+(selected.x+1)+','+(selected.y+1)+' · '+escapeHtml(c?.object?.name||mistMoveReason469_(selected.x,selected.y)||'點擊此格移動，消耗 1 體力'):'亮框為可移動格；點擊敵人或設施可查看操作。')+'</div><div class="mist-map-scroll465" tabindex="0" aria-label="探索地圖，可向四方捲動"><div class="mist-board465" style="--map-size:'+size+'">'+html+'</div></div><div class="mist-map-legend465"><span>青綠亮框：可移動</span><span>金框：目前選取</span><span>深色：迷霧</span></div></section><aside class="mist-side465">'+mistTarget465_(c,selected,adj)+'<div class="mist-direction465">'+[[0,-1,'上'],[-1,0,'左'],[0,1,'下'],[1,0,'右']].map(([dx,dy,label])=>'<button '+(mistMoveReason469_(s.x+dx,s.y+dy)?'disabled':'')+' aria-label="向'+label+'移動一格" onclick="mistMove465_('+dx+','+dy+')">'+({'上':'↑','左':'←','下':'↓','右':'→'}[label])+'</button>').join('')+'</div>'+mistStats469_()+(d.pendingLoot?.length?'<div class="mist-notice465">待處理戰利品 '+d.pendingLoot.length+' 件，處理後才能移動。<button onclick="mistTab465_(\'bag\')">處理戰利品</button></div>':'')+'</aside></div></div>';}
+ return '<div class="mist-explore469">'+mistActions469_()+(d.pendingLoot?.length?'<button onclick="mistTab465_(\'bag\')">待處理戰利品 '+d.pendingLoot.length+' 件 · 點此收納後繼續移動</button>':'')+'<div class="mist-explore-summary469"><b>HP '+Math.ceil(s.hp)+' / '+s.maxHp+'</b><span>體力 '+s.energy+' / 10</span><span>'+s.points+' 積分</span>'+(s.protectedUntil&&Date.parse(s.protectedUntil)>Date.now()?'<span>出生保護中 · 移動即解除</span>':'')+'</div><div class="mist-world465"><section class="mist-map-section465"><div class="mist-map-toolbar465"><span>位置 '+(s.x+1)+','+(s.y+1)+' · 點擊亮框移動</span><button onclick="mistCenter465_()">回到我的位置</button></div><div class="mist-selection469" role="status" aria-live="polite">'+(selected?'已選 '+(selected.x+1)+','+(selected.y+1)+' · '+escapeHtml(c?.object?.name||mistMoveReason469_(selected.x,selected.y)||'點擊此格移動，消耗 1 體力'):'亮框為可移動格；點擊敵人或設施可查看操作。')+'</div><div class="mist-map-scroll465" tabindex="0" aria-label="探索地圖，可向四方捲動"><div class="mist-board465" style="--map-size:'+size+'">'+html+'</div></div><div class="mist-map-legend465"><span>青綠亮框：可移動</span><span>金框：目前選取</span><span>深色：迷霧</span></div></section><aside class="mist-side465">'+mistTarget465_(c,selected,adj)+mistStats469_()+(d.pendingLoot?.length?'<div class="mist-notice465">待處理戰利品 '+d.pendingLoot.length+' 件，處理後才能移動。<button onclick="mistTab465_(\'bag\')">處理戰利品</button></div>':'')+'</aside></div></div>';}
 
 
 
