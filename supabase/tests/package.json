@@ -7,7 +7,7 @@
     "test:lease": "node --test lease446.mjs",
     "test:worldboss": "node worldboss448.mjs",
     "test:competition": "node mist465.mjs && node retirement465.mjs",
-    "test:mist": "node mist-runtime468.mjs && node mist-scenarios468.mjs && node mist-combat468.mjs && node mist-playback471.mjs && node mist-chests471.mjs && node mist-flags476.mjs"
+    "test:mist": "node mist-runtime468.mjs && node mist-scenarios468.mjs && node mist-combat468.mjs && node mist-playback471.mjs && node mist-chests471.mjs && node mist-flags476.mjs && node mist-energy478.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.16",

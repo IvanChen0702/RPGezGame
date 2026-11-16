@@ -16,15 +16,15 @@ const MIST_PLANNING465={
     },
     {
       "Key": "EnergyInitial",
-      "Value": 10
+      "Value": 20
     },
     {
       "Key": "EnergyCap",
-      "Value": 10
+      "Value": 20
     },
     {
       "Key": "EnergyRecoveryMinutes",
-      "Value": 60
+      "Value": 30
     },
     {
       "Key": "MoveCost",

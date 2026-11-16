@@ -996,6 +996,7 @@ export async function reduceMist468(
     input.save,
     input.rewards || [],
   );
+  result.energyRules = { initial:c('EnergyInitial'), cap:c('EnergyCap'), recoveryMinutes:c('EnergyRecoveryMinutes') };
   result.flagRules = {
     minutes: flagRule476('FlagScoreMinutes', 180),
     points: flagRule476('FlagScorePoints', 1),

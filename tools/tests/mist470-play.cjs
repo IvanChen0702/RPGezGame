@@ -19,6 +19,8 @@ const fs = require("node:fs"),
     ),
   );
   data.MistConfig.find((r) => r.Key === "Enabled").Value = true;
+  const initialEnergy478 = process.env.ENERGY20 ? 20 : 10;
+  if(process.env.ENERGY20)for(const r of data.MistConfig)if(['EnergyInitial','EnergyCap','EnergyRecoveryMinutes'].includes(r.Key))r.Value=r.Key==='EnergyRecoveryMinutes'?30:20;
   const engine = process.env.BROWSER === "webkit" ? "webkit" : "chromium";
   const browser = await (engine === "webkit"
     ? webkit.launch({ headless: true })
@@ -146,7 +148,7 @@ const fs = require("node:fs"),
       assert.equal(await tile.evaluate(e=>getComputedStyle(e).borderTopColor),'rgb(139, 227, 189)');
       await tile.click();
       await page.waitForFunction(({x,y})=>mist465_.data.self.x===x&&mist465_.data.self.y===y&&!mist465_.loading,step);
-      assert.equal(await page.evaluate(()=>mist465_.data.self.energy),8,'flag plus move costs two AP');
+      assert.equal(await page.evaluate(()=>mist465_.data.self.energy),initialEnergy478-2,'flag plus move costs two AP');
       await page.locator('.mist-cell465[data-x="'+home.x+'"][data-y="'+home.y+'"]').click();
       assert.match(await page.locator('#modal [data-flag-time476]').innerText(),/存續.*下次/);
       await page.locator('#modal').getByRole('button',{name:'移動至此 · −1 體力',exact:true}).click();
@@ -154,12 +156,13 @@ const fs = require("node:fs"),
       assert.equal(await page.evaluate(()=>mist465_.data.self.flags),1,'moving onto own flag retains it');
       await page.getByRole("button", {name:/^隱身/}).click();
       await page.waitForFunction(()=>!!mist465_.data.self.hiddenUntil&&!mist465_.loading);
-      assert.equal(await page.evaluate(()=>mist465_.data.self.energy),4);
+      assert.equal(await page.evaluate(()=>mist465_.data.self.energy),initialEnergy478-6);
       await page.waitForFunction(()=>document.querySelector('[data-mist-hero469="self"]')?.dataset.painted==='true');
       await page.evaluate(()=>mistCenter465_());
       const centered=await page.locator('.mist-cell465.self').evaluate(e=>{const r=e.getBoundingClientRect(),s=document.querySelector('.mist-map-scroll465').getBoundingClientRect();return r.top>=s.top&&r.bottom<=s.bottom&&r.left>=s.left&&r.right<=s.right;});
       assert.ok(centered,'character remains inside map viewport after flag and movement');
       await page.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-map469.png',fullPage:true});
+      assert.match(await page.locator('.mist-explore-summary469').innerText(),new RegExp('體力 '+(initialEnergy478-6)+' / '+initialEnergy478));
       assert.equal(await page.getByRole('tab',{name:'行囊',exact:true}).count(),0);
       assert.equal(await page.locator('.mist-world465 .mist-side465').count(),0);
       await page.locator('.mist-cell465.self').click();
