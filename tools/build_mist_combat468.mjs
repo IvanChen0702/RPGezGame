@@ -62,7 +62,22 @@ const noops = [
 ];
 const overrides = new Map(noops.map((n) => [n, `function ${n}(){}`]));
 for (const [n, src] of Object.entries({
-  arenaLog_: "function arenaLog_(s){arenaBattle_.log.push(String(s));}",
+  arenaLog_: "function arenaLog_(s){arenaBattle_.log.push(String(s));record471('log',{text:String(s)});}",
+  arenaVisual_: "function arenaVisual_(actor,target,kind,text='',impactDelay=320){record471('visual',{actor:side471(actor),target:side471(target),kind,text,impactDelay,skillId:actor.fxActiveSkillId||null});}",
+  pixelCast192_: "function pixelCast192_(side,sk){record471('cast',{actor:side==='player'?'attacker':'defender',skillId:sk.id||Object.keys(skillTemplates).find(id=>skillTemplates[id]===sk),name:sk.name});}",
+  arenaEffectText_: "function arenaEffectText_(x,text,type='buff'){record471('float',{target:side471(x),text,kind:type});}",
+  arenaFx_: "function arenaFx_(side,text,cls=''){record471('float',{target:side,text,kind:cls});}",
+  arenaCombatantEl_: "function arenaCombatantEl_(x){return side471(x);}",
+  arenaFxEl_: "function arenaFxEl_(x){return side471(x);}",
+  healFx: "function healFx(target){record471('heal',{target});}",
+  hitFx: "function hitFx(target){record471('hit',{target});}",
+  battleAuraFx_: "function battleAuraFx_(target,kind){record471('aura',{target,kind});}",
+  bossElementFx55_: "function bossElementFx55_(target,theme){record471('element',{target,theme});}",
+  queueDiceVisual141_: "function queueDiceVisual141_(owner,result,actor){record471('dice',{actor:side471(actor),result:JSON.parse(JSON.stringify(result))});}",
+  reflectAttackFx56_: "function reflectAttackFx56_(actor,target){record471('reflect',{actor,target});}",
+  render: "function render(){record471('state');}",
+  wait: "function wait(ms){record471('wait',{ms});}",
+  playSfx: "function playSfx(name){record471('sound',{name});}",
   arenaBaseStats_: "function arenaBaseStats_(){return {...base};}",
   defaultState: "function defaultState(){return {base:{...base}};}",
   planningRowsWithFallback_:
@@ -133,6 +148,8 @@ const globals = new Set([
   "random",
   "encodeURIComponent",
   "decodeURIComponent",
+  "record471",
+  "side471",
 ]);
 const roots = [
   "arenaStatsFrom_",
