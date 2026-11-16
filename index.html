@@ -25495,7 +25495,7 @@ function openGameHelp_(){
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal(){delete document.getElementById('modal').dataset.mistEncounter479;delete document.getElementById('modal').dataset.mist470;infoSide398_=null;modalObserver398_?.disconnect();gemPicker317_=null;gemLayoutObserver310_?.disconnect();cancelAnimationFrame(gemLayoutRaf310_);enhanceRushStop_=true;document.getElementById('modal').classList.remove('open')}
+function closeModal(){if(typeof mistSupplySeen481_==='function')mistSupplySeen481_();delete document.getElementById('modal').dataset.mistEncounter479;delete document.getElementById('modal').dataset.mist470;infoSide398_=null;modalObserver398_?.disconnect();gemPicker317_=null;gemLayoutObserver310_?.disconnect();cancelAnimationFrame(gemLayoutRaf310_);enhanceRushStop_=true;document.getElementById('modal').classList.remove('open');queueMicrotask(()=>{if(typeof mistAutoChest471_==='function')mistAutoChest471_()})}
 
 function ensureEnhanceOverlay(){
   let el=document.getElementById('enhanceOverlay');
@@ -32252,7 +32252,7 @@ renderArenaBattle_=function(){
  if(!b.finished){const controls=root.querySelector('.mobile-turn-controls34');controls.classList.remove('arena-turn-controls148');controls.style.cssText='display:flex;gap:8px;margin-top:8px';controls.querySelector('.skip-turn-btn').style.cssText='flex:1;margin-top:0';controls.insertAdjacentHTML('beforeend','<button class="danger" style="flex:1" disabled title="戰境交戰中無法撤退">撤退</button>');}
  root.querySelector('.battle-actions-title span')?.replaceChildren(document.createTextNode('戰境技能 · 禁止消耗品'));
  const info=root.querySelector('.battle-side-info>.panel:last-child');if(info)info.innerHTML='<h3>戰境規則</h3><p class="small">最多 30 回合 · 戰後保留剩餘 HP<br>異常、增益與技能冷卻每場重置。</p>';
- if(b.finished){const r=root.querySelector('.arena-result');r.innerHTML='<h2>'+({win:'戰鬥勝利',loss:'戰鬥失敗',draw:'平局',mutual:'雙方同時倒下'})[b.mistResult]+'</h2><div>目前積分 '+Number(mist465_.data.self.points)+' · 剩餘 HP '+Math.ceil(mist465_.data.self.hp)+'</div><button class="primary" onclick="mistCommand465_(\'battle/leave\',{battleId:\''+mistId465_(b.id)+'\'})">返回棋盤</button>';}
+ if(b.finished){const r=root.querySelector('.arena-result');r.innerHTML='<h2>'+({win:'戰鬥勝利',loss:'戰鬥失敗',draw:'平局',mutual:'雙方同時倒下'})[b.mistResult]+'</h2>'+mistBattleLoot481_(b)+'<div>目前積分 '+Number(mist465_.data.self.points)+' · 剩餘 HP '+Math.ceil(mist465_.data.self.hp)+'</div><button class="primary" onclick="mistCommand465_(\'battle/leave\',{battleId:\''+mistId465_(b.id)+'\'})">返回棋盤</button>';}
  const err=mist465_.error;
  if(err){const e=document.createElement('div');e.className='notice';e.setAttribute('role','alert');e.innerHTML=escapeHtml(err)+(mist465_.pending?'<button onclick="mistRetry465_()">重試同筆操作</button>':'<button onclick="refreshMist465_()">更新戰況</button>');root.querySelector('.battle-actions-v2').prepend(e);}
  return t.innerHTML;
@@ -32421,6 +32421,19 @@ function mistManager470_(body,x,source){
 function mistRing470_(id){mistModal469_('選擇戒指欄位','<div class="manager-buttons307">'+[1,2,3,4].map(i=>mistButton469_('戒指 '+i,'equip',{itemId:id,slot:'ring'+i})).join('')+'</div>');}
 const mistArenaSkillPicker470_=arenaOpenSkillPicker_;
 arenaOpenSkillPicker_=function(mode,kind,index=0){return mode==='mist'?mistSkillPicker469_(kind,index):mistArenaSkillPicker470_(mode,kind,index);};
+// v481: explain a legitimate empty PvP drop and show the exact supply reward.
+function mistBattleLoot481_(b){return b.mistResult==='win'&&b.loot481?.reason==='no_droppable_equipment'?'<p class="mist-loot-note481" role="status">對手沒有可掉落裝備，本次未獲得寶箱。重生補給裝備不會掉落。</p>':'';}
+const mistSupplySeenIds481_=new Set();
+function mistSupplyReceiptKey481_(){return 'mist_supply_seen481:'+cloudMeta.accountId;}
+function mistSupplySeen481_(){const modal=document.getElementById('modal'),id=modal?.dataset.mistSupply481;if(!id)return;const key=modal.dataset.mistSupplyOwner481;mistSupplySeenIds481_.add(key+':'+id);try{localStorage.setItem(key,id)}catch(_){}delete modal.dataset.mistSupply481;delete modal.dataset.mistSupplyOwner481;}
+function mistSupplyNotice481_(){
+ const d=mist465_.data,r=d?.supplyReceipt481;if(!r?.id||!r.item||!d.self||d.self.dead)return;
+ const key=mistSupplyReceiptKey481_();if(mistSupplySeenIds481_.has(key+':'+r.id))return;try{if(localStorage.getItem(key)===r.id)return;}catch(_){}
+ const pending=d.pendingLoot?.some(x=>x.id===r.item.id),owned=d.inventory?.gems?.some(x=>x.id===r.item.id),item=r.item;
+ mistModal469_('補給站 · 取得寶石','<div class="mist-supply-result481">'+gearTip404_(item,true)+'<p role="status">'+(pending?'寶石背包已滿，已放入待收戰利品。請整理行囊後收取。':owned?'已加入戰境寶石背包。':'這是先前取得的寶石，目前已不在背包中。')+'</p><button class="primary" onclick="closeModal()">確認</button><button onclick="closeModal();mistOpenPrep474_(\'bag\')">查看行囊</button></div>');
+ const modal=document.getElementById('modal');modal.dataset.mistSupply481=r.id;modal.dataset.mistSupplyOwner481=key;
+ modal.querySelector('.mist-supply-result481 .primary')?.focus({preventScroll:true});
+}
 // Mode-owned rewards use the existing shop chest ceremony, item cards and touch gestures.
 let mistChestBusy471_=false;
 function mistChestNeeded471_(){const d=mist465_.data;return !!(d?.starter&&d?.self&&Math.abs(d.self.x-d.starter.position.x)+Math.abs(d.self.y-d.starter.position.y)<=1||d?.chestReveals471?.length||d?.inventory?.chests?.length||d?.pendingLoot?.some(x=>x.kind==='chest'));}
@@ -32430,7 +32443,7 @@ async function mistAutoChest471_(includeStarter=false){
  const d=mist465_.data;if(!d?.self||d.self.dead||d.self.battleId)return;
  const receipt=d.chestReveals471?.[0],chest=d.inventory?.chests?.[0]||d.pendingLoot?.find(x=>x.kind==='chest');
  const starter=includeStarter&&d.starter&&Math.abs(d.self.x-d.starter.position.x)+Math.abs(d.self.y-d.starter.position.y)<=1?d.starter:null;
- if(!receipt&&!chest&&!starter)return;
+ if(!receipt&&!chest&&!starter){mistSupplyNotice481_();return;}
  mistChestBusy471_=true;const owner=cloudMeta.accountId;
  try{
   if(!receipt)await mistCommand465_('chest/open',{chestId:(chest||starter).id});

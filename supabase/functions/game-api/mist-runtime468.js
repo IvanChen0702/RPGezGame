@@ -327,6 +327,7 @@ export async function reduceMist468(
         name: loser.nickname + "的戰利品",
         contents: items,
       });
+    return { count: items.length, reason: items.length ? null : "no_droppable_equipment" };
   }
   function finishBattle(b, forced = false) {
     // Capture encounter position before death/respawn removes the target cell.
@@ -363,7 +364,7 @@ export async function reduceMist468(
           : c("NormalWinPoints");
       if (d) {
         a.kills++;
-        transferDrops(d, a);
+        b.loot481 = transferDrops(d, a);
         clearDead(d);
       } else {
         w.cells = w.cells.filter((x) => x.id !== b.target);
@@ -875,7 +876,10 @@ export async function reduceMist468(
         );
       else if (payload.choice === "gem") {
         const g = choose(data.Gems.filter(enabled));
-        award(p, { id: uuid(), kind: "gem", template: g.GemID, name: g.Name });
+        const item = { id: uuid(), kind: "gem", template: g.GemID, name: g.Name };
+        award(p, item);
+        // Persist the exact reward for reconnects; viewing this receipt never grants again.
+        p.runtime.supplyReceipt481 = { id: item.id, item: clone(item), createdAt: iso(now) };
       } else fail("INVALID_REQUEST");
       p.supplied_on = day(now);
     } else if (action === "reports/read") {
@@ -1129,6 +1133,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
           id: b.id,
           finished: b.finished,
           result: b.result,
+          loot481: b.finished && b.result === "win" ? b.loot481 || null : null,
           deadline: b.deadline,
           turn: b.combat.turn,
           maxTurns: b.combat.maxTurns,
@@ -1205,6 +1210,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
     inventory: p?.inventory || {},
     pendingLoot: p?.pending_loot || [],
     chestReveals471: p?.runtime.chestReveals471 || [],
+    supplyReceipt481: p?.runtime.supplyReceipt481 || null,
     skills: p?.skills || {},
     ownedSkills: save?.skillsOwned || [],
     starter:
