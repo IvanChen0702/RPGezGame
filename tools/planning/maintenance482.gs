@@ -4717,6 +4717,7 @@ function applyEquipmentLevels464Unlocked_(){
 /** Approved competition planning. No publish, player writes, or triggers. */
 const MIST_PLANNING465={
   "MistConfig": [
+{"Key": "RoadChestCap", "Value": 5},{"Key": "RoadChestRespawnMinutes", "Value": 30},{"Key": "RoadChestLegendaryPercent", "Value": 30},{"Key": "RoadChestRandomPercent", "Value": 40},{"Key": "RoadChestTrapPercent", "Value": 30},{"Key": "RoadChestTrapHpPercent", "Value": 80},
 {"Key": "StaminaPackCap", "Value": 10},{"Key": "StaminaPackWarningMinutes", "Value": 30},{"Key": "StaminaPackEnergy", "Value": 10},{"Key": "AirdropVisionRadius", "Value": 2},
     {
       "Key": "Enabled",
@@ -5279,6 +5280,16 @@ function planningMistErrors465_(data){
   if(!Number.isSafeInteger(Number(cfg[k]))||Number(cfg[k])<1)errors.push('MistConfig '+k+' 必須為正整數');
  for(const [k,limit] of [['StaminaPackCap',10],['StaminaPackWarningMinutes',1440],['StaminaPackEnergy',20],['AirdropVisionRadius',2]])
   if(cfg[k]!==undefined&&(!Number.isSafeInteger(Number(cfg[k]))||Number(cfg[k])<1||Number(cfg[k])>limit))errors.push('MistConfig '+k+' 必須為 1～'+limit+' 整數');
+ const roadKeys492=['RoadChestCap','RoadChestRespawnMinutes','RoadChestLegendaryPercent','RoadChestRandomPercent','RoadChestTrapPercent','RoadChestTrapHpPercent'];
+ const roadCount492=roadKeys492.filter(k=>cfg[k]!==undefined).length;
+ if(roadCount492&&roadCount492!==6)errors.push('路邊寶箱六項設定必須完整');
+ for(const k of roadKeys492){
+  if(cfg[k]===undefined)continue;
+  const min=['RoadChestLegendaryPercent','RoadChestRandomPercent','RoadChestTrapPercent'].includes(k)?0:1;
+  const max=k==='RoadChestCap'?10:k==='RoadChestRespawnMinutes'?1440:k==='RoadChestTrapHpPercent'?99:100;
+  if(!Number.isSafeInteger(Number(cfg[k]))||Number(cfg[k])<min||Number(cfg[k])>max)errors.push('MistConfig '+k+' 必須為 '+min+'～'+max+' 整數');
+ }
+ if(roadCount492===6&&Number(cfg.RoadChestLegendaryPercent)+Number(cfg.RoadChestRandomPercent)+Number(cfg.RoadChestTrapPercent)!==100)errors.push('路邊寶箱三種結果機率合計必須為 100');
  if(Number(cfg.UnlockFloor)!==1||Number(cfg.InitialMapSize)!==16)errors.push('迷霧戰境開放層數應為 1、初始地圖應為 16');
  const ids=new Set(),abilities=new Set(MIST_PLANNING465.MistEnemies.map(x=>x.Ability));
  for(const r of data.MistEnemies){

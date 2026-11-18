@@ -65,6 +65,18 @@ export async function reduceMist468(
     if (!Number.isSafeInteger(n) || n < 1 || n > (key === "AirdropVisionRadius" ? 2 : key === "StaminaPackCap" ? 10 : key === "StaminaPackEnergy" ? 20 : 1440)) fail("CONFIG_INVALID:" + key);
     return n;
   };
+  const roadRules492 = () => {
+    if (!Object.hasOwn(config, "RoadChestCap")) return null;
+    const keys = {cap:'RoadChestCap',minutes:'RoadChestRespawnMinutes',legendary:'RoadChestLegendaryPercent',random:'RoadChestRandomPercent',trap:'RoadChestTrapPercent',damage:'RoadChestTrapHpPercent'};
+    const rules = Object.fromEntries(Object.entries(keys).map(([k,v]) => [k,c(v)]));
+    for (const [k,n] of Object.entries(rules)) {
+      const min = ['legendary','random','trap'].includes(k) ? 0 : 1;
+      const max = k === 'cap' ? 10 : k === 'minutes' ? 1440 : k === 'damage' ? 99 : 100;
+      if (!Number.isSafeInteger(n) || n < min || n > max) fail('CONFIG_INVALID:' + keys[k]);
+    }
+    if (rules.legendary + rules.random + rules.trap !== 100) fail('CONFIG_INVALID:RoadChestPercentTotal');
+    return rules;
+  };
   let core = createMistCombat468(data, random);
   const additions = { seasons: [], reports: [], rewards: [] };
   w.meta.battles ||= {};
@@ -614,6 +626,24 @@ export async function reduceMist468(
     }
   }
   replenishResources487();
+  function replenishRoadChests492() {
+    const rules = roadRules492();
+    if (!rules || !configuredOpen || w.season.status !== 'ACTIVE' || now >= ms(w.season.closes_at)) return;
+    const queue = w.meta.roadChestRespawns492 ||= [];
+    const active = w.cells.filter(x => x.kind === 'road_chest').length;
+    while (active + queue.length < rules.cap) queue.push({readyAt:iso(now),avoid:null});
+    // Pending replacements count toward the cap. A crowded map keeps the job pending.
+    for (let i = 0; i < queue.length && w.cells.filter(x => x.kind === 'road_chest').length < rules.cap;) {
+      const job = queue[i];
+      if (ms(job.readyAt) > now) {i++; continue;}
+      const free = empty(false).filter(at => !w.flags.some(f => f.x === at.x && f.y === at.y) && !(job.avoid?.x === at.x && job.avoid?.y === at.y));
+      if (!free.length) {i++; continue;}
+      const at = choose(free);
+      w.cells.push(freshCell(at.x, at.y, 'road_chest', null, {name:'路邊寶箱'}));
+      queue.splice(i,1);
+    }
+  }
+  replenishRoadChests492();
   const retained = new Set(
     Object.values(w.players)
       .map((p) => p.runtime.lastBattle)
@@ -769,6 +799,29 @@ export async function reduceMist468(
       if (ms(p.hidden_until) > now) fail("ALREADY_HIDDEN");
       spend(p, c("HideCost"));
       p.hidden_until = iso(now + c("HideMinutes") * 60000);
+    } else if (action === "road-chest/open") {
+      const rules = roadRules492();
+      if (!rules) fail('NOT_OPEN');
+      if (p.pending_loot.length) fail('LOOT_PENDING');
+      const target = w.cells.find(x => x.id === payload.targetId && x.kind === 'road_chest');
+      if (!target) fail('RESOURCE_MISSING');
+      if (!adjacent(at,target)) fail('NOT_ADJACENT');
+      // One server-side draw, one committed world transaction, one durable receipt.
+      const roll = random() * 100;
+      const outcome = roll < rules.legendary ? 'legendary' : roll < rules.legendary + rules.random ? 'random' : 'trap';
+      if (outcome === 'trap') {
+        const hpBefore = p.hp, damage = Math.floor(hpBefore * rules.damage / 100);
+        p.hp = Math.max(1,hpBefore - damage);
+        p.runtime.roadChestReceipt492 = {id:target.id,outcome,hpBefore,damage:hpBefore-p.hp,hpAfter:p.hp,maxHp:p.max_hp,createdAt:iso(now)};
+        report(p,'road_chest','誤觸寶箱陷阱',`陷阱扣除當前 HP 的 ${rules.damage}%，損失 ${hpBefore-p.hp} HP，剩餘 ${p.hp} HP。`,target);
+      } else {
+        const item = rollEquipment(null,outcome === 'legendary');
+        award(p,item);
+        (p.runtime.chestReveals471 ||= []).push({id:target.id,name:outcome === 'legendary'?'路邊寶箱 · 傳說裝備':'路邊寶箱 · 隨機裝備',legendary:outcome === 'legendary',items:clone([item])});
+        report(p,'road_chest','開啟路邊寶箱',`取得${outcome === 'legendary'?'傳說':'隨機'}裝備：${item.name} +${item.enhance}。`,target);
+      }
+      w.cells = w.cells.filter(x => x !== target);
+      (w.meta.roadChestRespawns492 ||= []).push({readyAt:iso(now + rules.minutes * 60000),avoid:{x:target.x,y:target.y}});
     } else if (action === "chest/open") {
       const box = p.runtime.starter;
       let items, name, legendary = false;
@@ -1066,6 +1119,7 @@ export async function reduceMist468(
   );
   result.energyRules = { initial:c('EnergyInitial'), cap:c('EnergyCap'), recoveryMinutes:c('EnergyRecoveryMinutes') };
   if (result.self) result.self.energyNextAt = p.energy < c('EnergyCap') ? iso(ms(p.energy_at) + c('EnergyRecoveryMinutes') * 60000) : null;
+  result.roadChestRules492 = roadRules492();
   result.resourceRules487 = resources487() ? {
     staminaCap: resourceRule487('StaminaPackCap'), warningMinutes: resourceRule487('StaminaPackWarningMinutes'),
     energy: resourceRule487('StaminaPackEnergy'), airdropRadius: resourceRule487('AirdropVisionRadius'),
@@ -1263,6 +1317,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
     ] : [],
     airdropNextAt487: p && !airdrop ? w.meta.airdropNextAt487 || null : null,
     resourceReceipt487: p?.runtime.resourceReceipt487 || null,
+    roadChestReceipt492: p?.runtime.roadChestReceipt492 || null,
     ranking,
     reports: (p?.runtime.reports || []).map((r) => ({
       id: r.id,

@@ -87,3 +87,7 @@ npm --prefix supabase/tests test
 ## 迷霧戰境 468
 
 完整模式、資料庫套用順序、開啟企劃開關及驗證見 [部署說明](../docs/competition468.md)。需先套用缺少的 465 基礎 schema，再套用 468 runtime；不可只合併前端或改 ready。確認逾時的 migration 不視為已執行。
+
+## 路邊寶箱 492
+
+新增更新只使用 `20261118074324_mist_road_chests492.sql`，再部署 game-api 與前端，最後發布核准六項 MistConfig 設定。完整順序、試算表同步入口與驗證見 [路邊寶箱 492](../docs/reviews/mist-road-chests492.md)。不重跑歷史 migrations。
