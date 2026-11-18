@@ -60,15 +60,15 @@ for(const [view,width,height] of [['desktop',1440,900],['desktop',1366,650],['mo
  if(await page.locator('#uiAlertOk').count())await page.locator('#uiAlertOk').click();
  // Closing/reopening locked mode never bypasses main progress.
  assert.equal(await page.evaluate(()=>{state.maxCleared=0;return modeUnlockFloor258_('mist')===1&&!modeUnlocked258_('mist');}),true);
- assert.equal(await page.evaluate(async()=>{planningReady412_=()=>true;onlineGameConfig.ArenaUnlockFloor=5;state.maxCleared=1;mist465_.preview=false;mist465_.data={ok:true,ready:false,self:null};render=previewOriginalRender465;apiPost=async()=>({ok:true,ready:false,self:null,message:'戰境準備中'});await openMist465_();return state.page==='mist'&&!!document.querySelector('.mist465')&&modeUnlocked258_('mist')&&!modeUnlocked258_('arena')&&battleModeCards349_('arena').length===3&&!lobby402_().includes('undefined');}),true,'actual render, entrance and level 1 unlock');
+ assert.equal(await page.evaluate(async()=>{planningReady412_=()=>true;onlineGameConfig.ArenaUnlockFloor=5;state.maxCleared=1;mist465_.preview=false;mist465_.data={ok:true,ready:false,self:null};render=previewOriginalRender465;apiPost=async()=>({ok:true,ready:false,self:null,message:'戰境準備中'});await openMist465_();return state.page==='mist'&&!!document.querySelector('.mist465')&&modeUnlocked258_('mist')&&!modeUnlocked258_('arena')&&battleModeCards349_('arena').length===2&&!lobby402_().includes('undefined');}),true,'actual render, entrance and level 1 unlock');
  assert.deepEqual(errors,[],'actual render errors');
  // Actual competitive category: three equal horizontal cards, a single parent scroller.
  if(view==='mobile'){
   await page.evaluate(()=>{state.page='combatHub';mobilePrepareModeTab_='arena';render();});
-  const cards=page.locator('.mode-grid349 .mode-card349');assert.equal(await cards.count(),3);
+  const cards=page.locator('.mode-grid349 .mode-card349');assert.equal(await cards.count(),2);
   const boxes=await cards.evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));
   assert.ok(boxes.every(r=>Math.abs(r.x-boxes[0].x)<1&&Math.abs(r.w-boxes[0].w)<1&&r.h===150),'cards use equal full-width rows');
-  assert.ok(boxes[1].y>=boxes[0].y+boxes[0].h&&boxes[2].y>=boxes[1].y+boxes[1].h,'cards never overlap');
+  assert.ok(boxes.slice(1).every((b,i)=>b.y>=boxes[i].y+boxes[i].h),'cards never overlap');
   await cards.last().scrollIntoViewIfNeeded();
   const hit=await cards.last().evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));});assert.ok(hit,'last entry reachable and clickable');
   await page.screenshot({path:path.join(out,engine+'-'+width+'x'+height+'-entrances.png')});

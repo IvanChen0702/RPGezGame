@@ -25,6 +25,8 @@ for (const f of [
   await db.exec(
     readFileSync(new URL("../migrations/" + f, import.meta.url), "utf8"),
   );
+// Apply the new projection after the historical schema, as migration 482 does.
+await db.exec(`do $$ begin execute replace(pg_get_functiondef('game_mist_load468(text,uuid)'::regprocedure),'BoxingSeasons_SCHEMA','MistRankRewards');end $$;`);
 const one = async (q, a = []) => (await db.query(q, a)).rows[0];
 let now = "2026-11-16T01:00:00.000Z";
 const rpc = async (name, args) => {

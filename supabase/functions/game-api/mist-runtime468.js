@@ -446,7 +446,7 @@ export async function reduceMist468(
     const ranked = Object.values(w.players).sort(
       (a, b) => b.points - a.points || b.kills - a.kills,
     );
-    const t = data.BoxingSeasons_SCHEMA.find((r) => r.SeasonID === "2026-W42");
+    const t = data.MistRankRewards?.[0];
     if (!t) fail("REWARD_CONFIG_MISSING");
     let rank = 0,
       last = "";
@@ -498,7 +498,7 @@ export async function reduceMist468(
         "Gems",
         "Enhancement",
         "StatusEffects",
-        "BoxingSeasons_SCHEMA",
+        "MistRankRewards",
       ].map((k) => [k, live[k] || []]),
     );
     w.season = {

@@ -128,8 +128,6 @@
 /assets/images/embedded/ee8e24e36b8586d32415.webp /assets/images/characters/player/weapons/weapon245_claw.webp 301
 /assets/images/embedded/fc73e3e45726cc66fbec.webp /assets/images/characters/enemies/legacy/monster192.webp 301
 /assets/images/embedded/ff78d1401d96428ded5a.webp /assets/images/characters/player/weapons/weapon245_holyGreen.webp 301
-/assets/images/enemies/boxing-6f54777480.webp /assets/images/backgrounds/battle/mobile/boxing.webp 301
-/assets/images/enemies/boxing_dummy-f0b4af0399.webp /assets/images/characters/enemies/special/boxing_dummy-f0b4af0399.webp 301
 /assets/images/enemies/dungeon-a33a7b5180.webp /assets/images/backgrounds/battle/mobile/dungeon.webp 301
 /assets/images/enemies/dungeon_cyberSentinel-31cc5dc339.webp /assets/images/characters/enemies/dungeon/dungeon_cyberSentinel-31cc5dc339.webp 301
 /assets/images/enemies/dungeon_darkWitch-d0c95ea4bf.webp /assets/images/characters/enemies/dungeon/dungeon_darkWitch-d0c95ea4bf.webp 301
@@ -645,13 +643,11 @@
 /assets/images/leaderboard405/table-heading.svg /assets/images/ui/leaderboard/table-heading.svg 301
 /assets/images/leaderboard405/trophy.svg /assets/images/ui/leaderboard/trophy.svg 301
 /assets/images/mode-entries422/arena.webp /assets/images/backgrounds/mode-entries/arena.webp 301
-/assets/images/mode-entries422/boxing.webp /assets/images/backgrounds/mode-entries/boxing.webp 301
 /assets/images/mode-entries422/dungeon.webp /assets/images/backgrounds/mode-entries/dungeon.webp 301
 /assets/images/mode-entries422/extreme.webp /assets/images/backgrounds/mode-entries/extreme.webp 301
 /assets/images/mode-entries422/relic.webp /assets/images/backgrounds/mode-entries/relic.webp 301
 /assets/images/mode-entries422/worldboss.webp /assets/images/backgrounds/mode-entries/worldboss.webp 301
 /assets/images/mode-hubs413/arena.webp /assets/images/backgrounds/mode-hubs/arena.webp 301
-/assets/images/mode-hubs413/boxing.webp /assets/images/backgrounds/mode-hubs/boxing.webp 301
 /assets/images/mode-hubs413/dungeon.webp /assets/images/backgrounds/mode-hubs/dungeon.webp 301
 /assets/images/mode-hubs413/extreme.webp /assets/images/backgrounds/mode-hubs/extreme.webp 301
 /assets/images/mode-hubs413/relic.webp /assets/images/backgrounds/mode-hubs/relic.webp 301

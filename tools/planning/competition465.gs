@@ -180,7 +180,7 @@ const MIST_PLANNING465={
     },
     {
       "Key": "RewardTemplate",
-      "Value": "BoxingSeasons_SCHEMA:2026-W42"
+      "Value": "MistRankRewards"
     },
     {
       "Key": "ExcludedEquipmentIDs",
