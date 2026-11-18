@@ -1212,6 +1212,14 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 }
 
 
+/* Locked shop actions wrap below the product on compact lists, without dimming art. */
+.shop-condition493{display:grid;gap:4px;min-width:0;max-width:100%;padding:9px 11px;border:1px solid #9e815a66;border-radius:5px;background:#8e703313;color:#e4c68b;font-size:12px;line-height:1.55;text-align:left;overflow-wrap:anywhere;box-sizing:border-box}
+.shop-condition493 span{display:block}.trade402>.shop-condition493{width:100%}
+#app #page .shop-card[data-shop-locked493]{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important}
+#app #page .shop-card[data-shop-locked493]>.shop-product-main{width:100%;min-width:0}
+#app #page .shop-card[data-shop-locked493]>.shop-buy-area{display:flex!important;flex-direction:row!important;align-items:center!important;width:100%!important;min-width:0!important;max-width:100%;gap:10px!important;margin:0!important;padding:7px 0 0!important;border-top:1px solid #987d492e!important}
+#app #page .shop-card[data-shop-locked493] .shop-condition493{flex:1;font-size:11px;padding:7px 9px}
+#app #page .shop-card[data-shop-locked493] .shop-price{flex:0 0 auto;max-width:40%;white-space:normal;overflow-wrap:anywhere}
 .shop-buy-area{
   display:flex;
   align-items:center;
@@ -6903,7 +6911,7 @@ function showItem404_(el,row){
  if(!row||!el.isConnected)return;
  clearTimeout(closeItemTimer404_);if(itemAnchor404_===el)return;
  hideItem404_();prepareTooltipHide_();const tip=document.createElement('aside');tip.id='itemTip404';tip.className='card404';tip.setAttribute('role','tooltip');
- tip.innerHTML=itemHeader404_(row)+row.info+(row.price==null?'':'<div class="value404">'+icon402_('coin')+goldNumber331_(row.price)+' 金幣</div>');
+ tip.innerHTML=itemHeader404_(row)+row.info+(row.condition493||'')+(row.price==null?'':'<div class="value404">'+icon402_('coin')+goldNumber331_(row.price)+' 金幣</div>');
  document.body.append(tip);itemAnchor404_=el;itemPopup404_=tip;el.setAttribute('aria-describedby',tip.id);
  const a=el.getBoundingClientRect(),b=tip.getBoundingClientRect(),pad=8,gap=8;
  const board=el.closest('.tiles402,.pick-grid401')?.getBoundingClientRect()||a;
@@ -6950,7 +6958,7 @@ function market402_({title,rail,tabs='',filters='',rows=[],footer='',owner=false
  marketRows402_=rows;const selected=rows.find(r=>r.key===marketKey402_)||rows[0];marketSelected402_=selected;
  const cells=rows.map((r,i)=>'<button type="button" class="cell402'+(equipmentFx484&&r.type404==='equipment'?' bag-equipment-fx484':'')+'" data-market-index404="'+i+'" aria-pressed="'+(selected===r)+'" aria-label="'+escapeAttr(r.name)+'" onclick="marketPick402_('+i+')">'+(r.tile||'<span class="tile-art204">'+r.art+'</span><span class="tile-name204">'+escapeHtml(r.name)+'</span>')+(multi?'<i class="check402 '+(shopBulkSellSelected_.has(r.key)?'on':'')+'">'+(shopBulkSellSelected_.has(r.key)?'✓':'')+'</i>':'')+'</button>').join('');
  const blanks='<i class="empty402"></i>'.repeat(Math.max(0,(minSlots??(owner?20:24))-rows.length));
- const detail=selected?itemHeader404_(selected,selected.accessory404||'')+'<div class="info402">'+selected.info+'</div><div class="trade402">'+(selected.price==null?'':'<div class="gold402">'+icon402_('coin')+goldNumber331_(selected.price)+' 金幣</div>')+(selected.input?'<label>上架售價<input id="auctionAsk402" type="number" min="1" step="1" value="'+escapeAttr(auctionDraft402_.get(selected.key)||'')+'" oninput="auctionDraft402_.set(marketSelected402_.key,this.value)"></label>':'')+(selected.act?'<button class="primary" '+(selected.disabled?'disabled':'')+' onclick="marketAction402_(this)">'+escapeHtml(selected.label)+'</button>':'')+'</div>':'<div class="idle402">'+icon402_('gem')+'<span>物品資訊</span></div>';
+ const detail=selected?itemHeader404_(selected,selected.accessory404||'')+'<div class="info402">'+selected.info+'</div><div class="trade402">'+(selected.price==null?'':'<div class="gold402">'+icon402_('coin')+goldNumber331_(selected.price)+' 金幣</div>')+(selected.input?'<label>上架售價<input id="auctionAsk402" type="number" min="1" step="1" value="'+escapeAttr(auctionDraft402_.get(selected.key)||'')+'" oninput="auctionDraft402_.set(marketSelected402_.key,this.value)"></label>':'')+(selected.condition493||'')+(selected.act?'<button class="primary" '+(selected.disabled?'disabled':'')+' onclick="marketAction402_(this)">'+escapeHtml(selected.label)+'</button>':'')+'</div>':'<div class="idle402">'+icon402_('gem')+'<span>物品資訊</span></div>';
  return '<div class="market402">'+rail+'<section class="stock402">'+tabs+'<header><h3>'+title+'</h3><small>'+rows.length+' 件</small></header><div class="filters402">'+filters+'</div><div class="tiles402">'+cells+blanks+'</div>'+(!rows?'<small>'+empty+'</small>':'')+footer+'</section><aside class="detail402">'+detail+'</aside>'+(owner?'<aside class="keeper402" data-face="'+keeperMood402_+'"><div></div><b>雜貨店闆娘</b><p>'+keeperLines402_[keeperMood402_]+'</p></aside>':'')+'</div>';
 }
 function auction402_(){
@@ -7023,13 +7031,13 @@ function shop402_(){
   rail=marketRail402_([['equipment','gear','裝備'],['skill','scroll','技能'],['utility','potion','消耗品']],tab,'setShopTab');
   filters=(tab==='equipment'||tab==='utility'?'<label class="shop-filter403"><small>'+(tab==='equipment'?'裝備部位':'道具類型')+'</small>':'')+(tab==='equipment'?filter402_(state.shopEquipSubTab||'weapon',marketCats402_.slice(1,-1),'setShopEquipSubTab'):tab==='utility'?filter402_(shopConsumableSubTab_,[['battle','戰鬥'],['enhancement','強化'],['gift','禮盒']],'setShopConsumableSubTab_'):'')+(['equipment','utility'].includes(tab)?'</label>':'');
   rows=state.shopStock.flatMap((entry,index)=>{
-   if(shopEntryTab(entry)!==tab||tab==='equipment'&&shopEquipmentSubTab_(entry)!==(state.shopEquipSubTab||'weapon')||tab==='utility'&&shopConsumableSubTabFor_(entry)!==shopConsumableSubTab_||entry.type==='skill'&&!shopSkillAvailable(entry.template))return [];
+   if(shopEntryTab(entry)!==tab||tab==='equipment'&&shopEquipmentSubTab_(entry)!==(state.shopEquipSubTab||'weapon')||tab==='utility'&&shopConsumableSubTabFor_(entry)!==shopConsumableSubTab_)return [];
    const t=document.createElement('template');t.innerHTML=shopCard(entry,index);const node=t.content.querySelector('.shop-card');if(!node)return [];
    const id=entry.template,item=itemTemplates[id],name=node.querySelector('.shop-product-name');name?.querySelectorAll('.badge,.item-count-badge').forEach(n=>n.remove());
    const price=Number(node.querySelector('.shop-price')?.textContent.replace(/[^0-9]/g,'')),button=node.querySelector('button'),gear=tab==='equipment'?{...item,template:id,id,enhance:0}:null;
    const description=escapeHtml(node.querySelector('.small')?.textContent||'');
    const amount=entry.type==='enhancement'?(id==='legendaryHammer'?socketHammerCount_():state.stones):entry.type==='utility'?Number((state.utilityItems||[]).includes(id)):state.consumables?.[id];
-   return [{item404:gear,type404:gear?'equipment':entry.type,key:entry.type+':'+id,name:entry.displayName||item?.name||skillTemplates[id]?.name||name?.textContent.trim()||id,art:gear?objectArt202_(gear):skillArt198_(id)||objectArt202_(id,'item')||icon402_('potion'),info:gear?pickerDetail401_('equipment',gear):tab==='utility'?consumableInfo407_(Number(amount||0).toLocaleString(),description):'<p>'+description+'</p>',kind:shopCategoryInfo(entry).label,price,disabled:button?.disabled,label:button?.textContent||'購買',act:()=>buyShop(index)}];
+   return [{item404:gear,type404:gear?'equipment':entry.type,key:entry.type+':'+id,name:entry.displayName||item?.name||skillTemplates[id]?.name||name?.textContent.trim()||id,art:gear?objectArt202_(gear):skillArt198_(id)||objectArt202_(id,'item')||icon402_('potion'),info:gear?pickerDetail401_('equipment',gear):tab==='utility'?consumableInfo407_(Number(amount||0).toLocaleString(),description):'<p>'+description+'</p>',kind:shopCategoryInfo(entry).label,price,condition493:shopConditionHtml493_(shopConditions493_(entry)),disabled:button?.disabled,label:button?.textContent||'購買',act:button?()=>buyShop(index):null}];
   });
  }
  return market402_({title:sell?'背包出售':'購買商品',rows,rail,filters,footer,tabs:switcher,multi});
@@ -24660,7 +24668,7 @@ function shopSkillAvailable(id){
 function shopEntryTab(entry){
   if(!entry)return 'equipment';
   if(entry.type==='skill')return 'skill';
-  if(entry.type==='enhancement')return 'utility';
+  if(entry.type==='enhancement'||entry.type==='utility')return 'utility';
   if(entry.type==='consumable')return 'utility';
   return 'equipment';
 }
@@ -24685,57 +24693,72 @@ function setShopEquipSubTab(tab){
   save();
   render();
 }
+// Visibility and purchase eligibility are separate: enabled products always stay browsable.
+function shopConditions493_(entry){
+ if(!entry)return ['商品資料尚未載入'];
+ const t=skillTemplates[entry.template],owned=state.skillsOwned||[],messages=[];
+ if(entry.type==='skill'){
+  if(owned.includes(entry.template))return ['已習得此技能'];
+  if(owned.some(id=>skillUpgradeDescendsFrom_(id,entry.template)))return ['已習得進階技能'];
+ }
+ if(entry.type==='utility'&&(state.utilityItems||[]).includes(entry.template))return ['已持有此道具'];
+ const floor=Math.max(1,Number(entry.unlockFloor)||1),unlocked=Math.max(Number(state.floor)||1,(Number(state.maxCleared)||0)+1);
+ if(unlocked<floor)messages.push('通關主線第 '+(floor-1)+' 層後開放');
+ if(entry.type==='skill'&&t?.requires&&!owned.includes(t.requires))messages.push('需先習得【'+(skillTemplates[t.requires]?.name||t.requires)+'】');
+ const price=Number.isFinite(entry.price)?entry.price:entry.type==='enhancement'?(entry.template==='legendaryHammer'?10000:entry.template==='stonePack100'?500:50):Number((entry.type==='item'?itemTemplates[entry.template]:entry.type==='utility'?utilityTemplates[entry.template]:t)?.price||0);
+ if(!messages.length&&(Number(state.gold)||0)<price)messages.push('金幣不足，還差 '+goldNumber331_(price-(Number(state.gold)||0))+' 金幣');
+ return messages;
+}
+function shopConditionHtml493_(messages){return messages.length?'<div class="shop-condition493" aria-label="購買條件">'+messages.map(m=>'<span>'+escapeHtml(m)+'</span>').join('')+'</div>':'';}
+function shopAction493_(entry,index,label='購買'){
+ const messages=shopConditions493_(entry);
+ return messages.length?shopConditionHtml493_(messages):'<button class="shop-buy-btn" '+(shopPurchaseBusy175_?'disabled aria-busy="true"':'')+' onclick="buyShop('+index+')">'+(shopPurchaseBusy175_?'購買中…':label)+'</button>';
+}
+function shopGuard493_(entry){const messages=shopConditions493_(entry);if(messages.length){toast(messages.join('\n'));return false;}return true;}
 function refreshShop(){
-  const advanced=state.floor>=11 || state.maxCleared>=10;
+  if(cloudMeta.authProvider==='supabase'){
+    state.shopStock=shopEntriesOnline.filter(x=>['equipment','skill','consumable','utility','enhancement'].includes(x.type)).map(x=>({type:x.type==='equipment'?'item':x.type,template:x.template,displayName:x.displayName,price:x.price,shopEntryId:x.id,unlockFloor:x.unlockFloor}));
+    return;
+  }
   const entries=[
-    ...shopPool.map(id=>({type:'item',template:id})),
-    ...shopSkills.filter(id=>shopSkillAvailable(id)).map(id=>({type:'skill',template:id})),
+    ...shopPool.map(id=>({type:'item',template:id,unlockFloor:1})),
+    ...shopSkills.map(id=>({type:'skill',template:id,unlockFloor:Number(skillTemplates[id]?.unlockFloor)||1})),
     {type:'consumable',template:'poisonItem'},
     {type:'enhancement',template:'stonePack10'}
   ];
-  if(advanced){
-    entries.push(
-      ...shopPool11.map(id=>({type:'item',template:id})),
-      ...shopSkills11.filter(id=>shopSkillAvailable(id)).map(id=>({type:'skill',template:id})),
-      ...shopConsumables11.map(id=>({type:id==='fortuneBell'?'utility':'consumable',template:id}))
-    );
-  }
-  const unlockedFloor=Math.max(state.floor,state.maxCleared+1);
+  entries.push(
+      ...shopPool11.map(id=>({type:'item',template:id,unlockFloor:11})),
+      ...shopSkills11.map(id=>({type:'skill',template:id,unlockFloor:Number(skillTemplates[id]?.unlockFloor)||11})),
+      ...shopConsumables11.map(id=>({type:id==='fortuneBell'?'utility':'consumable',template:id,unlockFloor:11}))
+  );
   for(const x of shopEntriesOnline){
-    if(unlockedFloor<x.unlockFloor)continue;
-    const type=x.type==='skill'?'skill':(x.type==='consumable'?'consumable':'item');
-    if(type==='skill'&&!shopSkillAvailable(x.template))continue;
+    const type=x.type==='equipment'?'item':x.type;
     if(!entries.some(e=>e.type===type&&e.template===x.template)){
       entries.push({
         type,
         template:x.template,
         displayName:x.displayName||'',
         price:Number.isFinite(x.price)?x.price:null,
-        shopEntryId:x.id||''
+        shopEntryId:x.id||'',
+        unlockFloor:x.unlockFloor
       });
     }
   }
   // 既有保底商品也套用線上 ShopEntries 的 DisplayName / Price，避免因為先被內建清單加入而忽略表格改名。
   for(const x of shopEntriesOnline){
-    if(unlockedFloor<x.unlockFloor)continue;
     const normalizedType=x.type==='skill'?'skill':(x.type==='consumable'?'consumable':(x.type==='equipment'?'item':x.type));
     const e=entries.find(v=>v.type===normalizedType&&v.template===x.template);
     if(!e)continue;
     if(x.displayName)e.displayName=x.displayName;
     if(Number.isFinite(x.price))e.price=x.price;
     if(x.id)e.shopEntryId=x.id;
+    e.unlockFloor=x.unlockFloor;
   }
 
-  if(unlockedFloor>=21){
+  {
     for(const id of ['magicSlash','magicSwordsmanAptitude','fullPreparation','bloodSlash']){
-      if(shopSkillAvailable(id)&&!entries.some(e=>e.type==='skill'&&e.template===id))entries.push({type:'skill',template:id});
+      if(!entries.some(e=>e.type==='skill'&&e.template===id))entries.push({type:'skill',template:id,unlockFloor:Number(skillTemplates[id]?.unlockFloor)||21});
     }
-  }
-  if(cloudMeta.authProvider==='supabase'){
-    state.shopStock=shopEntriesOnline.filter(x=>unlockedFloor>=x.unlockFloor&&['equipment','skill','consumable','utility','enhancement'].includes(x.type)&&
-      (x.type!=='skill'||shopSkillAvailable(x.template))&&
-      (x.type!=='utility'||!(state.utilityItems||[]).includes(x.template))).map(x=>({type:x.type==='equipment'?'item':x.type,template:x.template,displayName:x.displayName,price:x.price,shopEntryId:x.id}));
-    return;
   }
   state.shopStock=entries;
 }
@@ -24790,10 +24813,10 @@ function renderShopLegacy25_(){
 
   state.shopStock=state.shopStock.filter(x=>{
     if(!x)return false;
-    if(x.type==='skill')return shopSkillAvailable(x.template);
+    if(x.type==='skill')return !!skillTemplates[x.template];
     if(x.type==='item')return !!itemTemplates[x.template];
     if(x.type==='consumable')return !!skillTemplates[x.template];
-    if(x.type==='utility')return x.template==='fortuneBell';
+    if(x.type==='utility')return !!utilityTemplates[x.template]||!!x.shopEntryId;
     if(x.type==='enhancement')return ['stonePack10','stonePack100','legendaryHammer'].includes(x.template);
     return false;
   });
@@ -24861,13 +24884,13 @@ function shopCategoryInfo(entry){
 
 function shopCard(entry,index){
   if(!entry)return '';
-  const cat=shopCategoryInfo(entry);
+  const cat=shopCategoryInfo(entry),locked=shopConditions493_(entry).length>0;
 
   if(entry.type==='enhancement'){
     const hammer=entry.template==='legendaryHammer',count=entry.template==='stonePack100'?100:10;
     const title=hammer?'傳說之鎚':`強化石 ×${count}`;
     const desc=hammer?'使用時消耗 1 個。0→1 孔 15%、1→2 孔 5%；2 孔裝備不可使用。':`購買後立即獲得 ${count} 顆強化石。`;
-    return `<div class="shop-card">
+    return `<div class="shop-card"${locked?' data-shop-locked493="true"':''}>
       <div class="shop-product-main">
         <span class="shop-type-badge ${cat.cls}">${cat.label}</span>
         <div class="shop-product-text">
@@ -24877,7 +24900,7 @@ function shopCard(entry,index){
       </div>
       <div class="shop-buy-area">
         <div class="shop-price">${Number.isFinite(entry.price)?entry.price:hammer?10000:count===100?500:50}金幣</div>
-        <button class="shop-buy-btn" ${shopPurchaseBusy175_?'disabled aria-busy="true"':''} onclick="buyShop(${index})">${shopPurchaseBusy175_?'購買中…':'購買'}</button>
+        ${shopAction493_(entry,index)}
       </div>
     </div>`;
   }
@@ -24886,18 +24909,17 @@ function shopCard(entry,index){
     const s=skillTemplates[entry.template];
     if(!s)return '';
     const req=s.requires?skillTemplates[s.requires]?.name:null;
-    const eligible=!s.requires||state.skillsOwned.includes(s.requires);
-    return `<div class="shop-card">
+    return `<div class="shop-card"${locked?' data-shop-locked493="true"':''}>
       <div class="shop-product-main">
         ${skillArt198_(entry.template)}${skillCategoryBadge179_(entry.template)}
         <div class="shop-product-text">
           <div class="shop-product-name">${escapeHtml(skillLevelText_(entry.template))}【${escapeHtml(entry.displayName||s.name)}】</div>
-          <div class="small">${skillDescHtml(s.desc)}${s.cd!=null?`｜CD ${s.cd}`:''}${req?`<br>升級條件：需擁有【${req}】`:''}</div>
+          <div class="small">${skillDescHtml(s.desc)}${s.cd!=null?`｜CD ${s.cd}`:''}${req&&!locked?`<br>升級條件：需擁有【${escapeHtml(req)}】`:''}</div>
         </div>
       </div>
       <div class="shop-buy-area">
         <div class="shop-price">${Number.isFinite(entry.price)?entry.price:s.price}金幣</div>
-        <button class="shop-buy-btn" ${shopPurchaseBusy175_?'disabled aria-busy="true"':''} ${!eligible?'disabled':''} onclick="buyShop(${index})">${shopPurchaseBusy175_?'購買中…':s.upgradeFrom?'升級':'購買'}</button>
+        ${shopAction493_(entry,index,s.upgradeFrom?'升級':'購買')}
       </div>
     </div>`;
   }
@@ -24906,7 +24928,7 @@ function shopCard(entry,index){
     const s=skillTemplates[entry.template];
     if(!s)return '';
     const count=state.consumables?.[entry.template]||0;
-    return `<div class="shop-card">
+    return `<div class="shop-card"${locked?' data-shop-locked493="true"':''}>
       <div class="shop-product-main">
         <span class="shop-type-badge ${cat.cls}">${cat.label}</span>
         <div class="shop-product-text">
@@ -24914,7 +24936,7 @@ function shopCard(entry,index){
           <div class="small">${s.desc}</div>
         </div>
       </div>
-      <div class="shop-buy-area"><div class="shop-price">${Number.isFinite(entry.price)?entry.price:s.price}金幣</div><button class="shop-buy-btn" ${shopPurchaseBusy175_?'disabled aria-busy="true"':''} onclick="buyShop(${index})">${shopPurchaseBusy175_?'購買中…':'購買'}</button></div>
+      <div class="shop-buy-area"><div class="shop-price">${Number.isFinite(entry.price)?entry.price:s.price}金幣</div>${shopAction493_(entry,index)}</div>
     </div>`;
   }
 
@@ -24922,7 +24944,7 @@ function shopCard(entry,index){
     const u=utilityTemplates[entry.template]||{name:entry.displayName||entry.template,price:Number.isFinite(entry.price)?entry.price:0,desc:''};
     const owned=(state.utilityItems||[]).includes(entry.template);
     const price=Number.isFinite(entry.price)?entry.price:Number(u.price||0);
-    return `<div class="shop-card">
+    return `<div class="shop-card"${locked?' data-shop-locked493="true"':''}>
       <div class="shop-product-main">
         <span class="shop-type-badge ${cat.cls}">${cat.label}</span>
         <div class="shop-product-text">
@@ -24930,24 +24952,24 @@ function shopCard(entry,index){
           <div class="small">${escapeHtml(u.desc||'')}</div>
         </div>
       </div>
-      <div class="shop-buy-area"><div class="shop-price">${price}金幣</div><button class="shop-buy-btn" ${shopPurchaseBusy175_?'disabled aria-busy="true"':''} ${owned?'disabled':''} onclick="buyShop(${index})">${shopPurchaseBusy175_?'購買中…':'購買'}</button></div>
+      <div class="shop-buy-area"><div class="shop-price">${price}金幣</div>${shopAction493_(entry,index)}</div>
     </div>`;
   }
 
   const t=itemTemplates[entry.template];
   if(!t)return '';
-  return `<div class="shop-card">
+  return `<div class="shop-card"${locked?' data-shop-locked493="true"':''}>
     <div class="shop-product-main">
       <span class="shop-type-badge ${cat.cls}">${cat.label}</span>
       <div class="shop-product-text">
         <div class="shop-product-name">${t.iconSymbol&&!PIXEL_ART202_['equipment_'+entry.template]?`<span style="margin-right:6px">${escapeHtml(String(t.iconSymbol))}</span>`:""}${rarityHtml({template:entry.template,rarity:t.rarity,name:entry.displayName||t.name,enhance:0})}</div>
         <div class="small">${equipmentLevelText_(entry.template)}｜${slotName(t.slot)}｜${statText(t.stats)}${effectDescription_(t.effect)?`｜${effectDescription_(t.effect)}`:''}${t.slot==='weapon'?'｜商店武器 0 鑲孔':''}</div>
       </div>
+    </div>
       <div class="shop-buy-area">
         <div class="shop-price">${Number.isFinite(entry.price)?entry.price:t.price}金幣</div>
-        <button class="shop-buy-btn" ${shopPurchaseBusy175_?'disabled aria-busy="true"':''} onclick="buyShop(${index})">${shopPurchaseBusy175_?'購買中…':'購買'}</button>
+        ${shopAction493_(entry,index)}
       </div>
-    </div>
   </div>`;
 }
 function showPurchaseFeedback(title,detail=''){
@@ -24979,6 +25001,7 @@ function openBulkBuy85_(index){
  if(document.getElementById('bulkBuy85'))return;
  if(activeBattleNow())return toast('戰鬥中無法使用商店。');
  const entry=state.shopStock?.[index];if(!entry||!['consumable','enhancement'].includes(entry.type))return;
+ if(!shopGuard493_(entry))return;
  const skill=skillTemplates[entry.template],enhancement=entry.type==='enhancement',hammer=entry.template==='legendaryHammer',packSize=entry.template==='stonePack100'?100:10;
  const name=entry.displayName||skill?.name||(enhancement?(hammer?'傳說之鎚':'強化石 ×'+packSize):entry.template);
  const price=Number.isFinite(entry.price)?entry.price:enhancement?(hammer?10000:packSize===100?500:50):Number(skill?.price);
@@ -25028,6 +25051,7 @@ async function buyShop(i){
  }
 }
 async function buyShopLegacy175_(i){
+  if(!shopGuard493_(state.shopStock?.[i]))return false;
   if(['consumable','enhancement'].includes(state.shopStock?.[i]?.type))return openBulkBuy85_(i);
   if(cloudMeta.authProvider==='supabase'){const entry=state.shopStock?.[i];if(!entry?.shopEntryId){toast('商品設定不完整，請更新遊戲資料。');return;}const ok=await runInventoryAction_({action:'buy',entryId:String(entry.shopEntryId)},'購買');if(ok&&viewMode_==='desktop'&&state.page==='shop')keeper402_(1);return ok;}
   if(activeBattleNow()){toast('戰鬥中無法使用商店。');return;}
