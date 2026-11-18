@@ -8,7 +8,7 @@ const epoch=411,enabled=r=>r.Enabled!==false&&String(r.Enabled).toLowerCase()!==
 const cfg=(d,k,f)=>{const r=(d.GameConfig||[]).find(r=>r.Key===k);return r?r.Value:f};
 function validate(d){
  if(Number(cfg(d,'MainProgressEpoch',0))!==epoch)throw Error('企劃資料尚未升級至411，請完成發布後重新整理。');
- for(const key of ['MainRecordStartFloor','MainStoryEndFloor','WorldBossUnlockFloor','ExtremeUnlockFloor','DungeonUnlockFloor','RelicUnlockFloor','ArenaUnlockFloor','BoxingUnlockFloor','ChallengeUnlockFloor'])if(!Number.isFinite(Number(cfg(d,key,undefined))))throw Error('缺少遊戲設定：'+key);
+ for(const key of ['MainRecordStartFloor','MainStoryEndFloor','WorldBossUnlockFloor','ExtremeUnlockFloor','DungeonUnlockFloor','RelicUnlockFloor','ArenaUnlockFloor','ChallengeUnlockFloor'])if(!Number.isFinite(Number(cfg(d,key,undefined))))throw Error('缺少遊戲設定：'+key);
  for(const k of ['Enemies','EnemyBehaviors','EnemyModules','BossPhases','Skills','Equipment','Gems','RelicConfig'])if(!Array.isArray(d[k]))throw Error('缺少企劃表：'+k);
  const rows=d.Enemies.filter(enabled),floors=rows.map(r=>Number(r.Floor));
  if(rows.length!==65||new Set(floors).size!==65||floors.some(f=>!Number.isInteger(f)||f<1||f>65)||new Set(rows.map(r=>r.EnemyID)).size!==65)throw Error('主線必須為不重複的1～65關。');
@@ -151,19 +151,7 @@ async function _asyncArray(method,rows,callback,...args){
 "use strict";
 
 // Turn Based RPG Backend v11.31.102 - Arena Season Rewards / Glory Gear
-/**
- * Turn Based RPG Backend v11.31.47 - Boxing Reward Shadow Test Tool
- * Google Apps Script Web App
- *
- * 使用方式：
- * 1. 把此檔內容貼到 Apps Script 的 Code.gs
- * 2. 執行 setupBackend() 一次並授權
- * 3. 部署 -> 新部署 -> 網頁應用程式
- * 4. 執行身分：我
- * 5. 存取權：任何人
- *
- * 前端建議用 POST + Content-Type: text/plain 傳 JSON，避免 CORS preflight。
- */
+// RPG game backend
 
 const DB = {
   ACCOUNTS: 'Accounts_SCHEMA',
@@ -177,12 +165,7 @@ const DB = {
   REDEEM_CODES: 'RedeemCodes_SCHEMA',
   REDEEM_REWARDS: 'RedeemCodeRewards_SCHEMA',
   REDEEM_CLAIMS: 'RedeemCodeClaims_SCHEMA',
-  BOXING_CONFIG: 'BoxingMachine_SCHEMA',
-  BOXING_SEASONS: 'BoxingSeasons_SCHEMA',
-  BOXING_ATTEMPTS: 'BoxingAttempts_SCHEMA',
-  BOXING_RANKING: 'BoxingRanking_SCHEMA',
-  BOXING_REWARDS: 'BoxingRewards_SCHEMA',
-  PUBLIC_SHEETS: ['RelicConfig','RelicEnemies','RelicCurses','RelicPools','GameConfig', 'Equipment', 'Skills', 'Consumables', 'Gems', 'Enemies', 'EnemyModules', 'ShopEntries', 'Enhancement', 'StatusEffects', 'EnemyBehaviors', 'BossPhases', 'Titles', 'Achievements', 'DungeonBosses', 'DungeonDifficulties', 'BoxingMachine_SCHEMA', 'BoxingSeasons_SCHEMA', 'WorldBoss_SCHEMA', 'WorldBossPool', 'ArenaConfig', 'ArenaNPC', 'ArenaRewards', 'ExtremeConfig', 'ExtremeStageRewards', 'ExtremeRankRewards', 'GiftBoxes', 'GiftBoxTiers', 'GiftBoxRewards','PetConfig','PetTrainingCosts','PetQualities','PetSpecies','PetTraits','QuestNPCs','Quests','QuestObjectives','QuestRewards','QuestDialogues']
+  PUBLIC_SHEETS: ['RelicConfig','RelicEnemies','RelicCurses','RelicPools','GameConfig','Equipment','Skills','Consumables','Gems','Enemies','EnemyModules','ShopEntries','Enhancement','StatusEffects','EnemyBehaviors','BossPhases','Titles','Achievements','DungeonBosses','DungeonDifficulties','WorldBoss_SCHEMA','WorldBossPool','ArenaConfig','ArenaNPC','ArenaRewards','ExtremeConfig','ExtremeStageRewards','ExtremeRankRewards','GiftBoxes','GiftBoxTiers','GiftBoxRewards','PetConfig','PetTrainingCosts','PetQualities','PetSpecies','PetTraits','QuestNPCs','Quests','QuestObjectives','QuestRewards','QuestDialogues']
 };
 const TOKEN_TTL_SEC = 60 * 60 * 24 * 30; // 30 days
 const PASSWORD_ITERATIONS = 12000;
@@ -191,7 +174,6 @@ const AUCTION_FEE_RATE = 0.10;
 // ============================================================
 // v11.31.91 Planning Data Publish System
 // Google Sheet = CMS only. Published Supabase package = Runtime Planning Primary.
-// Runtime tables (PlayerSave/Auction/Boxing*/WorldBoss*) are NOT part of this package.
 // ============================================================
 const PLANNING_CURRENT_TABLE_ = 'GameDataCurrent';
 const PLANNING_VERSIONS_TABLE_ = 'GameDataVersions';
@@ -210,13 +192,7 @@ function publishedPlanningRows_(sheetName) {
 // Setup
 // ------------------------------
 
-function ensureBoxingSchema_() {
-  ensureSheet_(DB.BOXING_CONFIG, ['Key', 'Value']);
-  ensureSheet_(DB.BOXING_SEASONS, ['SeasonID', 'StartAt', 'EndAt', 'Rank1RewardID', 'Rank2RewardID', 'Rank3RewardID', 'Rank4To10Stones', 'Enabled']);
-  ensureSheet_(DB.BOXING_ATTEMPTS, ['ChallengeID', 'SeasonID', 'AccountID', 'Nickname', 'StartedAt', 'SubmittedAt', 'Damage', 'Status']);
-  ensureSheet_(DB.BOXING_RANKING, ['SeasonID', 'AccountID', 'Nickname', 'Damage', 'SubmittedAt', 'BuildSnapshotJSON']);
-  ensureSheet_(DB.BOXING_REWARDS, ['RewardID', 'SeasonID', 'AccountID', 'Nickname', 'Rank', 'RewardType', 'RewardIDValue', 'Quantity', 'Status', 'CreatedAt', 'ClaimedAt']);
-}
+
 
 /**
  * Apps Script 編輯器可手動執行。
@@ -335,18 +311,12 @@ async function doPost(e) {
         return json_(await acknowledgeLoginGift278_(body));
       case 'achievement/claim':
         return json_(await claimAchievement_(body));
-      case 'boxing/status':
-        return json_(await getBoxingStatus_(body));
-      case 'boxing/ranking':
-        return json_(await getBoxingRanking_(body));
-      case 'boxing/start':
-        return json_(await startBoxingChallenge_(body));
-      case 'boxing/submit':
-        return json_(await submitBoxingChallenge_(body));
-      case 'boxing/history':
-        return json_(await getBoxingHistory_(body));
-      case 'boxing/reward/claim':
-        return json_(await claimBoxingReward_(body));
+
+
+
+
+
+
 
       // v11.31.92 Arena Phase 1
       case 'arena/status':
@@ -557,11 +527,7 @@ function invalidateWorldBossRankingCache_(bossInstanceId) {
     rankingCache_().remove('rank:wb:' + String(bossInstanceId || ''));
   } catch (_e) {}
 }
-function invalidateBoxingRankingCache_(seasonId) {
-  try {
-    rankingCache_().remove('rank:boxing:' + String(seasonId || ''));
-  } catch (_e) {}
-}
+
 
 // v11.31.28：一般排行榜改直接讀 Supabase PlayerSaves Primary。
 // 為了同時支援「等級排行」與「通關排行」，各抓前 N 名後合併；
@@ -1251,445 +1217,42 @@ async function submitWorldBossChallenge_(body) {
   return {chestAwarded:false, chest:null, ...result};
 }
 // ------------------------------
-// Boxing Machine v11.24.0
 // 每週個人最高單場傷害；舊 Season 永久保留。
 // ------------------------------
-// v11.31.81: Boxing Mode auto rotation.
-// v137: Taiwan weekly boxing calendar; immutable anchor keeps all runtimes in sync.
 // Existing 2026-W42 ranking IDs are retained. Its mode is 3; the next week is 4.
-function boxingCalendar137_(source, nowMs=Date.now()){
- const week=604800000, offset=28800000, anchor=Date.UTC(2026,9,11,16);
- const now=Number(nowMs), local=new Date(now+offset);
- const monday=Date.UTC(local.getUTCFullYear(),local.getUTCMonth(),local.getUTCDate()-((local.getUTCDay()+6)%7))-offset;
- const enabled=(source||[]).filter(r=>!('Enabled' in r)||String(r.Enabled).trim().toLowerCase()==='true');
- const template=enabled.find(r=>String(r.SeasonID||'').trim()==='2026-W42');
- if(!template)throw new Error('BOXING_FIXED_REWARDS_MISSING:2026-W42');
- const legacy=enabled.map(row=>({row,seasonId:String(row.SeasonID||'').trim(),start:boxingTaipeiTime_(row.StartAt),end:boxingTaipeiTime_(row.EndAt)})).filter(x=>x.seasonId&&Number.isFinite(x.start)&&Number.isFinite(x.end)&&x.start<anchor&&x.seasonId!=='2026-W42');
- // v465: W46 is the final season. Keep all past rows for settlement and claims.
- const finalStart=Date.UTC(2026,10,8,16); // 2026-11-09 00:00 Asia/Taipei
- for(let start=anchor;start<=Math.min(finalStart,Math.max(anchor,monday)+week);start+=week){
-  const day=new Date(start+offset), thursday=new Date(Date.UTC(day.getUTCFullYear(),day.getUTCMonth(),day.getUTCDate()+3));
-  const year=thursday.getUTCFullYear(), first=Date.UTC(year,0,1), isoWeek=Math.ceil(((thursday.getTime()-first)/86400000+1)/7);
-  const seasonId=year+'-W'+String(isoWeek).padStart(2,'0'), end=start+week-3600000;
-  legacy.push({row:{...template,SeasonID:seasonId,StartAt:new Date(start).toISOString(),EndAt:new Date(end).toISOString()},seasonId,start,end,auto137:true,mode:((2+Math.round((start-anchor)/week))%4)+1});
- }
- return legacy.sort((a,b)=>a.start-b.start);
-}
-function boxingSelect137_(rows,seasonId,now=Date.now()){
- if(seasonId)return rows.find(x=>x.seasonId===String(seasonId))||null;
- // During the Sunday 23:00 gap retain the ending season, not next week's mode.
- return rows.find(x=>x.auto137&&now>=x.start&&now<x.start+604800000)||rows.find(x=>now>=x.start&&now<x.end)||rows.find(x=>now<x.start)||rows[rows.length-1]||null;
-}
-function boxingStatus137_(x,now=Date.now()){
- return now<x.start?'UPCOMING':now<x.end?'ACTIVE':x.auto137&&now<x.start+604800000?'BREAK':'ENDED';
-}
 
-async function boxingConfiguredMode_(){const x=await boxingSeason_();return x?.mode||3;}
-async function boxingConfig_(season){
- const map={};(await readObjects_(DB.BOXING_CONFIG)).forEach(r=>map[String(r.Key||'').trim()]=r.Value);
- const x=season||await boxingSeason_();
- return {hp:Math.max(1,Math.trunc(Number(map.HP)||50000)),def:Math.max(0,Math.trunc(Number(map.DEF)||0)),patk:Math.max(1,Math.trunc(Number(map.PATK)||1)),matk:Math.max(0,Math.trunc(Number(map.MATK)||0)),maxTurns:Math.max(1,Math.trunc(Number(map.MaxTurns)||3)),mode:x?.mode||3};
-}
+
+
+
+
+
 // 拳擊機賽季時間一律把表格看到的年月日時分視為 Asia/Taipei。
 // Google Sheets 的日期儲存格會以 Date 物件回傳；若直接 getTime()，結果會受試算表/指令碼時區設定影響。
 // 這裡先取『儲存格顯示的年月日時分』，再明確換算成 UTC+8，避免本週被誤判成下週。
-function boxingTaipeiTime_(value) {
-  let raw = '';
-  if (value instanceof Date && !isNaN(value.getTime())) {
-    const ss = SpreadsheetApp.getActive();
-    const sheetTz = ss && ss.getSpreadsheetTimeZone && ss.getSpreadsheetTimeZone() || Session.getScriptTimeZone() || 'Asia/Taipei';
-    raw = Utilities.formatDate(value, sheetTz, 'yyyy-MM-dd HH:mm:ss');
-  } else raw = String(value == null ? '' : value).trim();
-  if (!raw) return NaN;
-  const m = raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
-  if (m) return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4] || 0) - 8, Number(m[5] || 0), Number(m[6] || 0));
-  const t = new Date(raw).getTime();
-  return Number.isFinite(t) ? t : NaN;
-}
-async function boxingSeasonRows_(){return boxingCalendar137_(await readObjects_(DB.BOXING_SEASONS));}
 
-async function boxingSeason_(seasonId){return boxingSelect137_(await boxingSeasonRows_(),seasonId);}
 
-function boxingRankRewards106_(row){
- const r=row||{},blank=v=>v===undefined||v===null||String(v).trim()==='';
- return [[1,1,'Rank1'],[2,2,'Rank2'],[3,3,'Rank3'],[4,10,'Rank4To10']].map(([rankMin,rankMax,key])=>{
-  const typed=!blank(r[key+'RewardType']);
-  let type=String(typed?r[key+'RewardType']:rankMin<=3?'EQUIPMENT':'STONES').trim().toUpperCase();
-  if(type==='STONE')type='STONES';
-  const id=String(r[key+'RewardID']||(!typed&&rankMin===4?'enhanceStone':'')).trim();
-  const raw=typed?r[key+'RewardQuantity']:rankMin<=3?1:blank(r.Rank4To10Stones)?300:r.Rank4To10Stones;
-  const quantity=Number(raw);
-  if(!['EQUIPMENT','CONSUMABLE','STONES'].includes(type)||blank(raw)||!Number.isSafeInteger(quantity)||quantity<(type==='STONES'?0:1)||quantity>(type==='CONSUMABLE'?999999:2147483647)||type==='EQUIPMENT'&&quantity!==1||typed&&type!=='STONES'&&!id){
-   throw new Error('BOXING_REWARD_CONFIG_INVALID:'+String(r.SeasonID||'')+':'+key);
-  }
-  return {rankMin,rankMax,type,id:type==='STONES'?'enhanceStone':id,quantity};
- });
-}
 
-function boxingSeasonPublic_(x) {
-  if (!x) return null;
-  const r = x.row,
-    now = Date.now();
-  return {
-    seasonId: x.seasonId,
-    startAt: new Date(x.start).toISOString(),
-    endAt: new Date(x.end).toISOString(),
-    status: boxingStatus137_(x,now),
-    rank1RewardId: String(r.Rank1RewardID || ''),
-    rank2RewardId: String(r.Rank2RewardID || ''),
-    rank3RewardId: String(r.Rank3RewardID || ''),
-    rank4To10Stones: Math.max(0, Math.trunc(Number(r.Rank4To10Stones) || 300)),
-    rankRewards: boxingRankRewards106_(r)
-  };
-}
-// v11.31.48: Boxing Runtime PRIMARY = Supabase. Runtime Google Sheet mirror disabled; Sheet is snapshot backup only.
-// Planning/config stays in Google Sheet: BoxingMachine_SCHEMA / BoxingSeasons_SCHEMA.
-async function boxingSbQuery_(table, params) {
-  const cfg = supabaseConfig_();
-  const qs = Object.keys(params || {}).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(String(params[k]))).join('&');
-  const url = cfg.url + '/rest/v1/' + table + (qs ? '?' + qs : '');
-  const res = await UrlFetchApp.fetch(url, {
-    method: 'get',
-    headers: boxingSbHeaders_(),
-    muteHttpExceptions: true
-  });
-  const status = res.getResponseCode(),
-    text = res.getContentText();
-  if (status < 200 || status >= 300) throw new Error('SUPABASE_BOXING_QUERY_' + table + '_HTTP_' + status + ': ' + text);
-  let rows = [];
-  try {
-    rows = JSON.parse(text || '[]');
-  } catch (_e) {
-    throw new Error('SUPABASE_BOXING_QUERY_' + table + '_JSON_INVALID');
-  }
-  if (!Array.isArray(rows)) throw new Error('SUPABASE_BOXING_QUERY_' + table + '_ROWS_INVALID');
-  return rows;
-}
-function boxingRewardSbToObj_(r) {
-  return {
-    RewardID: String(r.reward_id || ''),
-    SeasonID: String(r.season_id || ''),
-    AccountID: String(r.account_id || ''),
-    Nickname: String(r.nickname || ''),
-    Rank: Number(r.rank) || 0,
-    RewardType: String(r.reward_type || ''),
-    RewardIDValue: String(r.reward_id_value || ''),
-    Quantity: Number(r.quantity) || 0,
-    Status: String(r.status || 'PENDING'),
-    CreatedAt: String(r.created_at || ''),
-    ClaimedAt: String(r.claimed_at || '')
-  };
-}
-function boxingSheetMirrorSafe_() {}
-async function boxingRanking_(seasonId, accountId) {
-  const key = 'rank:boxing:' + String(seasonId || '');
-  let mapped = rankingCacheGetJson_(key);
-  if (!Array.isArray(mapped)) {
-    const rows = await boxingSbQuery_('BoxingRanking', {
-      select: '*',
-      season_id: 'eq.' + String(seasonId),
-      order: 'damage.desc,submitted_at.asc'
-    });
-    mapped = rows.map(r => ({
-      accountId: String(r.account_id || ''),
-      nickname: String(r.nickname || '冒險者'),
-      damage: Number(r.damage) || 0,
-      submittedAt: String(r.submitted_at || ''),
-      snapshot: r.build_snapshot_json && typeof r.build_snapshot_json === 'object' ? r.build_snapshot_json : {}
-    }));
-    rankingCachePutJson_(key, mapped);
-  }
-  const idx = mapped.findIndex(r => r.accountId === String(accountId || ''));
-  return {
-    top10: mapped.slice(0, 10),
-    myRank: idx >= 0 ? idx + 1 : 0,
-    myBest: idx >= 0 ? mapped[idx] : null,
-    all: mapped
-  };
-}
-async function settleBoxingSeason_(x) {
-  if (!x || Date.now() < x.end) return {
-    ok: true,
-    seasonId: x?.seasonId || '',
-    settled: false,
-    reason: 'NOT_ENDED'
-  };
-  // Settlement never needs player build snapshots or ranks below the reward cutoff.
-  const rank = (await boxingSbQuery_('BoxingRanking', {
-    select: 'account_id,nickname', season_id: 'eq.' + x.seasonId,
-    order: 'damage.desc,submitted_at.asc', limit: 10
-  })).map(p => ({accountId:String(p.account_id||''),nickname:String(p.nickname||'冒險者')})),
-    r = x.row;
-  const existing = await boxingSbQuery_('BoxingRewards', {
-    select: 'reward_id,account_id,rank',
-    season_id: 'eq.' + x.seasonId
-  });
-  const awarded = new Set(existing.map(v => String(v.account_id || '') + '#' + String(Number(v.rank) || 0)));
-  const definitions=boxingRankRewards106_(r);
-  for(const [i,p] of rank.entries())if(!awarded.has(String(p.accountId||'')+'#'+(i+1)))await boxingRewardTemplate106_(definitions.find(v=>i+1>=v.rankMin&&i+1<=v.rankMax));
-  let created = 0;
-  await _asyncArray("forEach", rank, async (p, i) => {
-    const pos = i + 1,
-      key = String(p.accountId || '') + '#' + String(pos);
-    if (awarded.has(key)) return;
-    const definition=definitions.find(v=>pos>=v.rankMin&&pos<=v.rankMax),type=definition.type,value=definition.id,qty=definition.quantity;
-    const obj = {
-      RewardID: 'BXR_' + Utilities.getUuid().replace(/-/g, ''),
-      SeasonID: x.seasonId,
-      AccountID: p.accountId,
-      Nickname: p.nickname,
-      Rank: pos,
-      RewardType: type,
-      RewardIDValue: value,
-      Quantity: qty,
-      Status: 'PENDING',
-      CreatedAt: new Date().toISOString(),
-      ClaimedAt: ''
-    };
-    await boxingSbUpsert_('BoxingRewards', boxingRewardSheetToSb_(obj));
-    boxingSheetMirrorSafe_(DB.BOXING_REWARDS, 'RewardID', obj.RewardID, obj, 'reward-create:' + obj.RewardID);
-    awarded.add(key);
-    created++;
-  });
-  return {
-    ok: true,
-    seasonId: x.seasonId,
-    settled: true,
-    ranked: rank.length,
-    created: created,
-    existing: existing.length
-  };
-}
+
+
+
+
+
+
+
+
+
+
 
 // v11.31.91：拳擊機賽季自動結算。Trigger 每 5 分鐘掃描所有已結束賽季，
 // 不再依賴玩家打開拳擊機 / 歷史紀錄才產生排名獎勵。
-async function settleEndedBoxingSeasons() {
-  ensureBoxingSchema_();
-  const lock = LockService.getScriptLock();
-  await lock.waitLock(30000);
-  try {
-    const now = Date.now(),
-      ended = (await boxingSeasonRows_()).filter(x => now >= x.end),
-      results = [];
-    await _asyncArray("forEach", ended, async x => results.push(await runJob('boxing_season',()=>settleBoxingSeason_(x))));
-    const out = {
-      ok: true,
-      checked: ended.length,
-      created: results.reduce((n, x) => n + Number(x?.created || 0), 0),
-      results: results,
-      ranAt: new Date().toISOString(),
-      status: 'BOXING_ENDED_SEASONS_SETTLED'
-    };
-    console.log('===== Boxing Auto Settlement =====');
-    console.log(JSON.stringify(out, null, 2));
-    return out;
-  } finally {
-    await lock.releaseLock();
-  }
-}
-async function boxingPendingRewardSbForAccount_(accountId, preferredSeasonId = '') {
-  const aid = String(accountId || '').trim(),
-    sid = String(preferredSeasonId || '').trim();
-  if (!aid) return null;
-  const rows = await boxingSbQuery_('BoxingRewards', {
-    select: '*',
-    account_id: 'eq.' + aid,
-    order: 'created_at.asc'
-  });
-  const valid = rows.filter(r => ['PENDING', 'PROCESSING'].includes(String(r.status || '').trim().toUpperCase()));
-  if (!valid.length) return null;
-  return (sid ? valid.find(r => String(r.season_id || '').trim() === sid) : null) || valid[0];
-}
-function boxingPendingRewardPublic_(pending) {
-  return pending ? {
-    rewardId: String(pending.reward_id || ''),
-    seasonId: String(pending.season_id || ''),
-    rank: Number(pending.rank) || 0,
-    type: String(pending.reward_type || ''),
-    id: String(pending.reward_id_value || ''),
-    quantity: Number(pending.quantity) || 0
-  } : null;
-}
-async function getBoxingStatus_(body) {
-  ensureBoxingSchema_();
-  const auth = requireAuth_(body.sessionToken),
-    x = await boxingSeason_(body.seasonId),
-    cfg = await boxingConfig_(x);
-  if (!x) return {
-    ok: false,
-    error: 'BOXING_SEASON_NOT_FOUND',
-    message: '尚未設定拳擊機賽季。'
-  };
-  const lock = LockService.getScriptLock();
-  await lock.waitLock(15000);
-  try {
-    await settleBoxingSeason_(x);
-    const rank = await boxingRanking_(x.seasonId, auth.accountId);
-    const pending = await boxingPendingRewardSbForAccount_(auth.accountId, x.seasonId);
-    return {
-      ok: true,
-      machine: cfg,
-      mode: Number(cfg.mode) || 1,
-      season: boxingSeasonPublic_(x),
-      ranking: rank.top10,
-      myRank: rank.myRank,
-      myBest: rank.myBest,
-      pendingReward: boxingPendingRewardPublic_(pending)
-    };
-  } finally {
-    await lock.releaseLock();
-  }
-}
-async function startBoxingChallenge_(body) {
-  ensureBoxingSchema_();
-  const auth = requireAuth_(body.sessionToken),
-    x = await boxingSeason_(),
-    cfg = await boxingConfig_(x);
-  if (!x || Date.now() < x.start || Date.now() >= x.end) return {
-    ok: false,
-    error: 'BOXING_NOT_ACTIVE',
-    message: '目前不在拳擊機挑戰期間。'
-  };
-  const acc = await runtimeAccountById_(auth.accountId),
-    id = 'BXC_' + Utilities.getUuid().replace(/-/g, ''),
-    obj = {
-      ChallengeID: id,
-      SeasonID: x.seasonId,
-      AccountID: auth.accountId,
-      Nickname: String(acc?.Nickname || '冒險者'),
-      StartedAt: new Date().toISOString(),
-      SubmittedAt: '',
-      Damage: 0,
-      Status: 'STARTED'
-    };
-  await boxingSbUpsert_('BoxingAttempts', boxingAttemptSheetToSb_(obj));
-  boxingSheetMirrorSafe_(DB.BOXING_ATTEMPTS, 'ChallengeID', id, obj, 'start:' + id);
-  return {
-    ok: true,
-    challengeId: id,
-    seasonId: x.seasonId,
-    machine: cfg
-  };
-}
-async function submitBoxingChallenge_(body) {
-  // v11.31.71: 拳擊機開始/戰鬥完全前端化；只有玩家主動上傳時才建立 Attempt。
-  // 不再要求先呼叫 boxing/start / STARTED challenge。
-  const auth = requireAuth_(body.sessionToken),
-    x = await boxingSeason_(body.seasonId),
-    cfg = await boxingConfig_(x);
-  if (!x) return {
-    ok: false,
-    error: 'BOXING_SEASON_NOT_FOUND',
-    message: '找不到拳擊機賽季。'
-  };
-  const nowMs = Date.now();
-  if (nowMs < x.start || nowMs >= x.end) return {
-    ok: false,
-    error: 'BOXING_NOT_ACTIVE',
-    message: '目前不在拳擊機挑戰期間。'
-  };
-  const damage = Math.max(0, Math.min(cfg.hp, Math.trunc(Number(body.damage) || 0)));
-  const snapshotObj = body.snapshot && typeof body.snapshot === 'object' && !Array.isArray(body.snapshot) ? body.snapshot : {};
-  const snapshot = JSON.stringify(snapshotObj);
-  if (snapshot.length > 40000) return {
-    ok: false,
-    error: 'BOXING_SNAPSHOT_TOO_LARGE'
-  };
-  const snapshotValid = Object.keys(snapshotObj).length > 0 && (Array.isArray(snapshotObj.equipment) || Array.isArray(snapshotObj.skills) || snapshotObj.talentSpent || snapshotObj.stats);
-  const lock = LockService.getScriptLock();
-  await lock.waitLock(15000);
-  try {
- if(Date.now()<x.start||Date.now()>=x.end)return {ok:false,error:'BOXING_NOT_ACTIVE',message:'目前不在拳擊機挑戰期間。'};
 
-    const now = new Date().toISOString(),
-      id = 'BXC_' + Utilities.getUuid().replace(/-/g, '');
-    const acc = await runtimeAccountById_(auth.accountId);
-    const attempt = {
-      ChallengeID: id,
-      SeasonID: x.seasonId,
-      AccountID: auth.accountId,
-      Nickname: String(acc?.Nickname || '冒險者'),
-      StartedAt: now,
-      SubmittedAt: now,
-      Damage: damage,
-      Status: 'DONE'
-    };
-    await boxingSbUpsert_('BoxingAttempts', boxingAttemptSheetToSb_(attempt));
-    const oldSb = (await boxingSbQuery_('BoxingRanking', {
-      select: '*',
-      season_id: 'eq.' + x.seasonId,
-      account_id: 'eq.' + auth.accountId,
-      limit: 1
-    }))[0];
-    let updated = false;
-    if (!oldSb || damage > Number(oldSb.damage || 0)) {
-      if (!snapshotValid) return {
-        ok: false,
-        error: 'BOXING_SNAPSHOT_REQUIRED',
-        message: '本次紀錄缺少配置資料，請重新挑戰後再登錄。'
-      };
-      const obj = {
-        SeasonID: x.seasonId,
-        AccountID: auth.accountId,
-        Nickname: String(acc?.Nickname || '冒險者'),
-        Damage: damage,
-        SubmittedAt: now,
-        BuildSnapshotJSON: snapshot
-      };
-      await boxingSbUpsert_('BoxingRanking', boxingRankingSheetToSb_(obj));
-      updated = true;
-      invalidateBoxingRankingCache_(x.seasonId);
-    }
-    const rank = await boxingRanking_(x.seasonId, auth.accountId);
-    return {
-      ok: true,
-      challengeId: id,
-      updated,
-      damage,
-      myRank: rank.myRank,
-      myBest: rank.myBest,
-      ranking: rank.top10
-    };
-  } finally {
-    await lock.releaseLock();
-  }
-}
-async function getBoxingRanking_(body) {
-  const auth = requireAuth_(body.sessionToken),
-    x = await boxingSeason_(body.seasonId);
-  if (!x) return {
-    ok: false,
-    error: 'BOXING_SEASON_NOT_FOUND'
-  };
-  const rank = await boxingRanking_(x.seasonId, auth.accountId);
-  const pending = await boxingPendingRewardSbForAccount_(auth.accountId, x.seasonId);
-  return {
-    ok: true,
-    seasonId: x.seasonId,
-    season: boxingSeasonPublic_(x),
-    ranking: rank.top10,
-    myRank: rank.myRank,
-    myBest: rank.myBest,
-    pendingReward: boxingPendingRewardPublic_(pending)
-  };
-}
-async function getBoxingHistory_(body) {
-  ensureBoxingSchema_();
-  requireAuth_(body.sessionToken);
-  const rows = await boxingSeasonRows_();
-  return {
-    ok: true,
-    seasons: await _asyncArray("map", rows, async x => {
-      if (Date.now() > x.end) await settleBoxingSeason_(x);
-      const rank = (await boxingRanking_(x.seasonId, '')).top10;
-      return {
-        ...boxingSeasonPublic_(x),
-        champion: rank[0]?.nickname || '',
-        topDamage: Number(rank[0]?.damage || 0)
-      };
-    })
-  };
-}
+
+
+
+
+
+
+
 // v11.31.20：伺服器交易 receipt。任何「外部紀錄 + PlayerSave」跨表交易，
 // 都先把唯一交易鍵寫進 PlayerSave，再完成外部狀態；重試時依 receipt 判斷是否已實際入帳。
 function serverReceiptBucket_(save, bucket) {
@@ -1717,99 +1280,10 @@ async function verifyReceiptAfterWrite_(accountId, bucket, key) {
     save
   };
 }
-function boxingRewardEquipmentPresent_(save, reward) {
-  if (!save || !reward || String(reward.RewardType || '').toUpperCase() !== 'EQUIPMENT') return false;
-  const templateId = String(reward.RewardIDValue || '').trim();
-  if (!templateId) return false;
-  const inv = Array.isArray(save.inventory) ? save.inventory : [];
-  // 拳擊排名獎勵是固定裝備模板；receipt 存在但 inventory 沒有該模板時視為未真正入帳。
-  return inv.some(it => String(it?.template || it?.templateId || it?.itemId || '') === templateId);
-}
-function boxingRewardActuallyPresent_(save, reward) {
-  if (String(reward?.RewardType || '').toUpperCase() === 'EQUIPMENT') return boxingRewardEquipmentPresent_(save, reward);
-  // 強化石無法只靠目前總量判斷歷史入帳，因此仍以 receipt 作為 STONES 的冪等依據。
-  return hasServerReceipt_(save, 'boxing', reward?.RewardID);
-}
-async function boxingRewardTemplate106_(reward){
- const type=String(reward.type||'').toUpperCase(),id=String(reward.id||'').trim();
- if(type==='EQUIPMENT'){
-  const row=await equipmentRowById_(id);
-  if(!row)throw new Error('BOXING_EQUIPMENT_NOT_FOUND:'+id);
-  return row;
- }
- if(type==='CONSUMABLE'){
-  const row=(await readObjects_('Consumables')).find(r=>String(r.ContentID||r.ConsumableID||r.ItemID||'').trim()===id);
-  if(!row)throw new Error('BOXING_CONSUMABLE_NOT_FOUND:'+id);
-  return row;
- }
- if(type!=='STONES'&&type!=='STONE')throw new Error('BOXING_REWARD_TYPE_UNSUPPORTED:'+type);
- return {Name:'強化石'};
-}
-async function claimBoxingReward_(body){
- ensureBoxingSchema_();
- const auth=requireAuth_(body.sessionToken),seasonId=String(body.seasonId||'').trim(),requestedId=String(body.rewardId||'').trim(),lock=LockService.getScriptLock();
- await lock.waitLock(30000);
- try{
-  // Exact IDs make retries safe even if another season also has a pending prize.
-  const sb=requestedId?(await boxingSbQuery_('BoxingRewards',{select:'*',account_id:'eq.'+auth.accountId,reward_id:'eq.'+requestedId}))[0]:await boxingPendingRewardSbForAccount_(auth.accountId,seasonId);
-  if(!sb)return {ok:false,error:'BOXING_REWARD_NOT_FOUND',message:'沒有可領取的拳擊機排名獎勵。'};
-  const reward=boxingRewardSbToObj_(sb),rewardId=reward.RewardID,status=String(reward.Status).toUpperCase();
-  if(String(reward.AccountID)!==String(auth.accountId))throw new Error('BOXING_REWARD_ACCOUNT_MISMATCH');
-  if(!rewardId||!['PENDING','PROCESSING','CLAIMED'].includes(status))throw new Error('BOXING_REWARD_STATUS_INVALID');
-  const saveRec=await findRowByValue_(DB.SAVES,'AccountID',auth.accountId);
-  if(!saveRec)return {ok:false,error:'SAVE_NOT_FOUND'};
-  let save=await parseSaveRecord_(saveRec),revision=Number(saveRec.Revision)||1,repaired=false;
-  const receiptExists=hasServerReceipt_(save,'boxing',rewardId),type=String(reward.RewardType).toUpperCase(),q=Number(reward.Quantity),id=reward.RewardIDValue;
-  let text=(id==='luckyBox'?'神運寶盒':type==='STONES'||type==='STONE'?'強化石':id)+' ×'+q;
-  if(body.confirmOnly===true&&!receiptExists)return {ok:false,error:'BOXING_CLAIM_UNCONFIRMED'};
-  if(status==='CLAIMED'&&!receiptExists)throw new Error('BOXING_REWARD_RECEIPT_MISSING');
-  // Retain legacy pending-equipment repair; a claimed or spent reward is never reissued.
-  const repairEquipment=body.confirmOnly!==true&&receiptExists&&status!=='CLAIMED'&&type==='EQUIPMENT'&&!boxingRewardEquipmentPresent_(save,reward);
-  if(!receiptExists||repairEquipment){
-   requireTransactionSaveRevision_(body,saveRec);
-   if(!Number.isSafeInteger(q)||q<(type==='STONES'||type==='STONE'?0:1)||q>(type==='CONSUMABLE'?999999:2147483647)||type==='EQUIPMENT'&&q!==1)throw new Error('BOXING_REWARD_QUANTITY_INVALID');
-   const row=await boxingRewardTemplate106_({type,id});
-   text=String(row.Name||id)+' ×'+q;
-   if(type==='EQUIPMENT'){
-    if(!boxingRewardEquipmentPresent_(save,reward)){
-     save.inventory=Array.isArray(save.inventory)?save.inventory:[];
-     save.inventory.push(makeEquipmentInstanceFromRow_(row));
-     repaired=receiptExists;
-    }
-   }else if(type==='CONSUMABLE'){
-    const bag=id==='legendaryHammer'?save.enhancementItems:save.consumables;
-    if(bag!=null&&(typeof bag!=='object'||Array.isArray(bag)))throw new Error('BOXING_CONSUMABLE_BAG_INVALID');
-    const count=Number(bag?.[id]??0);
-    if(!Number.isSafeInteger(count)||count<0||!Number.isSafeInteger(count+q)||count+q>2147483647)throw new Error('BOXING_CONSUMABLE_COUNT_INVALID');
-    if(id==='legendaryHammer')save.enhancementItems={...(bag||{}),[id]:count+q};
-    else{
-     save.consumables={...(bag||{}),[id]:count+q};
-     if(['redPotion','eyeDrops','sacrificeGoat','poisonItem'].includes(id)){
-      save.skillsOwned=Array.isArray(save.skillsOwned)?save.skillsOwned:[];
-      if(!save.skillsOwned.includes(id))save.skillsOwned.push(id);
-     }
-    }
-   }else{
-    const count=Number(save.stones??save.enhanceStones??0);
-    if(!Number.isSafeInteger(count)||count<0||!Number.isSafeInteger(count+q))throw new Error('BOXING_STONE_COUNT_INVALID');
-    save.stones=count+q;save.enhanceStones=save.stones;
-   }
-   const processing={...reward,Status:'PROCESSING',ClaimedAt:''};
-   await boxingSbUpsert_('BoxingRewards',boxingRewardSheetToSb_(processing));
-   if(!receiptExists)addServerReceipt_(save,'boxing',rewardId);
-   await writeFullSave_(auth.accountId,revision+1,save);
-   const verified=await verifyReceiptAfterWrite_(auth.accountId,'boxing',rewardId);
-   save=verified.save;revision=Number(verified.rec.Revision)||revision+1;
-   if(type==='EQUIPMENT'&&!boxingRewardEquipmentPresent_(save,reward))throw new Error('BOXING_REWARD_EQUIPMENT_VERIFY_FAILED:'+rewardId);
-  }
-  if(status!=='CLAIMED'){
-   const claimed={...reward,Status:'CLAIMED',ClaimedAt:new Date().toISOString()};
-   await boxingSbUpsert_('BoxingRewards',boxingRewardSheetToSb_(claimed));
-   boxingSheetMirrorSafe_(DB.BOXING_REWARDS,'RewardID',rewardId,claimed,'reward-claimed:'+rewardId);
-  }
-  return {ok:true,accountId:auth.accountId,seasonId:reward.SeasonID,rewardId,rewardText:text,duplicate:receiptExists&&!repaired,repaired,revision,save};
- }finally{await lock.releaseLock();}
-}
+
+
+
+
 
 // ------------------------------
 // Redeem Codes v11.14.0
@@ -3948,125 +3422,38 @@ async function auctionSbRequest_(method, query, payload, prefer) {
  */
 
 // ============================================================
-// v11.31.42 Boxing Supabase Shadow Migration / Audit
 // Google Sheet remains Primary in this version.
-// Only migrates/verifies BoxingAttempts / BoxingRanking / BoxingRewards.
-// BoxingMachine_SCHEMA and BoxingSeasons_SCHEMA remain in Google Sheet.
 // ============================================================
-function boxingSbHeaders_() {
-  const cfg = supabaseConfig_();
-  return {
-    apikey: cfg.key,
-    Authorization: 'Bearer ' + cfg.key
-  };
-}
-// v11.31.43b: Boxing Shadow Write (safe scope only).
-// IMPORTANT: boxing/status, boxing/history, settleBoxingSeason_, BoxingMachine_SCHEMA and BoxingSeasons_SCHEMA are untouched.
+
 // Google Sheet remains authoritative. Supabase mirror failure is log-only and never changes the API result.
-async function boxingSbUpsert_(table, row) {
-  const cfg = supabaseConfig_();
-  const res = await UrlFetchApp.fetch(cfg.url + '/rest/v1/' + table, {
-    method: 'post',
-    contentType: 'application/json',
-    headers: {
-      apikey: cfg.key,
-      Authorization: 'Bearer ' + cfg.key,
-      Prefer: 'resolution=merge-duplicates,return=minimal'
-    },
-    payload: JSON.stringify(row),
-    muteHttpExceptions: true
-  });
-  const status = res.getResponseCode(),
-    text = res.getContentText();
-  if (status < 200 || status >= 300) throw new Error('SUPABASE_BOXING_UPSERT_' + table + '_HTTP_' + status + ': ' + text);
-  return true;
-}
-function boxingNullableIso_(v) {
-  if (v === null || v === undefined || String(v).trim() === '') return null;
-  if (v instanceof Date && !isNaN(v.getTime())) return v.toISOString();
-  const d = new Date(v);
-  return isNaN(d.getTime()) ? String(v) : d.toISOString();
-}
-function boxingJsonValue_(v) {
-  if (v === null || v === undefined || String(v).trim() === '') return null;
-  if (typeof v === 'object') return v;
-  try {
-    return JSON.parse(String(v));
-  } catch (_e) {
-    return String(v);
-  }
-}
-function boxingAttemptSheetToSb_(r) {
-  return {
-    challenge_id: String(r.ChallengeID || ''),
-    season_id: String(r.SeasonID || ''),
-    account_id: String(r.AccountID || ''),
-    nickname: String(r.Nickname || ''),
-    started_at: boxingNullableIso_(r.StartedAt),
-    submitted_at: boxingNullableIso_(r.SubmittedAt),
-    damage: Math.trunc(Number(r.Damage) || 0),
-    status: String(r.Status || 'STARTED')
-  };
-}
-function boxingRankingSheetToSb_(r) {
-  return {
-    season_id: String(r.SeasonID || ''),
-    account_id: String(r.AccountID || ''),
-    nickname: String(r.Nickname || ''),
-    damage: Math.trunc(Number(r.Damage) || 0),
-    submitted_at: boxingNullableIso_(r.SubmittedAt),
-    build_snapshot_json: boxingJsonValue_(r.BuildSnapshotJSON)
-  };
-}
-function boxingRewardSheetToSb_(r) {
-  return {
-    reward_id: String(r.RewardID || ''),
-    season_id: String(r.SeasonID || ''),
-    account_id: String(r.AccountID || ''),
-    nickname: String(r.Nickname || ''),
-    rank: Math.trunc(Number(r.Rank) || 0),
-    reward_type: String(r.RewardType || ''),
-    reward_id_value: String(r.RewardIDValue || ''),
-    quantity: Math.trunc(Number(r.Quantity) || 0),
-    status: String(r.Status || 'PENDING'),
-    created_at: boxingNullableIso_(r.CreatedAt),
-    claimed_at: boxingNullableIso_(r.ClaimedAt)
-  };
-}
 
-// v11.31.43b verification: compare Sheet primary with Supabase mirror after a real Boxing run.
 
-// v11.31.44 verification: focused BoxingRewards mirror check.
+
+
+
+
+
+
 
 // ============================================================
-// v11.31.45 Boxing Reward Shadow Test Tool
-// TEST ONLY: verifies BoxingRewards Sheet -> Supabase mirror states.
 // Does NOT grant equipment/stones, modify PlayerSave, or create receipts.
 // Test identity is stored in Script Properties so each step targets the same row.
 // ============================================================
-const BOXING_REWARD_SHADOW_TEST_PROP_ = 'BOXING_REWARD_SHADOW_TEST_IDS_V113145';
+
 // ============================================================
-// v11.31.46 Boxing REAL Reward Claim Integration Test
 // PURPOSE: create one tiny real STONES reward for a chosen existing account,
-// then claim it through the NORMAL boxing/reward/claim API from the game client.
-// This DOES modify PlayerSave by +1 stone and writes a real boxing receipt.
-// It never changes BoxingSeasons_SCHEMA / BoxingRanking_SCHEMA.
-// IMPORTANT: set BOXING_REAL_REWARD_TEST_ACCOUNT_ID_ to your test AccountID before running prepare.
 // ============================================================
-const BOXING_REAL_REWARD_TEST_ACCOUNT_ID_ = ''; // <-- 貼上「測試帳號」AccountID；不可使用正式玩家帳號
-const BOXING_REAL_REWARD_TEST_PROP_ = 'BOXING_REAL_REWARD_CLAIM_TEST_V113146';
+ // <-- 貼上「測試帳號」AccountID；不可使用正式玩家帳號
+
 
 // ============================================================
-// v11.31.47 Boxing Supabase Primary smoke/audit helper
 // ============================================================
 
 // ============================================================
-// v11.31.48 Boxing Supabase -> Google Sheet Snapshot Backup
 // Replaces only the three Runtime backup sheets. Planning/config sheets are untouched.
 // ============================================================
 
 // ============================================================
-// v11.31.49 Boxing Daily Snapshot Trigger final verification
 // Runtime remains Supabase Primary; this only manages/verifies the daily Sheet backup trigger.
 // ============================================================
 
@@ -5585,7 +4972,7 @@ const QUEST_EGGS368={chickEgg368:'chick',spiritDeerEgg368:'spiritDeer',ragdollEg
 function questEnabled368(x){return x&&x.Enabled!==false&&String(x.Enabled).toLowerCase()!=='false';}
 function questRows368(data,key){return Array.isArray(data?.[key])?data[key]:[];}
 function questGoals368(data,id){return questRows368(data,'QuestObjectives').filter(x=>x.QuestID===id);}
-function questConfigured368(data,id){const goals=questGoals368(data,id);return goals.length>0&&goals.every(g=>{if(!Number.isSafeInteger(Number(g.Quantity))||Number(g.Quantity)<1)return false;if(!['dialogue','deliver_equipment','deliver_gem','battle','enhance','enhance_success','enhance_level','socket','main_clear','craft','kill'].includes(g.Type))return false;const id=String(g.TargetID||'').trim();if(['deliver_equipment','deliver_gem','kill','main_clear','craft','battle'].includes(g.Type)&&!id)return false;const table=({deliver_equipment:['Equipment','ItemID'],deliver_gem:['Gems','GemID'],kill:['Enemies','EnemyID']})[g.Type];if(table&&Array.isArray(data[table[0]])&&!data[table[0]].some(x=>String(x[table[1]])===id&&questEnabled368(x)))return false;if(g.Type==='main_clear'&&(!Number.isSafeInteger(Number(id))||Number(id)<1))return false;if(g.Type==='battle'&&!['main','dungeon','boxing','worldboss','arena'].includes(id))return false;return true;});}
+function questConfigured368(data,id){const goals=questGoals368(data,id);return goals.length>0&&goals.every(g=>{if(!Number.isSafeInteger(Number(g.Quantity))||Number(g.Quantity)<1)return false;if(!['dialogue','deliver_equipment','deliver_gem','battle','enhance','enhance_success','enhance_level','socket','main_clear','craft','kill'].includes(g.Type))return false;const id=String(g.TargetID||'').trim();if(['deliver_equipment','deliver_gem','kill','main_clear','craft','battle'].includes(g.Type)&&!id)return false;const table=({deliver_equipment:['Equipment','ItemID'],deliver_gem:['Gems','GemID'],kill:['Enemies','EnemyID']})[g.Type];if(table&&Array.isArray(data[table[0]])&&!data[table[0]].some(x=>String(x[table[1]])===id&&questEnabled368(x)))return false;if(g.Type==='main_clear'&&(!Number.isSafeInteger(Number(id))||Number(id)<1))return false;if(g.Type==='battle'&&!['main','dungeon','worldboss','arena'].includes(id))return false;return true;});}
 function questUnlocked368(q,save,states){if(!questEnabled368(q)||q.Prerequisite&&!states[q.Prerequisite]?.completed)return false;const n=Number(q.ConditionValue)||0;return q.ConditionType==='level'?Number(save.level)>=n:q.ConditionType==='main'?Number(save.maxCleared)>=n:['town','quest'].includes(q.ConditionType);}
 function questMetricKey368(g){return [g.Type,g.TargetID||'*',g.Slot||'*'].join(':');}
 function questMetric368(g,save,metrics){if(g.Type==='kill')return Number(save.enemyDefeatCounts?.[g.TargetID]||0);if(g.Type==='main_clear')return Number(save.maxCleared)>=Number(g.TargetID)?Number(g.Quantity):0;if(g.Type==='enhance_level')return (save.inventory||[]).filter(i=>(!g.TargetID||i.template===g.TargetID)&&(!g.Slot||i.slot===g.Slot)&&Number(i.enhance)>=Number(g.MinEnhance)).length;return Number(metrics[questMetricKey368(g)]||0);}
@@ -5611,20 +4998,8 @@ async function questReward368(data,save,r){const qty=Number(r.Quantity);if(!Numb
  else throw Error('QUEST_REWARD_INVALID');
 }
 // Quest-only run receipts. No score/ranking writes and no PlayerSave mutation.
-function questBoxingCompletion379(body){
- const c=body.completion;
- if(!c||typeof c!=='object'||Array.isArray(c)||!['turn_limit','machine_defeated','player_dead'].includes(c.reason)||!Number.isSafeInteger(c.turn)||c.turn<1||!Number.isFinite(c.enemyHp)||c.enemyHp<0||!Number.isFinite(c.playerHp)||c.playerHp<0)throw Error('QUEST_BOXING_INVALID');
- return {reason:c.reason,turn:c.turn,enemyHp:c.enemyHp,playerHp:c.playerHp};
-}
-async function questBoxingApi379(body){
- const auth=requireAuth_(body.sessionToken),run=String(body.runId||'');
- if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(run))throw Error('QUEST_BOXING_INVALID');
- if(body.action==='quest/boxing-finish')return secureRpc78('game_boxing_quest_finish379',{p_account:auth.accountId,p_run:run,p_completion:questBoxingCompletion379(body)});
- if(body.action!=='quest/boxing-start')throw Error('QUEST_BOXING_INVALID');
- const season=await boxingSeason_(body.seasonId);if(!season)throw Error('QUEST_BOXING_SEASON_MISSING');
- const cfg=await boxingConfig_(season),now=Date.now();
- return secureRpc78('game_boxing_quest_start379',{p_account:auth.accountId,p_run:run,p_season:season.seasonId,p_turns:Number(cfg.maxTurns||3),p_hp:Number(cfg.hp),p_active:now>=season.start&&now<season.end});
-}
+
+
 
 /* Resumable records are not live-combat locks. Only authenticated, owned runs renew a short lease. */
 async function questActivity392(body){
@@ -5646,7 +5021,7 @@ async function questActivity392(body){
  return secureRpc78('game_quest_activity392',{p_account:auth.accountId,p_session:sessionHash,p_mode:mode,p_run:runId,p_active:body.active});
 }
 
-async function questApi368(body){if(body.action==='quest/activity')return questActivity392(body);if(['quest/boxing-start','quest/boxing-finish'].includes(body.action))return questBoxingApi379(body);const auth=requireAuth_(body.sessionToken),data=questData368(),bundle=await secureRpc78('game_quest_read368',{p_account:auth.accountId});
+async function questApi368(body){if(body.action==='quest/activity')return questActivity392(body);const auth=requireAuth_(body.sessionToken),data=questData368(),bundle=await secureRpc78('game_quest_read368',{p_account:auth.accountId});
  const save=bundle.save,states=bundle.states,metrics=bundle.metrics;
  const catalog=()=>({ok:true,accountId:auth.accountId,quests:data.Quests.map(q=>({...q,status:questStatus368(data,q,save,states,metrics),objectives:questGoals368(data,q.QuestID).map(g=>({...g,progress:questProgress368(g,save,metrics,states[q.QuestID])})),autoSeen:!!states[q.QuestID]?.seen})),states,metrics,data:Object.fromEntries(Object.keys(QUEST_DEFAULT368).map(k=>[k,data[k]])),revision:bundle.revision});
  if(body.action==='quest/status')return catalog();
@@ -5937,10 +5312,10 @@ async function dispatchGate411_(body){
  const auth=requireAuth_(body.sessionToken),rec=await findRowByValue_(DB.SAVES,'AccountID',auth.accountId);
  if(!rec)return;
  const save=await parseSaveRecord_(rec);if(Number(save.mainProgressEpoch)!==411)throw Error('MAIN_PROGRESS_VERSION_CHANGED');
- const action=String(body.action||''),mode=action.startsWith('relic/')?'Relic':action.startsWith('extreme/')?'Extreme':action.startsWith('arena/')?'Arena':action.startsWith('worldboss/')?'WorldBoss':/boxing/.test(action)?'Boxing':body.selection?.mode==='dungeon'?'Dungeon':null;
+ const action=String(body.action||''),mode=action.startsWith('relic/')?'Relic':action.startsWith('extreme/')?'Extreme':action.startsWith('arena/')?'Arena':action.startsWith('worldboss/')?'WorldBoss':body.selection?.mode==='dungeon'?'Dungeon':null;
  if(mode&&Number(save.maxCleared||0)<Number(RPG411.cfg(EDGE_PLANNING.data,mode+'UnlockFloor',999)))throw Error('MODE_NOT_UNLOCKED');
 }
-return {dispatch:async(body)=>(await dispatchGate411_(body), dispatch411_(body)),read:async(body)=>doGet({parameter:body}),initialSave:makeInitialSave_,legacyHash:hashPassword_,boxingJobs:async()=>({boxing:await settleEndedBoxingSeasons()}),jobs:async()=>({boxing:await settleEndedBoxingSeasons(),worldboss:await runJob('worldboss_cleanup',()=>cleanupExpiredWorldBossData())})};
+return {dispatch:async(body)=>(await dispatchGate411_(body), dispatch411_(body)),read:async(body)=>doGet({parameter:body}),initialSave:makeInitialSave_,legacyHash:hashPassword_,jobs:async()=>({worldboss:await runJob('worldboss_cleanup',()=>cleanupExpiredWorldBossData())})};
 async function dispatch411_(body){return String(body.action||'').startsWith('quest/')?questApi368(body):String(body.action||'').startsWith('chaos/')?chaosApi332(body):String(body.action||'').startsWith('pet/')?petApi297(body):String(body.action||'').startsWith('relic/')?relic144Api(body):String(body.action||'').startsWith('extreme/')?extreme130Api(body):["battle/status","battle/cancel"].includes(body.action)?secureRecovery79(body):["battle/start","battle/finish"].includes(body.action)?secureBattle78(body):doPost({postData:{contents:JSON.stringify(body)}});}
 }
 
@@ -6147,22 +5522,9 @@ state.base={hp:cfgNum('BaseHP',100),def:cfgNum('BaseDEF',0),patk:cfgNum('BasePAT
 
 // v446: only audited read paths bypass the legacy cross-player mutation lease.
 // v453: full dependency audit and response-parity tests; writes remain serialized.
-const readOnlyActions453 = new Set(['arena/ranking','arena/revenge/list','arena/reports','boxing/ranking','worldboss/ranking','auction/my-sales']);
+const readOnlyActions453 = new Set(['arena/ranking','arena/revenge/list','arena/reports','worldboss/ranking','auction/my-sales']);
 const readActions446 = new Set(['battle/status', 'quest/status', 'chaos/catalog', ...readOnlyActions453]);
-const traceActions446 = new Set([
- 'health','leaderboard','data/version','data/bootstrap','profile/avatar/get','profile/avatar/set','profile/nickname',
- 'save/get','save/set','auction/list','auction/create','auction/cancel','auction/buy','auction/my-sales','auction/claim',
- 'battle/status','battle/cancel','battle/start','battle/finish','worldboss/status','worldboss/ranking','worldboss/reward/check',
- 'worldboss/start','worldboss/submit','worldboss/chest/open','redeem/claim','login-gift/status','login-gift/checkin','login-gift/ack',
- 'mist/status','mist/join','mist/respawn','mist/move','mist/flag','mist/unflag','mist/hide','mist/chest/open','mist/chest/confirm','mist/loot/take','mist/loot/discard','mist/equip','mist/unequip','mist/discard','mist/gem/insert','mist/gem/remove','mist/skills','mist/forge','mist/supply','mist/reports/read','mist/battle/start','mist/battle/turn','mist/battle/leave','mist/reward/claim','achievement/claim','boxing/status','boxing/ranking','boxing/start','boxing/submit','boxing/history','boxing/reward/claim',
- 'arena/status','arena/defense/upload','arena/matches','arena/battle/start','arena/battle/submit','arena/revenge/list','arena/reports',
- 'arena/ranking','arena/reward/claim','quest/status','quest/activity','quest/boxing-start','quest/boxing-finish','quest/openEgg',
- 'quest/seen','quest/accept','quest/claim','chaos/catalog','chaos/open','system/tick','system/boxingTick',
- 'pet/buy','pet/equip','pet/lock','pet/meta','pet/open','pet/potion','pet/recover-buy','pet/release','pet/train',
- 'extreme/status','extreme/start','extreme/progress','extreme/claim',
- 'relic/status','relic/start','relic/equip','relic/battle','relic/progress','relic/victory','relic/death',
- 'relic/choose','relic/reveal','relic/advance','relic/camp','relic/retreat'
-]);
+const traceActions446 = new Set(['health','leaderboard','data/version','data/bootstrap','profile/avatar/get','profile/avatar/set','profile/nickname','save/get','save/set','auction/list','auction/create','auction/cancel','auction/buy','auction/my-sales','auction/claim','battle/status','battle/cancel','battle/start','battle/finish','worldboss/status','worldboss/ranking','worldboss/reward/check','worldboss/start','worldboss/submit','worldboss/chest/open','redeem/claim','login-gift/status','login-gift/checkin','login-gift/ack','mist/status','mist/join','mist/respawn','mist/move','mist/flag','mist/unflag','mist/hide','mist/chest/open','mist/chest/confirm','mist/loot/take','mist/loot/discard','mist/equip','mist/unequip','mist/discard','mist/gem/insert','mist/gem/remove','mist/skills','mist/forge','mist/supply','mist/reports/read','mist/battle/start','mist/battle/turn','mist/battle/leave','mist/reward/claim','achievement/claim','arena/status','arena/defense/upload','arena/matches','arena/battle/start','arena/battle/submit','arena/revenge/list','arena/reports','arena/ranking','arena/reward/claim','quest/status','quest/activity','quest/openEgg','quest/seen','quest/accept','quest/claim','chaos/catalog','chaos/open','system/tick','pet/buy','pet/equip','pet/lock','pet/meta','pet/open','pet/potion','pet/recover-buy','pet/release','pet/train','extreme/status','extreme/start','extreme/progress','extreme/claim','relic/status','relic/start','relic/equip','relic/battle','relic/progress','relic/victory','relic/death','relic/choose','relic/reveal','relic/advance','relic/camp','relic/retreat']);
 const activeRequests446 = new Map();
 export function makeGameApi(env,fetcher=fetch){return async req=>{
  const owner=crypto.randomUUID(),started=Date.now();
@@ -6190,7 +5552,7 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
   action=traceActions446.has(body.action)?body.action:'unknown';phase='authenticate';
   activeRequests446.set(owner,()=>({trace_id:owner,action,phase,elapsed_ms:Date.now()-started,held:lease.held}));
   trace('request_started');
-  const cron=body.action==='system/tick'||body.action==='system/boxingTick';
+  const cron=body.action==='system/tick';
   const publicActions=new Set(['health','auction/list','data/version','data/bootstrap','leaderboard']);
   let actor=null,token=req.headers.get('Authorization')?.replace(/^Bearer\s+/i,'')||body.sessionToken||'';
   if(cron){if(!env('GAME_CRON_SECRET')||req.headers.get('x-game-cron-secret')!==env('GAME_CRON_SECRET'))return reply(403,{ok:false,error:'FORBIDDEN'});}
@@ -6283,7 +5645,7 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
    }
   };
   const engine=makeEngine({base,key,token,actor,planning:plans[0].data_json,privateConfig:Object.fromEntries(privateRows.map(x=>[x.name,x.rows])),fetcher,guard,runJob,readTimeoutMs:cron?5000:15000,readOnly:readOnlyActions453.has(body.action)});
-  if(cron)return reply(200,{ok:true,...await (body.action==='system/boxingTick'?engine.boxingJobs():engine.jobs())});
+  if(cron)return reply(200,{ok:true,...await engine.jobs()});
   const data=await (publicActions.has(body.action)?engine.read(body):engine.dispatch(body));
   return reply(200,data);
  }catch(err){

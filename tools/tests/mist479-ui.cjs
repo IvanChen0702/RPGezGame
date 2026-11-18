@@ -26,6 +26,10 @@ try{for(const [width,height,view]of [[1440,900,'desktop'],[390,844,'mobile'],[36
  await p.waitForFunction(()=>document.querySelector('.self canvas')?.dataset.painted==='true');
  assert.equal(await p.getByRole('progressbar',{name:'體力',exact:true}).getAttribute('aria-valuenow'),'12');
  assert.equal(await p.locator('.mist-energy479>svg').count(),1);
+ const resourceSizes=await p.evaluate(()=>({hp:document.querySelector('.mist-hp474').getBoundingClientRect().height,energy:document.querySelector('.mist-energy-track479').getBoundingClientRect().height,top:document.querySelector('.mist-map-scroll465').getBoundingClientRect().top-document.querySelector('.mist-top465').getBoundingClientRect().top}));
+ assert.equal(resourceSizes.hp,resourceSizes.energy,'HP and stamina have exactly equal outer height');
+ if(view==='mobile')assert.ok(resourceSizes.top<260,'mode controls stay compact: '+JSON.stringify(resourceSizes));
+
  assert.equal(await p.locator('[data-flag-clock479]').count(),4);
  const timers=await p.locator('[data-flag-clock479]').allTextContents();assert.ok(timers.every(s=>/01:29:|01:30:/.test(s)));
  assert.equal(await p.locator('.mist-cell465[data-x="7"][data-y="5"] img').count(),0,'unspawned monster has no image');

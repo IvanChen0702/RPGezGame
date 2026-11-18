@@ -540,7 +540,7 @@ function attackEvasion281_(actor=null){
  for(const source of sources)if(source.rate>0&&Math.random()<source.rate)return source;
  return null;
 }
-function petAllowed297(){return !(typeof readyRoom24_!=='undefined'&&['arena','boxing'].includes(readyRoom24_?.kind||readyRoom24_?.mode))&&!petSuppress297&&!state.currentBattle?.boxingMachine&&state.page!=='arenaBattle'&&state.page!=='boxing'&&!String(state.page||'').startsWith('arena');}
+function petAllowed297(){return !(typeof readyRoom24_!=='undefined'&&['arena'].includes(readyRoom24_?.kind||readyRoom24_?.mode))&&!petSuppress297&&state.page!=='arenaBattle'&&!String(state.page||'').startsWith('arena');}
 let readyRoom24_=null;
 let petSuppress297=false;
 function petActiveTraits297(){return petAllowed297()?petTraits297(state):[];}

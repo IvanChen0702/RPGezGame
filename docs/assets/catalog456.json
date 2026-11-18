@@ -909,18 +909,6 @@
       "sha256": "ff78d1401d96428ded5a0716e48479dc520b695c9f2975ea8f2c1ba9ba484b7f"
     },
     {
-      "path": "assets/images/backgrounds/battle/mobile/boxing.webp",
-      "previous": "assets/images/enemies/boxing-6f54777480.webp",
-      "bytes": 514458,
-      "sha256": "6f54777480d8aa9f6d95b1b668a31cf74727fa293e41ac0f59438b4797860448"
-    },
-    {
-      "path": "assets/images/characters/enemies/special/boxing_dummy-f0b4af0399.webp",
-      "previous": "assets/images/enemies/boxing_dummy-f0b4af0399.webp",
-      "bytes": 9678,
-      "sha256": "f0b4af03992a8d32129fcbd95a230c8789328e4b957e31cf94ad5ac9932ae2e1"
-    },
-    {
       "path": "assets/images/backgrounds/battle/mobile/dungeon.webp",
       "previous": "assets/images/enemies/dungeon-a33a7b5180.webp",
       "bytes": 407814,
@@ -3783,12 +3771,6 @@
       "sha256": "4389133069296a8d79711346f8c25ffba99fac4630825e0571b6c4179ffb763c"
     },
     {
-      "path": "assets/images/backgrounds/mode-entries/boxing.webp",
-      "previous": "assets/images/mode-entries422/boxing.webp",
-      "bytes": 103986,
-      "sha256": "696a374c7564cd39afd964acc47a806c02b18fd8fb6d98aa74a679cb93e81c03"
-    },
-    {
       "path": "assets/images/backgrounds/mode-entries/dungeon.webp",
       "previous": "assets/images/mode-entries422/dungeon.webp",
       "bytes": 139594,
@@ -3817,12 +3799,6 @@
       "previous": "assets/images/mode-hubs413/arena.webp",
       "bytes": 388282,
       "sha256": "05cbb9be11f1666ee1500027d12e9c077b5a7f6b41e407f7f98543a54f3b7872"
-    },
-    {
-      "path": "assets/images/backgrounds/mode-hubs/boxing.webp",
-      "previous": "assets/images/mode-hubs413/boxing.webp",
-      "bytes": 470440,
-      "sha256": "92c2f451b810fa17eaa4362b984f029e766eabded8c02817d09da90724afaa54"
     },
     {
       "path": "assets/images/backgrounds/mode-hubs/dungeon.webp",
@@ -5689,12 +5665,6 @@
       "previous": null,
       "bytes": 506428,
       "sha256": "71eb7dd5cc97c9cb49ac45a4627ba4d5690ba31a87c4f14f7b3032c9612a7f63"
-    },
-    {
-      "path": "assets/images/backgrounds/battle/desktop/boxing-456.webp",
-      "previous": null,
-      "bytes": 457670,
-      "sha256": "990e5e83b979be745b1050792267528e8084f5393e1308824f7d3565d36948ec"
     },
     {
       "path": "assets/images/backgrounds/battle/desktop/castle-456.webp",

@@ -77,12 +77,6 @@
     "height": 887,
     "floorY": 0.74
   },
-  "boxing": {
-    "src": "assets/images/backgrounds/battle/desktop/boxing-456.webp",
-    "width": 1774,
-    "height": 887,
-    "floorY": 0.74
-  },
   "dungeon": {
     "src": "assets/images/backgrounds/battle/desktop/dungeon-456.webp",
     "width": 1774,

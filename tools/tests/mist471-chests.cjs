@@ -29,11 +29,10 @@ try{for(const [view,width,height] of [['desktop',1440,900],['mobile',390,844]]){
  await p.locator('#mistChest471 [data-retry471]').click();await p.waitForSelector('#mistChest471',{state:'detached'});
  assert.deepEqual(new Set(Object.values(input.world.players['preview-adventurer'].equipment).map(x=>x.id)),new Set(ids));
  assert.equal(input.world.players['preview-adventurer'].energy,10);
- // Respawn uses a fresh private starter and the first board click opens it without movement.
+ // Confirming respawn immediately opens the fresh private starter, without another button.
  let player=input.world.players['preview-adventurer'];player.runtime.dead=true;player.runtime.starter=null;player.equipment={};player.inventory={equipment:[],gems:[],chests:[]};player.pending_loot=[];player.hp=0;
  await p.evaluate(()=>refreshMist465_());await p.evaluate(()=>mistCommand465_('respawn'));
- assert.equal(await p.locator('#mistChest471').count(),0,'respawn itself waits for first board interaction');
- await p.evaluate(()=>mistTab465_('map'));await p.waitForSelector('#mistChest471');await p.locator('#mistChest471 .g431-skip').click();await p.locator('#mistChest471 [data-keep471]').click();await p.waitForSelector('#mistChest471',{state:'detached'});
+ await p.waitForSelector('#mistChest471');assert.equal(await p.getByRole('button',{name:'開啟補給箱',exact:true}).count(),0);await p.waitForSelector('#mistChest471');await p.locator('#mistChest471 .g431-skip').click();await p.locator('#mistChest471 [data-keep471]').click();await p.waitForSelector('#mistChest471',{state:'detached'});
  assert.equal(input.world.players['preview-adventurer'].inventory.equipment.length,4);
  input.now='2026-11-16T01:31:00Z';await call('mist/status');
  const monster=input.world.cells.find(x=>x.kind==='monster'),me=input.world.cells.find(x=>x.kind==='player'&&x.owner_account==='preview-adventurer');
