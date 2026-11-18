@@ -4419,7 +4419,7 @@ html.mobile-ui .prepare-player-panel .stat-talent-main>div:last-child>b{font-siz
 html.mobile-ui .prepare-player-panel .stat-talent-main>div:last-child>.small{font-size:8px!important}
 html.mobile-ui .prepare-player-panel .stat-talent-row>div:last-child{gap:3px!important}
 html.mobile-ui .prepare-player-panel .stat-plus-btn{width:27px!important;min-width:27px!important;height:27px!important;min-height:27px!important;padding:0!important;font-size:12px!important}
-html.mobile-ui .prepare-player-panel .stat-plus-btn[onclick$=",10)"]{width:32px!important;min-width:32px!important;font-size:9px!important}
+html.mobile-ui .prepare-player-panel .stat-plus-btn.talent-batch486{width:32px!important;min-width:32px!important;font-size:9px!important}
 html.mobile-ui .prepare-player-panel .talent-reset-box{margin-top:5px!important;padding:5px 0 0!important}
 html.mobile-ui .prepare-player-panel .talent-reset-box .between{gap:5px!important;align-items:center;flex-wrap:nowrap}
 html.mobile-ui .prepare-player-panel .talent-reset-box b{font-size:10px!important}
@@ -19505,7 +19505,10 @@ function talentAllocatedBonus_(key){
   if(key==='hp')return spent*10;
   return spent;
 }
+// Batch size follows unspent points; the existing single-point action is unchanged.
+function talentBatch486_(remaining){return Number(remaining)>500?99:Number(remaining)>200?50:10;}
 function prepareTalentRow(key,label,value,detail,readOnly=false){
+  const batch=talentBatch486_(state.talent);
   const canAdd=(state.talent||0)>0 && !activeBattleNow();
   const allocated=readOnly?0:talentAllocatedBonus_(key);
   const suffix=key==='crit'?'%':'';
@@ -19517,7 +19520,7 @@ function prepareTalentRow(key,label,value,detail,readOnly=false){
     </div>
     ${readOnly?'':`<div class="talent-actions310">
       <button class="stat-plus-btn" ${canAdd?'':'disabled'} onclick="spendTalent('${key}',1)">＋</button>
-      <button class="stat-plus-btn" style="width:auto;min-width:48px;font-size:10.5px" ${canAdd&&Number(state.talent||0)>=10?'':'disabled'} onclick="spendTalent('${key}',10)">＋10</button>
+      <button class="stat-plus-btn talent-batch486" style="width:auto;min-width:48px;font-size:10.5px" ${canAdd&&Number(state.talent||0)>=batch?'':'disabled'} onclick="spendTalent('${key}',${batch})">＋${batch}</button>
     </div>`}
   </div>`;
 }
@@ -25603,7 +25606,7 @@ function arenaTalentLeft_(){return Math.max(0,arenaTalentTotal_()-arenaTalentUse
 function arenaStats_(){return arenaStatsFrom_(null,arenaEquipmentSnapshot_())}
 function arenaSpend_(k,n){const d=arenaDraft_(),v=Number(d.talentSpent[k]||0);if(n>0&&arenaTalentLeft_()<n)return;d.talentSpent[k]=Math.max(0,v+n);render()}
 function arenaResetStats_(){arenaDraft_().talentSpent={hp:0,def:0,patk:0,matk:0,crit:0};render()}
-function arenaStatRow_(k,n,desc){const v=Number(arenaDraft_().talentSpent[k]||0);return `<div class="arena-stat-row"><div><b>${n}</b><div class="small">${desc}</div></div><div>投入 <b>${v}</b></div><div class="arena-stat-actions"><button ${arenaTalentLeft_()<1?'disabled':''} onclick="arenaSpend_('${k}',1)">+1</button><button ${arenaTalentLeft_()<10?'disabled':''} onclick="arenaSpend_('${k}',10)">+10</button><button ${v<1?'disabled':''} onclick="arenaSpend_('${k}',-1)">-1</button></div></div>`}
+function arenaStatRow_(k,n,desc){const v=Number(arenaDraft_().talentSpent[k]||0),batch=talentBatch486_(arenaTalentLeft_());return `<div class="arena-stat-row"><div><b>${n}</b><div class="small">${desc}</div></div><div>投入 <b>${v}</b></div><div class="arena-stat-actions"><button ${arenaTalentLeft_()<1?'disabled':''} onclick="arenaSpend_('${k}',1)">+1</button><button class="talent-batch486" ${arenaTalentLeft_()<batch?'disabled':''} onclick="arenaSpend_('${k}',${batch})">+${batch}</button><button ${v<1?'disabled':''} onclick="arenaSpend_('${k}',-1)">-1</button></div></div>`}
 function renderArenaStats_(){const x=arenaStats_();return `<div class="section-title"><h3>競技場專屬配點</h3><span class="badge">剩餘 ${arenaTalentLeft_()} / ${arenaTalentTotal_()}</span></div><div class="notice">固定 Lv250，每升 1 等獲得 3 點，共 747 點。此配點完全獨立，不會修改 PvE 配點。</div>${arenaStatRow_('hp','HP','每點 +10 HP')}${arenaStatRow_('def','防禦','每點 +1')}${arenaStatRow_('patk','物攻','每點 +1')}${arenaStatRow_('matk','魔攻','每點 +1')}${arenaStatRow_('crit','爆擊','每點 +1%')}<div class="arena-kpis"><div class="arena-kpi">HP<b>${x.hp}</b></div><div class="arena-kpi">物攻<b>${x.patk}</b></div><div class="arena-kpi">魔攻<b>${x.matk}</b></div></div><div class="arena-kpis"><div class="arena-kpi">防禦<b>${x.def}</b></div><div class="arena-kpi">爆擊<b>${x.crit}%</b></div><div class="arena-kpi">爆擊傷害 <span class="small">（不可配點）</span><b>${Number(x.critDamage||100)}%</b></div></div><button style="margin-top:10px" onclick="arenaResetStats_()">重置競技場配點</button>`}
 function renderArenaEquipment_(){const a=equippedItems();return `<div class="section-title"><h3>目前裝備</h3><span class="badge">資料與 PvE 共用</span></div><div class="notice">顯示角色目前穿著的裝備、強化與寶石。上傳防守後會保存成獨立 Snapshot。</div><div class="arena-equip-list">${a.map(it=>`<div class="arena-equip-row"><b>${rarityHtml(it)}</b><div class="small">${slotName(it.slot)}｜${statText(enhancedStats(it))}｜強化 +${it.enhance||0}</div><div class="small">寶石：${(it.gems||[]).filter(Boolean).map(g=>escapeHtml(gemDisplayName(g))).join('、')||'無'}</div></div>`).join('')||'<div class="empty">目前沒有裝備。</div>'}</div>`}
 function arenaChooseSkill_(i,id){arenaCache_.defenseDirty=true;const d=arenaDraft_();if(id)d.skills=d.skills.map((x,j)=>j!==i&&x===id?null:x);d.skills[i]=id;closeQuickPicker();render()}
