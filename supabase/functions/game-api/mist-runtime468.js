@@ -58,6 +58,13 @@ export async function reduceMist468(
     if (!Number.isFinite(n)) fail("CONFIG_INVALID:" + k);
     return n;
   };
+  // Old season fixtures/packages remain compatible until the resource rules are published.
+  const resources487 = () => Object.hasOwn(config, "StaminaPackCap");
+  const resourceRule487 = (key) => {
+    const n = c(key);
+    if (!Number.isSafeInteger(n) || n < 1 || n > (key === "AirdropVisionRadius" ? 2 : key === "StaminaPackCap" ? 10 : key === "StaminaPackEnergy" ? 20 : 1440)) fail("CONFIG_INVALID:" + key);
+    return n;
+  };
   let core = createMistCombat468(data, random);
   const additions = { seasons: [], reports: [], rewards: [] };
   w.meta.battles ||= {};
@@ -76,6 +83,7 @@ export async function reduceMist468(
     const p0 = pos(p);
     return (
       (p0 && Math.abs(p0.x - x) <= 1 && Math.abs(p0.y - y) <= 1) ||
+      w.cells.some((a) => a.kind === "airdrop" && Math.abs(a.x - x) <= a.payload.radius && Math.abs(a.y - y) <= a.payload.radius) ||
       w.flags.some(
         (f) =>
           f.owner_account === p.account_id &&
@@ -585,6 +593,27 @@ export async function reduceMist468(
       w.meta.lastSpawn = now;
     }
   }
+  function replenishResources487() {
+    if (!resources487() || !configuredOpen || w.season.status !== "ACTIVE") return;
+    const candidates = () => empty(false).filter((at) => !w.flags.some((f) => f.x === at.x && f.y === at.y));
+    for (const cell of w.cells)
+      if (cell.kind === "stamina_spawn" && ms(cell.payload.spawnAt) <= now) cell.kind = "stamina";
+    const count = w.cells.filter((cell) => ["stamina", "stamina_spawn"].includes(cell.kind)).length;
+    for (let i = count; i < resourceRule487("StaminaPackCap"); i++) {
+      const free = candidates(); if (!free.length) break;
+      const at = choose(free);
+      w.cells.push(freshCell(at.x, at.y, "stamina_spawn", null, {
+        name: "體力補包", spawnAt: iso(now + resourceRule487("StaminaPackWarningMinutes") * 60000),
+      }));
+    }
+    if (!w.cells.some((cell) => cell.kind === "airdrop") && now >= ms(w.meta.airdropNextAt487)) {
+      // Leave a full 5 x 5 public sight area even near the map boundary.
+      const radius = resourceRule487("AirdropVisionRadius");
+      const free = candidates().filter((a) => a.x >= radius && a.y >= radius && a.x < w.season.size - radius && a.y < w.season.size - radius);
+      if (free.length) {const at = choose(free); w.cells.push(freshCell(at.x, at.y, "airdrop", null, {name: "空降資源", radius}));}
+    }
+  }
+  replenishResources487();
   const retained = new Set(
     Object.values(w.players)
       .map((p) => p.runtime.lastBattle)
@@ -870,6 +899,27 @@ export async function reduceMist468(
       spend(p, c("ForgeEnergyCost"));
       item.enhance = c("ForgeEnhanceLevel");
       stats(p);
+    } else if (action === "resource/claim") {
+      if (!resources487()) fail("NOT_OPEN");
+      const target = w.cells.find((x) => x.id === payload.targetId);
+      if (!target) fail("RESOURCE_MISSING");
+      if (!adjacent(at, target)) fail("NOT_ADJACENT");
+      if (target.kind === "stamina_spawn") fail("RESOURCE_PENDING");
+      if (target.kind === "stamina") {
+        if (p.energy >= c("EnergyCap")) fail("ENERGY_FULL");
+        const gain = Math.min(resourceRule487("StaminaPackEnergy"), c("EnergyCap") - p.energy);
+        p.energy += gain;
+        if (p.energy === c("EnergyCap")) p.energy_at = iso(now);
+        p.runtime.resourceReceipt487 = {id: target.id, kind: "stamina", gained: gain, createdAt: iso(now)};
+        report(p, "resource", "領取體力補包", "體力 +" + gain + "，目前 " + p.energy + "/" + c("EnergyCap"), target);
+      } else if (target.kind === "airdrop") {
+        award(p, chest(true));
+        // UTC+8 midnight; unclaimed cells are never moved by the daily tick.
+        w.meta.airdropNextAt487 = iso(Date.parse(day(now) + "T00:00:00+08:00") + 86400000);
+        report(p, "resource", "領取空降資源", "獲得傳說裝備寶箱 ×1", target);
+      } else fail("INVALID_TARGET");
+      w.cells = w.cells.filter((x) => x.id !== target.id);
+      replenishResources487();
     } else if (action === "supply") {
       const s = w.cells.find((x) => x.kind === "supply");
       if (!s || Math.abs(s.x - at.x) > 1 || Math.abs(s.y - at.y) > 1)
@@ -1016,6 +1066,10 @@ export async function reduceMist468(
   );
   result.energyRules = { initial:c('EnergyInitial'), cap:c('EnergyCap'), recoveryMinutes:c('EnergyRecoveryMinutes') };
   if (result.self) result.self.energyNextAt = p.energy < c('EnergyCap') ? iso(ms(p.energy_at) + c('EnergyRecoveryMinutes') * 60000) : null;
+  result.resourceRules487 = resources487() ? {
+    staminaCap: resourceRule487('StaminaPackCap'), warningMinutes: resourceRule487('StaminaPackWarningMinutes'),
+    energy: resourceRule487('StaminaPackEnergy'), airdropRadius: resourceRule487('AirdropVisionRadius'),
+  } : null;
   result.flagRules = {
     minutes: flagRule476('FlagScoreMinutes', 180),
     points: flagRule476('FlagScorePoints', 1),
@@ -1067,8 +1121,10 @@ export function projectMist468(w, account, now, ready, save, rewards) {
         ...w.flags.filter((f) => f.owner_account === account),
       ]
     : [];
+  const airdrop = w.cells.find((c) => c.kind === "airdrop");
   const visible = (x, y) =>
-      centers.some((c) => Math.abs(c.x - x) <= 1 && Math.abs(c.y - y) <= 1),
+      centers.some((c) => Math.abs(c.x - x) <= 1 && Math.abs(c.y - y) <= 1) ||
+      !!(p && airdrop && Math.abs(airdrop.x - x) <= airdrop.payload.radius && Math.abs(airdrop.y - y) <= airdrop.payload.radius),
     cells = [];
   if (p)
     for (let y = 0; y < w.season.size; y++)
@@ -1092,14 +1148,14 @@ export function projectMist468(w, account, now, ready, save, rewards) {
             };
         } else if (cell && cell.kind !== "player")
           o = {
-            kind: cell.kind === "spawn" ? "monster" : cell.kind,
+            kind: cell.kind === "spawn" ? "monster" : cell.kind === "stamina_spawn" ? "stamina" : cell.kind,
             id: cell.id,
             name: cell.payload.name,
             art: cell.payload.art,
             elite: cell.payload.elite,
             busy: !!cell.payload.battleId,
             countdown:
-              cell.kind === "spawn"
+              ["spawn", "stamina_spawn"].includes(cell.kind)
                 ? Math.max(
                     1,
                     Math.ceil((ms(cell.payload.spawnAt) - now) / 60000),
@@ -1201,6 +1257,12 @@ export function projectMist468(w, account, now, ready, save, rewards) {
         }
       : null,
     cells,
+    visions487: p ? [
+      ...w.flags.filter(f => f.owner_account === account).map(f => ({kind: 'flag', x: f.x, y: f.y, radius: 1, createdAt: f.created_at})),
+      ...(airdrop ? [{kind: 'airdrop', x: airdrop.x, y: airdrop.y, radius: airdrop.payload.radius}] : []),
+    ] : [],
+    airdropNextAt487: p && !airdrop ? w.meta.airdropNextAt487 || null : null,
+    resourceReceipt487: p?.runtime.resourceReceipt487 || null,
     ranking,
     reports: (p?.runtime.reports || []).map((r) => ({
       id: r.id,
