@@ -288,7 +288,8 @@ export async function reduceMist468(
       }
     }
   }
-  function clearDead(p) {
+  function clearDead(p, byPlayer = false) {
+    p.runtime.restoreEnergyOnRespawn484 = byPlayer;
     p.equipment = {};
     p.inventory = { equipment: [], gems: [], chests: [] };
     p.pending_loot = [];
@@ -353,8 +354,8 @@ export async function reduceMist468(
     else if (!forced && D.hp <= 0) result = "win";
     else if (!forced && A.hp <= 0) result = "loss";
     if (result === "mutual") {
-      clearDead(a);
-      if (d) clearDead(d);
+      clearDead(a, !!d);
+      if (d) clearDead(d, true);
       else w.cells = w.cells.filter((x) => x.id !== b.target);
     } else if (result === "win") {
       a.points += d
@@ -365,7 +366,7 @@ export async function reduceMist468(
       if (d) {
         a.kills++;
         b.loot481 = transferDrops(d, a);
-        clearDead(d);
+        clearDead(d, true);
       } else {
         w.cells = w.cells.filter((x) => x.id !== b.target);
         award(a, chest(!!b.monster.Elite));
@@ -379,7 +380,7 @@ export async function reduceMist468(
         d.points += c("PlayerWinPoints");
         d.kills++;
         transferDrops(a, d);
-        clearDead(a);
+        clearDead(a, true);
       } else {
         const home = a.runtime.spawn;
         w.cells = w.cells.filter(
@@ -677,6 +678,11 @@ export async function reduceMist468(
     if (action === "respawn") {
       if (!p.runtime.dead) fail("NOT_DEAD");
       spawn(p);
+      if (p.runtime.restoreEnergyOnRespawn484) {
+        p.energy = c("EnergyCap");
+        p.energy_at = iso(now);
+      }
+      delete p.runtime.restoreEnergyOnRespawn484;
       p.hp = p.max_hp;
       starter(p);
       p.defense_snapshot = core.snapshot(p);
