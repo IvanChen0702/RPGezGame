@@ -1,0 +1,18 @@
+const {chromium,webkit}=require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const fs=require('fs'),assert=require('assert/strict');
+(async()=>{const engine=process.env.BROWSER||'chromium',browser=await(engine==='webkit'?webkit.launch():chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']}));try{for(const view of ['desktop','mobile']){
+ const p=await browser.newPage({viewport:view==='desktop'?{width:1440,height:900}:{width:390,height:844},timezoneId:'America/Los_Angeles'}),errors=[];
+ p.on('pageerror',e=>{if(!/ResizeObserver/.test(e.message))errors.push(e.message)});await p.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());await p.goto('http://127.0.0.1:8443/',{waitUntil:'networkidle'});await p.addScriptTag({content:fs.readFileSync('tools/tests/mist465-preview-fixture.js','utf8')});
+ await p.evaluate(({data,view})=>{installMistPreview465({data},view);applyEquipmentRows_(data.Equipment);applyGemRows_(data.Gems);planningReady412_=()=>true;render=previewOriginalRender465;save=()=>{};
+ const t=Object.entries(itemTemplates).find(([,x])=>x.slot==='head');window.gear484={...t[1],template:t[0],id:'gear484',rarity:'傳說',enhance:10,gems:[],sockets:1};state.inventory=[gear484];state.equipment.head=gear484.id;state.page='prepare';mobilePrepareManageTab_='equip';render();void requestReadyRoom24_('main','一般整備',()=>{});
+ },{data:JSON.parse(fs.readFileSync('supabase/tests/fixtures/mist468-planning.json')),view});
+ const styles=selector=>p.locator(selector).evaluate(el=>{const s=getComputedStyle(el),a=getComputedStyle(el,'::after');return {border:s.borderWidth,color:s.getPropertyValue('--item-fx-color'),speed:s.getPropertyValue('--item-fx-speed'),animation:s.animationName,sheen:a.animationName,sheenSpeed:a.animationDuration,opacity:a.opacity,content:a.content,enhance:el.dataset.itemEnhance}});
+ const prep='#readyRoom24 .paperdoll-slot204[data-item-enhance="10"]';await p.waitForSelector(prep);const expected=await styles(prep);
+ await p.evaluate(()=>{document.getElementById('readyRoom24')?.remove();state.page='inventory';inventoryMainTab_='equipment';inventorySlotFilter='all';document.getElementById('page').innerHTML=bag402_();decorateItemBorders_();});
+ const normal=await styles('.bag-equipment-fx484');assert.deepEqual(normal,expected,'normal bag uses the same prep frame and sheen');
+ await p.evaluate(()=>{state.page='mist';mist465_.data.inventory={equipment:[{...gear484,kind:'equipment'}],gems:[],chests:[]};mist465_.data.pendingLoot=[];mistUi470_.bag='equipment';mistUi470_.slot='all';render();mistOpenPrep474_('bag');decorateItemBorders_();});
+ assert.deepEqual(await styles('.bag-equipment-fx484'),expected,'mist bag shares exact frame');await p.screenshot({path:`/workspace/work/mist465-preview/${engine}-${view}-equipment484.png`,fullPage:true});
+ await p.evaluate(()=>changeBagLayout402_());assert.deepEqual(await styles('.bag-equipment-fx484'),expected,'list view keeps effects');
+ await p.emulateMedia({reducedMotion:'reduce'});assert.equal((await styles('.bag-equipment-fx484')).animation,'none');assert.equal((await styles('.bag-equipment-fx484')).sheen,'none');
+ const times=await p.evaluate(()=>[mistReportTime484_('2026-11-17T16:05:09.000Z'),mistReportTime484_('2026-11-18T00:00:00+08:00'),mistReportTime484_('本季')]);assert.deepEqual(times,['2026/11/18 00:05:09（台灣時間）','2026/11/18 00:00:00（台灣時間）','本季']);assert.deepEqual(errors,[]);console.log(engine,view,'prep/normal/mist/list effects match; reduced-motion and Taiwan dates passed');await p.close();
+}}finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});
