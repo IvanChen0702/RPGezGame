@@ -31583,7 +31583,15 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
 #app #page .mist465 .mist-board-frame479{border:22px solid transparent;border-image:url('assets/images/ui/mist/board-frame479.webp') 100 100 100 100 / 22px / 0 stretch;min-width:0;min-height:0;flex:1;background:#080f14;isolation:isolate}
 #app #page .mist465 .mist-map-scroll465{contain:none!important;border:0!important;border-radius:0!important;padding:0!important;height:clamp(300px,48vh,580px)!important;min-height:0!important;background:#080f14!important;scrollbar-width:thin}
 #app #page .mist465 .mist-board465{--tile:76px!important;position:relative!important;gap:0!important;padding:0!important;border:0!important;background:#101b22!important;margin:auto!important}
-#app #page .mist465 button.mist-cell465{border:1px solid #78918b30!important;border-radius:0!important;box-shadow:none!important;background:linear-gradient(#27433a22,#0a141a33),url('assets/images/backgrounds/mist/board465.webp') calc(var(--cx)*var(--tile)*-1) calc(var(--cy)*var(--tile)*-1)/calc(var(--tile)*4) calc(var(--tile)*4)!important;overflow:hidden!important}
+/* A shared floor under the cells. Mirrored quadrants meet at the same image
+   edge, keeping stone seams continuous without magnifying the whole map. */
+.mist-floor483{position:absolute;inset:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));pointer-events:none;z-index:0}
+.mist-floor483>i{background:linear-gradient(#12202a30,#12202a30),url('assets/images/backgrounds/mist/board465.webp') center/cover no-repeat;image-rendering:auto}
+.mist-floor483>i:nth-child(2){transform:scaleX(-1)}
+.mist-floor483>i:nth-child(3){transform:scaleY(-1)}
+.mist-floor483>i:nth-child(4){transform:scale(-1)}
+#app #page .mist465 button.mist-cell465{z-index:1}
+#app #page .mist465 button.mist-cell465{border:1px solid #78918b18!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;overflow:hidden!important}
 #app #page .mist465 button.mist-cell465::after{display:none!important}
 #app #page .mist465 button.mist-cell465.fog{background:radial-gradient(ellipse at 30% 20%,#18242b,#0c141b)!important;border-color:#72838d12!important;box-shadow:none!important}
 #app #page .mist465 button.mist-cell465.fog::before{content:none!important}
@@ -31628,6 +31636,13 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
  #app #page .mist465 .mist-board465{--tile:70px!important}
  #app #page .mist465 .mist-map-scroll465{height:clamp(230px,39dvh,480px)!important}
  #modal[data-mist-encounter479]>.modal-box{left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important}
+}
+/* The timer is a caption, not part of the bar's flex alignment box. */
+@media(min-width:901px){
+ html body #app #page .mist465 .mist-explore-summary469{padding-bottom:20px!important;row-gap:20px!important}
+ .mist-energy479{position:relative;height:24px;grid-template-rows:24px}
+ .mist-energy479>svg{height:24px;grid-row:1}
+ .mist-energy479>small{position:absolute;top:27px;left:28px;right:0;line-height:12px}
 }
 @media(prefers-reduced-motion:reduce){.mist-energy-track479 i{transition:none}}
 }</style>
@@ -31866,7 +31881,7 @@ function mistActions469_(){const d=mist465_.data,s=d.self,can=mistCanAct465_(),b
 function mistMap465_(){const d=mist465_.data,s=d?.self;if(s?.dead)return mistRespawn468_();if(!s)return mistStatus465_('參加賽季後，這裡會顯示你的探索範圍與旗幟視野。');const size=Math.max(16,Math.min(256,Math.trunc(Number(d.size)||16))),cells=new Map((d.cells||[]).map(c=>[c.x+','+c.y,c])),selected=mist465_.selection;let html='';for(let y=0;y<size;y++)for(let x=0;x<size;x++){const c=cells.get(x+','+y),self=s.x===x&&s.y===y,visible=!!c||self,o=self?{kind:'self'}:c?.object,reachable=!mistMoveReason469_(x,y);html+='<button type="button" class="mist-cell465 '+(!visible?'fog ':'')+(self?'self ':'')+(reachable?'reachable469 ':'')+(selected?.x===x&&selected?.y===y?'selected':'')+'" style="--cx:'+x+';--cy:'+y+'" data-x="'+x+'" data-y="'+y+'" aria-label="'+(x+1)+','+(y+1)+' '+escapeAttr(self?'你的位置':!visible?'迷霧':o?.name||'空地')+(reachable?'，可移動':'')+'" aria-pressed="'+(selected?.x===x&&selected?.y===y)+'" tabindex="'+((selected?selected.x===x&&selected.y===y:self)?0:-1)+'" onkeydown="mistMapKey465_(event,'+x+','+y+')" onclick="mistCellClick469_('+x+','+y+')">'+(visible?mistCellArt465_(o):'')+(visible&&c?.flag?mistFlagBadge479_(c.flag,o?.kind!=='flag'):'')+(visible&&o?.busy?'<span class="mist-busy479">交戰中</span>':'')+(reachable?'<span class="mist-step469" aria-hidden="true">'+(x>s.x?'›':x<s.x?'‹':y>s.y?'⌄':'⌃')+'</span>':'')+'</button>';}
  const c=selected?cells.get(selected.x+','+selected.y):null,adj=selected&&Math.abs(s.x-selected.x)+Math.abs(s.y-selected.y)===1;
  queueMicrotask(mistPaint469_);
- return '<div class="mist-explore469">'+(d.pendingLoot?.length?'<button onclick="mistTab465_(\'bag\')">待處理戰利品 '+d.pendingLoot.length+' 件 · 點此收納後繼續移動</button>':'')+'<div class="mist-explore-summary469">'+mistHp474_(s)+mistEnergy479_(s,d.energyRules)+'<span class="mist-score479">'+flatIcon313_('crown')+s.points+' 積分'+(s.protectedUntil&&Date.parse(s.protectedUntil)>Date.now()?'<small class="mist-protection482" title="出生保護中，移動或主動開戰即解除">出生保護</small>':'')+'</span>'+mistActions469_()+'</div><div class="mist-world465"><section class="mist-map-section465"><div class="mist-map-toolbar465"><span>位置 '+(s.x+1)+','+(s.y+1)+' · 點擊亮框移動</span><button onclick="mistCenter465_()">回到我的位置</button></div><div class="mist-selection469" role="status" aria-live="polite">'+(selected?'已選 '+(selected.x+1)+','+(selected.y+1)+' · '+escapeHtml(c?.object?.name||mistMoveReason469_(selected.x,selected.y)||'點擊此格移動，消耗 1 體力'):'')+'</div><div class="mist-board-frame479"><div class="mist-map-scroll465" tabindex="0" aria-label="探索地圖，可向四方捲動"><div class="mist-board465" style="--map-size:'+size+'">'+html+'</div></div></div><div class="mist-map-legend465"><span>青綠亮框：可移動</span><span>金框：目前選取</span><span>深色：迷霧</span></div></section></div></div>';}
+ return '<div class="mist-explore469">'+(d.pendingLoot?.length?'<button onclick="mistTab465_(\'bag\')">待處理戰利品 '+d.pendingLoot.length+' 件 · 點此收納後繼續移動</button>':'')+'<div class="mist-explore-summary469">'+mistHp474_(s)+mistEnergy479_(s,d.energyRules)+'<span class="mist-score479">'+flatIcon313_('crown')+s.points+' 積分'+(s.protectedUntil&&Date.parse(s.protectedUntil)>Date.now()?'<small class="mist-protection482" title="出生保護中，移動或主動開戰即解除">出生保護</small>':'')+'</span>'+mistActions469_()+'</div><div class="mist-world465"><section class="mist-map-section465"><div class="mist-map-toolbar465"><span>位置 '+(s.x+1)+','+(s.y+1)+' · 點擊亮框移動</span><button onclick="mistCenter465_()">回到我的位置</button></div><div class="mist-selection469" role="status" aria-live="polite">'+(selected?'已選 '+(selected.x+1)+','+(selected.y+1)+' · '+escapeHtml(c?.object?.name||mistMoveReason469_(selected.x,selected.y)||'點擊此格移動，消耗 1 體力'):'')+'</div><div class="mist-board-frame479"><div class="mist-map-scroll465" tabindex="0" aria-label="探索地圖，可向四方捲動"><div class="mist-board465" style="--map-size:'+size+'"><div class="mist-floor483" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'+html+'</div></div></div><div class="mist-map-legend465"><span>青綠亮框：可移動</span><span>金框：目前選取</span><span>深色：迷霧</span></div></section></div></div>';}
 
 
 

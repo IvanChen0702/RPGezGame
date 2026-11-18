@@ -1,7 +1,7 @@
 const {chromium,webkit}=require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const fs=require('fs'),assert=require('assert/strict'),path=require('path');
 (async()=>{const engine=process.env.BROWSER==='webkit'?'webkit':'chromium',browser=await(engine==='webkit'?webkit.launch({headless:true}):chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox'],headless:true}));
-try{for(const [width,height,view]of [[1440,900,'desktop'],[390,844,'mobile'],[360,640,'mobile']]){
+try{for(const [width,height,view]of [[1440,900,'desktop'],[1024,768,'desktop'],[901,760,'desktop'],[390,844,'mobile'],[360,640,'mobile']]){
  const p=await browser.newPage({viewport:{width,height},hasTouch:view==='mobile'}),errors=[];
  p.on('pageerror',e=>{if(!e.message.includes('ResizeObserver loop'))errors.push(e.message)});
  await p.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
@@ -28,6 +28,10 @@ try{for(const [width,height,view]of [[1440,900,'desktop'],[390,844,'mobile'],[36
  assert.equal(await p.locator('.mist-energy479>svg').count(),1);
  const resourceSizes=await p.evaluate(()=>({hp:document.querySelector('.mist-hp474').getBoundingClientRect().height,energy:document.querySelector('.mist-energy-track479').getBoundingClientRect().height,top:document.querySelector('.mist-map-scroll465').getBoundingClientRect().top-document.querySelector('.mist-top465').getBoundingClientRect().top}));
  assert.equal(resourceSizes.hp,resourceSizes.energy,'HP and stamina have exactly equal outer height');
+ const edges=await p.evaluate(()=>{const hp=document.querySelector('.mist-hp474').getBoundingClientRect(),energy=document.querySelector('.mist-energy-track479').getBoundingClientRect();return {top:Math.abs(hp.top-energy.top),bottom:Math.abs(hp.bottom-energy.bottom)};});
+ assert.ok(edges.top<1&&edges.bottom<1,'bars align at both edges, not just height: '+JSON.stringify(edges));
+ assert.ok(await p.evaluate(()=>{const timer=document.querySelector('.mist-energy479>small').getBoundingClientRect(),bar=document.querySelector('.mist-energy-track479').getBoundingClientRect(),summary=document.querySelector('.mist-explore-summary469').getBoundingClientRect();return timer.top>=bar.bottom&&timer.bottom<=summary.bottom;}),'countdown stays beneath the bar and inside the resource panel');
+
  if(view==='mobile')assert.ok(resourceSizes.top<260,'mode controls stay compact: '+JSON.stringify(resourceSizes));
 
  assert.equal(await p.locator('[data-flag-clock479]').count(),4);
@@ -35,6 +39,9 @@ try{for(const [width,height,view]of [[1440,900,'desktop'],[390,844,'mobile'],[36
  assert.equal(await p.locator('.mist-cell465[data-x="7"][data-y="5"] img').count(),0,'unspawned monster has no image');
  assert.equal(await p.locator('.mist-busy479').count(),1);
  assert.equal(await p.locator('.fog img,.fog canvas,.fog .mist-flag-label479').count(),0,'fog hides all world objects');
+ assert.equal(await p.locator('.mist-floor483>i').count(),4);
+ assert.ok(await p.locator('.mist-cell465:not(.fog)').evaluateAll(es=>es.every(e=>getComputedStyle(e).backgroundImage==='none')),'visible cells share a continuous floor instead of individually cropped images');
+
  assert.equal(await p.locator('.mist-flag-label479').evaluateAll(es=>es.every(e=>{const a=e.getBoundingClientRect(),b=e.parentElement.getBoundingClientRect();return a.left>=b.left&&a.right<=b.right&&a.bottom<=b.bottom+1})),true,'flag labels stay inside their cells');
  await p.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-crowd479.png'});
  await p.locator('.mist-cell465[data-x="7"][data-y="6"]').click();
