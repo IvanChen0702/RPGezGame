@@ -39,7 +39,7 @@ try{for(const [width,height,view]of [[1440,900,'desktop'],[1024,768,'desktop'],[
  assert.equal(await p.locator('.mist-cell465[data-x="7"][data-y="5"] img').count(),0,'unspawned monster has no image');
  assert.equal(await p.locator('.mist-busy479').count(),1);
  assert.equal(await p.locator('.fog img,.fog canvas,.fog .mist-flag-label479').count(),0,'fog hides all world objects');
- assert.equal(await p.locator('.mist-floor483>i').count(),4);
+ assert.equal(await p.locator('.mist-room489 .mist-floor489').count(),1);
  assert.ok(await p.locator('.mist-cell465:not(.fog)').evaluateAll(es=>es.every(e=>getComputedStyle(e).backgroundImage==='none')),'visible cells share a continuous floor instead of individually cropped images');
 
  assert.equal(await p.locator('.mist-flag-label479').evaluateAll(es=>es.every(e=>{const a=e.getBoundingClientRect(),b=e.parentElement.getBoundingClientRect();return a.left>=b.left&&a.right<=b.right&&a.bottom<=b.bottom+1})),true,'flag labels stay inside their cells');

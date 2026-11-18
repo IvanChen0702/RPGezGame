@@ -5767,6 +5767,18 @@
       "previous": "assets/images/ui/mist/airdrop487.webp",
       "bytes": 78788,
       "sha256": "db0794e54c013268ba85a09aedf7caf8fd4840e5db8788feaf5779eca495e077"
+    },
+    {
+      "path": "assets/images/backgrounds/mist/dungeon-room489.webp",
+      "previous": "assets/images/backgrounds/mist/dungeon-room489.webp",
+      "bytes": 534698,
+      "sha256": "1d63611180e8d8e5a7ad9806829c3a7852a495868d1c10ea49dfdc411fb1c765"
+    },
+    {
+      "path": "assets/images/backgrounds/mist/dungeon-floor489.webp",
+      "previous": "assets/images/backgrounds/mist/dungeon-floor489.webp",
+      "bytes": 303630,
+      "sha256": "0401bec76abcd4f09247d6045075e457ed0c0aa4d2ca213d91fff474a687be58"
     }
   ]
 }
