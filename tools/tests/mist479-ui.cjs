@@ -50,7 +50,7 @@ try{for(const [width,height,view]of [[1440,900,'desktop'],[1024,768,'desktop'],[
  let box=await p.locator('#modal>.modal-box').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1&&box.y>=0&&box.y+box.height<=height+1);
  await p.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-monster479.png'});
  await p.evaluate(()=>closeModal());await p.locator('.mist-cell465[data-x="5"][data-y="6"]').click();
- const info=await p.locator('#modalBody').innerText();assert.match(info,/積分 18 · 剩餘 HP 183/);assert.ok(!/物攻|魔攻|防禦|裝備/.test(info),'opponent stats remain private');
+ const info=await p.locator('#modalBody').innerText();assert.match(info,/剩餘 HP\s+183/);assert.match(info,/目前積分\s+18 分/);assert.ok(!/物攻|魔攻|防禦|裝備/.test(info),'opponent stats remain private');
  await p.screenshot({path:'/workspace/work/mist465-preview/'+engine+'-'+width+'-player479.png'});
  await p.evaluate(()=>closeModal());await p.getByRole('tab',{name:'戰報',exact:true}).click();assert.match(await p.locator('.mist-report465').innerText(),/座標 6,6/);
  await p.getByRole('tab',{name:'棋盤',exact:true}).click();
