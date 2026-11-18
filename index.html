@@ -31622,7 +31622,7 @@ html body #app #page .mist465 .mist-cell465.reachable469{border-color:#8be3bdad!
 #app #page .mist465 .mist-walker479{position:absolute;z-index:10;pointer-events:none;image-rendering:pixelated;filter:drop-shadow(0 3px 2px #0008)}
 #app #page .mist465 .mist-cell465.mist-walking479>canvas{visibility:hidden}
 #modal[data-mist-encounter479]{background:#03080c40!important;backdrop-filter:none!important}
-#modal[data-mist-encounter479]>.modal-box{position:fixed!important;left:var(--mist-popup-x)!important;top:var(--mist-popup-y)!important;width:350px!important;max-width:calc(100vw - 24px)!important;height:auto!important;min-height:0!important;max-height:calc(100dvh - 24px)!important;transform:none!important;margin:0!important;padding:12px!important;border-radius:7px!important;background:linear-gradient(#24292d,#151c21)!important;border:1px solid #998152!important;box-shadow:0 8px 26px #000b!important}
+#modal[data-mist-encounter479]>.modal-box{position:fixed!important;left:var(--mist-popup-x)!important;top:var(--mist-popup-y)!important;width:420px!important;max-width:calc(100vw - 24px)!important;height:auto!important;min-height:0!important;max-height:calc(100dvh - 24px)!important;transform:none!important;margin:0!important;padding:12px!important;border-radius:7px!important;background:linear-gradient(#24292d,#151c21)!important;border:1px solid #998152!important;box-shadow:0 8px 26px #000b!important}
 #modal[data-mist-encounter479] .mist-target465{border:0!important;background:none!important;grid-template-columns:94px minmax(0,1fr)!important;align-items:start!important}
 #modal[data-mist-encounter479] .mist-target-art465{height:126px!important;background:none!important;position:relative}
 #modal[data-mist-encounter479] .mist-target-art465 img{width:100%!important;height:100%!important;object-fit:contain!important;filter:drop-shadow(0 4px 4px #0008)}
@@ -31633,6 +31633,30 @@ html body #app #page .mist465 .mist-cell465.reachable469{border-color:#8be3bdad!
 .mist-target-kind479{font-size:10px;color:#9db9bb}
 .mist-reward479{display:flex;align-items:center;gap:6px;color:#e6cb8d;font-size:11px}
 .mist-reward479 img{width:38px;height:38px;object-fit:contain}
+/* v490: existing encounter art, separated facts and a clear action area. */
+#modal[data-mist-encounter479] .mist-info490{display:block!important}
+#modal[data-mist-encounter479] .mist-target-head490{display:grid;grid-template-columns:96px minmax(0,1fr);align-items:center;gap:12px;padding:6px 0 12px;border-bottom:1px solid #8f77454d}
+#modal[data-mist-encounter479] .mist-info490 .mist-target-art465{height:110px!important;padding:4px!important;border:1px solid #a184493b;border-radius:6px;background:radial-gradient(ellipse at 50% 80%,#a182442b,transparent 75%),#10191f!important}
+#modal[data-mist-encounter479] .mist-info490 .mist-target-copy465{padding:0!important;min-width:0;overflow-wrap:anywhere}
+#modal[data-mist-encounter479] .mist-info490 h3{font-size:21px!important;line-height:1.35!important;color:#ffe0a0;margin:7px 0 10px!important}
+#modal[data-mist-encounter479] .mist-info490 .mist-target-kind479{font-size:11px;letter-spacing:1px;color:#9bbfc1}
+.mist-coordinate490{display:inline-block;padding:3px 8px;border:1px solid #746446;border-radius:4px;color:#c5bdad;font-size:11px;font-variant-numeric:tabular-nums}
+.mist-target-details490{padding:12px 0}.mist-facts490{margin:0;display:grid;gap:6px}
+.mist-fact490{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 11px;border:1px solid #66757538;border-radius:5px;background:#0d171d80;font-size:12px;line-height:1.55}
+.mist-fact490 dt{flex-shrink:0;color:#a9b6b9}.mist-fact490 dd{margin:0;text-align:right;color:#e5e3d9;overflow-wrap:anywhere;min-width:0}
+.mist-fact490.highlight{border-color:#b99a504d;background:linear-gradient(100deg,#8b6c1c19,#101a20a6)}.mist-fact490.highlight dd{font-weight:700;color:#ffdc87;font-size:14px}
+.mist-fact490.warning{border-color:#c179544d}.mist-fact490.warning dd{color:#f0b998}
+.mist-info490 .mist-loot490{border:1px solid #b79450a6;background:linear-gradient(100deg,#6b4b202e,#121b22);border-radius:6px;padding:9px 12px;gap:12px;margin-bottom:9px}
+.mist-info490 .mist-loot490 img{width:48px;height:48px}.mist-loot490 small{display:block;color:#b5b2a4;font-size:11px;margin-bottom:4px}.mist-loot490 strong{display:block;color:#ffdb8e;font-size:15px}
+.mist-health490{padding:11px 12px;border:1px solid #6d99777a;border-radius:6px;background:#10201b;margin-bottom:9px}.mist-health-label490{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#b2cec2;font-size:12px}.mist-health-label490 strong{font-size:20px;color:#e3f9e9;font-variant-numeric:tabular-nums}
+.mist-health-track490{height:21px;margin-top:7px;border:1px solid #49765b;border-radius:4px;background:#091411;overflow:hidden;position:relative}.mist-health-track490 i{height:100%;display:block;background:linear-gradient(90deg,#306e55,#67b28a)}
+.mist-health490.unknown .mist-health-track490{border-color:#4b6258;background:repeating-linear-gradient(125deg,#90b69a0d 0 7px,transparent 7px 14px),#0b1713}.mist-health-track490>span{display:block;text-align:center;color:#b2c1b8;font-size:10px;line-height:19px;letter-spacing:1px}
+.mist-flag-info490{padding:10px;border:1px solid #897644;border-radius:6px;background:#27251b66}.mist-flag-heading490{display:flex;gap:6px;align-items:center;font-size:12px;color:#ddc38b;margin-bottom:8px}.mist-flag-heading490 svg{width:16px;height:16px}.mist-flag-info490 .mist-fact490{border:0;background:transparent;padding:5px 0}.mist-flag-info490 time{font-variant-numeric:tabular-nums}
+.mist-target-actions490{display:grid;gap:7px;border-top:1px solid #8f77454d;padding-top:11px}
+#modal[data-mist-encounter479] .mist-target-actions490 button{margin:0!important;width:100%;min-height:44px!important;font-size:13px!important;font-weight:700;border:1px solid #b79a57;background:linear-gradient(#65502b,#3d301c);color:#ffe7b0;border-radius:5px;padding:10px;white-space:normal}
+#modal[data-mist-encounter479] .mist-target-actions490 button:disabled{background:#1b2226;color:#949b9e;border-color:#566063;opacity:1;cursor:not-allowed}
+#modal[data-mist-encounter479] .mist-target-actions490 button:focus-visible{outline:2px solid #79d3df;outline-offset:2px}.mist-target-actions490>small{color:#aeb8b9;font-size:11px;text-align:center;line-height:1.5}
+@media(max-width:480px){#modal[data-mist-encounter479] .mist-target-head490{grid-template-columns:80px minmax(0,1fr);gap:10px}#modal[data-mist-encounter479] .mist-info490 .mist-target-art465{height:94px!important}#modal[data-mist-encounter479] .mist-info490 h3{font-size:19px!important}.mist-fact490{padding:8px 9px;gap:8px}.mist-fact490.highlight dd{font-size:13px}}
 .mist-report-coordinate479{display:inline-block;border:1px solid #5e665a;border-radius:4px;color:#9dc5c7;padding:3px 7px;margin:0 10px 8px 0;font-size:12px}
 #mistChest471 .g431-chest img{object-fit:contain!important}
 @media(max-width:900px){
@@ -31719,7 +31743,8 @@ function mistFlagBadge479_(flag,occupied){return (occupied?'<img class="mist-occ
 function mistEnergyText479_(at){const secs=(Date.parse(at)-Date.now())/1000;return Number.isFinite(secs)&&secs>0?mistClock479_(secs)+' +1':'等待恢復同步';}
 function mistEnergy479_(s,rules={}){const cap=Math.max(1,Number(rules?.cap)||20),value=Math.max(0,Math.min(cap,Number(s.energy)||0));return '<div class="mist-energy479"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2L4 14h7l-1 8 10-12h-7z" fill="currentColor" stroke="#ffeac0" stroke-width=".7"/></svg><div class="mist-energy-track479" role="progressbar" aria-label="體力" aria-valuemin="0" aria-valuemax="'+cap+'" aria-valuenow="'+value+'"><i style="width:'+value/cap*100+'%"></i><span>體力 '+value+' / '+cap+'</span></div><small'+(s.energyNextAt?' data-energy-clock479="'+escapeAttr(s.energyNextAt)+'"':'')+'>'+(value>=cap?'體力已滿':s.energyNextAt?mistEnergyText479_(s.energyNextAt):'每 '+(Number(rules?.recoveryMinutes)||30)+' 分鐘 +1')+'</small></div>';}
 setInterval(()=>{if(document.hidden)return;document.querySelectorAll('[data-flag-clock479]').forEach(n=>n.textContent=mistFlagCountdown479_(n.dataset.flagClock479));document.querySelectorAll('[data-energy-clock479]').forEach(n=>n.textContent=mistEnergyText479_(n.dataset.energyClock479));},1000);
-function mistAnchor479_(x,y){const modal=document.getElementById('modal'),tile=document.querySelector('.mist-cell465[data-x="'+x+'"][data-y="'+y+'"]');if(!tile)return;modal.dataset.mistEncounter479='true';const r=tile.getBoundingClientRect(),box=modal.querySelector('.modal-box'),w=Math.min(350,innerWidth-24),h=Math.min(box.getBoundingClientRect().height,innerHeight-32);const right=r.right+12,left=right+w<=innerWidth-12?right:Math.max(12,r.left-w-12);modal.style.setProperty('--mist-popup-x',left+'px');modal.style.setProperty('--mist-popup-y',Math.max(12,Math.min(innerHeight-h-12,r.top-40))+'px');}
+function mistAnchor479_(x,y){const modal=document.getElementById('modal'),tile=document.querySelector('.mist-cell465[data-x="'+x+'"][data-y="'+y+'"]');if(!tile)return;modal.dataset.mistEncounter479='true';const r=tile.getBoundingClientRect(),box=modal.querySelector('.modal-box'),w=Math.min(420,innerWidth-24),h=Math.min(box.getBoundingClientRect().height,innerHeight-24);const right=r.right+12,left=Math.max(12,Math.min(innerWidth-w-12,right+w<=innerWidth-12?right:r.left-w-12));modal.style.setProperty('--mist-popup-x',left+'px');modal.style.setProperty('--mist-popup-y',Math.max(12,Math.min(innerHeight-h-12,r.top-40))+'px');}
+window.addEventListener('resize',()=>{const m=document.getElementById('modal'),p=mist465_.selection;if(m?.classList.contains('open')&&m.hasAttribute('data-mist-encounter479')&&p)mistAnchor479_(p.x,p.y);});
 async function mistWalk479_(from,to,owner){
  if(!from||!to||Math.abs(from.x-to.x)+Math.abs(from.y-to.y)!==1||document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const board=document.querySelector('.mist-board465'),start=board?.querySelector('.self'),end=board?.querySelector('[data-x="'+to.x+'"][data-y="'+to.y+'"]');
@@ -31850,13 +31875,54 @@ function mistEntry465_(){
 }
 
 
-function mistFlagTime476_(createdAt){
+function mistFlagParts490_(createdAt){
  const rules=mist465_.data?.flagRules||{},interval=(Number(rules.minutes)||180)*60;
  const end=Math.min(Date.now(),Date.parse(rules.closesAt)||Infinity),elapsed=Math.max(0,Math.floor((end-Date.parse(createdAt))/1000)||0);
  const duration=n=>Math.floor(n/3600)+'時 '+Math.floor(n%3600/60)+'分 '+n%60+'秒';
- return '存續 '+duration(elapsed)+' · '+(end<Date.now()-1000?'本季計分已結束':'下次 +'+(Number(rules.points)||1)+' 分：'+duration(interval-elapsed%interval));
+ return {elapsed:duration(elapsed),next:end<Date.now()-1000?'本季計分已結束':duration(interval-elapsed%interval)};
 }
-setInterval(()=>{if(document.hidden)return;document.querySelectorAll('[data-flag-time476]').forEach(n=>n.textContent=mistFlagTime476_(n.dataset.flagTime476));},1000);
+function mistFlagTime476_(createdAt){const t=mistFlagParts490_(createdAt);return '存續 '+t.elapsed+' · '+(t.next==='本季計分已結束'?t.next:'下次 +'+(Number(mist465_.data?.flagRules?.points)||1)+' 分：'+t.next);}
+setInterval(()=>{if(document.hidden)return;document.querySelectorAll('[data-flag-time476]').forEach(n=>n.textContent=n.dataset.flagPart490?mistFlagParts490_(n.dataset.flagTime476)[n.dataset.flagPart490]:mistFlagTime476_(n.dataset.flagTime476));},1000);
+function mistTargetInfo490_(cell,desc){
+ const o=cell?.object,s=mist465_.data?.self,d=mist465_.data||{},esc=escapeHtml;
+ const row=(label,value,tone='')=>'<div class="mist-fact490 '+tone+'"><dt>'+esc(label)+'</dt><dd>'+esc(String(value))+'</dd></div>';
+ const reward=(label,art)=>'<div class="mist-reward479 mist-loot490"><img src="'+escapeAttr(art)+'" alt=""><div><small>可獲得獎勵</small><strong>'+esc(label)+'</strong></div></div>';
+ let facts='',lead='';
+ if(o?.kind==='player'){
+  const hp=Math.max(0,Number(o.hp)||0),max=Number(o.maxHp),known=Number.isFinite(max)&&max>0;
+  lead='<div class="mist-health490 '+(known?'':'unknown')+'"><div class="mist-health-label490"><span>剩餘 HP</span><strong>'+hp.toLocaleString()+(known?' / '+max.toLocaleString():'')+'</strong></div><div class="mist-health-track490" '+(known?'role="progressbar" aria-label="對手 HP" aria-valuemin="0" aria-valuemax="'+max+'" aria-valuenow="'+Math.min(hp,max)+'"':'role="img" aria-label="剩餘 HP '+hp+'，上限未公開"')+'>'+(known?'<i style="width:'+Math.min(100,hp/max*100)+'%"></i>':'<span>上限未公開</span>')+'</div></div>';
+  facts+=row('目前積分',Number(o.points||0)+' 分','highlight');
+  if(o.busy)facts+=row('交戰狀態','交戰中，暫時無法挑戰','warning');
+  if(o.protected)facts+=row('保護狀態','出生保護中','warning');
+  facts+=row('挑戰消耗','1 體力');
+ }else if(o?.kind==='monster'){
+  if(o.countdown){facts+=row('預計出現',o.countdown+' 後','highlight');facts+=row('目前狀態','召喚中，尚不可挑戰');}
+  else{facts+=row('擊敗積分',o.elite?'擊敗 +2 分':'擊敗 +1 分','highlight');lead=reward(o.elite?'傳說裝備寶箱':'裝備寶箱',mistChestArt479_(o));if(o.busy)facts+=row('交戰狀態','交戰中，暫時無法挑戰','warning');}
+  facts+=row('挑戰消耗','1 體力');
+ }else if(o?.kind==='flag'){
+  facts+=row('視野範圍','周圍 3 × 3 格');
+  facts+=o.own?row('撤回消耗','不消耗體力'):row('拔旗獎勵','+3 積分','highlight')+row('拔旗消耗','2 體力');
+ }else if(o?.kind==='supply'){
+  facts+=row('補給選擇','恢復 30% HP','highlight')+row('另一選擇','隨機寶石 ×1','highlight')+row('領取規則','每日二選一')+row('重置時間','台灣時間每日 00:00');
+  if(s.suppliedToday)facts+=row('今日狀態','已領取，請於重置後再來','warning');
+ }else if(o?.kind==='forge'){
+  facts+=row('強化效果','一件裝備直接升至 +10','highlight')+row('每次消耗','1 體力')+row('操作方式','至相鄰格選擇裝備');
+ }else if(o?.kind==='stamina'){
+  facts+=row('恢復體力','+'+(Number(d.resourceRules487?.energy)||10)+' 點','highlight')+row('體力上限',(Number(d.energyRules?.cap)||20)+' 點')+row('領取消耗','免費');
+  if(o.countdown)facts+=row('預計出現',o.countdown+' 後','warning');
+  else if(s.energy>=(Number(d.energyRules?.cap)||20))facts+=row('目前狀態','體力已滿','warning');
+ }else if(o?.kind==='airdrop'){
+  lead=reward('傳說裝備寶箱 ×1',mistChestArt479_({elite:true}));
+  facts+=row('共用視野','全玩家可見 5 × 5 格','highlight')+row('領取方式','相鄰領取，立即開箱')+row('領取之後','共用視野消失')+row('再次生成','領取後，下個台灣時間 00:00');
+ }else if(o?.kind==='chest'){
+  facts+=row('補給內容','頭部、防具、武器、特殊各一件','highlight')+row('可見對象','僅自己可見')+row('掉落規則','重生補給不會掉落給其他玩家');
+ }else facts+=row('此處情報',desc);
+ if(cell?.flag?.createdAt){
+  const f=cell.flag,t=mistFlagParts490_(f.createdAt),clock=(part)=>'<time data-flag-time476="'+escapeAttr(f.createdAt)+'" data-flag-part490="'+part+'">'+esc(t[part])+'</time>';
+  facts+='<div class="mist-flag-info490"><div class="mist-flag-heading490">'+flatIcon313_('flag')+esc(f.own?'我的旗幟':'敵方旗幟')+'</div><div class="mist-fact490"><dt>已存續</dt><dd>'+clock('elapsed')+'</dd></div><div class="mist-fact490 highlight"><dt>下次 +'+esc(String(d.flagRules?.points||1))+' 分</dt><dd>'+clock('next')+'</dd></div></div>';
+ }
+ return lead+'<dl class="mist-facts490">'+facts+'</dl>';
+}
 function mistTarget465_(cell,selected,adj){
  const s=mist465_.data?.self,o=cell?.object,can=mistCanAct465_(),coord=selected?(selected.x+1)+','+(selected.y+1):'選取一格';
  let name='探索未知',desc='點選附近的格子，查看遭遇、設施或移動方向。',action='',art='';
@@ -31881,7 +31947,10 @@ function mistTarget465_(cell,selected,adj){
  if(cell?.flag?.createdAt)desc+=' · 每 '+(mist465_.data?.flagRules?.minutes||180)+' 分鐘 +'+(mist465_.data?.flagRules?.points||1)+' 分';
  if((o?.kind==='flag'||cell?.flag)&&selected&&!mistMoveReason469_(selected.x,selected.y))action+='<button onclick="mistCommand465_(\'move\',{x:'+selected.x+',y:'+selected.y+'})">移動至此 · −1 體力</button>';
  if(cell?.flag&&o?.kind!=='flag')action+='<button '+(!can||(!adj&&!(s.x===cell.x&&s.y===cell.y))||(!cell.flag.own&&s.energy<2)?'disabled':'')+' onclick="mistCommand465_(\'unflag\',{x:'+cell.x+',y:'+cell.y+'})">'+(cell.flag.own?'撤回旗幟':'拔旗 · −2 體力')+'</button>';
- return '<section class="mist-target465"><div class="mist-target-art465">'+art+'</div><div class="mist-target-copy465"><small class="mist-target-kind479">'+escapeHtml(({player:'冒險者',monster:o?.countdown?'即將出現':o?.elite?'菁英怪物':'一般怪物',flag:'旗幟據點',supply:'補給站',forge:'鐵匠鋪',stamina:'體力補給',airdrop:'全場空降'})[o?.kind]||'此處情報')+' · '+escapeHtml(coord)+'</small><h3>'+escapeHtml(name)+'</h3><p>'+escapeHtml(desc)+'</p>'+(o?.kind==='monster'&&!o.countdown?'<div class="mist-reward479"><img src="'+mistChestArt479_(o)+'" alt=""><span>'+(o.elite?'傳說裝備寶箱':'裝備寶箱')+'</span></div>':'')+(cell?.flag?.createdAt?'<p data-flag-time476="'+escapeAttr(cell.flag.createdAt)+'">'+escapeHtml(mistFlagTime476_(cell.flag.createdAt))+'</p>':'')+action+'</div></section>';
+ const kind=({player:'冒險者',monster:o?.countdown?'即將出現':o?.elite?'菁英怪物':'一般怪物',flag:'旗幟據點',supply:'補給站',forge:'鐵匠鋪',stamina:'體力補給',airdrop:'全場空降',chest:'重生補給'})[o?.kind]||'此處情報';
+ const near=o?.kind==='supply'?Math.abs(s.x-cell.x)<=1&&Math.abs(s.y-cell.y)<=1:adj||selected?.x===s.x&&selected?.y===s.y;
+ return '<section class="mist-target465 mist-info490"><header class="mist-target-head490"><div class="mist-target-art465">'+art+'</div><div class="mist-target-copy465"><small class="mist-target-kind479">'+escapeHtml(kind)+'</small><h3>'+escapeHtml(name)+'</h3><span class="mist-coordinate490">座標 '+escapeHtml(coord)+'</span></div></header><div class="mist-target-details490">'+mistTargetInfo490_(cell,desc)+'</div><footer class="mist-target-actions490">'+(action||'')+(action&&!near?'<small>請先移動至'+(o?.kind==='supply'?'周圍一格':'上下左右相鄰格')+'</small>':'')+'</footer></section>';
+
 }
 function mistBagView465_(){return mistInventory468_();}
 function mistRanking465_(){
