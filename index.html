@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<style>@layer mistLayout466,desktopViewport421;</style>
+<style>@layer dungeonLobby491,mistLayout466,desktopViewport421;</style>
 <script id="planning-rules411">
 /* Shared planning compiler and migration. No game-content fallback. */
 (function(g){
@@ -9749,6 +9749,96 @@ html.mobile-ui .pixel-background456{display:none!important}
 .catalog-sources463{min-width:0;overflow-wrap:anywhere}.catalog-sources463>ul{margin:8px 0;padding-left:18px}.catalog-sources463 li+li{margin-top:9px}.catalog-sources463 li>strong{display:block;color:#e4cf9c;font-weight:600}.catalog-sources463 li>span{display:block;margin-top:3px;font-size:.9em;line-height:1.5}.catalog-actions{display:flex;flex-wrap:wrap;gap:6px}.catalog-actions>button{max-width:100%;white-space:normal}
 </style>
 
+
+<style id="dungeon-lobby491">
+@layer dungeonLobby491 {
+#app #page .dungeon-lobby491{display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important;min-height:0!important;min-width:0!important;overflow:hidden!important;background:linear-gradient(120deg,#23262a,#141a20)!important;color:#e6ddcb;font-size:14px}
+#app #page .dungeon-mobile-head491{display:none!important}
+#app #page .dungeon-body491{display:grid!important;grid-template-columns:235px minmax(0,1fr)!important;gap:20px!important;padding:20px!important;flex:1!important;min-height:0!important;overflow:hidden!important}
+#app #page .dungeon-pick491{display:flex;flex-direction:column;min-height:0;min-width:0}
+#app #page .dungeon-pick491>h3{font-size:16px!important;color:#edce8c;margin:0 0 12px!important;padding-bottom:10px;border-bottom:1px solid #a78c4a66}
+#app #page .dungeon-roster491{display:flex;flex-direction:column;gap:9px;overflow:auto;min-height:0;scrollbar-width:thin;padding:2px}
+#app #page .dungeon-roster491 button{display:flex!important;align-items:center;gap:10px;width:100%;min-height:82px!important;flex-shrink:0;padding:8px!important;background:linear-gradient(120deg,#2a2c2b,#171d22)!important;border:1px solid #776644!important;border-radius:5px!important;color:#ddcfb2;font-size:14px!important;text-align:left!important;white-space:normal!important}
+#app #page .dungeon-roster491 button[aria-pressed=true]{border-color:#e4bc61!important;box-shadow:inset 0 0 12px #d1a34722,0 0 5px #d1a34744!important;background:linear-gradient(120deg,#57472b,#242524)!important;color:#ffe5a4!important}
+#app #page .dungeon-thumb491{display:flex;align-items:center;justify-content:center;width:66px;height:66px;flex:0 0 66px}
+#app #page .dungeon-thumb491 img{width:100%!important;height:100%!important;object-fit:contain!important;image-rendering:pixelated!important}
+#app #page .dungeon-detail491{min-width:0;min-height:0;overflow:auto;scrollbar-width:thin;padding:2px 3px 2px 0}
+#app #page .dungeon-hero491{display:grid;grid-template-columns:minmax(150px,.9fr) minmax(0,1.25fr);gap:22px;align-items:center}
+#app #page .dungeon-figure491{display:flex;align-items:flex-end;justify-content:center;position:relative;height:245px;padding:12px;background:linear-gradient(#13202455,#14202966),url('assets/images/backgrounds/mode-hubs/dungeon.webp') center bottom/cover;border:1px solid #81704b77;border-radius:5px;overflow:hidden}
+#app #page .dungeon-figure491 img{height:210px!important;width:100%!important;max-width:100%!important;object-fit:contain!important;image-rendering:pixelated!important;filter:drop-shadow(0 7px 4px #000b)}
+#app #page .dungeon-intro491{min-width:0}
+#app #page .dungeon-intro491>small{font-size:12px!important;color:#b7c6bd;line-height:1.6}
+#app #page .dungeon-intro491 h2{font-size:30px!important;color:#ffe2a2!important;line-height:1.4!important;margin:8px 0 20px!important;overflow-wrap:anywhere}
+#app #page .dungeon-difficulties491{display:flex;gap:8px}
+#app #page .dungeon-difficulties491 button{flex:1;min-width:0;min-height:44px!important;padding:8px!important;font-size:15px!important;color:#d9ccb0!important;background:#151b20!important;border:1px solid #7e6b46!important;border-radius:4px!important}
+#app #page .dungeon-difficulties491 button[aria-pressed=true]{background:linear-gradient(#786136,#4c391d)!important;color:#ffe9b3!important;border-color:#e3bf6c!important;box-shadow:inset 0 1px #f6d88d55!important}
+#app #page .dungeon-condition491{display:flex;align-items:center;gap:8px;color:#f8d78d;background:#91702b19;border-left:2px solid #d3ad5b;margin:15px 0 0!important;padding:10px 12px!important;line-height:1.5;font-size:16px!important}
+#app #page .dungeon-condition491 svg{width:22px;height:22px;flex-shrink:0}
+#app #page .dungeon-stats491{display:flex;flex-wrap:wrap;gap:12px 25px;margin:0!important;padding:18px 4px!important;border:0!important;background:none!important}
+#app #page .dungeon-stats491>div{display:flex;align-items:baseline;gap:7px;border:0!important;box-shadow:none!important;border-radius:0!important;background:none!important;padding:0!important;min-width:0}
+#app #page .dungeon-stats491 dt{color:#b6b4a8;font-size:13px;white-space:nowrap}.dungeon-stats491 dt span{color:#d1b77f}.dungeon-stats491 dd{margin:0;color:#ffe2a4;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+#app #page .dungeon-cards491{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+#app #page .dungeon-cards491>section{display:flex;flex-direction:column;min-width:0;padding:16px!important;border:1px solid #897044;border-radius:5px;background:linear-gradient(120deg,#272b2c,#141b22)}
+#app #page .dungeon-cards491 h3{display:flex;align-items:center;gap:7px;margin:0 0 12px!important;color:#edce8c;font-size:17px!important;border-bottom:1px solid #aa875342;padding-bottom:10px}
+#app #page .dungeon-cards491 h3 svg{width:20px;height:20px}
+#app #page .dungeon-skills491 ul{margin:0 0 12px;padding-left:18px;line-height:1.8;font-size:13px}
+#app #page .dungeon-skills491 li{margin:0 0 7px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+#app #page .dungeon-special491{padding:8px 10px;border-left:2px solid #c6855c;background:#60382130;font-size:12px;line-height:1.6;margin-bottom:10px;color:#edc8a6}.dungeon-special491 p{margin:4px 0 0!important}
+#app #page .dungeon-reward491{display:flex;gap:12px;align-items:center;flex:1;min-width:0;margin-bottom:14px}
+#app #page .dungeon-item491{width:66px;height:66px;flex:0 0 66px;display:grid;place-items:center;border:1px solid #b79651;border-radius:5px;background:#14191e;box-shadow:0 0 12px #bc923526}
+#app #page .dungeon-item491 img{width:60px!important;height:60px!important;object-fit:contain!important}
+#app #page .dungeon-reward491 strong{display:block;color:#ffe0a0;font-size:17px;overflow-wrap:anywhere}
+#app #page .dungeon-reward491 p{margin:8px 0 0!important;font-size:12px!important;color:#b9b6a7}
+#app #page .dungeon-reward491 b{color:#ffd66f;font-size:30px!important;margin-left:8px}
+#app #page .dungeon-link491{margin-top:auto!important;align-self:flex-start!important;padding:6px 0!important;min-height:40px!important;background:none!important;box-shadow:none!important;border:0!important;border-radius:0!important;text-align:left!important;color:#e3c284!important;font-size:12px!important;text-decoration:underline;text-underline-offset:4px}
+#app #page .dungeon-exp491{margin:12px 0 0!important;color:#b8b6a8;font-size:12px!important}
+#app #page .dungeon-actions491{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px!important;border-top:1px solid #9c8148;background:linear-gradient(#25282a,#171c20);z-index:1}
+#app #page .dungeon-actions491>span{color:#f0d59b;font-weight:700;font-size:18px;white-space:nowrap}.dungeon-actions491 small{font-size:12px;color:#bcb49e}
+#app #page .dungeon-actions491>button{display:flex;align-items:center;justify-content:center;gap:12px;width:48%!important;flex:0 1 48%!important;min-width:0!important;min-height:48px!important;padding:10px 18px!important;border:1px solid #caab64!important;border-radius:4px!important;background:linear-gradient(#846536,#503b20)!important;color:#ffedbf!important;font-size:18px!important;font-weight:700}
+#app #page .dungeon-actions491>button:disabled{opacity:.45!important;cursor:not-allowed}.dungeon-actions491 svg{width:20px;height:20px}
+#app #page .dungeon-lobby491 button:focus-visible{outline:2px solid #7bd4e3!important;outline-offset:2px!important}
+html.desktop-ui #app #page .hub-dialog413:has(.dungeon-lobby491){height:min(760px,100%)!important;min-height:0!important}
+@media(max-width:1100px){#app #page .dungeon-body491{grid-template-columns:190px minmax(0,1fr)!important;gap:14px!important;padding:14px!important}#app #page .dungeon-hero491{gap:14px}#app #page .dungeon-figure491{height:195px}#app #page .dungeon-figure491 img{height:170px!important}#app #page .dungeon-intro491 h2{font-size:24px!important}.dungeon-stats491 dd{font-size:17px}}
+html.mobile-ui #app #page .dungeon-lobby491{border:1px solid #887046!important;border-radius:6px!important}
+html.mobile-ui #app #page .dungeon-mobile-head491{display:flex!important;align-items:center;justify-content:space-between!important;padding:10px 12px!important;flex:none;border-bottom:1px solid #7a6943;background:linear-gradient(90deg,#171d23ed,#171d23bb),url('assets/images/backgrounds/mode-hubs/dungeon.webp') center/cover}
+html.mobile-ui #app #page .dungeon-mobile-head491 h2{font-size:19px!important;margin:0!important;color:#f1d395}
+html.mobile-ui #app #page .dungeon-mobile-head491 button{min-height:40px!important;padding:5px 12px!important;font-size:12px!important}
+html.mobile-ui #app #page .dungeon-body491{display:block!important;overflow:auto!important;padding:10px!important}
+html.mobile-ui #app #page .dungeon-pick491>h3{display:none!important}
+html.mobile-ui #app #page .dungeon-roster491{flex-direction:row;overflow:auto;gap:7px;margin-bottom:12px;padding:2px 2px 7px}
+html.mobile-ui #app #page .dungeon-roster491 button{flex:0 0 100px;width:100px;min-height:90px!important;flex-direction:column;gap:3px;padding:5px!important;text-align:center!important;font-size:11px!important}
+html.mobile-ui #app #page .dungeon-thumb491{width:56px;height:56px;flex:0 0 56px}
+html.mobile-ui #app #page .dungeon-detail491{overflow:visible;padding:0}
+html.mobile-ui #app #page .dungeon-hero491{grid-template-columns:90px minmax(0,1fr);gap:12px}
+html.mobile-ui #app #page .dungeon-figure491{height:124px;padding:4px}
+html.mobile-ui #app #page .dungeon-figure491 img{height:110px!important}
+html.mobile-ui #app #page .dungeon-intro491>small{font-size:10px!important}
+html.mobile-ui #app #page .dungeon-intro491 h2{font-size:20px!important;margin:4px 0 8px!important}
+html.mobile-ui #app #page .dungeon-difficulties491{gap:5px}
+html.mobile-ui #app #page .dungeon-difficulties491 button{font-size:13px!important;padding:5px!important;min-height:40px!important}
+html.mobile-ui #app #page .dungeon-condition491{font-size:12px!important;padding:5px 7px!important;margin:7px 0 0!important;gap:5px}.dungeon-condition491 svg{width:18px;height:18px}
+html.mobile-ui #app #page .dungeon-stats491{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;padding:12px 2px!important}
+html.mobile-ui #app #page .dungeon-stats491>div{justify-content:space-between}.dungeon-stats491 dd{font-size:18px}
+html.mobile-ui #app #page .dungeon-cards491{display:flex;flex-direction:column;gap:10px}
+html.mobile-ui #app #page .dungeon-loot491{order:-1}
+html.mobile-ui #app #page .dungeon-cards491>section{padding:11px!important}
+html.mobile-ui #app #page .dungeon-cards491 h3{font-size:14px!important;padding-bottom:6px;margin-bottom:8px!important}
+html.mobile-ui #app #page .dungeon-reward491{margin-bottom:4px;gap:10px}
+html.mobile-ui #app #page .dungeon-item491{width:48px;height:48px;flex-basis:48px}
+html.mobile-ui #app #page .dungeon-item491 img{width:44px!important;height:44px!important}
+html.mobile-ui #app #page .dungeon-reward491>div:last-child{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1}
+html.mobile-ui #app #page .dungeon-reward491 strong{font-size:14px}
+html.mobile-ui #app #page .dungeon-reward491 p{margin:0!important;flex-shrink:0;font-size:10px!important}
+html.mobile-ui #app #page .dungeon-reward491 b{font-size:23px!important;margin-left:5px}
+html.mobile-ui #app #page .dungeon-skills491 ul{font-size:12px;line-height:1.65;margin-bottom:4px}
+html.mobile-ui #app #page .dungeon-actions491{padding:10px!important;gap:10px}
+html.mobile-ui #app #page .dungeon-actions491>span{font-size:14px}.dungeon-actions491 small{font-size:11px}
+html.mobile-ui #app #page .dungeon-actions491>button{flex:1!important;width:auto!important;font-size:16px!important;min-height:46px!important}
+}
+
+#app #page .dungeon-stats491 dt{display:flex;align-items:center;gap:3px}#app #page .dungeon-stats491 svg{width:16px!important;height:16px!important;color:#cbb27b}
+</style>
+
 </head>
 <body>
 <style id="bootStyle279">
@@ -17858,19 +17948,30 @@ function battleCaption406_(b,e){
  return [floor>50?'BOSS 挑戰':chapter.name,'第 '+floor+' 關',floor>50?'BOSS CHALLENGE':'CHAPTER '+String(chapter.chapter).padStart(2,'0')+' · MAIN STORY'];
 }
 
+// Shared dungeon lobby: planning values and existing art; original preparation and battle actions.
+function dungeonChoose491_(kind,id){
+ const root=document.querySelector('.dungeon-lobby491'),list=root?.querySelector('.dungeon-roster491'),detail=root?.querySelector('.dungeon-detail491');
+ const position={left:list?.scrollLeft||0,top:list?.scrollTop||0,detail:detail?.scrollTop||0,body:root?.querySelector('.dungeon-body491')?.scrollTop||0};
+ if(kind==='boss')selectDungeonBoss_(id);else selectDungeonDifficulty_(id);
+ requestAnimationFrame(()=>{const next=document.querySelector('.dungeon-lobby491');if(!next)return;const rail=next.querySelector('.dungeon-roster491'),body=next.querySelector('.dungeon-detail491');if(rail){rail.scrollLeft=position.left;rail.scrollTop=position.top;}if(body)body.scrollTop=kind==='boss'?0:position.detail;const frame=next.querySelector('.dungeon-body491');if(frame)frame.scrollTop=kind==='boss'?0:position.body;next.querySelector('[data-dungeon-'+kind+'491="'+CSS.escape(id)+'"]')?.focus({preventScroll:true});});
+}
+function dungeonInfo491_(tab){showDungeonBossInfo_(dungeonUi.bossId);switchDungeonBossInfoTab_(tab);}
 function renderDungeon_(){
  const bosses=dungeonData.bosses.filter(x=>x.enabled!==false&&dungeonAvailability_(x).open);
- if(!bosses.length)return `<div class="panel"><h3>副本關卡</h3><div class="notice">目前沒有開放中的副本。</div><button onclick="setPage('combatHub')">返回戰鬥入口</button></div>`;
- if(!bosses.some(b=>b.id===dungeonUi.bossId)){dungeonUi.bossId=bosses[0].id;dungeonStep25_=1}
- const b=dungeonBoss_(dungeonUi.bossId);if(viewMode_==='desktop'&&!dungeonDiff_())dungeonUi.difficulty=['easy','normal','hard'].find(k=>dungeonDiff_(b.id,k))||'easy';const d=dungeonDiff_();
- const heading=`<header class="dungeon-heading25"><div><small>步驟 ${dungeonStep25_} / 3 · ${['','選擇關卡','選擇難度','挑戰情報'][dungeonStep25_]}</small><h2>${dungeonStep25_===1?'副本關卡':escapeHtml(b.name)}</h2></div><button onclick="backDungeon25_()">${dungeonStep25_===1?'返回':'上一步'}</button></header>`;
- let body='',footer='';
- if(viewMode_!=='desktop'&&dungeonStep25_===1){body=`<div class="dungeon-choices25">${bosses.map(x=>`<button class="dungeon-choice25 ${x.theme}" onclick="selectDungeonBoss_('${mistId465_(x.id)}')"><span>${artTag202_('dungeon_'+x.id)||x.icon}</span><div><b>${escapeHtml(x.name)}</b><small>${escapeHtml(dungeonTimeLabel_(x))}</small></div><span>›</span></button>`).join('')}</div>`}
- else if(viewMode_!=='desktop'&&dungeonStep25_===2){body=`<div class="dungeon-choices25">${['easy','normal','hard'].map(k=>{const v=dungeonDiff_(b.id,k);return v?`<button class="dungeon-choice25" onclick="selectDungeonDifficulty_('${k}')"><div><b>${DUNGEON_DIFF_LABEL[k]}</b><small>HP ${Number(v.hp).toLocaleString()} · ${v.turnLimit} 回合內討伐</small><small>限定裝備掉落 ${(v.dropRate*100).toFixed(0)}%</small></div><span>›</span></button>`:''}).join('')}</div>`}
- else if(d){const reward=itemTemplates[b.rewardId];body=`<section class="panel dungeon-info25" style="background:rgba(20,17,14,.5)!important"><div class="section-title"><h3>${DUNGEON_DIFF_LABEL[dungeonUi.difficulty]} · 通關條件</h3></div><p>在 ${d.turnLimit} 回合限制內擊敗 ${escapeHtml(b.name)}。</p><div class="dungeon-stats25"><span>HP <b>${Number(d.hp).toLocaleString()}</b></span><span>物攻 <b>${d.patk}</b></span><span>魔攻 <b>${d.matk}</b></span><span>防禦 <b>${d.def}</b></span></div><div class="small">通關 EXP ${d.expMin}～${d.expMax} · ${escapeHtml(dungeonTimeLabel_(b))}</div></section><section class="panel dungeon-info25" style="background:rgba(20,17,14,.5)!important"><h3>敵人技能</h3><p>${enemyDescriptionHtml40_(b.skill)}</p>${b.special&&b.special!=='none'?`<b>${escapeHtml(DUNGEON_SPECIAL_LABEL[b.special]||b.special)}</b><p>${enemyDescriptionHtml40_(dungeonSpecialText_(b.special))}</p>`:''}</section><section class="panel dungeon-info25 dungeon-loot27" style="background:rgba(20,17,14,.5)!important"><div class="loot-glow27"></div><div class="loot-heading27"><div class="loot-icon27">${objectArt202_(b.rewardId,'equipment')||escapeHtml(String(reward?.iconSymbol||reward?.IconSymbol||'◇'))}</div><div><div class="loot-tag27">✦ 傳說限定裝備</div><b class="dungeon-reward-name25">${escapeHtml(reward?.name||b.rewardId)}</b></div></div><div class="section-title"><h3>限定掉落 · ${(Number(d.dropRate)*100).toFixed(0)}%</h3></div><p>${escapeHtml(dungeonRewardDesc_(b.rewardId))}</p><div class="small">掉落後鑲孔機率：0 孔 95% ／ 1 孔 4% ／ 2 孔 1%</div></section>`;footer=`<footer class="dungeon-footer25"><button class="primary" onclick="startDungeonChallenge_()">最後整備 · 進入${DUNGEON_DIFF_LABEL[dungeonUi.difficulty]}副本</button></footer>`}
- if(viewMode_==='desktop')return dungeonSelect406_(bosses,b)+body+footer;
- return `<div class="dungeon-flow25">${heading}<div class="dungeon-scroll25">${body}</div>${footer}</div>`;
+ if(!bosses.length)return '<section class="dungeon-empty491"><h2>副本入口</h2><p>目前沒有開放中的副本。</p><button onclick="returnPortal406_()">返回戰鬥入口</button></section>';
+ if(!bosses.some(b=>b.id===dungeonUi.bossId))dungeonUi.bossId=bosses[0].id;
+ const b=dungeonBoss_(),levels=['easy','normal','hard'].filter(k=>dungeonDiff_(b.id,k));
+ if(!levels.includes(dungeonUi.difficulty))dungeonUi.difficulty=levels[0]||'';
+ const d=dungeonDiff_(),reward=itemTemplates[b.rewardId],difficulty=DUNGEON_DIFF_LABEL[dungeonUi.difficulty]||'尚未開放';
+ const art=artTag202_('dungeon_'+b.id)||escapeHtml(b.icon||'◇');
+ const skills=String(b.skill||'').split(/[\n；;。]/).map(t=>t.trim()).filter(Boolean),summary=skills.slice(0,2);
+ const special=b.special&&b.special!=='none';
+ const roster=bosses.map(x=>'<button type="button" data-dungeon-boss491="'+escapeAttr(x.id)+'" aria-pressed="'+(x.id===b.id)+'" onclick="dungeonChoose491_(\'boss\',\''+mistId465_(x.id)+'\')"><span class="dungeon-thumb491">'+(artTag202_('dungeon_'+x.id)||escapeHtml(x.icon||'◇'))+'</span><span>'+escapeHtml(x.name)+'</span></button>').join('');
+ const choices=levels.map(k=>'<button type="button" data-dungeon-diff491="'+k+'" aria-pressed="'+(k===dungeonUi.difficulty)+'" onclick="dungeonChoose491_(\'diff\',\''+k+'\')">'+DUNGEON_DIFF_LABEL[k]+'</button>').join('');
+ const stat=(key,label,value)=>'<div><dt>'+battleIcon199_(key)+' '+label+'</dt><dd>'+Number(value).toLocaleString()+'</dd></div>';
+ return '<section class="dungeon-lobby491" aria-label="副本入口"><header class="dungeon-mobile-head491"><h2>副本入口</h2><button onclick="returnPortal406_()">返回</button></header><div class="dungeon-body491"><aside class="dungeon-pick491"><h3>選擇討伐目標</h3><div class="dungeon-roster491" role="group" aria-label="選擇副本王">'+roster+'</div></aside><main class="dungeon-detail491"><div class="dungeon-hero491"><div class="dungeon-figure491">'+art+'</div><div class="dungeon-intro491"><small>'+escapeHtml(dungeonTimeLabel_(b))+'</small><h2>'+escapeHtml(b.name)+'</h2><div class="dungeon-difficulties491" role="group" aria-label="選擇難度">'+choices+'</div><p class="dungeon-condition491">'+flatIcon313_('swords')+(d?'<strong>'+d.turnLimit+' 回合內擊敗</strong>':'尚無開放難度')+'</p></div></div>'+(d?'<dl class="dungeon-stats491" aria-label="敵人基礎能力">'+stat('hp','HP',d.hp)+stat('patk','物攻',d.patk)+stat('matk','魔攻',d.matk)+stat('def','防禦',d.def)+'</dl>':'')+'<div class="dungeon-cards491"><section class="dungeon-skills491"><h3>'+flatIcon313_('book')+' 技能情報</h3><ul>'+summary.map(t=>'<li>'+enemyDescriptionHtml40_(t)+'</li>').join('')+'</ul>'+(special?'<div class="dungeon-special491"><strong>'+escapeHtml(DUNGEON_SPECIAL_LABEL[b.special]||b.special)+'</strong><p>'+enemyDescriptionHtml40_(dungeonSpecialText_(b.special))+'</p></div>':'')+'<button class="dungeon-link491" onclick="dungeonInfo491_(\'skill\')">查看完整技能 ›</button></section><section class="dungeon-loot491"><h3>'+flatIcon313_('bag')+' 限定掉落</h3><div class="dungeon-reward491"><div class="dungeon-item491">'+(objectArt202_(b.rewardId,'equipment')||'◇')+'</div><div><strong>'+escapeHtml(reward?.name||b.rewardId||'尚未設定')+'</strong><p>掉落機率 <b>'+(d?(Number(d.dropRate)*100).toFixed(0)+'%':'—')+'</b></p></div></div><button class="dungeon-link491" onclick="dungeonInfo491_(\'drop\')">查看裝備能力與鑲孔機率 ›</button></section></div>'+(d?'<p class="dungeon-exp491">通關 EXP '+d.expMin+'～'+d.expMax+'</p>':'')+'</main></div><footer class="dungeon-actions491"><span>'+escapeHtml(difficulty)+(d?' <small>· '+d.turnLimit+' 回合</small>':'')+'</span><button class="primary dungeon-challenge-btn" '+(!d?'disabled':'')+' onclick="startDungeonChallenge_()">最後整備 <span aria-hidden="true">›</span></button></footer></section>';
 }
+
 
 let worldTab26_='battle';
 function setWorldTab26_(tab){worldTab26_=tab==='chest'?'chest':'battle';render()}
@@ -29703,7 +29804,7 @@ function hubSelectPanels413_(html,selectors){
  return box.innerHTML;
 }
 function hubContent413_(mode,facility){
- if(mode==='dungeon')return hubSelectPanels413_(renderDungeon_(),facility==='rewards'?'.dungeon-picks406,.dungeon-loot27':'.dungeon-picks406,.dungeon-info25:not(.dungeon-loot27),.dungeon-footer25');
+ if(mode==='dungeon')return renderDungeon_();
  if(mode==='worldboss'){
   if(facility==='ranking')return `<div class="between"><p>本次討伐貢獻度</p><button onclick="refreshWorldBossRanking_(this)">更新排行</button></div>${worldBossRankRows_(worldBossCache)}`;
   return hubSelectPanels413_(renderWorldBossLegacy26_(),facility==='rewards'?'[data-world26=chest]':'[data-world26=battle]');
@@ -29746,10 +29847,10 @@ function hubShowRankReward422_(){
 }
 function hubDialog413_(mode,id){
  const c=hubLayout413_[mode],hasRewards=hubPending413_(mode);
- const raw=hubContent413_(mode,id),content=id==='challenge'&&hubBrief424_[mode]?hubEntrySheet424_(mode,raw):raw;
+ const raw=hubContent413_(mode,id),content=mode!=='dungeon'&&id==='challenge'&&hubBrief424_[mode]?hubEntrySheet424_(mode,raw):raw;
  const tabs=Object.entries(c.tabs).map(([key,title])=>`<button type="button" aria-pressed="${key===id}" data-hub-tab422="${key}" onclick="hubOpen413_('${key}')">${title}${hasRewards&&(key==='rewards'||key==='loot')?'<i aria-label="有待查看獎勵"></i>':''}</button>`).join('');
  return `<div class="hub-overlay413" onclick="if(event.target===this)hubClose413_()"><section class="hub-dialog413" style="--hub-scene424:url('${hubAsset413_(mode)}')" role="dialog" aria-modal="true" aria-labelledby="hubTitle413" tabindex="-1"><header><h2 id="hubTitle413"><img class="hub-thumb422" src="${hubEntryAsset422_(mode)}" alt=""><span><small>${modeNames406_[mode]}</small>${c.label}</span></h2><button type="button" onclick="hubClose413_()" aria-label="關閉${c.label}">✕</button></header>
- <nav class="hub-tabs422" aria-label="${c.label}功能">${tabs}</nav><div class="hub-content413 ${mode} ${id}">${content}${id==='ranking'?`<button class="hub-reward-link422" onclick="hubShowRankReward422_()">${hubRank422_(mode)>0?'查看我的名次獎勵':'查看排名獎勵'} →</button>`:''}</div></section></div>`;
+ ${mode==='dungeon'?'':`<nav class="hub-tabs422" aria-label="${c.label}功能">${tabs}</nav>`}<div class="hub-content413 ${mode} ${id}">${content}${id==='ranking'?`<button class="hub-reward-link422" onclick="hubShowRankReward422_()">${hubRank422_(mode)>0?'查看我的名次獎勵':'查看排名獎勵'} →</button>`:''}</div></section></div>`;
 }
 function hubKit413_(root){
  if(!root||viewMode_!=='desktop')return;
@@ -29764,7 +29865,7 @@ function hubKit413_(root){
  card?.querySelectorAll('.panel,.notice,.worldboss-chest').forEach(n=>style(n,{background:'linear-gradient(130deg,#24241fe8,#15171df5)','box-shadow':'inset 0 1px #e2be7130','border-radius':'5px'}));
  const content=card?.querySelector(':scope>.hub-content413');
  if(content){
-  style(content,{display:'block',flex:'1 1 0','min-height':'0','overflow-x':'hidden','overflow-y':'auto',padding:'18px','scrollbar-gutter':'stable'});
+  style(content,{display:'block',flex:'1 1 0','min-height':'0','overflow-x':'hidden','overflow-y':content.classList.contains('dungeon')?'hidden':'auto',padding:content.classList.contains('dungeon')?'0':'18px','scrollbar-gutter':content.classList.contains('dungeon')?'auto':'stable'});
   const panel=content.querySelector('.arena-opponents-panel'),list=panel?.querySelector('.arena-opponents');
   style(panel,{display:'block',flex:'none',height:'auto','max-height':'none','overflow':'visible'});
   style(list,{display:'grid','grid-template-columns':'repeat(auto-fit,minmax(min(100%,300px),1fr))','grid-auto-rows':'minmax(220px,auto)',flex:'none',height:'auto','max-height':'none','overflow':'visible',padding:'2px',gap:'14px'});
