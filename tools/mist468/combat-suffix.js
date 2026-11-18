@@ -1,28 +1,41 @@
- applyGameConfigRows_(data.GameConfig);applyEquipmentRows_(data.Equipment);applySkillRows_(data.Skills);applyGemRows_(data.Gems);applyEnhancementRows_(data.Enhancement);
+ applyStatusRows494_(data.StatusEffects);applyGameConfigRows_(data.GameConfig);applyEquipmentRows_(data.Equipment);applySkillRows_(data.Skills);applyGemRows_(data.Gems);applyEnhancementRows_(data.Enhancement);
  function equipment(items){return items.map(it=>{const t=itemTemplates[it.template];if(!t)throw Error('MIST_EQUIPMENT_UNKNOWN');return {...it,slot:t.slot,name:t.name,rarity:t.rarity,resolvedStats:enhancedStats(it),effects:itemEffectKeys_(it),gems:(it.gems||[]).map(g=>g?{...g,name:gemTemplates[g.template]?.name,stats:gemResolved_(g).stats,effect:gemResolved_(g).effect}:null)};});}
  function snapshot(p){const eq=equipment(Object.values(p.equipment||{}).filter(Boolean));return {name:p.nickname,stats:arenaStatsFrom_(null,eq,p.skills?.passive||null),skills:p.skills?.active||[],passive:p.skills?.passive||null,equipmentList:eq,ai:(p.skills?.active||[]).map((skill,i)=>({skill,priority:i+1,condition:'ALWAYS'}))};}
  function actor(s,hp){return {name:s.name,stats:{...s.stats},baseCritDamage:s.stats.critDamage||100,hp:Math.max(0,Math.min(s.stats.hp,hp??s.stats.hp)),maxHp:s.stats.hp,skills:[...(s.skills||[])],passive:s.passive||null,equipmentList:s.equipmentList||[],equipment:{},ai:s.ai||[],status:{},buff:{},cooldowns:{},regen:0,regenTurns:0,firstDebuffDurationReduced:false};}
  function create(a,d,ahp,dhp,maxTurns=30){arenaBattle_={attacker:actor(a,ahp),defender:actor(d,dhp),turn:1,maxTurns,finished:false,log:[],attackerDamage:0,defenderDamage:0};return arenaBattle_;}
- async function act(a,t,id){record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaRefreshConditionalStats_(t);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
+ async function act(a,t,id){if(a===arenaBattle_.attacker)record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaRefreshConditionalStats_(t);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
   if(arenaCanAct_(a)){if(id==='skip'){await fxEvent_('skip',a,t);arenaFinishArcaneRound_(a,false);arenaLog_(a.name+' 跳過回合。');}
-   else if(id){if(!a.skills.includes(id)||!skillTemplates[id]||(a.cooldowns[skillTemplates[id].name]||0)>0)throw Error('MIST_SKILL_UNAVAILABLE');await arenaUse_(a,t,id);}
-   else {const loss=await arenaHit_(a,t,Math.max(1,Math.trunc(a.stats.patk-t.stats.def)),'physical');arenaLog_(a.name+' 普通攻擊造成 '+loss+' 傷害。');}}
-  await drain468();arenaTick_(a);await drain468();}
+   else if(id){if(!a.skills.includes(id)||!skillTemplates[id]||(a.cooldowns[skillTemplates[id].name]||0)>0)throw Error('MIST_SKILL_UNAVAILABLE');if(a.status.seal?.turns>0&&a.status.seal.skill===id)throw Error('MIST_SKILL_SEALED');await arenaUse_(a,t,id);if(a.hp>0&&a.status.bleed?.turns>0){const damage=Math.max(1,Math.trunc(a.maxHp*Number(statusDef_('bleed').value||.1)));a.hp=Math.max(0,a.hp-damage);arenaLog_(a.name+'【失血】施放技能失去 '+damage+' HP。');arenaFx_(side471(a),'-'+damage+' 失血','status');}}
+   else {const loss=await arenaHit_(a,t,Math.max(1,Math.trunc(questArenaAtk368_(a,'patk')-defense494(t))),'physical');arenaLog_(a.name+' 普通攻擊造成 '+loss+' 傷害。');}}
+  await drain468();}
  async function turn(b,id,monster=null){arenaBattle_=structuredClone(b);arenaBattle_.events471=[];const a=arenaBattle_.attacker,d=arenaBattle_.defender;
   if(monster&&arenaBattle_.turn===1&&!d.monsterOpened468){d.monsterOpened468=true;if(['opening_shield','elite_golem'].includes(monster.Ability))arenaAddShield60_(d,{id:'mist-opening',name:'開場護盾',hp:monster.Ability==='elite_golem'?monster.Value:Math.floor(d.maxHp*monster.Multiplier),turns:99});if(monster.Ability==='first_hit_guard')d.mistFirstGuard468=monster.Multiplier;}
-  if(arenaBattle_.finished)throw Error('MIST_BATTLE_FINISHED');await act(a,d,id);
-  if(a.hp>0&&d.hp>0){if(monster)await monsterAct468(monster,d,a,arenaBattle_.turn);else await act(d,a,arenaChooseAi_(d,a));}
-  await drain468();arenaBattle_.finished=a.hp<=0||d.hp<=0||arenaBattle_.turn>=arenaBattle_.maxTurns;
+  if(arenaBattle_.finished)throw Error('MIST_BATTLE_FINISHED');
+  arenaBattle_.phase494=(arenaBattle_.phase494||0)+1;
+  tickDebuffs494(d);await act(a,d,id);
+  if(!arenaHasDead59_()){finishAction494(a);await drain468();}
+  if(!arenaHasDead59_()){
+   // Same order as enemyTurnVisualLegacy130: enemy burning/poison, then player poison/burning.
+   record471('phase',{actor:'defender'});dot494(d,['burning','poison']);dot494(a,['poison','burning']);await drain468();
+  }
+  arenaBattle_.phase494++;a.freezeCd494=a.freezeCd494||a.status.freeze?.turns>0||a.status.paralysis?.turns>0;
+  if(a.hp>0&&d.hp>0){if(monster)await monsterAct468(monster,d,a,arenaBattle_.turn);else {let skill=arenaChooseAi_(d,a);if(d.status.seal?.turns>0&&skill===d.status.seal.skill)skill=null;await act(d,a,skill);}}
+  await drain468();
+  if(!arenaHasDead59_()){
+   tickDebuffs494(a,Object.keys(a.status||{}).filter(id=>!['stun','heal_block'].includes(id)));
+   finishAction494(d);await drain468();cooldown494(a);cooldown494(d);record471('state');
+  }
+  arenaBattle_.finished=a.hp<=0||d.hp<=0||arenaBattle_.turn>=arenaBattle_.maxTurns;
   if(!arenaBattle_.finished)arenaBattle_.turn++;
   arenaBattle_.log=arenaBattle_.log.slice(-120);return arenaBattle_;
  }
  async function monsterAct468(m,a,t,round){
-  record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
+  arenaRefreshConditionalStats_(a);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
   if(arenaCanAct_(a)){
    const magic=Number(m.MATK)>Number(m.PATK),kind=magic?'magic':'physical';
-   const hit=async(mult,bonus=1)=>{const raw=magic?a.stats.matk:a.stats.patk;const loss=await arenaHit_(a,t,Math.max(1,Math.trunc((raw*mult-(magic?0:t.stats.def))*bonus)),kind);arenaLog_(a.name+' 攻擊造成 '+loss+(magic?' 魔法':' 物理')+'傷害。');return loss;};
+   const hit=async(mult,bonus=1)=>{const raw=questArenaAtk368_(a,magic?'matk':'patk');const loss=await arenaHit_(a,t,Math.max(1,Math.trunc((raw*mult-(magic?0:defense494(t)))*bonus)),kind);arenaLog_(a.name+' 攻擊造成 '+loss+(magic?' 魔法':' 物理')+'傷害。');return loss;};
    await monsterAbility468(m,a,t,round,hit);
-  }await drain468();arenaTick_(a);await drain468();
+  }await drain468();
  }
  async function monsterAbility468(m,a,t,round,hit){
   let mult=Number(m.Multiplier)||1;

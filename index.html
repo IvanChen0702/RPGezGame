@@ -14518,7 +14518,11 @@ function applyBootstrapTables_(boot){
   for(const [id,e]of Object.entries(enemyTemplates))e.skill=(enemyBehaviors[id]||[]).map(x=>bossBehaviorTriggerText_(x)+'：'+x.message).join('；');
   applyDungeonRows_(boot);
 
-  const rows=boot.StatusEffects;
+  applyStatusRows494_(boot.StatusEffects);
+  planningInstalled412_=source412;
+}
+
+function applyStatusRows494_(rows){
     if(Array.isArray(rows)&&rows.length){
       for(const r of rows){
         const id=String(r.StatusID||'').trim();if(!id)continue;
@@ -14539,7 +14543,6 @@ function applyBootstrapTables_(boot){
         };
       }
     }
-  planningInstalled412_=source412;
 }
 
 async function loadOnlineStatusEffects_(){
@@ -21873,7 +21876,7 @@ function battleSkillDescHtml_(sk){
 function skillButton(sk,i,source=null){
  const cd=(source?.cooldowns||state.currentBattle.cooldowns)[sk.name]||0;
  const busy=source?source.busy:state.battleVisual&&state.battleVisual.busy;
- const sealed=source?false:sealedSkillSlot_()===i;
+ const sealed=source?!!source.sealed:sealedSkillSlot_()===i;
  return `<button id="skillBtn${i}" class="skill-btn" ${(cd>0||busy||sealed)?'disabled':''} onclick="${source?'arenaPlayerSkill_':'useSkill'}(${i})"><b>${escapeHtml(sk.name)}${skillCategoryBadge179_(source?source.id:(state.equippedSkills||[])[i])}${sealed?'（封印）':''}</b><div class="small">${source?skillDescHtml(sk.desc||''):battleSkillDescHtml_(sk)}</div><div class="cd ${sealed?'cd-sealed':(cd>0?'cd-waiting':'cd-ready')}">${sealed?'此技能欄被封印':(cd>0?`CD：剩餘 ${cd} 回合`:`技能已準備好`)}</div></button>`;
 }
 
@@ -22353,11 +22356,17 @@ function clearNonStunAbnormal(){
     if(def.category==='debuff' && id!=='stun')delete stores.player[id];
   }
 }
+// Count enemy debuffs once per player action, including a deliberate/control skip.
+function tickEnemyActionDebuffs494_(){
+ const b=state.currentBattle;if(!b||b.enemyDebuffTick494===b.turn)return;
+ b.enemyDebuffTick494=b.turn;tickGenericEnemyStatuses_('debuff');
+}
 async function resolvePlayerControlSkips(){
   const b=state.currentBattle;
   while(b && !b.lost && !b.won){
     const frozen=hasBattleStatus('player','freeze'),stunned=(b.stunTurns||0)>0;
     if(!frozen&&!stunned)break;
+    tickEnemyActionDebuffs494_();
     const id=frozen?'freeze':'stun',name=statusDef_(id).name||id;
     if(frozen){b.freezeSkipNoCooldown=true;removeBattleStatus_('player','freeze');}
     else b.stunTurns=Math.max(0,(b.stunTurns||0)-1);
@@ -22424,6 +22433,7 @@ async function skipPlayerTurn(){
   applyTurnStartGemEffects_();if(diceFlight141_(b)){await diceFlight141_(b);if(state.currentBattle!==b)return;}
   if((b.stunTurns||0)>0||hasBattleStatus('player','freeze')){await resolvePlayerControlSkips();save();render();return;}
 
+  tickEnemyActionDebuffs494_();
   state.battleVisual={phase:'玩家跳過回合',detail:'你選擇不使用技能，直接讓敵人行動。',busy:true,actor:'player'};
   playSfx('click');
   render();
@@ -22595,7 +22605,7 @@ async function useSkill(i){
  if(!e){toast('敵人資料尚未載入，請重新確認本場戰鬥。');return;}
  const id=state.equippedSkills[i],sk=skillTemplates[id];if(!sk)return;
  if((b.cooldowns[sk.name]||0)>0)return;
- tickGenericEnemyStatuses_('debuff');
+ tickEnemyActionDebuffs494_();
  const s=battlePlayerStats();
 
  state.battleVisual={phase:`玩家使用 ${sk.name}`,detail:`你選擇了 <strong>【${sk.name}】</strong>。`,busy:true,actor:'player'};
@@ -26767,7 +26777,7 @@ function arenaCombatantStatusHtml_(x){
  if(x?.passive==='mageAptitudeII')tags.push(x===arenaBattle_?.defender?opponentArcaneMeter187_(x.arcaneStacks,!arenaMageAptitudeIIActive_(x)):arcaneMeterHtml_(x.arcaneStacks,!arenaMageAptitudeIIActive_(x)));
  for(const [id,v] of Object.entries(x?.status||{})){
   if(Number(v?.turns||0)<=0)continue;
-  const def=statusDef_(id),kind=def.category==='buff'?'buff':'debuff',meta=id==='block'?'下一次':Number(v.stacks||0)>1?`${v.stacks}層｜${v.turns}R`:`${v.turns}R`;
+  const def=statusDef_(id),kind=def.category==='buff'?'buff':'debuff',meta=id==='block'?'下一次':arenaBattle_?.mist470&&def.durationType==='stacks'?`${v.stacks||1}層`:Number(v.stacks||0)>1?`${v.stacks}層｜${v.turns}R`:`${v.turns}R`;
   tags.push(compactStatusTag_(def.name||id,meta,kind,def.description||''));
  }
  for(const sh of arenaActiveShields60_(x))tags.push(shieldStatusTag60_(sh));
@@ -26807,7 +26817,7 @@ function arenaRevealHtml_(){
  <div class="section-title" style="margin-top:14px"><h3>裝備 / 寶石</h3><span class="badge">${eq.length} 件</span></div>${arenaReadOnlyEquipmentHtml_(eq)}</div>`;
 }
 function arenaSkillButton148_(actor,i,busy){
- const id=actor.skills[i],sk=skillTemplates?.[id];if(arenaBattle_?.mist470)return sk?skillButton(sk,i,{id,cooldowns:actor.cooldowns,busy}):'<button disabled>空技能欄</button>';if(!sk)return '<button class="skill-btn" disabled>空技能欄</button>';
+ const id=actor.skills[i],sk=skillTemplates?.[id];if(arenaBattle_?.mist470)return sk?skillButton(sk,i,{id,cooldowns:actor.cooldowns,busy,sealed:actor.status.seal?.turns>0&&actor.status.seal.skill===id}):'<button disabled>空技能欄</button>';if(!sk)return '<button class="skill-btn" disabled>空技能欄</button>';
  const cd=Math.max(0,Number(actor.cooldowns[sk.name]||0));
  return `<button id="skillBtn${i}" class="skill-btn" onclick="arenaPlayerSkill_(${i})" ${busy||cd>0?'disabled':''}><b>${skillNameHtml179_(id)}</b><div class="small">${skillDescHtml(sk.desc||'')}</div><div class="cd ${cd>0?'cd-waiting':'cd-ready'}">${cd>0?`CD：剩餘 ${cd} 回合`:'技能已準備好'}</div></button>`;
 }
@@ -31957,7 +31967,7 @@ function mistView487_(index){
 function mistSelect465_(x,y){mist465_.selection={x,y};mistDraw465_();document.querySelector('.mist-cell465.selected')?.focus({preventScroll:true});}
 function mistMapKey465_(event,x,y){const step={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[event.key];if(!step)return;event.preventDefault();const size=Number(mist465_.data?.size)||16;mistSelect465_(Math.max(0,Math.min(size-1,x+step[0])),Math.max(0,Math.min(size-1,y+step[1])));document.querySelector('.mist-cell465.selected')?.scrollIntoView({block:'nearest',inline:'nearest'});}
 function mistBag465_(tab){if(['equipment','gems','chests'].includes(tab)){mist465_.bag=tab;mistDraw465_();}}
-function mistError465_(code){return ({MIST_RESOURCE_MISSING:'這份資源已被領取，請更新棋盤。',MIST_RESOURCE_PENDING:'體力補包仍在生成中。',MIST_ENERGY_FULL:'體力已滿，無需領取補包。',MIST_NOT_OPEN:'目前不在開放時間，已開始的戰鬥仍可完成。',MIST_RETRY:'戰境狀態剛有變動，請重試同筆操作。',MIST_BAG_FULL:'此分類行囊已滿，請先丟棄或裝備物品。',MIST_PAIR_COOLDOWN:'與這位玩家的對戰尚在六小時冷卻中。',MIST_TARGET_PROTECTED:'對方處於出生保護或隱身中。',MIST_TARGET_BUSY:'對方正在交戰，請稍後再試。',MIST_RESPAWN_REQUIRED:'請先完成重生。',MIST_NOT_ADJACENT:'請先移動到相鄰格。',MIST_NOT_NEARBY:'請先接近補給站。',MIST_SUPPLY_USED:'今天已領取補給，凌晨 00:00 重置。',MIST_SKILL_UNAVAILABLE:'技能尚在冷卻或未配置。',MIST_SKILL_NOT_OWNED:'只能配置已解鎖的技能。',MIST_FLAG_LIMIT:'最多同時設置三面旗幟。',MIST_FLAG_EXISTS:'此格已經有旗幟。',MIST_ALREADY_HIDDEN:'目前仍在隱身中。',MIST_ITEM_MISSING:'物品狀態已變更，請重新整理。',MIST_INVALID_MOVE:'只能移動到上下左右相鄰格。',MIST_NOT_UNLOCKED:'通關主線第 1 層後開放。',MIST_CELL_BLOCKED:'該格已被占用，請重新選擇路線。',MIST_ENERGY_LOW:'體力不足，每 30 分鐘恢復 1 點。',MIST_LOOT_PENDING:'請先收取或丟棄待處理戰利品。',MIST_IN_BATTLE:'戰鬥尚未結束，無法執行此操作。',MIST_STALE:'狀態已更新，請重新確認。'})[code]||code||'操作未完成，請重新整理確認。';}
+function mistError465_(code){return ({MIST_RESOURCE_MISSING:'這份資源已被領取，請更新棋盤。',MIST_RESOURCE_PENDING:'體力補包仍在生成中。',MIST_ENERGY_FULL:'體力已滿，無需領取補包。',MIST_NOT_OPEN:'目前不在開放時間，已開始的戰鬥仍可完成。',MIST_RETRY:'戰境狀態剛有變動，請重試同筆操作。',MIST_BAG_FULL:'此分類行囊已滿，請先丟棄或裝備物品。',MIST_PAIR_COOLDOWN:'與這位玩家的對戰尚在六小時冷卻中。',MIST_TARGET_PROTECTED:'對方處於出生保護或隱身中。',MIST_TARGET_BUSY:'對方正在交戰，請稍後再試。',MIST_RESPAWN_REQUIRED:'請先完成重生。',MIST_NOT_ADJACENT:'請先移動到相鄰格。',MIST_NOT_NEARBY:'請先接近補給站。',MIST_SUPPLY_USED:'今天已領取補給，凌晨 00:00 重置。',MIST_SKILL_SEALED:'此技能欄受到封印，請選擇其他技能或跳過回合。',MIST_SKILL_UNAVAILABLE:'技能尚在冷卻或未配置。',MIST_SKILL_NOT_OWNED:'只能配置已解鎖的技能。',MIST_FLAG_LIMIT:'最多同時設置三面旗幟。',MIST_FLAG_EXISTS:'此格已經有旗幟。',MIST_ALREADY_HIDDEN:'目前仍在隱身中。',MIST_ITEM_MISSING:'物品狀態已變更，請重新整理。',MIST_INVALID_MOVE:'只能移動到上下左右相鄰格。',MIST_NOT_UNLOCKED:'通關主線第 1 層後開放。',MIST_CELL_BLOCKED:'該格已被占用，請重新選擇路線。',MIST_ENERGY_LOW:'體力不足，每 30 分鐘恢復 1 點。',MIST_LOOT_PENDING:'請先收取或丟棄待處理戰利品。',MIST_IN_BATTLE:'戰鬥尚未結束，無法執行此操作。',MIST_STALE:'狀態已更新，請重新確認。'})[code]||code||'操作未完成，請重新整理確認。';}
 async function mistCommand465_(action,payload={}){
  if(mist465_.preview){toast('這是介面預覽，不會變更角色或消耗體力。');return;}
  if(mist465_.loading||mist465_.pending||mistAnimating470_||(!mist465_.data?.ready&&!['battle/turn','battle/leave','reports/read','chest/open','chest/confirm'].includes(action)))return;
@@ -32212,7 +32222,7 @@ function mistSyncBattle470_(){
  if(!b){if(mistSharedBattle470_()){arenaBattle_=null;state.page='mist';mist465_.tab='map';return true;}return false;}
  if(state.page!=='mist'&&!mistSharedBattle470_())return false;
  const prior=arenaBattle_?.mist470&&arenaBattle_.id===b.id?arenaBattle_:null;
- const actor=(x,own)=>({...x,stats:x.stats|| (own?d.stats:{hp:x.maxHp,patk:0,matk:0,def:0,crit:0,critDamage:100}),buff:x.buff||{},status:x.status||{},skills:x.skills||[],cooldowns:x.cooldowns||{},passive:own?(x.passive||d.skills.passive):null,equipmentList:own?Object.values(d.equipment||{}).filter(Boolean):[],equipment:{},regen:0,regenTurns:0});
+ const actor=(x,own)=>({...x,stats:x.stats|| (own?d.stats:{hp:x.maxHp,patk:0,matk:0,def:0,crit:0,critDamage:100}),buff:x.buff||{},status:x.status||{},skills:x.skills||[],cooldowns:x.cooldowns||{},passive:own?(x.passive||d.skills.passive):null,equipmentList:own?Object.values(d.equipment||{}).filter(Boolean):[],equipment:{},regen:Number(x.regen)||0,regenTurns:Number(x.regenTurns)||0,regenRate241:Number(x.regenRate241)||0});
  const next={...b,mist470:true,battleId:b.id,attacker:actor(b.attacker,true),defender:actor(b.defender,false),result:({win:'ATTACKER_WIN',loss:'DEFENDER_WIN',draw:'DRAW',mutual:'DRAW'})[b.result],mistResult:b.result,actionBusy:mist465_.loading||!!mist465_.pending||mistAnimating470_||!!mistPresentation471_||!!mist465_.error,preparing:false,submitting:false,serverPending:false,defenderIsNpc:!!b.defender.art,playerTurnStarted:true};
  if(prior)Object.assign(prior,next);else arenaBattle_=next;
  state.page='arenaBattle';return true;
@@ -32225,7 +32235,7 @@ renderArenaBattle_=function(){
  root.querySelector('.battle-hud-kicker').textContent='迷霧戰境';
  root.querySelector('.battle-hud-title h2').textContent=b.defender.name;
  root.querySelector('#enemyCombatant .badge').textContent=b.defender.art?'戰境守衛':'冒險者';
- root.querySelector('#enemyBattleStats')?.remove();
+ // Keep the shared enemy stat row; combat stats are now included by the server.
  if(!b.finished){const controls=root.querySelector('.mobile-turn-controls34');controls.classList.remove('arena-turn-controls148');controls.style.cssText='display:flex;gap:8px;margin-top:8px';controls.querySelector('.skip-turn-btn').style.cssText='flex:1;margin-top:0';controls.insertAdjacentHTML('beforeend','<button class="danger" style="flex:1" disabled title="戰境交戰中無法撤退">撤退</button>');}
  root.querySelector('.battle-actions-title span')?.replaceChildren(document.createTextNode('戰境技能 · 禁止消耗品'));
  const info=root.querySelector('.battle-side-info>.panel:last-child');if(info)info.innerHTML='<h3>戰境規則</h3><p class="small">最多 30 回合 · 戰後保留剩餘 HP<br>異常、增益與技能冷卻每場重置。</p>';
@@ -32238,7 +32248,7 @@ renderArenaBattle_=function(){
 let mistPresentation471_=null;
 function mistFrame471_(frame){
  const b=arenaBattle_;if(!b?.mist470||!mistPresentation471_)return;
- const before=JSON.stringify([b.attacker.stats,b.attacker.buff]);
+ const before=JSON.stringify([b.attacker.stats,b.attacker.buff,b.defender.stats,b.defender.buff]);
  for(const [key,side]of [['attacker','player'],['defender','enemy']]){
   Object.assign(mistPresentation471_.battle[key],frame[key]);Object.assign(b[key],frame[key]);
   const hp=document.getElementById(side+'HpText'),fill=document.getElementById(side+'HpFill');
@@ -32246,7 +32256,8 @@ function mistFrame471_(frame){
   if(fill)fill.style.width=shieldBarData111_(b[key].hp,b[key].maxHp,arenaShieldTotal60_(b[key])).hpPercent+'%';
  }
  refreshArenaShields111_();
- if(before!==JSON.stringify([b.attacker.stats,b.attacker.buff]))render();
+ for(const [key,side]of [['attacker','player'],['defender','enemy']])battleHtml228_(document.getElementById(side+'StatusZone'),arenaCombatantStatusHtml_(b[key]));
+ if(before!==JSON.stringify([b.attacker.stats,b.attacker.buff,b.defender.stats,b.defender.buff]))render();
 }
 async function mistTurn470_(id,retry=false){
  if(!id||mistAnimating470_||mistPresentation471_||mist465_.loading||(!retry&&(mist465_.pending||mist465_.error||arenaBattle_?.finished))||!mistSharedBattle470_())return;

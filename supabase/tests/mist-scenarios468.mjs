@@ -276,6 +276,7 @@ player('b').protected_until=null;
 r=await act('a','battle/start',{targetId:cell('b').id});
 assert.ok(r.battle.attacker.stats);
 assert.ok(r.battle.attacker.buff);
+assert.ok(r.battle.defender.stats);
 assert.deepEqual(r.battle.defender.appearance,{sex:'female',suit:7,head:6,kind:'staff',glow:true});
-for(const key of ['stats','equipment','skills','passive','account','inventory'])assert.ok(!(key in r.battle.defender));
+for(const key of ['equipment','skills','passive','account','inventory'])assert.ok(!(key in r.battle.defender));
 console.log('Shared battle own HUD and opponent privacy passed');

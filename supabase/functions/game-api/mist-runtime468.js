@@ -1255,6 +1255,9 @@ export function projectMist468(w, account, now, ready, save, rewards) {
           maxTurns: b.combat.maxTurns,
           attacker: {
             name: b.combat.attacker.name,
+            regen: b.combat.attacker.regen || 0,
+            regenTurns: b.combat.attacker.regenTurns || 0,
+            regenRate241: b.combat.attacker.regenRate241 || 0,
             stats: b.combat.attacker.stats,
             buff: b.combat.attacker.buff || {},
             passive: b.combat.attacker.passive,
@@ -1268,6 +1271,11 @@ export function projectMist468(w, account, now, ready, save, rewards) {
           },
           defender: {
             name: b.combat.defender.name,
+            regen: b.combat.defender.regen || 0,
+            regenTurns: b.combat.defender.regenTurns || 0,
+            regenRate241: b.combat.defender.regenRate241 || 0,
+            stats: b.combat.defender.stats,
+            buff: b.combat.defender.buff || {},
             appearance: b.defender ? w.players[b.defender]?.runtime?.appearance || null : null,
             hp: b.combat.defender.hp,
             maxHp: b.combat.defender.maxHp,
