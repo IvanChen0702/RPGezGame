@@ -4717,6 +4717,7 @@ function applyEquipmentLevels464Unlocked_(){
 /** Approved competition planning. No publish, player writes, or triggers. */
 const MIST_PLANNING465={
   "MistConfig": [
+{"Key": "StaminaPackCap", "Value": 10},{"Key": "StaminaPackWarningMinutes", "Value": 30},{"Key": "StaminaPackEnergy", "Value": 10},{"Key": "AirdropVisionRadius", "Value": 2},
     {
       "Key": "Enabled",
       "Value": false
@@ -5276,6 +5277,8 @@ function planningMistErrors465_(data){
  if(!String(cfg.ExcludedEquipmentIDs||'').toLowerCase().split(',').map(x=>x.trim()).includes('gmsword'))errors.push('迷霧戰境必須排除 gmSword');
  for(const k of ['UnlockFloor','InitialMapSize','EnergyInitial','EnergyCap','EnergyRecoveryMinutes','BattleMaxRounds','BattleTimeoutMinutes','MaxFlags'])
   if(!Number.isSafeInteger(Number(cfg[k]))||Number(cfg[k])<1)errors.push('MistConfig '+k+' 必須為正整數');
+ for(const [k,limit] of [['StaminaPackCap',10],['StaminaPackWarningMinutes',1440],['StaminaPackEnergy',20],['AirdropVisionRadius',2]])
+  if(cfg[k]!==undefined&&(!Number.isSafeInteger(Number(cfg[k]))||Number(cfg[k])<1||Number(cfg[k])>limit))errors.push('MistConfig '+k+' 必須為 1～'+limit+' 整數');
  if(Number(cfg.UnlockFloor)!==1||Number(cfg.InitialMapSize)!==16)errors.push('迷霧戰境開放層數應為 1、初始地圖應為 16');
  const ids=new Set(),abilities=new Set(MIST_PLANNING465.MistEnemies.map(x=>x.Ability));
  for(const r of data.MistEnemies){

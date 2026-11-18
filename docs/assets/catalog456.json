@@ -5755,6 +5755,18 @@
       "previous": null,
       "bytes": 498474,
       "sha256": "07a351e8cf0ca8bb249e33bfbef28fd914002592ea28d72293b46e6f60d9e9e3"
+    },
+    {
+      "path": "assets/images/ui/mist/stamina487.webp",
+      "previous": "assets/images/ui/mist/stamina487.webp",
+      "bytes": 75540,
+      "sha256": "1580063880b1de8d6f42a51bafbc0348d32a1a31b687c9e3eacdba433eb936df"
+    },
+    {
+      "path": "assets/images/ui/mist/airdrop487.webp",
+      "previous": "assets/images/ui/mist/airdrop487.webp",
+      "bytes": 78788,
+      "sha256": "db0794e54c013268ba85a09aedf7caf8fd4840e5db8788feaf5779eca495e077"
     }
   ]
 }
