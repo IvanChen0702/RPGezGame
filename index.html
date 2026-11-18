@@ -9748,6 +9748,7 @@ html.mobile-ui .pixel-background456{display:none!important}
 <style id="catalog-sources463">
 .catalog-sources463{min-width:0;overflow-wrap:anywhere}.catalog-sources463>ul{margin:8px 0;padding-left:18px}.catalog-sources463 li+li{margin-top:9px}.catalog-sources463 li>strong{display:block;color:#e4cf9c;font-weight:600}.catalog-sources463 li>span{display:block;margin-top:3px;font-size:.9em;line-height:1.5}.catalog-actions{display:flex;flex-wrap:wrap;gap:6px}.catalog-actions>button{max-width:100%;white-space:normal}
 </style>
+
 </head>
 <body>
 <style id="bootStyle279">
@@ -31783,15 +31784,29 @@ function mistRewards465_(){
  const source=bootstrapDataCache||{},r=(source.MistRankRewards||[])[0];
  if(!r)return mistStatus465_('排名獎勵企劃資料尚未載入。');
  let rewards;try{rewards=seasonRankRewards482_(r);}catch(_){return mistStatus465_('獎勵企劃尚未就緒。');}
- return '<table class="mist-table465"><thead><tr><th>名次</th><th>賽季獎勵</th></tr></thead><tbody>'+rewards.map(x=>'<tr><td>第 '+x.rankMin+(x.rankMax!==x.rankMin?'～'+x.rankMax:'')+' 名</td><td>'+rankRewardLootHtml_(x.type==='EQUIPMENT'?'equipment':x.type==='STONES'?'stone':'consumable',x.id,x.quantity)+'</td></tr>').join('')+'</tbody></table>';
+ return '<div class="rank-rewards57 rank-rewards-arena58">'+rewards.map((x,i)=>rankRewardTierHtml_(i+1,rankRewardLabel57_(x.rankMin,x.rankMax),rankRewardLootHtml_(x.type==='EQUIPMENT'?'equipment':x.type==='STONES'?'stone':'consumable',x.id,x.quantity),x.rankMin,x.rankMax)).join('')+'</div>';
+}
+function mistGuide485_(){
+ const art=(kind,id)=>'<img src="'+mistAsset465_(kind,id)+'" alt="" loading="lazy">';
+ const box=art('object','chest'),flag=art('object','flag-blue'),red=art('object','flag-red');
+ const card=(title,visual,headline,note)=>'<article class="mist-guide-card485"><h3>'+title+'</h3><div class="mist-guide-art485">'+visual+'</div><strong>'+headline+'</strong><p>'+note+'</p></article>';
+ const sight='<div class="mist-guide-sight485" aria-hidden="true">'+Array.from({length:25},(_,i)=>'<i class="'+(i%5>0&&i%5<4&&i>4&&i<20?'lit':'')+'">'+(i===12?'◆':'')+'</i>').join('')+'</div>';
+ return '<section class="mist-guide485" aria-label="戰境玩法圖解"><div class="mist-guide-heading485"><h3>出發前，記住這幾件事</h3><div class="mist-guide-energy485"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2L4 14h7l-1 8 10-12h-7z" fill="currentColor"/></svg><b>20 <small>體力上限</small></b><span>每 30 分鐘 +1</span></div></div><div class="mist-guide-grid485">'+
+ card('出生補給',box,'4 件初始裝備','頭部・防具・武器・特殊')+
+ card('探索迷霧',sight,'3 × 3 周圍視野','上下左右移動，每格 −1 體力')+
+ card('擊敗得分','<figure>'+art('enemy','normal-6')+'<figcaption>一般怪 <b>+1</b></figcaption></figure><figure>'+art('enemy','elite-2')+'<figcaption>菁英 <b>+2</b></figcaption></figure>','擊敗玩家 +3 分','菁英保證傳說裝備寶箱')+
+ card('插旗・奪旗','<figure>'+flag+'<figcaption>駐守 3 小時 <b>+1</b></figcaption></figure><figure>'+red+'<figcaption>拔除敵旗 <b>+3</b></figcaption></figure>','最多 3 面旗幟','每面旗提供 3 × 3 視野')+
+ card('補給・鍛造','<figure>'+art('object','supply')+'<figcaption>補給站</figcaption></figure><figure>'+art('object','forge')+'<figcaption>鐵匠鋪</figcaption></figure>','HP +30% ／ 寶石','補給每日二選一；鍛造 −1 體力 → +10')+
+ card('死亡・重生','<div class="mist-guide-rebirth485">'+box+'<div><span>HP <b>全滿</b></span><span>體力 <b>20</b></span></div></div>','玩家對戰死亡後重生','裝備、背包、旗幟清空；重領補給')+
+ '</div><div class="mist-guide-note485"><span>戰後 HP 保留</span><span>裝備無法攜出</span><span>技能可帶入，消耗品禁用</span></div></section>';
 }
 function mistEntry465_(){
  const d=mist465_.data,s=d?.self;if(s?.dead)return mistRespawn468_();
- return '<div class="mist-entry465"><div class="mist-gate465"><div class="mist-gate-copy465"><div class="mist-tag465">每週重啟的生存競技</div><h3>迷霧之中<br>立下你的旗幟</h3><p>尋寶、奪旗，或伏擊下一位旅人。<br>只帶上你的技能，從邊境重新出發。</p><div class="mist-facts466"><span>16 × 16 戰境</span><span>3 × 3 視野</span><span>週日 23:00 結算</span></div></div><aside class="mist-entry-side465">'+
- (!d?.ready?'<div class="mist-notice465">'+escapeHtml(d?.message||'戰境準備中。開放前可先查看玩法與獎勵。')+'</div>':'<p>裝備在戰境取得，戰後 HP 保留。<br>每一步，都可能遇見新的對手。</p>')+
+ return '<div class="mist-entry465"><div class="mist-gate465"><div class="mist-gate-copy465"><div class="mist-tag465">每週重啟的生存競技</div><h3>迷霧之中，立下旗幟</h3><p>只帶技能入場，裝備從戰境取得。</p><div class="mist-facts466"><span>16 × 16 戰境</span><span>3 × 3 視野</span><span>週日 23:00 結算</span></div></div><aside class="mist-entry-side465">'+
+ (!d?.ready?'<div class="mist-notice465">'+escapeHtml(d?.message||'戰境準備中。開放前可先查看玩法與獎勵。')+'</div>':'<p>每週重新出發 · 尋寶／奪旗／生存</p>')+
  '<button class="primary" '+(!mistCanAct465_()?'disabled':'')+' onclick="'+(s?"mistTab465_('map')":"mistCommand465_('join')")+'">'+(mist465_.loading?'讀取戰境…':s?'繼續探索':d?.ready?'參加本季':'戰境準備中')+'</button><small>通關主線第 1 層開放 · 台灣時間</small></aside></div></div>'+
- '<div class="mist-rules465 mist-highlights466"><section class="mist-rule465"><img src="'+mistAsset465_('object','chest')+'" alt=""><div><h3>尋寶，武裝自己</h3><p>初始體力與上限 20，每 30 分鐘恢復 1 點。出生補給四件裝備；擊敗菁英取得傳說寶箱。</p></div></section><section class="mist-rule465"><img src="'+mistAsset465_('object','flag-blue')+'" alt=""><div><h3>插旗，掌握視野</h3><p>最多三把旗，每面每存續 3 小時 +1 分；拔除敵旗 +3 分。</p></div></section><section class="mist-rule465"><img src="'+mistAsset465_('object','supply')+'" alt=""><div><h3>補給，再走一步</h3><p>戰後不會補滿 HP。尋找補給站與鐵匠鋪，延續旅程。</p></div></section></div>'+
- '<section class="mist-section465"><details><summary>完整玩法與賽季規則</summary><div class="mist-rules465"><section class="mist-rule465"><h3>探索與補給</h3><p>初始體力 20、上限 20，每 30 分鐘恢復 1 點。出生專屬箱提供頭部、防具、武器、特殊裝備各一件，不能攜出戰境。一般怪 +1 分；菁英 +2 分並保證傳說裝備箱。每把旗提供 3 × 3 視野，每存續 3 小時 +1 分；拔除敵旗 +3 分。旗幟被拔除或死亡後計時歸零。移動、戰鬥、插旗各花 1 體力；拔敵旗 2 點；隱身 3 點、持續一小時。補給站每日擇一：恢復 30% HP 或取得寶石；鐵匠鋪每花 1 體力強化一件裝備至 +10。</p></section><section class="mist-rule465"><h3>死亡與重生</h3><p>死亡清空身上裝備、背包與旗子。擊殺者從可掉落的出戰裝備取得 1～3 件；重生補給不會掉落。積分保留，主動挑戰失敗另扣 3 分，最低為 0。重生滿血；被其他玩家擊敗（含玩家對戰同歸於盡）後重生，體力恢復至上限。怪物戰敗不補滿體力。</p></section><section class="mist-rule465"><h3>每次決定都有代價</h3><p>相鄰才可發起戰鬥。最多 30 回合，平局保留最後 HP；體力不退。雙方同時死亡則回出生點、裝備全消失，不加減積分。對同一玩家的 6 小時限制期間允許一次復仇。</p></section><section class="mist-rule465"><h3>每週重新出發</h3><p>出生保護一小時，移動或主動開戰即解除。週日 23:00 停止新行動，23:10 結束未完成戰鬥，週一 00:00 重啟。排名依積分、玩家擊殺數排序，同分同擊殺數並列。</p></section></div></details></section>';
+ mistGuide485_()+
+ '<section class="mist-section465 mist-details485"><details><summary>查看完整規則、死亡掉落與賽季時間</summary><div class="mist-rules465"><section class="mist-rule465"><h3>探索與補給</h3><p>初始體力 20、上限 20，每 30 分鐘恢復 1 點。出生專屬箱提供頭部、防具、武器、特殊裝備各一件，不能攜出戰境。一般怪 +1 分；菁英 +2 分並保證傳說裝備箱。每把旗提供 3 × 3 視野，每存續 3 小時 +1 分；拔除敵旗 +3 分。旗幟被拔除或死亡後計時歸零。移動、戰鬥、插旗各花 1 體力；拔敵旗 2 點；隱身 3 點、持續一小時。補給站每日擇一：恢復 30% HP 或取得寶石；鐵匠鋪每花 1 體力強化一件裝備至 +10。</p></section><section class="mist-rule465"><h3>死亡與重生</h3><p>死亡清空身上裝備、背包與旗子。擊殺者從可掉落的出戰裝備取得 1～3 件；重生補給不會掉落。積分保留，主動挑戰失敗另扣 3 分，最低為 0。重生滿血；被其他玩家擊敗（含玩家對戰同歸於盡）後重生，體力恢復至上限。怪物戰敗不補滿體力。</p></section><section class="mist-rule465"><h3>每次決定都有代價</h3><p>相鄰才可發起戰鬥。最多 30 回合，平局保留最後 HP；體力不退。雙方同時死亡則回出生點、裝備全消失，不加減積分。對同一玩家的 6 小時限制期間允許一次復仇。</p></section><section class="mist-rule465"><h3>每週重新出發</h3><p>出生保護一小時，移動或主動開戰即解除。週日 23:00 停止新行動，23:10 結束未完成戰鬥，週一 00:00 重啟。排名依積分、玩家擊殺數排序，同分同擊殺數並列。</p></section></div></details></section>';
 }
 
 
@@ -32161,5 +32176,49 @@ async function mistShowChest471_(receipt){
  equip.onclick=()=>confirm('equip');keep.onclick=()=>confirm('keep');retry.onclick=async()=>{if(mist465_.pending)return confirm('keep');await refreshMist465_();if(owner!==cloudMeta.accountId||!mist465_.data.chestReveals471?.some(x=>x.id===receipt.id)){el.remove();void mistAutoChest471_();}else{status.textContent=mist465_.error||'戰況已更新，請選擇裝備或收下。';}};keep.focus({preventScroll:true});
 }
 </script>
+<style id="mist-guide485">
+@layer mistLayout466 {
+/* The shared account banner and existing mode navigation remain untouched. */
+html body #app #page .mist465 .mist-gate465{min-height:200px!important;padding:24px 28px!important;align-items:center!important}
+html body #app #page .mist465 .mist-gate-copy465 h3{font-size:30px!important;letter-spacing:2px!important;margin:8px 0 12px!important}
+html body #app #page .mist465 .mist-entry-side465{max-width:300px!important}
+.mist-guide485{padding:18px 22px 8px!important;background:linear-gradient(180deg,#20282c,#171e23)!important}
+.mist-guide-heading485{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin-bottom:16px!important}
+.mist-guide-heading485 h3{font-size:18px!important;margin:0!important;color:#efce8d!important}
+.mist-guide-energy485{display:flex!important;align-items:center!important;gap:8px!important;color:#e6c27c!important}
+.mist-guide-energy485 svg{width:24px!important;height:28px!important;flex:none!important}
+.mist-guide-energy485 b{font-size:22px!important;white-space:nowrap!important}.mist-guide-energy485 small{font-size:11px!important;color:#bdb6a5!important;font-weight:400!important}
+.mist-guide-energy485>span{font-size:12px!important;border-left:1px solid #655b44!important;padding-left:10px!important;color:#c9c1ae!important}
+.mist-guide-grid485{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+.mist-guide-card485{min-width:0!important;position:relative!important;padding:12px 10px 13px!important;text-align:center!important;border:1px solid #66583d!important;border-radius:6px!important;background:radial-gradient(ellipse at 50% 45%,#37403c55,transparent 70%),#161d22!important;overflow:hidden!important}
+.mist-guide-card485 h3{font-size:14px!important;letter-spacing:2px!important;color:#dac597!important;margin:0!important}
+.mist-guide-art485{height:104px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:14px!important;margin:5px 0 9px!important}
+.mist-guide-art485 img{width:100px!important;height:100px!important;object-fit:contain!important;image-rendering:pixelated!important;filter:drop-shadow(0 4px 5px #0008)!important}
+.mist-guide-art485 figure{margin:0!important;min-width:0!important;display:grid!important;justify-items:center!important;gap:1px!important}
+.mist-guide-art485 figure img{width:80px!important;height:80px!important}
+.mist-guide-art485 figcaption{font-size:11px!important;color:#beb8a8!important;white-space:nowrap!important}.mist-guide-art485 figcaption b{color:#efce8d!important;font-size:15px!important}
+.mist-guide-card485>strong{font-size:17px!important;color:#f4d99f!important;display:block!important;line-height:1.4!important}
+.mist-guide-card485>p{margin:4px 0 0!important;font-size:11px!important;line-height:1.5!important;color:#b8b9b1!important}
+.mist-guide-sight485{display:grid!important;grid-template-columns:repeat(5,17px)!important;grid-template-rows:repeat(5,17px)!important;gap:2px!important;transform:rotate(-4deg)!important;padding:4px!important;background:#0e171c!important;border:1px solid #40504a!important;border-radius:5px!important}
+.mist-guide-sight485 i{border:1px solid #27363c!important;background:#16232a!important;font-style:normal!important;display:grid!important;place-items:center!important;font-size:16px!important;color:#ffdc87!important}
+.mist-guide-sight485 i.lit{background:#344f4c!important;border-color:#7da79a!important;box-shadow:inset 0 0 5px #94cdb02a!important}
+.mist-guide-rebirth485{display:flex!important;align-items:center!important;gap:8px!important}.mist-guide-rebirth485>img{width:92px!important;height:92px!important}
+.mist-guide-rebirth485>div{display:grid!important;gap:7px!important}.mist-guide-rebirth485 span{font-size:11px!important;color:#b9c3b8!important}.mist-guide-rebirth485 b{display:block!important;font-size:20px!important;color:#9bd6b7!important}
+.mist-guide-note485{display:flex!important;justify-content:center!important;flex-wrap:wrap!important;gap:8px 22px!important;color:#c4bca7!important;font-size:11px!important;padding:13px 0 4px!important}.mist-guide-note485 span::before{content:'◆'!important;font-size:8px!important;color:#b79b62!important;margin-right:6px!important}
+.mist-details485{padding:12px 22px 18px!important}.mist-details485 summary{font-size:12px!important;color:#d5bb83!important}
+@media(max-width:700px){
+ html body #app #page .mist465 .mist-gate465{padding:18px!important;gap:12px!important;min-height:0!important}
+ html body #app #page .mist465 .mist-gate-copy465 h3{font-size:23px!important;letter-spacing:1px!important;margin:4px 0 8px!important}
+ html body #app #page .mist465 .mist-entry-side465{max-width:none!important}.mist-entry-side465>p{display:none!important}
+ .mist-guide485{padding:14px 10px 6px!important}.mist-guide-heading485{align-items:flex-start!important;flex-direction:column!important;gap:7px!important;margin-bottom:12px!important}.mist-guide-heading485 h3{font-size:16px!important}
+ .mist-guide-energy485{width:100%!important;background:#121b20!important;border:1px solid #544c39!important;padding:4px 9px!important;border-radius:5px!important}.mist-guide-energy485>span{margin-left:auto!important}
+ .mist-guide-grid485{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.mist-guide-card485{padding:10px 5px!important}.mist-guide-card485 h3{font-size:12px!important;letter-spacing:1px!important}.mist-guide-art485{height:96px!important;gap:4px!important;margin:4px 0 7px!important}
+ .mist-guide-art485 figure img{width:62px!important;height:70px!important}.mist-guide-art485 img{width:88px!important;height:88px!important}.mist-guide-art485 figcaption{font-size:9px!important}.mist-guide-art485 figcaption b{font-size:12px!important}
+ .mist-guide-card485>strong{font-size:13px!important}.mist-guide-card485>p{font-size:10px!important;min-height:30px!important}.mist-guide-note485{gap:6px 10px!important;font-size:10px!important}.mist-details485{padding:10px 12px 16px!important}
+ .mist-guide-rebirth485{gap:1px!important}.mist-guide-rebirth485>img{width:68px!important;height:82px!important}.mist-guide-rebirth485 b{font-size:18px!important}
+}
+
+}
+</style>
 </body>
 </html>
