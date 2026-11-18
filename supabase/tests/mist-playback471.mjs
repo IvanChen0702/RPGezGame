@@ -15,7 +15,7 @@ for(const skill of ['slash','magicMissileII','magicMissileIII','magicBurst']){
  assert.equal(attacks[0].frame.defender.hp,10000,'HP is preserved until first impact');
  assert.ok(out.defender.hp<attacks[0].frame.defender.hp);
  for(let i=1;i<attacks.length;i++)assert.ok(attacks[i].frame.defender.hp<attacks[i-1].frame.defender.hp,'multi-hit impacts have distinct HP snapshots');
- for(const e of ev){for(const key of ['stats','buff','skills','equipment','equipmentList','ai','passive'])assert.ok(!(key in e.frame.defender),'opponent private data excluded');}
+ for(const e of ev){for(const key of ['skills','equipment','equipmentList','ai','passive'])assert.ok(!(key in e.frame.defender),'opponent private data excluded');}
  assert.ok(ev.length<=512);
  const next=await c.turn(out,'skip');assert.ok(!next.events471.some(e=>e.type==='cast'&&e.actor==='attacker'),'previous cast is not replayed next turn');
  console.log(skill,attacks.length,'ordered attack events');

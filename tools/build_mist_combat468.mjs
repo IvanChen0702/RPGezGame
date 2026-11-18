@@ -99,7 +99,7 @@ for (const [n, src] of Object.entries({
   clearTimeout: "function clearTimeout(){}",
   requestAnimationFrame: "function requestAnimationFrame(){}",
   statusEffects:
-    "let statusEffects=Object.fromEntries((data.StatusEffects||[]).map(r=>[r.StatusID,{id:r.StatusID,name:r.Name,category:r.Category,defaultDuration:r.DefaultDuration,stackable:r.Stackable,maxStacks:r.MaxStacks,value:r.Value}]));",
+    "let statusEffects=structuredClone(defaultStatusEffects);",
   ORDER_TABLES127_: "const ORDER_TABLES127_={Equipment:[],Gems:[],Skills:[]};",
 }))
   overrides.set(n, src);
@@ -120,6 +120,24 @@ for (const n of [
   "resolvePlayerHealing_",
 ])
   overrides.set(n, `function ${n}(){throw Error('MIST_NON_ARENA_PATH:${n}');}`);
+// Mist follows the normal battle phase order, not arena's start-of-action DOT/regen.
+const start494=defs.get("arenaTurnStartStatus_");
+overrides.set("arenaTurnStartStatus_",start494.slice(0,start494.indexOf(" const side="))+start494.slice(start494.indexOf(" for(const entry of arenaEffectEntries46_")));
+// Arena's legacy attack code has fixed defense/crit multipliers; use published status values in Mist.
+for(const name of ["arenaUseLegacy127_","fxEvent_"]){
+ let src=defs.get(name).replaceAll("target.status.armor_break?.turns>0?.7:1", "target.status.armor_break?.turns>0?Number(statusDef_('armor_break').value):1").replaceAll("target.status?.armor_break?.turns>0?.7:1", "target.status?.armor_break?.turns>0?Number(statusDef_('armor_break').value):1");
+ src=src.replace("const p=actor.passive,s=actor.stats;if(p===", "const p=actor.status?.forget?.turns>0?null:actor.passive,s=actor.stats;if(p===");
+ src=src.replace("Number(actor.stats.crit||0)/100", "Number(actor.stats.crit||0)*(actor.status.blind?.turns>0?Number(statusDef_('blind').value):1)/100");
+ if(name==='arenaUseLegacy127_'){
+  const begin=src.indexOf("   heal=Math.max(0,Number(sk.value)||0);"),end=src.indexOf(" }else if(kind==='precisionStrike')",begin);
+  if(begin<0||end<0)throw Error('Heal source changed; review normal/Mist parity');
+  src=src.slice(0,begin)+`   const before=actor.hp,got=fxArenaHeal_(actor,Math.max(0,Number(sk.value)||0));
+   if(!(actor.status.enhancement_lock?.turns>0)){actor.regen=Number(sk.regen)||0;actor.regenRate241=0;actor.regenTurns=Math.max(0,Number(sk.duration)||0);}
+   arenaLog_(actor.name+' 使用【'+name+'】立即恢復 '+got+' HP'+(before>actor.hp?'（詛咒反轉）':'')+'。');arenaFx_(side471(actor),before>actor.hp?'-'+(before-actor.hp)+' 詛咒':'+'+got+' HP',before>actor.hp?'status':'heal');
+`+src.slice(end);
+ }
+ overrides.set(name,src);
+}
 const globals = new Set([
   "Object",
   "Array",
@@ -143,6 +161,7 @@ const globals = new Set([
   "isNaN",
   "arguments",
   "globalThis",
+  "structuredClone",
   "data",
   "base",
   "random",
@@ -155,7 +174,10 @@ const roots = [
   "arenaStatsFrom_",
   "arenaUse_",
   "arenaHit_",
-  "arenaTick_",
+  "arenaTickProtection45_",
+  "arenaRegen_",
+  "fxNaturalCooldown_",
+  "applyStatusRows494_",
   "arenaTurnStartStatus_",
   "arenaCanAct_",
   "arenaRefreshConditionalStats_",
@@ -219,7 +241,9 @@ const code = [...selected.values()]
   .replace(
     "function arenaTakeDamage_(target,amount,kind=",
     "function arenaTakeDamageBase468_(target,amount,kind=",
-  );
+  )
+  .replace("function arenaStatus_(", "function arenaStatusBase494_(")
+  .replace("function arenaTryStatus_(", "function arenaTryStatusBase494_(");
 const pre = readFileSync(
     new URL("./mist468/combat-prefix.js", import.meta.url),
     "utf8",

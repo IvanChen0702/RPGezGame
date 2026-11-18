@@ -7,7 +7,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict');
  const core=createMistCombat468(data,()=>.4),stats={hp:10000,patk:100,matk:100,def:30,crit:0,critDamage:100};
  const a={name:'測試旅人',stats,skills:['magicMissileIII','slash'],passive:null,equipmentList:[],ai:[]},d={...a,name:'測試守衛',skills:[]};
  const initial=core.create(a,d),end=await core.turn(initial,'magicMissileIII');
- const project=b=>({...b,id:'compare471',result:null,attacker:{...b.attacker},defender:{name:b.defender.name,hp:b.defender.hp,maxHp:b.defender.maxHp,status:b.defender.status,shields:b.defender.shields,art:'normal-1'}});
+ const project=b=>({...b,id:'compare471',result:null,attacker:{...b.attacker},defender:{stats:b.defender.stats,buff:b.defender.buff,regen:b.defender.regen,regenTurns:b.defender.regenTurns,name:b.defender.name,hp:b.defender.hp,maxHp:b.defender.maxHp,status:b.defender.status,shields:b.defender.shields,art:'normal-1'}});
  const engine=process.env.BROWSER||'chromium',browser=await (engine==='webkit'?webkit.launch():chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']}));
  try{for(const [view,width,height]of [['desktop',1440,900],['mobile',390,844],['mobile',360,640],['mobile',844,390]]){
   if(process.env.WIDTH&&Number(process.env.WIDTH)!==width)continue;

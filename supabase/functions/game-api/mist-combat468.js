@@ -5,14 +5,63 @@ export function createMistCombat468(data,random){
  if(Object.values(base).some(n=>!Number.isFinite(n))||base.hp<=0)throw Error('MIST_BASE_CONFIG_INVALID');
  let pending468=[];
  // Presentation events are recorded from the same combat hooks as the browser.
- // Only public combat state is copied; opponent stats/equipment/AI never leave the server.
+ // Only public combat state is copied; opponent equipment/AI never leave the server.
  function side471(x){return x===arenaBattle_?.attacker?'attacker':x===arenaBattle_?.defender?'defender':x;}
- function frame471(){const pick=(a,own)=>({hp:a.hp,maxHp:a.maxHp,status:a.status||{},shields:(a.shields||[]).map(s=>({id:s.id,name:s.name,hp:s.hp,turns:s.turns})),...(own?{stats:a.stats,buff:a.buff||{},cooldowns:a.cooldowns||{},arcaneStacks:a.arcaneStacks||0}:{})});return structuredClone({attacker:pick(arenaBattle_.attacker,true),defender:pick(arenaBattle_.defender,false)});}
+ function frame471(){const pick=(a,own)=>({hp:a.hp,maxHp:a.maxHp,stats:a.stats,buff:a.buff||{},regen:a.regen||0,regenTurns:a.regenTurns||0,regenRate241:a.regenRate241||0,status:a.status||{},shields:(a.shields||[]).map(s=>({id:s.id,name:s.name,hp:s.hp,turns:s.turns})),...(own?{stats:a.stats,buff:a.buff||{},cooldowns:a.cooldowns||{},arcaneStacks:a.arcaneStacks||0}:{})});return structuredClone({attacker:pick(arenaBattle_.attacker,true),defender:pick(arenaBattle_.defender,false)});}
  function record471(type,detail={}){if(!arenaBattle_?.events471)return;const events=arenaBattle_.events471;if(events.length>=512)return;events.push({type,...detail,frame:frame471()});}
  function fxEvent_(...args){const p=fxEventCore468_(...args);pending468.push(p);return p;}
  async function drain468(){for(let i=0;pending468.length;i++){if(i>1000)throw Error('MIST_EFFECT_LOOP');const tasks=pending468;pending468=[];await Promise.all(tasks);}}
 
- function arenaTakeDamage_(target,amount,kind='damage',source=null){if(target?.mistFirstGuard468&&source&&kind==='damage'&&amount>0){amount=Math.floor(amount*target.mistFirstGuard468);delete target.mistFirstGuard468;}return arenaTakeDamageBase468_(target,amount,kind,source);}
+ function arenaTakeDamage_(target,amount,kind='damage',source=null){if(target?.status?.brand?.turns>0)amount=Math.trunc(amount*Number(statusDef_('brand').value??1.5));if(target?.mistFirstGuard468&&source&&kind==='damage'&&amount>0){amount=Math.floor(amount*target.mistFirstGuard468);delete target.mistFirstGuard468;}return arenaTakeDamageBase468_(target,amount,kind,source);}
+
+ // Persist phase stamps in the authoritative battle so retries/resumes cannot double-tick.
+ function arenaStatus_(target,id,turns=2,stacks=1){
+  if(statusDef_(id).category==='buff'&&target.status.enhancement_lock?.turns>0)return;
+  arenaStatusBase494_(target,id,turns,stacks);
+  const entry=target.status[id];entry.applied494=arenaBattle_.phase494||0;
+  if(id==='seal'){const skills=(target.skills||[]).filter(Boolean);if(skills.length)entry.skill=skills[Math.floor(Math.random()*skills.length)];}
+ }
+ function tickDebuffs494(x,ids=null){
+  for(const [id,v] of Object.entries(x.status||{})){
+   const def=statusDef_(id);
+   if(def.category==='buff'||def.durationType!=='turns'||ids&&!ids.includes(id))continue;
+   if(v.applied494===(arenaBattle_.phase494||0))continue;
+   if(--v.turns<=0){delete x.status[id];arenaLog_(`${x.name} 的【${def.name||id}】效果結束。`);}
+  }
+ }
+ function dot494(x,ids){
+  for(const id of ids){
+   if(arenaHasDead59_())return;
+   const v=x.status?.[id];if(!(v?.stacks>0))continue;
+   const rate=Number(statusDef_(id).value),damage=Math.max(1,Math.trunc(x.maxHp*rate*v.stacks));
+   const got=arenaTakeDamage_(x,damage,id);
+   arenaLog_(`${x.name} 受到【${statusDef_(id).name}】${got} 傷害（最大 HP ${x.maxHp} × ${rate*100}% × ${v.stacks} 層）。`);
+   arenaFx_(side471(x),`-${got} ${statusDef_(id).name}`,'status');record471('hit',{target:side471(x)});record471('wait',{ms:450});
+  }
+ }
+ function finishAction494(x){
+  x.freezeCd494=x.freezeCd494||x.status.freeze?.turns>0||x.status.paralysis?.turns>0;
+  // Normal battle's legacy stun/heal-block counters expire after the affected action.
+  tickDebuffs494(x,['stun','heal_block']);
+  const other=x===arenaBattle_.attacker?arenaBattle_.defender:arenaBattle_.attacker;
+  arenaTickProtection45_(other);arenaRegen_(other);
+  other.gamblePct141=0;delete other.status.gamble_luck141;
+  arenaRefreshConditionalStats_(x);arenaRefreshConditionalStats_(other);record471('state');
+ }
+ function cooldown494(x){
+  const frozen=x.freezeCd494||x.status.freeze?.turns>0||x.status.paralysis?.turns>0;
+  fxNaturalCooldown_(x.cooldowns,fxArenaKeys_(x),frozen);
+  if(frozen)arenaLog_(`${x.name}【冰凍／麻痺】技能 CD 停止自然倒數。`);
+  x.freezeCd494=false;
+ }
+
+ function arenaTryStatus_(actor,target,id,turns=2,stacks=1){
+  if(statusDef_(id).category==='debuff'&&target.status.invincible?.turns>0){arenaLog_(`${target.name} 的【無敵】免疫【${statusDef_(id).name}】。`);return false;}
+  if(statusDef_(id).category==='buff'&&target.status.enhancement_lock?.turns>0)return false;
+  return arenaTryStatusBase494_(actor,target,id,turns,stacks);
+ }
+
+ function defense494(x){return Number(x.stats.def||0)*(x.status.armor_break?.turns>0?Number(statusDef_('armor_break').value):1);}
 
 function arenaStatsFrom_(_talentSpent,eq){
  const x=arenaBaseStats_();
@@ -91,7 +140,7 @@ let defaultStatusEffects={
   brand:{id:'brand',name:'烙印',category:'debuff',durationType:'turns',defaultDuration:2,stackable:false,effectType:'damage_taken_multiplier',value:1.5,description:'受到傷害增加50%。'},
   blessing:{id:'blessing',name:'祝福',category:'buff',durationType:'turns',defaultDuration:2,stackable:false,effectType:'abnormal_immunity',description:'免疫新的異常效果。'}
 };
-let statusEffects=Object.fromEntries((data.StatusEffects||[]).map(r=>[r.StatusID,{id:r.StatusID,name:r.Name,category:r.Category,defaultDuration:r.DefaultDuration,stackable:r.Stackable,maxStacks:r.MaxStacks,value:r.Value}]));
+let statusEffects=structuredClone(defaultStatusEffects);
 function fxCondition_(condition,ctx={}){
  const hp=Number(ctx.hp||0),max=Math.max(1,Number(ctx.maxHp)||1),enemyHp=Number(ctx.enemyHp||0),enemyMax=Math.max(1,Number(ctx.enemyMaxHp)||1);
  if(condition==='fullhp')return hp>=max;
@@ -344,19 +393,18 @@ async function arenaUseLegacy127_(actor,target,id){
  pixelCast192_(arenaSide_(actor)==='attacker'?'player':'enemy',sk);
  arenaPrepareArcaneForSkill_(actor,sk);
  let dmg=0,crit=false,heal=0,total=0;
- const arenaPassiveMult=(damageKind)=>{const p=actor.passive,s=actor.stats;if(p==='adventurerAptitude')return damageKind==='physical'?(s.patk>=s.matk?1.05:1):(s.matk>=s.patk?1.05:1);if(p==='mageAptitude'&&damageKind==='magic'&&s.matk>=25)return 1.10;if(p==='mageAptitudeII'&&damageKind==='magic'&&arenaMageAptitudeIIActive_(actor))return (s.matk>=300?1.15:1)*Number(actor.arcaneCastMultiplier||1);return 1};
- const effectiveDef=()=>Number(target.stats.def||0)*(target.status.armor_break?.turns>0?.7:1);
- const phys=(mult=Number(sk.mult??1))=>{arenaRefreshPair46_(actor,target);let n=Math.max(1,Math.trunc(questArenaAtk368_(actor,'patk')*mult-effectiveDef()));crit=Math.random()<Math.max(0,Math.min(1,Number(actor.stats.crit||0)/100));actor.lastPhysicalCrit462=crit;if(crit)n=Math.max(1,Math.trunc(n*(1+Number(actor.stats.critDamage||100)/100)));return Math.max(1,Math.trunc(n*arenaPassiveMult('physical')))};
+ const arenaPassiveMult=(damageKind)=>{const p=actor.status?.forget?.turns>0?null:actor.passive,s=actor.stats;if(p==='adventurerAptitude')return damageKind==='physical'?(s.patk>=s.matk?1.05:1):(s.matk>=s.patk?1.05:1);if(p==='mageAptitude'&&damageKind==='magic'&&s.matk>=25)return 1.10;if(p==='mageAptitudeII'&&damageKind==='magic'&&arenaMageAptitudeIIActive_(actor))return (s.matk>=300?1.15:1)*Number(actor.arcaneCastMultiplier||1);return 1};
+ const effectiveDef=()=>Number(target.stats.def||0)*(target.status.armor_break?.turns>0?Number(statusDef_('armor_break').value):1);
+ const phys=(mult=Number(sk.mult??1))=>{arenaRefreshPair46_(actor,target);let n=Math.max(1,Math.trunc(questArenaAtk368_(actor,'patk')*mult-effectiveDef()));crit=Math.random()<Math.max(0,Math.min(1,Number(actor.stats.crit||0)*(actor.status.blind?.turns>0?Number(statusDef_('blind').value):1)/100));actor.lastPhysicalCrit462=crit;if(crit)n=Math.max(1,Math.trunc(n*(1+Number(actor.stats.critDamage||100)/100)));return Math.max(1,Math.trunc(n*arenaPassiveMult('physical')))};
  const mag=(mult=Number(sk.mult??1))=>{arenaRefreshPair46_(actor,target);return Math.max(1,Math.trunc(questArenaAtk368_(actor,'matk')*mult*arenaPassiveMult('magic')))};
  actor.chaosBlockAction332=false;actor.attackMissed241=false;actor.fxActiveSkillId=id;
  if(['godspeedSlash','heavenlyThunder','enchantedBlade'].includes(kind)){total=await questArenaSkill368_(actor,target,id,sk,phys,mag);
  }else if(kind==='fx'){total+=await fxEvent_('cast',actor,target,fxSkillKeys_(id));arenaLog_(`${actor.name} 使用【${name}】。`);
  }else if(await useBalancedArena241_(actor,target,id,sk)){
  }else if(kind==='heal'){
-   heal=Math.max(0,Number(sk.value)||0);const healBonus=arenaEffectNumber_(actor,'healing_received_',0)+fxSum_(fxArenaKeys_(actor),'healing_gain');if(healBonus>0){const raw=heal;heal=Math.trunc(heal*(1+healBonus/100));effectGainReport44_(actor,'healing_gain','healing_received_',raw,heal,'恢復量');}let got=0;
-   if(actor.status.heal_block){arenaLog_(`${actor.name} 使用【${name}】，但受到【禁療】影響，恢復量為 0。`);arenaFx_(actor===arenaBattle_.attacker?'attacker':'defender','禁療：恢復 0','status')}
-   else if(actor.status.curse){const hurt=arenaTakeDamage_(actor,heal,'curse',target);arenaLog_(`${actor.name} 使用【${name}】，但【詛咒】將恢復反轉為 ${hurt} 傷害。`);arenaFx_(actor===arenaBattle_.attacker?'attacker':'defender',`-${hurt} 詛咒`,'status')}
-   else{got=Math.min(heal,Math.max(0,actor.maxHp-actor.hp));actor.hp+=got;if(got>0)playSfx('heal');if(Number(sk.regen)>0){actor.regen=Number(sk.regen);actor.regenRate241=0;actor.regenTurns=Math.max(1,Number(sk.duration)||1)}arenaLog_(`${actor.name} 使用【${name}】恢復 ${got} HP。`);arenaFx_(actor===arenaBattle_.attacker?'attacker':'defender',`+${got} HP`,'heal')}
+   const before=actor.hp,got=fxArenaHeal_(actor,Math.max(0,Number(sk.value)||0));
+   if(!(actor.status.enhancement_lock?.turns>0)){actor.regen=Number(sk.regen)||0;actor.regenRate241=0;actor.regenTurns=Math.max(0,Number(sk.duration)||0);}
+   arenaLog_(actor.name+' 使用【'+name+'】立即恢復 '+got+' HP'+(before>actor.hp?'（詛咒反轉）':'')+'。');arenaFx_(side471(actor),before>actor.hp?'-'+(before-actor.hp)+' 詛咒':'+'+got+' HP',before>actor.hp?'status':'heal');
  }else if(kind==='precisionStrike'){
    const broken=!!target.status.armor_break?.turns;dmg=phys(Number(sk.mult??1.5));total+=await arenaHit_(actor,target,dmg,crit?'crit':'physical',`-${dmg}${crit?' 爆擊!':''}`);arenaFx_(target===arenaBattle_.attacker?'attacker':'defender',`-${dmg}${crit?' 爆擊!':''}`,crit?'crit':'damage');
    if(target.hp>0&&broken){const d2=phys(Number(sk.breakMult??1.8));total+=await arenaHit_(actor,target,d2,crit?'crit':'physical',`-${d2} 追加`);arenaFx_(target===arenaBattle_.attacker?'attacker':'defender',`-${d2} 追加`,'damage')}
@@ -689,7 +737,7 @@ function zeroParadoxThreshold395_(before,after,maxHp,used){
   const max=Number(maxHp)||0;
   return !used&&max>0&&before>0&&after>0&&before/max>=.3&&after/max<.3;
 }
-function arenaStatus_(target,id,turns=2,stacks=1){if(id==='block'){target.status.block={turns:1,stacks:1};playSfx('gainBuff226',{side:target===arenaBattle_?.attacker?'player':'enemy'});return;}const cur=target.status[id]||{turns:0,stacks:0};cur.turns=Math.max(cur.turns,Math.max(1,Number(turns)||1));cur.stacks=statusDef_(id)?.stackable===false?1:Math.max(1,cur.stacks+Math.max(1,Number(stacks)||1));target.status[id]=cur;if(statusDef_(id)?.category==='debuff')playSfx('debuff');else if(statusDef_(id)?.category==='buff')playSfx('gainBuff226',{side:target===arenaBattle_?.attacker?'player':'enemy'})}
+function arenaStatusBase494_(target,id,turns=2,stacks=1){if(id==='block'){target.status.block={turns:1,stacks:1};playSfx('gainBuff226',{side:target===arenaBattle_?.attacker?'player':'enemy'});return;}const cur=target.status[id]||{turns:0,stacks:0};cur.turns=Math.max(cur.turns,Math.max(1,Number(turns)||1));cur.stacks=statusDef_(id)?.stackable===false?1:Math.max(1,cur.stacks+Math.max(1,Number(stacks)||1));target.status[id]=cur;if(statusDef_(id)?.category==='debuff')playSfx('debuff');else if(statusDef_(id)?.category==='buff')playSfx('gainBuff226',{side:target===arenaBattle_?.attacker?'player':'enemy'})}
 function zeroParadoxCd395_(cooldowns){
   if(!cooldowns||typeof cooldowns!=='object')return 0;
   let changed=0;
@@ -728,7 +776,7 @@ async function fxEventCore468_(event,actor=null,target=null,extra=[]){
    const enemy=arena?target:battleEnemy(b),enemyHp=arena?target?.hp:b.enemyHp;
    if(!enemy||enemyHp<=0)continue;
    const chance=(arena?actor.hp:b.playerHp)/max<f.threshold?f.lowChance:f.chance;if(Math.random()>=chance)continue;
-   const raw=Math.trunc(Number(arena?target.maxHp:enemy.hp)*f.n/100),def=arena?Number(target.stats.def||0)*(target.status?.armor_break?.turns>0?.7:1):effectiveEnemyDef_(enemy,b),hit=Math.max(1,Math.trunc(raw-def));
+   const raw=Math.trunc(Number(arena?target.maxHp:enemy.hp)*f.n/100),def=arena?Number(target.stats.def||0)*(target.status?.armor_break?.turns>0?Number(statusDef_('armor_break').value):1):effectiveEnemyDef_(enemy,b),hit=Math.max(1,Math.trunc(raw-def));
    let actual=0;
    if(arena){actual=arenaTakeDamage_(target,fxDamage_(hit,'physical',keys,fxArenaContext_(actor,target)),'equipmentProc462',actor);arenaEffectText_(target,`-${actual} 追加`,'damage');}
    else{const missed=b.windDodged69;try{actual=await applyDirectDamageToEnemyLegacy122_(hit,'physical',effectSources44_(key),true);await phantomFlush122_(b);}finally{b.windDodged69=missed;}floatText(document.getElementById('enemyFx'),`-${actual} 追加`,'damage');}
@@ -765,7 +813,7 @@ async function fxEventCore468_(event,actor=null,target=null,extra=[]){
    }
   }else if(f.type==='castDamage'){
    reportApplied=damage;
-   if(arena){const raw=questArenaAtk368_(actor,f.kind==='physical'?'patk':'matk')*f.n/100,hit=Math.max(1,Math.trunc(raw-(f.kind==='physical'?Number(target.stats.def||0)*(target.status.armor_break?.turns>0?.7:1):0)));const p=actor.passive,s=actor.stats;let mult=1;if(!(actor.status?.forget?.turns>0)){if(p==='adventurerAptitude')mult=(f.kind==='physical'?s.patk>=s.matk:s.matk>=s.patk)?1.05:1;if(f.kind==='magic'&&p==='mageAptitude'&&s.matk>=25)mult=1.1;if(f.kind==='magic'&&p==='mageAptitudeII')mult=(s.matk>=300?1.15:1)*Number(actor.arcaneCastMultiplier||1);}damage+=await arenaHit_(actor,target,Math.trunc(hit*mult),f.kind);}
+   if(arena){const raw=questArenaAtk368_(actor,f.kind==='physical'?'patk':'matk')*f.n/100,hit=Math.max(1,Math.trunc(raw-(f.kind==='physical'?Number(target.stats.def||0)*(target.status.armor_break?.turns>0?Number(statusDef_('armor_break').value):1):0)));const p=actor.passive,s=actor.stats;let mult=1;if(!(actor.status?.forget?.turns>0)){if(p==='adventurerAptitude')mult=(f.kind==='physical'?s.patk>=s.matk:s.matk>=s.patk)?1.05:1;if(f.kind==='magic'&&p==='mageAptitude'&&s.matk>=25)mult=1.1;if(f.kind==='magic'&&p==='mageAptitudeII')mult=(s.matk>=300?1.15:1)*Number(actor.arcaneCastMultiplier||1);}damage+=await arenaHit_(actor,target,Math.trunc(hit*mult),f.kind);}
    else{const stats=battlePlayerStats(),enemy=battleEnemy(b),raw=(f.kind==='physical'?stats.patk:stats.matk)*f.n/100,hit=f.kind==='physical'?applyAdventurerDamageBonus(Math.max(1,Math.trunc(raw-effectiveEnemyDef_(enemy,b))),'physical',stats):magicDamageAgainstEnemy(raw,enemy,stats);damage+=await applyDirectDamageToEnemy_(hit,f.kind,'企劃技能');await applyWeaponOnHitEffect_(false);}
   }
   effectEventReport44_(key,f,actor,target,reportBefore,f.type==='castDamage'?damage-reportApplied:reportApplied);
@@ -780,7 +828,7 @@ async function chaosFxEvent332_(event,actor,target,extra=[]){
   if(ok!==false&&f.type==='chaosBlock')owner.chaosBlockAction332=true;
  }
 }
-function arenaTryStatus_(actor,target,id,turns=2,stacks=1){
+function arenaTryStatusBase494_(actor,target,id,turns=2,stacks=1){
  if(actor?.attackMissed241)return false;
  const n=statusDef_(id)?.name||id,immuneKey='immune_'+id;
  if(arenaHasEffect_(target,immuneKey)){const src=arenaEffectSourceName_(target,immuneKey);arenaLog_(`${target.name} 的【${src}】免疫【${n}】。`);arenaEffectText_(target,`${src}｜免疫 ${n}`,'buff');return false}
@@ -954,21 +1002,6 @@ function orderShieldRate139_(entries){
   return total+(m&&Number.isFinite(Number(m[1]))?Number(m[1]):0);
  },0)/100;
 }
-function arenaTick_(x){
- // End of x's turn, including a turn skipped because of control or by choice.
- const frozen=x.status?.freeze?.turns>0,paralyzed=x.status?.paralysis?.turns>0;
- fxNaturalCooldown_(x.cooldowns,fxArenaKeys_(x),frozen||paralyzed);
- if(frozen||paralyzed)arenaLog_(`${x.name}【${frozen?'冰凍':'麻痺'}】技能 CD 停止自然倒數。`);
- // Debuffs must survive until the affected combatant has taken/skipped a turn.
- for(const [k,v] of Object.entries(x.status||{})){
-  if(k==='block'||statusDef_(k)?.category==='buff')continue;
-  if(--v.turns<=0){delete x.status[k];arenaLog_(`${x.name} 的【${statusDef_(k)?.name||k}】效果結束。`)}
- }
- const opponent=x===arenaBattle_?.attacker?arenaBattle_?.defender:arenaBattle_?.attacker;
- if(opponent)arenaTickProtection45_(opponent);
- x.gamblePct141=0;delete x.status.gamble_luck141;arenaRefreshConditionalStats_(x);
-}
-function fxNaturalCooldown_(cooldowns,keys,paralyzed){if(paralyzed)return;const n=Math.max(0,1+fxSum_(keys,'tick'));for(const k of Object.keys(cooldowns||{}))if(cooldowns[k]>0){const before245=cooldowns[k];cooldowns[k]=Math.max(0,cooldowns[k]-n);if(n>1){const actor245=typeof arenaBattle_!=='undefined'&&arenaBattle_?.attacker?.cooldowns===cooldowns?arenaBattle_.attacker:typeof arenaBattle_!=='undefined'&&arenaBattle_?.defender?.cooldowns===cooldowns?arenaBattle_.defender:null;cooldownNotice245_(k,Math.max(0,before245-cooldowns[k]-1),actor245);}}}
 function arenaTickProtection45_(x){
  // A shield/buff round is consumed only after the opponent completes a turn.
  for(const k of Object.keys(x.buff)){
@@ -995,13 +1028,43 @@ function arenaTickProtection45_(x){
  }
  arenaActiveShields60_(x);
 }
+function arenaRegen_(x){
+ const turns=Number(x.regenTurns),amount=Number(x.regenRate241)>0?Math.trunc(x.maxHp*x.regenRate241):Number(x.regen);
+ if(!Number.isFinite(turns)||turns<1||!Number.isFinite(amount)||amount<0||amount===0&&!(Number(x.regenRate241)>0)){x.regenTurns=0;x.regen=0;x.regenRate241=0;return;}
+ if(x.hp<=0)return;
+ x.regenTurns=Math.trunc(turns);
+ const before=x.hp,got=fxArenaHeal_(x,amount);x.regenTurns--;
+ if(x.regenTurns===0){x.regen=0;x.regenRate241=0;}
+ const loss=Math.max(0,before-x.hp);
+ arenaLog_(`${x.name} 持續恢復：${loss?`詛咒反轉扣除 ${loss} HP`:`實際恢復 ${got} HP`}${x.status.heal_block?.turns>0?'（禁療）':''}，剩餘 ${x.regenTurns} 次。`);
+ arenaFx_(x===arenaBattle_.attacker?'attacker':'defender',loss?`-${loss} 詛咒`:`+${got} 持續恢復`,loss?'status':'heal');
+}
+function fxNaturalCooldown_(cooldowns,keys,paralyzed){if(paralyzed)return;const n=Math.max(0,1+fxSum_(keys,'tick'));for(const k of Object.keys(cooldowns||{}))if(cooldowns[k]>0){const before245=cooldowns[k];cooldowns[k]=Math.max(0,cooldowns[k]-n);if(n>1){const actor245=typeof arenaBattle_!=='undefined'&&arenaBattle_?.attacker?.cooldowns===cooldowns?arenaBattle_.attacker:typeof arenaBattle_!=='undefined'&&arenaBattle_?.defender?.cooldowns===cooldowns?arenaBattle_.defender:null;cooldownNotice245_(k,Math.max(0,before245-cooldowns[k]-1),actor245);}}}
+function applyStatusRows494_(rows){
+    if(Array.isArray(rows)&&rows.length){
+      for(const r of rows){
+        const id=String(r.StatusID||'').trim();if(!id)continue;
+        const base=statusEffects[id]||{id};
+        statusEffects[id]={
+          ...base,
+          id,
+          name:String(r.Name||base.name||id),
+          category:String(r.Category||base.category||'debuff'),
+          durationType:id==='block'?'trigger':String(r.DurationType||base.durationType||'turns'),
+          defaultDuration:id==='block'?0:Number(r.DefaultDuration??base.defaultDuration??1),
+          stackable:id==='block'?false:String(r.Stackable).toLowerCase()==='true'||r.Stackable===true,
+          maxStacks:id==='block'?1:Number(r.MaxStacks??base.maxStacks??1),
+          effectType:String(r.EffectType||base.effectType||''),
+          stat:String(r.Stat||base.stat||''),
+          value:Number(r.Value??base.value??0),
+          description:id==='block'?'下一段有效傷害降低90%，觸發後消失；不隨回合到期，最多持有一個。':String(r.Description||base.description||'')
+        };
+      }
+    }
+}
 function arenaTurnStartStatus_(x){
  // Each call begins one actor turn; the defender opening and first response share the battle round number.
  netherShield141_(x);rollGems141_(x);
- const side=x===arenaBattle_.attacker?'attacker':'defender';
- if(x.status.poison?.turns>0&&x.hp>0){const stacks=Math.max(1,Number(x.status.poison.stacks)||1),d=Math.max(1,Math.trunc(x.maxHp*.05*stacks));const got=arenaTakeDamage_(x,d,'poison');arenaLog_(`${x.name} 受到【中毒】${got} 傷害（${stacks}層）。`);arenaFx_(side,`-${got} 中毒`,'status')}
- if(x.status.burning?.turns>0&&x.hp>0){const stacks=Math.max(1,Number(x.status.burning.stacks)||1),d=Math.max(1,Math.trunc(x.maxHp*.04*stacks));const got=arenaTakeDamage_(x,d,'burning');arenaLog_(`${x.name} 受到【燃燒】${got} 傷害（${stacks}層）。`);arenaFx_(side,`-${got} 燃燒`,'status')}
- arenaRegen_(x);
  for(const entry of arenaEffectEntries46_(x)){
   const m=entry.key.match(/^turn_regen_maxhp_(\d+(?:\.\d+)?)$/);if(!m||x.hp<=0)continue;
   const raw=Math.max(1,Math.trunc(x.maxHp*Number(m[1])/100)),before=x.hp;
@@ -1044,17 +1107,6 @@ function diceRoll141_(values,random=Math.random){
  return {faces,wins,losses:faces.length-wins,raw,pct:Math.max(-100,raw)};
 }
 function queueDiceVisual141_(owner,result,actor){record471('dice',{actor:side471(actor),result:JSON.parse(JSON.stringify(result))});}
-function arenaRegen_(x){
- const turns=Number(x.regenTurns),amount=Number(x.regenRate241)>0?Math.trunc(x.maxHp*x.regenRate241):Number(x.regen);
- if(!Number.isFinite(turns)||turns<1||!Number.isFinite(amount)||amount<0||amount===0&&!(Number(x.regenRate241)>0)){x.regenTurns=0;x.regen=0;x.regenRate241=0;return;}
- if(x.hp<=0)return;
- x.regenTurns=Math.trunc(turns);
- const before=x.hp,got=fxArenaHeal_(x,amount);x.regenTurns--;
- if(x.regenTurns===0){x.regen=0;x.regenRate241=0;}
- const loss=Math.max(0,before-x.hp);
- arenaLog_(`${x.name} 持續恢復：${loss?`詛咒反轉扣除 ${loss} HP`:`實際恢復 ${got} HP`}${x.status.heal_block?.turns>0?'（禁療）':''}，剩餘 ${x.regenTurns} 次。`);
- arenaFx_(x===arenaBattle_.attacker?'attacker':'defender',loss?`-${loss} 詛咒`:`+${got} 持續恢復`,loss?'status':'heal');
-}
 function arenaCanAct_(x){const side=x===arenaBattle_.attacker?'attacker':'defender';if(x.status.stun?.turns>0){arenaLog_(`${x.name} 因【暈眩】無法行動。`);arenaFx_(side,'暈眩・跳過','status');return false}if(x.status.freeze?.turns>0){arenaLog_(`${x.name} 因【冰凍】無法行動。`);arenaFx_(side,'冰凍・跳過','status');return false}return true}
 function arenaChooseAi_(a,t){for(const ai of (a.ai||[]).slice().sort((x,y)=>Number(x.priority||9)-Number(y.priority||9))){const sk=skillTemplates?.[ai.skill];if(ai.skill&&sk&&!(a.cooldowns[sk.name]||0)&&arenaCond_(ai.condition,a,t))return ai.skill}return null}
 function arenaCond_(c,self,enemy){c=String(c||'ALWAYS');const a=self.hp/self.maxHp,b=enemy.hp/enemy.maxHp;if(c==='ALWAYS')return true;if(c==='SELF_HP_LE_75')return a<=.75;if(c==='SELF_HP_LE_50')return a<=.5;if(c==='SELF_HP_LE_25')return a<=.25;if(c==='ENEMY_HP_LE_50')return b<=.5;if(c==='ENEMY_HP_LE_25')return b<=.25;if(c==='SELF_HAS_STATUS')return Object.keys(self.status).length>0;if(c==='ENEMY_NO_STATUS'||c==='ENEMY_NO_DEBUFF')return Object.keys(enemy.status).length===0;if(c==='SELF_NO_BUFF')return Object.keys(self.buff).length===0;return false}
@@ -1279,31 +1331,44 @@ function resolveItemTemplateStats_(item){
     effect:t.effect ?? ''
   };
 }
- applyGameConfigRows_(data.GameConfig);applyEquipmentRows_(data.Equipment);applySkillRows_(data.Skills);applyGemRows_(data.Gems);applyEnhancementRows_(data.Enhancement);
+ applyStatusRows494_(data.StatusEffects);applyGameConfigRows_(data.GameConfig);applyEquipmentRows_(data.Equipment);applySkillRows_(data.Skills);applyGemRows_(data.Gems);applyEnhancementRows_(data.Enhancement);
  function equipment(items){return items.map(it=>{const t=itemTemplates[it.template];if(!t)throw Error('MIST_EQUIPMENT_UNKNOWN');return {...it,slot:t.slot,name:t.name,rarity:t.rarity,resolvedStats:enhancedStats(it),effects:itemEffectKeys_(it),gems:(it.gems||[]).map(g=>g?{...g,name:gemTemplates[g.template]?.name,stats:gemResolved_(g).stats,effect:gemResolved_(g).effect}:null)};});}
  function snapshot(p){const eq=equipment(Object.values(p.equipment||{}).filter(Boolean));return {name:p.nickname,stats:arenaStatsFrom_(null,eq,p.skills?.passive||null),skills:p.skills?.active||[],passive:p.skills?.passive||null,equipmentList:eq,ai:(p.skills?.active||[]).map((skill,i)=>({skill,priority:i+1,condition:'ALWAYS'}))};}
  function actor(s,hp){return {name:s.name,stats:{...s.stats},baseCritDamage:s.stats.critDamage||100,hp:Math.max(0,Math.min(s.stats.hp,hp??s.stats.hp)),maxHp:s.stats.hp,skills:[...(s.skills||[])],passive:s.passive||null,equipmentList:s.equipmentList||[],equipment:{},ai:s.ai||[],status:{},buff:{},cooldowns:{},regen:0,regenTurns:0,firstDebuffDurationReduced:false};}
  function create(a,d,ahp,dhp,maxTurns=30){arenaBattle_={attacker:actor(a,ahp),defender:actor(d,dhp),turn:1,maxTurns,finished:false,log:[],attackerDamage:0,defenderDamage:0};return arenaBattle_;}
- async function act(a,t,id){record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaRefreshConditionalStats_(t);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
+ async function act(a,t,id){if(a===arenaBattle_.attacker)record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaRefreshConditionalStats_(t);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
   if(arenaCanAct_(a)){if(id==='skip'){await fxEvent_('skip',a,t);arenaFinishArcaneRound_(a,false);arenaLog_(a.name+' 跳過回合。');}
-   else if(id){if(!a.skills.includes(id)||!skillTemplates[id]||(a.cooldowns[skillTemplates[id].name]||0)>0)throw Error('MIST_SKILL_UNAVAILABLE');await arenaUse_(a,t,id);}
-   else {const loss=await arenaHit_(a,t,Math.max(1,Math.trunc(a.stats.patk-t.stats.def)),'physical');arenaLog_(a.name+' 普通攻擊造成 '+loss+' 傷害。');}}
-  await drain468();arenaTick_(a);await drain468();}
+   else if(id){if(!a.skills.includes(id)||!skillTemplates[id]||(a.cooldowns[skillTemplates[id].name]||0)>0)throw Error('MIST_SKILL_UNAVAILABLE');if(a.status.seal?.turns>0&&a.status.seal.skill===id)throw Error('MIST_SKILL_SEALED');await arenaUse_(a,t,id);if(a.hp>0&&a.status.bleed?.turns>0){const damage=Math.max(1,Math.trunc(a.maxHp*Number(statusDef_('bleed').value||.1)));a.hp=Math.max(0,a.hp-damage);arenaLog_(a.name+'【失血】施放技能失去 '+damage+' HP。');arenaFx_(side471(a),'-'+damage+' 失血','status');}}
+   else {const loss=await arenaHit_(a,t,Math.max(1,Math.trunc(questArenaAtk368_(a,'patk')-defense494(t))),'physical');arenaLog_(a.name+' 普通攻擊造成 '+loss+' 傷害。');}}
+  await drain468();}
  async function turn(b,id,monster=null){arenaBattle_=structuredClone(b);arenaBattle_.events471=[];const a=arenaBattle_.attacker,d=arenaBattle_.defender;
   if(monster&&arenaBattle_.turn===1&&!d.monsterOpened468){d.monsterOpened468=true;if(['opening_shield','elite_golem'].includes(monster.Ability))arenaAddShield60_(d,{id:'mist-opening',name:'開場護盾',hp:monster.Ability==='elite_golem'?monster.Value:Math.floor(d.maxHp*monster.Multiplier),turns:99});if(monster.Ability==='first_hit_guard')d.mistFirstGuard468=monster.Multiplier;}
-  if(arenaBattle_.finished)throw Error('MIST_BATTLE_FINISHED');await act(a,d,id);
-  if(a.hp>0&&d.hp>0){if(monster)await monsterAct468(monster,d,a,arenaBattle_.turn);else await act(d,a,arenaChooseAi_(d,a));}
-  await drain468();arenaBattle_.finished=a.hp<=0||d.hp<=0||arenaBattle_.turn>=arenaBattle_.maxTurns;
+  if(arenaBattle_.finished)throw Error('MIST_BATTLE_FINISHED');
+  arenaBattle_.phase494=(arenaBattle_.phase494||0)+1;
+  tickDebuffs494(d);await act(a,d,id);
+  if(!arenaHasDead59_()){finishAction494(a);await drain468();}
+  if(!arenaHasDead59_()){
+   // Same order as enemyTurnVisualLegacy130: enemy burning/poison, then player poison/burning.
+   record471('phase',{actor:'defender'});dot494(d,['burning','poison']);dot494(a,['poison','burning']);await drain468();
+  }
+  arenaBattle_.phase494++;a.freezeCd494=a.freezeCd494||a.status.freeze?.turns>0||a.status.paralysis?.turns>0;
+  if(a.hp>0&&d.hp>0){if(monster)await monsterAct468(monster,d,a,arenaBattle_.turn);else {let skill=arenaChooseAi_(d,a);if(d.status.seal?.turns>0&&skill===d.status.seal.skill)skill=null;await act(d,a,skill);}}
+  await drain468();
+  if(!arenaHasDead59_()){
+   tickDebuffs494(a,Object.keys(a.status||{}).filter(id=>!['stun','heal_block'].includes(id)));
+   finishAction494(d);await drain468();cooldown494(a);cooldown494(d);record471('state');
+  }
+  arenaBattle_.finished=a.hp<=0||d.hp<=0||arenaBattle_.turn>=arenaBattle_.maxTurns;
   if(!arenaBattle_.finished)arenaBattle_.turn++;
   arenaBattle_.log=arenaBattle_.log.slice(-120);return arenaBattle_;
  }
  async function monsterAct468(m,a,t,round){
-  record471('phase',{actor:side471(a)});arenaRefreshConditionalStats_(a);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
+  arenaRefreshConditionalStats_(a);arenaTurnStartStatus_(a);await drain468();if(a.hp<=0||t.hp<=0)return;
   if(arenaCanAct_(a)){
    const magic=Number(m.MATK)>Number(m.PATK),kind=magic?'magic':'physical';
-   const hit=async(mult,bonus=1)=>{const raw=magic?a.stats.matk:a.stats.patk;const loss=await arenaHit_(a,t,Math.max(1,Math.trunc((raw*mult-(magic?0:t.stats.def))*bonus)),kind);arenaLog_(a.name+' 攻擊造成 '+loss+(magic?' 魔法':' 物理')+'傷害。');return loss;};
+   const hit=async(mult,bonus=1)=>{const raw=questArenaAtk368_(a,magic?'matk':'patk');const loss=await arenaHit_(a,t,Math.max(1,Math.trunc((raw*mult-(magic?0:defense494(t)))*bonus)),kind);arenaLog_(a.name+' 攻擊造成 '+loss+(magic?' 魔法':' 物理')+'傷害。');return loss;};
    await monsterAbility468(m,a,t,round,hit);
-  }await drain468();arenaTick_(a);await drain468();
+  }await drain468();
  }
  async function monsterAbility468(m,a,t,round,hit){
   let mult=Number(m.Multiplier)||1;
