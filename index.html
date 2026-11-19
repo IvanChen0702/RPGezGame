@@ -7031,6 +7031,7 @@ function shop402_(){
   rail=marketRail402_([['equipment','gear','裝備'],['skill','scroll','技能'],['utility','potion','消耗品']],tab,'setShopTab');
   filters=(tab==='equipment'||tab==='utility'?'<label class="shop-filter403"><small>'+(tab==='equipment'?'裝備部位':'道具類型')+'</small>':'')+(tab==='equipment'?filter402_(state.shopEquipSubTab||'weapon',marketCats402_.slice(1,-1),'setShopEquipSubTab'):tab==='utility'?filter402_(shopConsumableSubTab_,[['battle','戰鬥'],['enhancement','強化'],['gift','禮盒']],'setShopConsumableSubTab_'):'')+(['equipment','utility'].includes(tab)?'</label>':'');
   rows=state.shopStock.flatMap((entry,index)=>{
+   if(entry.type==='skill'&&!shopSkillAvailable(entry.template))return [];
    if(shopEntryTab(entry)!==tab||tab==='equipment'&&shopEquipmentSubTab_(entry)!==(state.shopEquipSubTab||'weapon')||tab==='utility'&&shopConsumableSubTabFor_(entry)!==shopConsumableSubTab_)return [];
    const t=document.createElement('template');t.innerHTML=shopCard(entry,index);const node=t.content.querySelector('.shop-card');if(!node)return [];
    const id=entry.template,item=itemTemplates[id],name=node.querySelector('.shop-product-name');name?.querySelectorAll('.badge,.item-count-badge').forEach(n=>n.remove());
@@ -24704,7 +24705,7 @@ function setShopEquipSubTab(tab){
   save();
   render();
 }
-// Visibility and purchase eligibility are separate: enabled products always stay browsable.
+// Unowned products remain browsable even when purchase conditions are unmet.
 function shopConditions493_(entry){
  if(!entry)return ['商品資料尚未載入'];
  const t=skillTemplates[entry.template],owned=state.skillsOwned||[],messages=[];
@@ -24841,6 +24842,7 @@ function renderShopLegacy25_(){
 
   const visible=state.shopStock
     .map((x,i)=>({x,i}))
+    .filter(o=>o.x.type!=='skill'||shopSkillAvailable(o.x.template))
     .filter(o=>shopEntryTab(o.x)===state.shopTab)
     .filter(o=>state.shopTab!=='utility'||shopConsumableSubTabFor_(o.x)===shopConsumableSubTab_)
     .filter(o=>state.shopTab!=='equipment'||shopEquipmentSubTab_(o.x)===state.shopEquipSubTab);
