@@ -1125,6 +1125,7 @@ export async function reduceMist468(
     input.save,
     input.rewards || [],
   );
+  result.inventoryCapacity499 = {equipment:capacity('equipment'),gems:capacity('gems'),chests:capacity('chests')};
   result.energyRules = { initial:c('EnergyInitial'), cap:c('EnergyCap'), recoveryMinutes:c('EnergyRecoveryMinutes') };
   if (result.self) result.self.energyNextAt = p.energy < c('EnergyCap') ? iso(ms(p.energy_at) + c('EnergyRecoveryMinutes') * 60000) : null;
   result.roadChestRules492 = roadRules492();
