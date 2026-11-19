@@ -414,6 +414,10 @@ g.RPG411=Object.freeze({epoch,enabled,cfg,validate,describe,compile,relicScale,m
 .pick-grid401{flex:1!important;min-height:0!important;display:grid!important;grid-template-columns:repeat(9,minmax(0,1fr))!important;grid-auto-rows:calc((100% - 12px)/4)!important;gap:4px!important;align-content:start!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:4px!important;border:1px solid #635b4d!important;background:#14171c!important}
 .pick-grid401>i{border:1px solid #383939!important;background:#1b1d23!important;border-radius:3px!important}
 .pick-tile401{position:relative!important;display:block!important;min-width:0!important;min-height:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;border:1px solid #7c6c50!important;border-radius:4px!important;background:linear-gradient(145deg,#373139,#171820 65%)!important;color:#e4d6bf!important}
+
+/* Shared skill category badges in the compact shop and selection tiles. */
+.cell402>.skill-category179,.pick-tile401>.skill-category179{position:absolute!important;top:2px!important;right:2px!important;z-index:2!important;margin:0!important;padding:0 3px!important;font-size:9px!important;line-height:14px!important;pointer-events:none!important;background:#10151ff0!important}
+.pick-title401 h3{min-width:0!important;overflow-wrap:anywhere!important}.pick-title401 h3 .skill-category179{margin:3px 0 0 7px!important}
 .pick-tile401[aria-pressed=true],.pick-tile401:focus-visible{border-color:#ffdc99!important;box-shadow:inset 0 0 0 1px #ffe1a9!important}
 .pick-tile401[aria-pressed=true]:after{content:"✓"!important;position:absolute!important;top:0!important;left:0!important;color:#2c2112!important;background:#efce91!important;padding:0 3px!important;font:700 11px/14px sans-serif!important}
 .pick-tile401 .wear401{position:absolute!important;left:2px!important;top:2px!important;font-size:9px!important;color:#c8efd9!important;background:#1f423bdd!important}.pick-tile401[aria-pressed=true] .wear401{left:17px!important}
@@ -6744,13 +6748,13 @@ function openPicker401_(spec){
  const renderSelection=i=>{
   selected=i;const v=values[i];Array.from(grid.children).forEach((b,j)=>{if(j<values.length)b.setAttribute('aria-pressed',String(i===j))});
   if(!values.length){article.textContent="目前沒有可選擇的項目";confirm.textContent="確定";confirm.disabled=true;return}
-  article.innerHTML='<div class="pick-title401"><span>'+art(v)+'</span><h3>'+escapeHtml(name(v))+'</h3>'+(type==='equipment'&&v&&spec.favorites!==false?favoriteStarHtml_(v):'')+'</div><div class="pick-detail401">'+pickerDetail401_(type,v)+'</div>';
+  article.innerHTML='<div class="pick-title401"><span>'+art(v)+'</span><h3>'+escapeHtml(name(v))+(['active','passive'].includes(type)?skillCategoryBadge179_(v):'')+'</h3>'+(type==='equipment'&&v&&spec.favorites!==false?favoriteStarHtml_(v):'')+'</div><div class="pick-detail401">'+pickerDetail401_(type,v)+'</div>';
   confirm.textContent=!v?'卸下':type==='gem'?'鑲嵌寶石':type==='equipment'?'裝備武器'.replace('武器',slotName(v.slot)):type==='item'?'配置道具':'裝備技能';confirm.disabled=busy||!values.length||unavailable(v);
  };
  values.forEach((v,i)=>{
-  const btn=document.createElement('button');btn.type='button';btn.className='pick-tile401';if(v)btn.detailRow404_=()=>type==='equipment'||type==='gem'?asGear402_(v,type==='gem'):{name:name(v),art:art(v),kind:type==='item'?'道具':'技能',info:pickerDetail401_(type,v)};
+  const btn=document.createElement('button');btn.type='button';btn.className='pick-tile401';if(v)btn.detailRow404_=()=>type==='equipment'||type==='gem'?asGear402_(v,type==='gem'):{name:name(v),art:art(v),skillId497:['active','passive'].includes(type)?v:null,kind:type==='item'?'道具':'技能',info:pickerDetail401_(type,v)};
   btn.setAttribute('aria-label',name(v));
-  btn.innerHTML=(type==='equipment'&&v?equipmentTileBody208_(v):'<span class="tile-art204">'+art(v)+'</span><span class="tile-name204">'+escapeHtml(name(v))+'</span>')+(equipped(v)?'<small class="wear401">裝備中</small>':'');btn.onclick=()=>{if(!busy)renderSelection(i)};grid.append(btn);
+  btn.innerHTML=(type==='equipment'&&v?equipmentTileBody208_(v):'<span class="tile-art204">'+art(v)+'</span><span class="tile-name204">'+escapeHtml(name(v))+'</span>')+(['active','passive'].includes(type)?skillCategoryBadge179_(v):'')+(equipped(v)?'<small class="wear401">裝備中</small>':'');btn.onclick=()=>{if(!busy)renderSelection(i)};grid.append(btn);
  });
  for(let i=values.length;i<36;i++){const empty=document.createElement('i');empty.setAttribute('aria-hidden','true');grid.append(empty)}
  function cancel(){if(busy)return;closeQuickPicker();if(trigger?.isConnected)trigger.focus({preventScroll:true})}
@@ -6894,7 +6898,7 @@ function itemBody404_(type,item){
 function itemHeader404_(r,control=''){
  const item=r.item404,gear=item&&r.type404==='equipment',rarity=gear?equipmentRarity280_(item):item?gemResolved_(item)?.rarity:'';
  const tone=({傳說:'legend',史詩:'epic',稀有:'rare',特殊:'special'})[rarity]||'common',level=gear?equipmentLevelText_(item):'',enh=gear&&Number(item.enhance)>0?' +'+Number(item.enhance):'';
- return '<div class="itemhead404 tone-'+tone+'"><div class="face404">'+r.art+'</div><div><h3>'+escapeHtml(r.name+enh)+'</h3><p>'+[rarity,level,r.kind].filter(Boolean).map(escapeHtml).join(' · ')+'</p></div>'+control+'</div>';
+ return '<div class="itemhead404 tone-'+tone+'"><div class="face404">'+r.art+'</div><div><h3>'+escapeHtml(r.name+enh)+'</h3><p>'+[rarity,level,r.kind].filter(Boolean).map(escapeHtml).join(' · ')+(r.skillId497?skillCategoryBadge179_(r.skillId497):'')+'</p></div>'+control+'</div>';
 }
 function desktopTipTop421_(){
  return Math.max(8,(parseFloat(document.documentElement.style.getPropertyValue('--banner-bottom421'))||0)+8);
@@ -6956,7 +6960,7 @@ function asGear402_(item,gem=false){
 }
 function market402_({title,rail,tabs='',filters='',rows=[],footer='',owner=false,minSlots=null,empty='此分類目前沒有物品。',multi=false,equipmentFx484=false}){
  marketRows402_=rows;const selected=rows.find(r=>r.key===marketKey402_)||rows[0];marketSelected402_=selected;
- const cells=rows.map((r,i)=>'<button type="button" class="cell402'+(equipmentFx484&&r.type404==='equipment'?' bag-equipment-fx484':'')+'" data-market-index404="'+i+'" aria-pressed="'+(selected===r)+'" aria-label="'+escapeAttr(r.name)+'" onclick="marketPick402_('+i+')">'+(r.tile||'<span class="tile-art204">'+r.art+'</span><span class="tile-name204">'+escapeHtml(r.name)+'</span>')+(multi?'<i class="check402 '+(shopBulkSellSelected_.has(r.key)?'on':'')+'">'+(shopBulkSellSelected_.has(r.key)?'✓':'')+'</i>':'')+'</button>').join('');
+ const cells=rows.map((r,i)=>'<button type="button" class="cell402'+(equipmentFx484&&r.type404==='equipment'?' bag-equipment-fx484':'')+'" data-market-index404="'+i+'" aria-pressed="'+(selected===r)+'" aria-label="'+escapeAttr(r.name)+'" onclick="marketPick402_('+i+')">'+(r.tile||'<span class="tile-art204">'+r.art+'</span><span class="tile-name204">'+escapeHtml(r.name)+'</span>')+(r.skillId497?skillCategoryBadge179_(r.skillId497):'')+(multi?'<i class="check402 '+(shopBulkSellSelected_.has(r.key)?'on':'')+'">'+(shopBulkSellSelected_.has(r.key)?'✓':'')+'</i>':'')+'</button>').join('');
  const blanks='<i class="empty402"></i>'.repeat(Math.max(0,(minSlots??(owner?20:24))-rows.length));
  const detail=selected?itemHeader404_(selected,selected.accessory404||'')+'<div class="info402">'+selected.info+'</div><div class="trade402">'+(selected.price==null?'':'<div class="gold402">'+icon402_('coin')+goldNumber331_(selected.price)+' 金幣</div>')+(selected.input?'<label>上架售價<input id="auctionAsk402" type="number" min="1" step="1" value="'+escapeAttr(auctionDraft402_.get(selected.key)||'')+'" oninput="auctionDraft402_.set(marketSelected402_.key,this.value)"></label>':'')+(selected.condition493||'')+(selected.act?'<button class="primary" '+(selected.disabled?'disabled':'')+' onclick="marketAction402_(this)">'+escapeHtml(selected.label)+'</button>':'')+'</div>':'<div class="idle402">'+icon402_('gem')+'<span>物品資訊</span></div>';
  return '<div class="market402">'+rail+'<section class="stock402">'+tabs+'<header><h3>'+title+'</h3><small>'+rows.length+' 件</small></header><div class="filters402">'+filters+'</div><div class="tiles402">'+cells+blanks+'</div>'+(!rows?'<small>'+empty+'</small>':'')+footer+'</section><aside class="detail402">'+detail+'</aside>'+(owner?'<aside class="keeper402" data-face="'+keeperMood402_+'"><div></div><b>雜貨店闆娘</b><p>'+keeperLines402_[keeperMood402_]+'</p></aside>':'')+'</div>';
@@ -7038,7 +7042,7 @@ function shop402_(){
    const price=Number(node.querySelector('.shop-price')?.textContent.replace(/[^0-9]/g,'')),button=node.querySelector('button'),gear=tab==='equipment'?{...item,template:id,id,enhance:0}:null;
    const description=escapeHtml(node.querySelector('.small')?.textContent||'');
    const amount=entry.type==='enhancement'?(id==='legendaryHammer'?socketHammerCount_():state.stones):entry.type==='utility'?Number((state.utilityItems||[]).includes(id)):state.consumables?.[id];
-   return [{item404:gear,type404:gear?'equipment':entry.type,key:entry.type+':'+id,name:entry.displayName||item?.name||skillTemplates[id]?.name||name?.textContent.trim()||id,art:gear?objectArt202_(gear):skillArt198_(id)||objectArt202_(id,'item')||icon402_('potion'),info:gear?pickerDetail401_('equipment',gear):tab==='utility'?consumableInfo407_(Number(amount||0).toLocaleString(),description):'<p>'+description+'</p>',kind:shopCategoryInfo(entry).label,price,condition493:shopConditionHtml493_(shopConditions493_(entry)),disabled:button?.disabled,label:button?.textContent||'購買',act:button?()=>buyShop(index):null}];
+   return [{item404:gear,type404:gear?'equipment':entry.type,skillId497:entry.type==='skill'?id:null,key:entry.type+':'+id,name:entry.displayName||item?.name||skillTemplates[id]?.name||name?.textContent.trim()||id,art:gear?objectArt202_(gear):skillArt198_(id)||objectArt202_(id,'item')||icon402_('potion'),info:gear?pickerDetail401_('equipment',gear):tab==='utility'?consumableInfo407_(Number(amount||0).toLocaleString(),description):'<p>'+description+'</p>',kind:shopCategoryInfo(entry).label,price,condition493:shopConditionHtml493_(shopConditions493_(entry)),disabled:button?.disabled,label:button?.textContent||'購買',act:button?()=>buyShop(index):null}];
   });
  }
  return market402_({title:sell?'背包出售':'購買商品',rows,rail,filters,footer,tabs:switcher,multi});
@@ -9659,7 +9663,8 @@ html:not(.battle398) #battleStage .effect-icon398{display:none!important}
 .ready400 .prepare-skills-area>.panel{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-content:space-between!important;gap:6px 4px!important}
 .ready400 .prepare-skills-area .section-title{grid-column:1/-1!important}.ready400 .prepare-skills-area .section-title .badge{display:none!important}
 .ready400 .prepare-skills-area .quick-slot{display:flex!important;align-items:center!important;justify-content:flex-start!important;flex-direction:column!important;gap:3px!important;border:0!important;background:transparent!important;padding:0!important;margin:0!important;height:auto!important;min-height:0!important;min-width:0!important;width:100%!important;box-shadow:none!important}
-.ready400 .prepare-skills-area .slot-arrow,.ready400 .prepare-skills-area .skill-category179{display:none!important}
+.ready400 .prepare-skills-area .slot-arrow{display:none!important}
+.ready400 .prepare-skills-area .skill-category179{display:inline-flex!important;margin:0!important;font-size:9px!important;line-height:13px!important;padding:0 4px!important}
 .ready400 .prepare-skills-area .quick-slot-label{font-size:10px!important;color:#c2b598!important;width:auto!important;min-width:0!important;flex:0 0 auto!important}
 .ready400 .prepare-skills-area .quick-slot-value{display:flex!important;align-items:center!important;justify-content:center!important;flex-flow:column nowrap!important;gap:4px!important;flex:0 1 auto!important;width:100%!important;min-width:0!important}
 .ready400 .quick-slot-value .skill-art198,.ready400 .quick-slot-value .pixel-art202,.ready400 .quick-slot-value .empty400{box-sizing:border-box!important;width:43px!important;height:43px!important;border:1px solid #9e865f!important;border-radius:4px!important;padding:2px!important;background:#16191f!important;object-fit:contain!important;box-shadow:0 1px 4px #08090c88!important}
