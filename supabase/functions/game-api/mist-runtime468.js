@@ -77,6 +77,13 @@ export async function reduceMist468(
     if (rules.legendary + rules.random + rules.trap !== 100) fail('CONFIG_INVALID:RoadChestPercentTotal');
     return rules;
   };
+  const rule498 = (key, fallback, allowed) => {
+    const value = Object.hasOwn(config,key) ? c(key) : fallback;
+    if (!allowed.includes(value)) fail('CONFIG_INVALID:' + key);
+    return value;
+  };
+  const supplyRadius = () => rule498('SupplyVisionRadius',0,[0,1,2]);
+  const airdropHours = () => rule498('AirdropIntervalHours',24,[12,24]);
   let core = createMistCombat468(data, random);
   const additions = { seasons: [], reports: [], rewards: [] };
   w.meta.battles ||= {};
@@ -95,7 +102,7 @@ export async function reduceMist468(
     const p0 = pos(p);
     return (
       (p0 && Math.abs(p0.x - x) <= 1 && Math.abs(p0.y - y) <= 1) ||
-      w.cells.some((a) => a.kind === "airdrop" && Math.abs(a.x - x) <= a.payload.radius && Math.abs(a.y - y) <= a.payload.radius) ||
+      w.cells.some((a) => ["airdrop","supply"].includes(a.kind) && (a.kind !== "supply" || supplyRadius() > 0) && Math.abs(a.x - x) <= (a.kind === "supply" ? supplyRadius() : a.payload.radius) && Math.abs(a.y - y) <= (a.kind === "supply" ? supplyRadius() : a.payload.radius)) ||
       w.flags.some(
         (f) =>
           f.owner_account === p.account_id &&
@@ -210,16 +217,13 @@ export async function reduceMist468(
       rows.find((r) => (n -= Number(r.Weight)) < 0)?.Value ?? rows.at(-1).Value
     );
   }
-  function rollEquipment(slot = null, legendary = false, starter = false) {
-    const exclude = String(config.ExcludedEquipmentIDs || "gmSword")
-      .toLowerCase()
-      .split(",")
-      .map((x) => x.trim());
+  const excludedEquipment498 = id => String(config.ExcludedEquipmentIDs || 'gmSword').toLowerCase().split(',').map(x=>x.trim()).includes(String(id||'').toLowerCase());
+  function rollEquipment(slot = null, legendary = false, starter = false, nonLegendary = false) {
     let rows = data.Equipment.filter(
       (r) =>
         enabled(r) &&
-        !exclude.includes(String(r.ItemID).toLowerCase()) &&
-        (!slot || r.Slot === slot),
+        !excludedEquipment498(r.ItemID) &&
+        (!slot || r.Slot === slot) && (!nonLegendary || r.Rarity !== "傳說"),
     );
     const rarity = legendary
       ? "傳說"
@@ -328,7 +332,7 @@ export async function reduceMist468(
   }
   function transferDrops(loser, winner) {
     const eligible = Object.values(loser.equipment).filter(
-      (x) => x && !x.starter,
+      (x) => x && !x.starter && !excludedEquipment498(x.template),
     );
     const count = Math.min(
         eligible.length,
@@ -565,7 +569,8 @@ export async function reduceMist468(
   if (configuredOpen && w.season.status === "ACTIVE") {
     if (w.meta.supplyDay !== day(now)) {
       w.cells = w.cells.filter((x) => x.kind !== "supply");
-      const at = choose(empty(false));
+      const sites = empty(false), radius = supplyRadius(), interior = sites.filter(a=>a.x>=radius&&a.y>=radius&&a.x<w.season.size-radius&&a.y<w.season.size-radius);
+      const at = choose(interior.length ? interior : sites);
       w.cells.push(freshCell(at.x, at.y, "supply", null, { name: "補給站" }));
       w.meta.supplyDay = day(now);
     }
@@ -815,7 +820,7 @@ export async function reduceMist468(
         p.runtime.roadChestReceipt492 = {id:target.id,outcome,hpBefore,damage:hpBefore-p.hp,hpAfter:p.hp,maxHp:p.max_hp,createdAt:iso(now)};
         report(p,'road_chest','誤觸寶箱陷阱',`陷阱扣除當前 HP 的 ${rules.damage}%，損失 ${hpBefore-p.hp} HP，剩餘 ${p.hp} HP。`,target);
       } else {
-        const item = rollEquipment(null,outcome === 'legendary');
+        const item = rollEquipment(null,outcome === 'legendary',false,rule498('RoadChestRandomExcludeLegendary',0,[0,1]) === 1 && outcome === 'random');
         award(p,item);
         (p.runtime.chestReveals471 ||= []).push({id:target.id,name:outcome === 'legendary'?'路邊寶箱 · 傳說裝備':'路邊寶箱 · 隨機裝備',legendary:outcome === 'legendary',items:clone([item])});
         report(p,'road_chest','開啟路邊寶箱',`取得${outcome === 'legendary'?'傳說':'隨機'}裝備：${item.name} +${item.enhance}。`,target);
@@ -836,7 +841,7 @@ export async function reduceMist468(
         if (!b) fail("ITEM_MISSING");
         p.inventory.chests = p.inventory.chests.filter(x => x !== b);
         p.pending_loot = p.pending_loot.filter(x => x !== b);
-        items = b.contents || [rollEquipment(null, b.legendary)];
+        items = b.contents ? b.contents.filter(x=>!excludedEquipment498(x.template)) : [rollEquipment(null, b.legendary)];
         name = b.name || "戰利品寶箱";
         legendary = !!b.legendary;
       }
@@ -850,7 +855,7 @@ export async function reduceMist468(
         const used = new Set();
         for (const reward of reveal.items) {
           const item = [...p.inventory.equipment, ...p.pending_loot].find(x => x.id === reward.id && x.kind === "equipment");
-          if (!item) continue; // An older client may already have equipped or discarded it.
+          if (!item || excludedEquipment498(item.template)) continue; // An older client may already have equipped or discarded it.
           const slot = item.slot === "ring"
             ? activeSlots.find(k => k.startsWith("ring") && !used.has(k) && !p.equipment[k]) || activeSlots.find(k => k.startsWith("ring") && !used.has(k))
             : item.slot;
@@ -877,6 +882,7 @@ export async function reduceMist468(
     } else if (action === "equip") {
       const x = p.inventory.equipment.find((x) => x.id === payload.itemId);
       if (!x) fail("ITEM_MISSING");
+      if (excludedEquipment498(x.template)) fail("EQUIPMENT_EXCLUDED");
       const slot = x.slot === "ring" ? String(payload.slot || "ring1") : x.slot;
       if (
         !activeSlots.includes(slot) ||
@@ -967,8 +973,10 @@ export async function reduceMist468(
         report(p, "resource", "領取體力補包", "體力 +" + gain + "，目前 " + p.energy + "/" + c("EnergyCap"), target);
       } else if (target.kind === "airdrop") {
         award(p, chest(true));
-        // UTC+8 midnight; unclaimed cells are never moved by the daily tick.
-        w.meta.airdropNextAt487 = iso(Date.parse(day(now) + "T00:00:00+08:00") + 86400000);
+        // Slot boundaries are anchored to Taiwan midnight, not claim-time + 12h.
+        const start = Date.parse(day(now) + "T00:00:00+08:00"), interval = airdropHours() * 3600000;
+        w.meta.airdropNextAt487 = iso(start + (Math.floor((now - start) / interval) + 1) * interval);
+        w.meta.airdropClaimedAt498 = iso(now);
         report(p, "resource", "領取空降資源", "獲得傳說裝備寶箱 ×1", target);
       } else fail("INVALID_TARGET");
       w.cells = w.cells.filter((x) => x.id !== target.id);
@@ -1120,9 +1128,10 @@ export async function reduceMist468(
   result.energyRules = { initial:c('EnergyInitial'), cap:c('EnergyCap'), recoveryMinutes:c('EnergyRecoveryMinutes') };
   if (result.self) result.self.energyNextAt = p.energy < c('EnergyCap') ? iso(ms(p.energy_at) + c('EnergyRecoveryMinutes') * 60000) : null;
   result.roadChestRules492 = roadRules492();
+  if(result.roadChestRules492)result.roadChestRules492.nonLegendary = rule498('RoadChestRandomExcludeLegendary',0,[0,1]) === 1;
   result.resourceRules487 = resources487() ? {
     staminaCap: resourceRule487('StaminaPackCap'), warningMinutes: resourceRule487('StaminaPackWarningMinutes'),
-    energy: resourceRule487('StaminaPackEnergy'), airdropRadius: resourceRule487('AirdropVisionRadius'),
+    energy: resourceRule487('StaminaPackEnergy'), airdropRadius: resourceRule487('AirdropVisionRadius'), supplyRadius: supplyRadius(), airdropIntervalHours: airdropHours(),
   } : null;
   result.flagRules = {
     minutes: flagRule476('FlagScoreMinutes', 180),
@@ -1176,7 +1185,10 @@ export function projectMist468(w, account, now, ready, save, rewards) {
       ]
     : [];
   const airdrop = w.cells.find((c) => c.kind === "airdrop");
+  const cfg498 = Object.fromEntries((w.season?.rules?.planning?.MistConfig || []).map(r=>[r.Key,r.Value]));
+  const supply = w.cells.find(c=>c.kind==='supply'), radius498 = Number(cfg498.SupplyVisionRadius)||0;
   const visible = (x, y) =>
+      !!(p && supply && radius498 > 0 && Math.abs(supply.x-x)<=radius498 && Math.abs(supply.y-y)<=radius498) ||
       centers.some((c) => Math.abs(c.x - x) <= 1 && Math.abs(c.y - y) <= 1) ||
       !!(p && airdrop && Math.abs(airdrop.x - x) <= airdrop.payload.radius && Math.abs(airdrop.y - y) <= airdrop.payload.radius),
     cells = [];
@@ -1320,6 +1332,7 @@ export function projectMist468(w, account, now, ready, save, rewards) {
       : null,
     cells,
     visions487: p ? [
+      ...(supply && radius498 > 0 ? [{kind:'supply',x:supply.x,y:supply.y,radius:radius498}] : []),
       ...w.flags.filter(f => f.owner_account === account).map(f => ({kind: 'flag', x: f.x, y: f.y, radius: 1, createdAt: f.created_at})),
       ...(airdrop ? [{kind: 'airdrop', x: airdrop.x, y: airdrop.y, radius: airdrop.payload.radius}] : []),
     ] : [],

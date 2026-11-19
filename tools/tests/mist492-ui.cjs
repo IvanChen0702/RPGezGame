@@ -3,7 +3,7 @@ const fs=require('fs'),assert=require('assert/strict');
 (async()=>{
 const {reduceMist468}=await import('../../supabase/functions/game-api/mist-runtime468.js');
 const data=JSON.parse(fs.readFileSync('supabase/tests/fixtures/mist468-planning.json'));
-for(const [k,v]of Object.entries({Enabled:true,EnergyInitial:20,EnergyCap:20,EnergyRecoveryMinutes:30,RoadChestCap:5,RoadChestRespawnMinutes:30,RoadChestLegendaryPercent:30,RoadChestRandomPercent:40,RoadChestTrapPercent:30,RoadChestTrapHpPercent:80})){const row=data.MistConfig.find(x=>x.Key===k);if(row)row.Value=v;else data.MistConfig.push({Key:k,Value:v});}
+for(const [k,v]of Object.entries({Enabled:true,EnergyInitial:20,EnergyCap:20,EnergyRecoveryMinutes:30,RoadChestCap:5,RoadChestRespawnMinutes:30,RoadChestLegendaryPercent:20,RoadChestRandomPercent:60,RoadChestTrapPercent:20,RoadChestRandomExcludeLegendary:1,RoadChestTrapHpPercent:80})){const row=data.MistConfig.find(x=>x.Key===k);if(row)row.Value=v;else data.MistConfig.push({Key:k,Value:v});}
 const engine=process.env.BROWSER||'chromium',browser=await(engine==='webkit'?webkit.launch():chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']}));
 fs.mkdirSync('/workspace/outputs/mist492',{recursive:true});
 try{for(const [view,width,height]of [['desktop',1440,900],['mobile',390,844],['mobile',360,640]]){
@@ -18,7 +18,7 @@ try{for(const [view,width,height]of [['desktop',1440,900],['mobile',390,844],['m
  await p.goto('http://127.0.0.1:8443/',{waitUntil:'networkidle'});await p.addScriptTag({content:fs.readFileSync('tools/tests/mist465-preview-fixture.js','utf8')});await p.evaluate(({data,view})=>{installMistPreview465({data},view);applyGameConfigRows_(data.GameConfig);applyEquipmentRows_(data.Equipment);applySkillRows_(data.Skills);applyGemRows_(data.Gems);applyEnhancementRows_(data.Enhancement);planningReady412_=()=>true;render=previewOriginalRender465;mist465_.preview=false;mist465_.tab='map';mist465_.data=null;apiPost=(a,b)=>mistRpc492(a,b);render();},{data,view});await p.evaluate(()=>refreshMist465_());await p.evaluate(()=>mistCenter465_());
  await p.locator('[data-x="5"][data-y="6"]').click();assert.equal(await p.locator('.mist-target-art465 img').evaluate(i=>i.complete&&i.naturalWidth>0),true);
  assert.match(await p.locator('.mist-target-details490').innerText(),/目前 HP −80%/);await p.screenshot({path:`/workspace/outputs/mist492/${engine}-${width}-details.png`});
- await p.getByRole('button',{name:'開啟寶箱 · 免費',exact:true}).click();assert.match(await p.locator('#uiConfirmOverlay').innerText(),/30%.*傳說裝備/s);assert.match(await p.locator('#uiConfirmOverlay').innerText(),/40%.*隨機裝備/s);
+ await p.getByRole('button',{name:'開啟寶箱 · 免費',exact:true}).click();assert.match(await p.locator('#uiConfirmOverlay').innerText(),/20%.*傳說裝備/s);assert.match(await p.locator('#uiConfirmOverlay').innerText(),/60%.*非傳說裝備/s);
  await p.waitForFunction(()=>Number(getComputedStyle(document.querySelector('#uiConfirmOverlay .ui-confirm-card')).opacity)>.99);
  await p.screenshot({path:`/workspace/outputs/mist492/${engine}-${width}-confirm.png`});
  const box=await p.locator('#uiConfirmOverlay .ui-confirm-card').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1&&box.y>=0&&box.y+box.height<=height+1);

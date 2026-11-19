@@ -4717,7 +4717,8 @@ function applyEquipmentLevels464Unlocked_(){
 /** Approved competition planning. No publish, player writes, or triggers. */
 const MIST_PLANNING465={
   "MistConfig": [
-{"Key": "RoadChestCap", "Value": 5},{"Key": "RoadChestRespawnMinutes", "Value": 30},{"Key": "RoadChestLegendaryPercent", "Value": 30},{"Key": "RoadChestRandomPercent", "Value": 40},{"Key": "RoadChestTrapPercent", "Value": 30},{"Key": "RoadChestTrapHpPercent", "Value": 80},
+{"Key": "RoadChestCap", "Value": 5},{"Key": "RoadChestRespawnMinutes", "Value": 30},{"Key": "RoadChestLegendaryPercent", "Value": 20},{"Key": "RoadChestRandomPercent", "Value": 60},{"Key": "RoadChestTrapPercent", "Value": 20},{"Key": "RoadChestTrapHpPercent", "Value": 80},
+{"Key":"SupplyVisionRadius","Value":2},{"Key":"AirdropIntervalHours","Value":12},{"Key":"RoadChestRandomExcludeLegendary","Value":1},
 {"Key": "StaminaPackCap", "Value": 10},{"Key": "StaminaPackWarningMinutes", "Value": 30},{"Key": "StaminaPackEnergy", "Value": 10},{"Key": "AirdropVisionRadius", "Value": 2},
     {
       "Key": "Enabled",
@@ -4901,7 +4902,7 @@ const MIST_PLANNING465={
     },
     {
       "Key": "ExcludedEquipmentIDs",
-      "Value": "gmSword"
+      "Value": "gmSword,forgeBlank172"
     },
     {
       "Key": "CarrySkillsOnly",
@@ -5280,6 +5281,7 @@ function planningMistErrors465_(data){
   if(!Number.isSafeInteger(Number(cfg[k]))||Number(cfg[k])<1)errors.push('MistConfig '+k+' 必須為正整數');
  for(const [k,limit] of [['StaminaPackCap',10],['StaminaPackWarningMinutes',1440],['StaminaPackEnergy',20],['AirdropVisionRadius',2]])
   if(cfg[k]!==undefined&&(!Number.isSafeInteger(Number(cfg[k]))||Number(cfg[k])<1||Number(cfg[k])>limit))errors.push('MistConfig '+k+' 必須為 1～'+limit+' 整數');
+ for(const [key,allowed] of [['SupplyVisionRadius',[0,1,2]],['AirdropIntervalHours',[12,24]],['RoadChestRandomExcludeLegendary',[0,1]]])if(cfg[key]!==undefined&&!allowed.includes(Number(cfg[key])))errors.push('MistConfig '+key+' 值不合法');
  const roadKeys492=['RoadChestCap','RoadChestRespawnMinutes','RoadChestLegendaryPercent','RoadChestRandomPercent','RoadChestTrapPercent','RoadChestTrapHpPercent'];
  const roadCount492=roadKeys492.filter(k=>cfg[k]!==undefined).length;
  if(roadCount492&&roadCount492!==6)errors.push('路邊寶箱六項設定必須完整');
@@ -5333,4 +5335,20 @@ function removeRetiredMode482() {
   SpreadsheetApp.flush();
   return {ok:true,deletedSheets,deletedTriggers,published:false,note:'僅能刪除目前執行者的觸發器；其他擁有者須各執行一次。完成後可移除這個一次性函式。'};
  } finally {lock.releaseLock();}
+}
+
+/** Sync only the seven approved 498 keys from the published package into MistConfig.
+ * Updates existing values too; does not publish or modify players/schedules. */
+function syncMistRules498(){
+ const keys=['SupplyVisionRadius','AirdropIntervalHours','RoadChestRandomExcludeLegendary','RoadChestLegendaryPercent','RoadChestRandomPercent','RoadChestTrapPercent','ExcludedEquipmentIDs'];
+ const pkg=publishedPlanningPackage_(true),source=pkg?.data?.MistConfig||[];
+ const rows=keys.map(k=>source.find(r=>r.Key===k));
+ if(rows.some(r=>!r))throw Error('正式企劃尚未包含 498 迷霧設定，未修改試算表。');
+ const sh=ss_().getSheetByName('MistConfig');if(!sh)throw Error('找不到 MistConfig 工作表。');
+ const values=sh.getDataRange().getValues(),headers=values[0],ki=headers.indexOf('Key'),vi=headers.indexOf('Value');
+ if(ki<0||vi<0)throw Error('MistConfig 缺少 Key／Value 欄位。');
+ const present=new Set(values.slice(1).map(r=>String(r[ki]))),missing=rows.filter(r=>!present.has(r.Key));
+ if(missing.length)sh.getRange(sh.getLastRow()+1,1,missing.length,headers.length).setValues(missing.map(r=>headers.map(h=>r[h]??'')));
+ const updated=[];for(const row of rows){const index=values.findIndex((r,i)=>i>0&&String(r[ki])===row.Key);if(index>0&&String(values[index][vi])!==String(row.Value)){sh.getRange(index+1,vi+1).setValue(row.Value);updated.push(row.Key);}}
+ SpreadsheetApp.flush();return {ok:true,added:missing.map(r=>r.Key),updated,published:false};
 }

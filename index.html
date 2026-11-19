@@ -31741,12 +31741,15 @@ html.mobile-ui #battleStage .enemy-notice458.tight458 .enemy-copy458{-webkit-lin
 #app #page .mist465 .mist-map-section465{background:#10171c!important;border:0!important;padding:0!important;min-width:0}
 #app #page .mist465 .mist-map-toolbar465{padding:5px 5px 0!important}
 #app #page .mist465 .mist-selection469{padding:2px 6px 6px!important;color:#a9b5b5;font-size:11px}
-#app #page .mist465 .mist-board-frame479{border:22px solid transparent;border-image:url('assets/images/ui/mist/board-frame479.webp') 100 100 100 100 / 22px / 0 stretch;min-width:0;min-height:0;flex:1;background:#080f14;isolation:isolate}
+#app #page .mist465 .mist-board-frame479{border:22px solid transparent;border-image:url('assets/images/ui/mist/board-frame479.webp') 100 100 100 100 / 22px / 0 stretch;min-width:0;min-height:0;flex:1;background:#0b171f;isolation:isolate;position:relative}
 #app #page .mist465 .mist-map-scroll465{contain:none!important;border:0!important;border-radius:0!important;padding:0!important;height:clamp(300px,48vh,580px)!important;min-height:0!important;background:#080f14!important;scrollbar-width:thin}
 #app #page .mist465 .mist-board465{--tile:76px!important;position:relative!important;gap:0!important;padding:0!important;border:0!important;background:#101b22!important;margin:auto!important}
 /* v489: the masonry is outside the playable grid; its edge segments repeat as
    the map expands. Ground detail keeps a fixed scale instead of stretching. */
-.mist-room489{position:relative;width:max-content;margin:auto;border-style:solid;border-color:transparent;border-width:156px 102px 124px;border-image-source:url('assets/images/backgrounds/mist/dungeon-room489.webp');border-image-slice:170 126 144 126;border-image-repeat:round;background:#111c23;background-clip:padding-box}
+.mist-room489{position:relative;width:max-content;margin:auto;border-style:solid;border-color:transparent;border-width:156px 102px 124px;border-image-source:url('assets/images/backgrounds/mist/dungeon-room489.webp');border-image-slice:170 126 144 126;border-image-repeat:round;background:#0b171f;background-clip:padding-box}
+.mist-board-frame479::after{content:'';position:absolute;inset:0;z-index:5;pointer-events:none;box-shadow:inset 0 0 16px 6px #0b171fcc}
+.mist-room489::before{content:'';position:absolute;inset:-156px -102px -124px;z-index:3;pointer-events:none;background:linear-gradient(#0b171fe0,#0b171f55) top/100% 156px,linear-gradient(#0b171f55,#0b171fe0) bottom/100% 124px,linear-gradient(90deg,#0b171fe0,#0b171f55) left/102px 100%,linear-gradient(90deg,#0b171f55,#0b171fe0) right/102px 100%;background-repeat:no-repeat}
+.mist-room489::after{content:'';position:absolute;inset:-22px;z-index:3;pointer-events:none;box-shadow:inset 0 0 22px 16px #0b171f;border-radius:10px;opacity:.85}
 .mist-floor489{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 250px 180px at left top,#d28c3730,transparent 85%),radial-gradient(ellipse 250px 180px at right top,#c98d3925,transparent 85%),linear-gradient(#11212b20,#11212b20),url('assets/images/backgrounds/mist/dungeon-floor489.webp') left top/768px 768px repeat}
 .mist-fog489{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
 .mist-fog489>svg,.mist-fog489>i{position:absolute;display:block;pointer-events:none}
@@ -31977,8 +31980,8 @@ function mistCenter465_(){const e=document.querySelector('.mist-cell465.self'),s
 // Camera-only controls: no mode mutation, movement or stamina cost.
 function mistVisions487_(){
  const d=mist465_.data,views=d?.visions487||[];
- const buttons=views.map((v,i)=>'<button class="mist-vision487" onclick="mistView487_('+i+')"><img src="'+mistAsset465_('object',v.kind==='airdrop'?'airdrop':'flag-blue')+'" alt=""><span><b>'+(v.kind==='airdrop'?'空降資源 · 共用視野':'我的旗幟 '+(i+1))+'</b><small>座標 '+(v.x+1)+','+(v.y+1)+' · '+(v.radius*2+1)+' × '+(v.radius*2+1)+(v.createdAt?' · 下次 +1分 '+mistFlagCountdown479_(v.createdAt):'')+'</small></span></button>').join('');
- mistModal469_('查看其它視野','<div class="mist-visions487">'+(buttons||'<p>目前沒有旗幟或空降視野。</p>')+(d?.airdropNextAt487?'<small>空降已領取，下次生成：'+escapeHtml(mistReportTime484_(d.airdropNextAt487))+'</small>':'')+'<p class="small">只切換觀看位置，不會移動角色或消耗體力。</p></div>');
+ const buttons=views.map((v,i)=>'<button class="mist-vision487" onclick="mistView487_('+i+')"><img src="'+mistAsset465_('object',v.kind==='airdrop'?'airdrop':v.kind==='supply'?'supply':'flag-blue')+'" alt=""><span><b>'+(v.kind==='airdrop'?'空降資源 · 共用視野':v.kind==='supply'?'補給站 · 共用視野':'我的旗幟 '+views.slice(0,i+1).filter(x=>x.kind==='flag').length)+'</b><small>座標 '+(v.x+1)+','+(v.y+1)+' · '+(v.radius*2+1)+' × '+(v.radius*2+1)+(v.createdAt?' · 下次 +1分 '+mistFlagCountdown479_(v.createdAt):'')+'</small></span></button>').join('');
+ mistModal469_('查看其它視野','<div class="mist-visions487">'+(buttons||'<p>目前沒有旗幟、補給站或空降視野。</p>')+(d?.airdropNextAt487?'<small>空降已領取，下次生成：'+escapeHtml(mistReportTime484_(d.airdropNextAt487))+'</small>':'')+'<p class="small">只切換觀看位置，不會移動角色或消耗體力。</p></div>');
 }
 function mistView487_(index){
  const v=mist465_.data?.visions487?.[index];if(!v)return;
@@ -31988,7 +31991,7 @@ function mistView487_(index){
 function mistSelect465_(x,y){mist465_.selection={x,y};mistDraw465_();document.querySelector('.mist-cell465.selected')?.focus({preventScroll:true});}
 function mistMapKey465_(event,x,y){const step={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[event.key];if(!step)return;event.preventDefault();const size=Number(mist465_.data?.size)||16;mistSelect465_(Math.max(0,Math.min(size-1,x+step[0])),Math.max(0,Math.min(size-1,y+step[1])));document.querySelector('.mist-cell465.selected')?.scrollIntoView({block:'nearest',inline:'nearest'});}
 function mistBag465_(tab){if(['equipment','gems','chests'].includes(tab)){mist465_.bag=tab;mistDraw465_();}}
-function mistError465_(code){return ({MIST_RESOURCE_MISSING:'這份資源已被領取，請更新棋盤。',MIST_RESOURCE_PENDING:'體力補包仍在生成中。',MIST_ENERGY_FULL:'體力已滿，無需領取補包。',MIST_NOT_OPEN:'目前不在開放時間，已開始的戰鬥仍可完成。',MIST_RETRY:'戰境狀態剛有變動，請重試同筆操作。',MIST_BAG_FULL:'此分類行囊已滿，請先丟棄或裝備物品。',MIST_PAIR_COOLDOWN:'與這位玩家的對戰尚在六小時冷卻中。',MIST_TARGET_PROTECTED:'對方處於出生保護或隱身中。',MIST_TARGET_BUSY:'對方正在交戰，請稍後再試。',MIST_RESPAWN_REQUIRED:'請先完成重生。',MIST_NOT_ADJACENT:'請先移動到相鄰格。',MIST_NOT_NEARBY:'請先接近補給站。',MIST_SUPPLY_USED:'今天已領取補給，凌晨 00:00 重置。',MIST_SKILL_SEALED:'此技能欄受到封印，請選擇其他技能或跳過回合。',MIST_SKILL_UNAVAILABLE:'技能尚在冷卻或未配置。',MIST_SKILL_NOT_OWNED:'只能配置已解鎖的技能。',MIST_FLAG_LIMIT:'最多同時設置三面旗幟。',MIST_FLAG_EXISTS:'此格已經有旗幟。',MIST_ALREADY_HIDDEN:'目前仍在隱身中。',MIST_ITEM_MISSING:'物品狀態已變更，請重新整理。',MIST_INVALID_MOVE:'只能移動到上下左右相鄰格。',MIST_NOT_UNLOCKED:'通關主線第 1 層後開放。',MIST_CELL_BLOCKED:'該格已被占用，請重新選擇路線。',MIST_ENERGY_LOW:'體力不足，每 30 分鐘恢復 1 點。',MIST_LOOT_PENDING:'請先收取或丟棄待處理戰利品。',MIST_IN_BATTLE:'戰鬥尚未結束，無法執行此操作。',MIST_STALE:'狀態已更新，請重新確認。'})[code]||code||'操作未完成，請重新整理確認。';}
+function mistError465_(code){return ({MIST_EQUIPMENT_EXCLUDED:'此裝備不可用於迷霧戰境。',MIST_RESOURCE_MISSING:'這份資源已被領取，請更新棋盤。',MIST_RESOURCE_PENDING:'體力補包仍在生成中。',MIST_ENERGY_FULL:'體力已滿，無需領取補包。',MIST_NOT_OPEN:'目前不在開放時間，已開始的戰鬥仍可完成。',MIST_RETRY:'戰境狀態剛有變動，請重試同筆操作。',MIST_BAG_FULL:'此分類行囊已滿，請先丟棄或裝備物品。',MIST_PAIR_COOLDOWN:'與這位玩家的對戰尚在六小時冷卻中。',MIST_TARGET_PROTECTED:'對方處於出生保護或隱身中。',MIST_TARGET_BUSY:'對方正在交戰，請稍後再試。',MIST_RESPAWN_REQUIRED:'請先完成重生。',MIST_NOT_ADJACENT:'請先移動到相鄰格。',MIST_NOT_NEARBY:'請先接近補給站。',MIST_SUPPLY_USED:'今天已領取補給，凌晨 00:00 重置。',MIST_SKILL_SEALED:'此技能欄受到封印，請選擇其他技能或跳過回合。',MIST_SKILL_UNAVAILABLE:'技能尚在冷卻或未配置。',MIST_SKILL_NOT_OWNED:'只能配置已解鎖的技能。',MIST_FLAG_LIMIT:'最多同時設置三面旗幟。',MIST_FLAG_EXISTS:'此格已經有旗幟。',MIST_ALREADY_HIDDEN:'目前仍在隱身中。',MIST_ITEM_MISSING:'物品狀態已變更，請重新整理。',MIST_INVALID_MOVE:'只能移動到上下左右相鄰格。',MIST_NOT_UNLOCKED:'通關主線第 1 層後開放。',MIST_CELL_BLOCKED:'該格已被占用，請重新選擇路線。',MIST_ENERGY_LOW:'體力不足，每 30 分鐘恢復 1 點。',MIST_LOOT_PENDING:'請先收取或丟棄待處理戰利品。',MIST_IN_BATTLE:'戰鬥尚未結束，無法執行此操作。',MIST_STALE:'狀態已更新，請重新確認。'})[code]||code||'操作未完成，請重新整理確認。';}
 async function mistCommand465_(action,payload={}){
  if(mist465_.preview){toast('這是介面預覽，不會變更角色或消耗體力。');return;}
  if(mist465_.loading||mist465_.pending||mistAnimating470_||(!mist465_.data?.ready&&!['battle/turn','battle/leave','reports/read','chest/open','chest/confirm'].includes(action)))return;
@@ -32018,12 +32021,12 @@ function mistRewards465_(){
 function mistRoadRules492_(){
  if(mist465_.data?.roadChestRules492)return mist465_.data.roadChestRules492;
  const cfg=Object.fromEntries((bootstrapDataCache?.MistConfig||[]).map(r=>[r.Key,r.Value]));
- return {cap:Number(cfg.RoadChestCap)||5,minutes:Number(cfg.RoadChestRespawnMinutes)||30,legendary:Number(cfg.RoadChestLegendaryPercent??30),random:Number(cfg.RoadChestRandomPercent??40),trap:Number(cfg.RoadChestTrapPercent??30),damage:Number(cfg.RoadChestTrapHpPercent)||80};
+ return {cap:Number(cfg.RoadChestCap)||5,minutes:Number(cfg.RoadChestRespawnMinutes)||30,legendary:Number(cfg.RoadChestLegendaryPercent??20),random:Number(cfg.RoadChestRandomPercent??60),trap:Number(cfg.RoadChestTrapPercent??20),damage:Number(cfg.RoadChestTrapHpPercent)||80,nonLegendary:Number(cfg.RoadChestRandomExcludeLegendary??1)===1};
 }
 function mistRoadOdds492_(details=false){
  const r=mistRoadRules492_(),box=mistChestArt479_(),gold=mistChestArt479_({legendary:true});
  const odds=(kind,label,value,art)=>'<figure class="mist-odd492 '+kind+'"><div class="mist-odd-art492"><img src="'+escapeAttr(art)+'" alt="">'+(kind==='trap'?'<span>'+flatIcon313_('bolt')+'</span>':'')+'</div><strong>'+value+'<small>%</small></strong><figcaption>'+label+'</figcaption></figure>';
- return '<div class="mist-road-panel492"><div class="mist-road-kicker492">免費開啟 <i>·</i> 隨機一種結果</div><div class="mist-road-odds492">'+odds('legendary','傳說裝備',r.legendary,gold)+odds('random','隨機裝備',r.random,box)+odds('trap','陷阱',r.trap,box)+'</div><div class="mist-road-risk492"><span>陷阱</span><strong>目前 HP −'+r.damage+'%</strong></div>'+(details?'<details class="mist-road-more492"><summary>領取規則</summary><p>上下左右相鄰可開啟；全玩家共用，先開先得。裝備每次 1 件，隨機品質可能包含傳說。場上最多 '+r.cap+' 箱，開啟後 '+r.minutes+' 分鐘於其他空格補回。陷阱傷害小數捨去。</p></details>':'<p class="mist-road-foot492">全玩家共用 · 先開先得</p>')+'</div>';
+ return '<div class="mist-road-panel492"><div class="mist-road-kicker492">免費開啟 <i>·</i> 隨機一種結果</div><div class="mist-road-odds492">'+odds('legendary','傳說裝備',r.legendary,gold)+odds('random',r.nonLegendary?'非傳說裝備':'隨機裝備',r.random,box)+odds('trap','陷阱',r.trap,box)+'</div><div class="mist-road-risk492"><span>陷阱</span><strong>目前 HP −'+r.damage+'%</strong></div>'+(details?'<details class="mist-road-more492"><summary>領取規則</summary><p>上下左右相鄰可開啟；全玩家共用，先開先得。裝備每次 1 件，'+(r.nonLegendary?'非傳說裝備不含傳說品質。':'隨機品質可能包含傳說。')+'場上最多 '+r.cap+' 箱，開啟後 '+r.minutes+' 分鐘於其他空格補回。陷阱傷害小數捨去。</p></details>':'<p class="mist-road-foot492">全玩家共用 · 先開先得</p>')+'</div>';
 }
 async function mistRoadOpen492_(id){
  if(!mistCanAct465_()||document.getElementById('uiConfirmOverlay'))return;
@@ -32034,7 +32037,7 @@ async function mistRoadOpen492_(id){
  if(owner!==cloudMeta.accountId||season!==mist465_.data?.season?.id||state.page!=='mist')return;
  await mistCommand465_('road-chest/open',{targetId:id});
 }
-function mistRoadRuleText492_(){const r=mistRoadRules492_();return '路邊寶箱最多 '+r.cap+' 個，在上下左右相鄰格免費開啟：'+r.legendary+'% 傳說裝備、'+r.random+'% 隨機品質裝備、'+r.trap+'% 陷阱；陷阱扣當前剩餘 HP 的 '+r.damage+'%（傷害小數捨去）。寶箱全玩家共用，開啟後 '+r.minutes+' 分鐘於其他空格補回。';}
+function mistRoadRuleText492_(){const r=mistRoadRules492_();return '路邊寶箱最多 '+r.cap+' 個，在上下左右相鄰格免費開啟：'+r.legendary+'% 傳說裝備、'+r.random+'% '+(r.nonLegendary?'隨機非傳說裝備':'隨機品質裝備')+'、'+r.trap+'% 陷阱；陷阱扣當前剩餘 HP 的 '+r.damage+'%（傷害小數捨去）。寶箱全玩家共用，開啟後 '+r.minutes+' 分鐘於其他空格補回。';}
 function mistGuide485_(){
  const art=(kind,id)=>'<img src="'+mistAsset465_(kind,id)+'" alt="" loading="lazy">';
  const box=art('object','chest'),flag=art('object','flag-blue'),red=art('object','flag-red');
@@ -32045,7 +32048,7 @@ function mistGuide485_(){
  card('探索迷霧',sight,'3 × 3 周圍視野','上下左右移動，每格 −1 體力')+
  card('擊敗得分','<figure>'+art('enemy','normal-6')+'<figcaption>一般怪 <b>+1</b></figcaption></figure><figure>'+art('enemy','elite-2')+'<figcaption>菁英 <b>+2</b></figcaption></figure>','擊敗玩家 +3 分','菁英保證傳說裝備寶箱')+
  card('插旗・奪旗','<figure>'+flag+'<figcaption>駐守 3 小時 <b>+1</b></figcaption></figure><figure>'+red+'<figcaption>拔除敵旗 <b>+3</b></figcaption></figure>','最多 3 面旗幟','每面旗提供 3 × 3 視野')+
- card('補給・鍛造','<figure>'+art('object','supply')+'<figcaption>補給站</figcaption></figure><figure>'+art('object','forge')+'<figcaption>鐵匠鋪</figcaption></figure>','HP +30% ／ 寶石','補給每日二選一；鍛造 −1 體力 → +10')+
+ card('補給・鍛造','<figure>'+art('object','supply')+'<figcaption>補給站</figcaption></figure><figure>'+art('object','forge')+'<figcaption>鐵匠鋪</figcaption></figure>','HP +30% ／ 寶石','補給站共用 5×5 視野；每日二選一')+
  card('死亡・重生','<div class="mist-guide-rebirth485">'+box+'<div><span>HP <b>全滿</b></span><span>體力 <b>20</b></span></div></div>','玩家對戰死亡後重生','裝備、背包、旗幟清空；重領補給')+
  card('體力補包',art('object','stamina'),'相鄰領取 · 體力 +10','金綠魔法陣預告 30 分鐘；場上最多 10 包')+
  card('全場空降',art('object','airdrop'),'傳說裝備寶箱 ×1','共用 5 × 5 視野；領取後下個 00:00 再生')+
@@ -32058,7 +32061,7 @@ function mistEntry465_(){
  (!d?.ready?'<div class="mist-notice465">'+escapeHtml(d?.message||'戰境準備中。開放前可先查看玩法與獎勵。')+'</div>':'<p>每週重新出發 · 尋寶／奪旗／生存</p>')+
  '<button class="primary" '+(!mistCanAct465_()?'disabled':'')+' onclick="'+(s?"mistTab465_('map')":"mistCommand465_('join')")+'">'+(mist465_.loading?'讀取戰境…':s?'繼續探索':d?.ready?'參加本季':'戰境準備中')+'</button><small>通關主線第 1 層開放 · 台灣時間</small></aside></div></div>'+
  mistGuide485_()+
- '<section class="mist-section465 mist-details485"><details><summary>查看完整規則、死亡掉落與賽季時間</summary><div class="mist-rules465"><section class="mist-rule465"><h3>探索與補給</h3><p>初始體力 20、上限 20，每 30 分鐘恢復 1 點。出生專屬箱提供頭部、防具、武器、特殊裝備各一件，不能攜出戰境。一般怪 +1 分；菁英 +2 分並保證傳說裝備箱。每把旗提供 3 × 3 視野，每存續 3 小時 +1 分；拔除敵旗 +3 分。旗幟被拔除或死亡後計時歸零。移動、戰鬥、插旗各花 1 體力；拔敵旗 2 點；隱身 3 點、持續一小時。補給站每日擇一：恢復 30% HP 或取得寶石；鐵匠鋪每花 1 體力強化一件裝備至 +10。體力補包與金綠預告魔法陣合計最多 10 個，預告 30 分鐘後可在相鄰格免費領取，恢復 10 體力（不超過上限）；領取後再預告補回。空降資源全場僅 1 個，提供 5 × 5 共用視野；相鄰領取傳說裝備寶箱 ×1，未領取就保留，領取後於下一個台灣時間 00:00 生成，視野隨領取消失。'+escapeHtml(mistRoadRuleText492_())+'</p></section><section class="mist-rule465"><h3>死亡與重生</h3><p>死亡清空身上裝備、背包與旗子。擊殺者從可掉落的出戰裝備取得 1～3 件；重生補給不會掉落。積分保留，主動挑戰失敗另扣 3 分，最低為 0。重生滿血；被其他玩家擊敗（含玩家對戰同歸於盡）後重生，體力恢復至上限。怪物戰敗不補滿體力。</p></section><section class="mist-rule465"><h3>每次決定都有代價</h3><p>相鄰才可發起戰鬥。最多 30 回合，平局保留最後 HP；體力不退。雙方同時死亡則回出生點、裝備全消失，不加減積分。對同一玩家的 6 小時限制期間允許一次復仇。</p></section><section class="mist-rule465"><h3>每週重新出發</h3><p>出生保護一小時，移動或主動開戰即解除。週日 23:00 停止新行動，23:10 結束未完成戰鬥，週一 00:00 重啟。排名依積分、玩家擊殺數排序，同分同擊殺數並列。</p></section></div></details></section>';
+ '<section class="mist-section465 mist-details485"><details><summary>查看完整規則、死亡掉落與賽季時間</summary><div class="mist-rules465"><section class="mist-rule465"><h3>探索與補給</h3><p>初始體力 20、上限 20，每 30 分鐘恢復 1 點。出生專屬箱提供頭部、防具、武器、特殊裝備各一件，不能攜出戰境。一般怪 +1 分；菁英 +2 分並保證傳說裝備箱。每把旗提供 3 × 3 視野，每存續 3 小時 +1 分；拔除敵旗 +3 分。旗幟被拔除或死亡後計時歸零。移動、戰鬥、插旗各花 1 體力；拔敵旗 2 點；隱身 3 點、持續一小時。補給站提供 5 × 5 共用視野，每日擇一：恢復 30% HP 或取得寶石；鐵匠鋪每花 1 體力強化一件裝備至 +10。體力補包與金綠預告魔法陣合計最多 10 個，預告 30 分鐘後可在相鄰格免費領取，恢復 10 體力（不超過上限）；領取後再預告補回。空降資源全場僅 1 個，提供 5 × 5 共用視野；相鄰領取傳說裝備寶箱 ×1，未領取就保留，領取後於下一個台灣時間 00:00 或 12:00 生成，視野隨領取消失。'+escapeHtml(mistRoadRuleText492_())+'</p></section><section class="mist-rule465"><h3>死亡與重生</h3><p>死亡清空身上裝備、背包與旗子。擊殺者從可掉落的出戰裝備取得 1～3 件；重生補給不會掉落。積分保留，主動挑戰失敗另扣 3 分，最低為 0。重生滿血；被其他玩家擊敗（含玩家對戰同歸於盡）後重生，體力恢復至上限。怪物戰敗不補滿體力。</p></section><section class="mist-rule465"><h3>每次決定都有代價</h3><p>相鄰才可發起戰鬥。最多 30 回合，平局保留最後 HP；體力不退。雙方同時死亡則回出生點、裝備全消失，不加減積分。對同一玩家的 6 小時限制期間允許一次復仇。</p></section><section class="mist-rule465"><h3>每週重新出發</h3><p>出生保護一小時，移動或主動開戰即解除。週日 23:00 停止新行動，23:10 結束未完成戰鬥，週一 00:00 重啟。排名依積分、玩家擊殺數排序，同分同擊殺數並列。</p></section></div></details></section>';
 }
 
 
@@ -32090,7 +32093,7 @@ function mistTargetInfo490_(cell,desc){
   facts+=row('視野範圍','周圍 3 × 3 格');
   facts+=o.own?row('撤回消耗','不消耗體力'):row('拔旗獎勵','+3 積分','highlight')+row('拔旗消耗','2 體力');
  }else if(o?.kind==='supply'){
-  facts+=row('補給選擇','恢復 30% HP','highlight')+row('另一選擇','隨機寶石 ×1','highlight')+row('領取規則','每日二選一')+row('重置時間','台灣時間每日 00:00');
+  facts+=row('共用視野','全玩家可見 5 × 5 格','highlight')+row('補給選擇','恢復 30% HP','highlight')+row('另一選擇','隨機寶石 ×1','highlight')+row('領取規則','每日二選一')+row('重置時間','台灣時間每日 00:00');
   if(s.suppliedToday)facts+=row('今日狀態','已領取，請於重置後再來','warning');
  }else if(o?.kind==='forge'){
   facts+=row('強化效果','一件裝備直接升至 +10','highlight')+row('每次消耗','1 體力')+row('操作方式','至相鄰格選擇裝備');
@@ -32100,7 +32103,7 @@ function mistTargetInfo490_(cell,desc){
   else if(s.energy>=(Number(d.energyRules?.cap)||20))facts+=row('目前狀態','體力已滿','warning');
  }else if(o?.kind==='airdrop'){
   lead=reward('傳說裝備寶箱 ×1',mistChestArt479_({elite:true}));
-  facts+=row('共用視野','全玩家可見 5 × 5 格','highlight')+row('領取方式','相鄰領取，立即開箱')+row('領取之後','共用視野消失')+row('再次生成','領取後，下個台灣時間 00:00');
+  facts+=row('共用視野','全玩家可見 5 × 5 格','highlight')+row('領取方式','相鄰領取，立即開箱')+row('領取之後','共用視野消失')+row('再次生成','領取後，下個台灣時間 00:00／12:00');
  }else if(o?.kind==='road_chest'){
   lead=mistRoadOdds492_(true);
  }else if(o?.kind==='chest'){
@@ -32221,7 +32224,8 @@ function mistFog489_(d,size){
 }
 function mistMap465_(){const d=mist465_.data,s=d?.self;if(s?.dead)return mistRespawn468_();if(!s)return mistStatus465_('參加賽季後，這裡會顯示你的探索範圍與旗幟視野。');const size=Math.max(16,Math.min(256,Math.trunc(Number(d.size)||16))),cells=new Map((d.cells||[]).map(c=>[c.x+','+c.y,c])),selected=mist465_.selection;let html='';for(let y=0;y<size;y++)for(let x=0;x<size;x++){const c=cells.get(x+','+y),self=s.x===x&&s.y===y,visible=!!c||self,o=self?{kind:'self'}:c?.object,reachable=!mistMoveReason469_(x,y);html+='<button type="button" class="mist-cell465 '+(!visible?'fog ':'')+(self?'self ':'')+(reachable?'reachable469 ':'')+(selected?.x===x&&selected?.y===y?'selected':'')+'" style="--cx:'+x+';--cy:'+y+'" data-x="'+x+'" data-y="'+y+'" aria-label="'+(x+1)+','+(y+1)+' '+escapeAttr(self?'你的位置':!visible?'迷霧':o?.name||'空地')+(reachable?'，可移動':'')+'" aria-pressed="'+(selected?.x===x&&selected?.y===y)+'" tabindex="'+((selected?selected.x===x&&selected.y===y:self)?0:-1)+'" onkeydown="mistMapKey465_(event,'+x+','+y+')" onclick="mistCellClick469_('+x+','+y+')">'+(visible?mistCellArt465_(o):'')+(visible&&c?.flag?mistFlagBadge479_(c.flag,o?.kind!=='flag'):'')+(visible&&o?.busy?'<span class="mist-busy479">交戰中</span>':'')+(reachable?'<span class="mist-step469" aria-hidden="true">'+(x>s.x?'›':x<s.x?'‹':y>s.y?'⌄':'⌃')+'</span>':'')+'</button>';}
  const c=selected?cells.get(selected.x+','+selected.y):null,adj=selected&&Math.abs(s.x-selected.x)+Math.abs(s.y-selected.y)===1;
- queueMicrotask(mistPaint469_);
+ const firstMap498=!document.querySelector('.mist-map-scroll465');
+ queueMicrotask(()=>{mistPaint469_();if(firstMap498)requestAnimationFrame(mistCenter465_);});
  return '<div class="mist-explore469">'+(d.pendingLoot?.length?'<button onclick="mistTab465_(\'bag\')">待處理戰利品 '+d.pendingLoot.length+' 件 · 點此收納後繼續移動</button>':'')+'<div class="mist-explore-summary469">'+mistHp474_(s)+mistEnergy479_(s,d.energyRules)+'<span class="mist-score479">'+flatIcon313_('crown')+s.points+' 積分'+(s.protectedUntil&&Date.parse(s.protectedUntil)>Date.now()?'<small class="mist-protection482" title="出生保護中，移動或主動開戰即解除">出生保護</small>':'')+'</span>'+mistActions469_()+'</div><div class="mist-world465"><section class="mist-map-section465"><div class="mist-map-toolbar465"><span>位置 '+(s.x+1)+','+(s.y+1)+' · 點擊亮框移動</span><div class="mist-view-tools487"><button onclick="mistCenter465_()">回到我的位置</button><button onclick="mistVisions487_()">查看其它視野</button></div></div><div class="mist-selection469" role="status" aria-live="polite">'+(selected?'已選 '+(selected.x+1)+','+(selected.y+1)+' · '+escapeHtml(c?.object?.name||mistMoveReason469_(selected.x,selected.y)||'點擊此格移動，消耗 1 體力'):'')+'</div><div class="mist-board-frame479"><div class="mist-map-scroll465" tabindex="0" aria-label="探索地圖，可向四方捲動"><div class="mist-room489"><div class="mist-board465" style="--map-size:'+size+'"><div class="mist-floor489" aria-hidden="true"></div>'+mistFog489_(d,size)+html+'</div></div></div></div><div class="mist-map-legend465"><span>青綠亮框：可移動</span><span>金框：目前選取</span><span>深色：迷霧</span></div></section></div></div>';}
 
 
@@ -32380,7 +32384,7 @@ function mistClosePrep474_(restore=true){
  if(!mistPrep474_&&!document.getElementById('mistPrep474'))return;
  const old=mistPrep474_;mistPrep474_=null;prepareTooltipHide_();hideItem404_();closeEquipMenu206_();
  document.getElementById('mistPrep474')?.remove();document.querySelector('.mist465')?.removeAttribute('inert');
- if(restore){(old?.focus?.isConnected?old.focus:document.querySelector('.mist-actions469 button:last-child'))?.focus({preventScroll:true});void mistAutoChest471_();}
+ if(restore){requestAnimationFrame(mistCenter465_);(old?.focus?.isConnected?old.focus:document.querySelector('.mist-actions469 button:last-child'))?.focus({preventScroll:true});void mistAutoChest471_();}
 }
 function mistRefreshPrep474_(){
  if(!mistPrep474_)return;
