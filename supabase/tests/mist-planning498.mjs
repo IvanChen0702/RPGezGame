@@ -37,4 +37,14 @@ assert.equal(Date.parse((await one('select meta from mist_runtime468')).meta.air
 await assert.rejects(()=>db.exec(readFileSync(new URL('../../tools/planning/publish_mist_rules498.sql',import.meta.url),'utf8')),/PLANNING_VERSION_CHANGED/);await db.exec('rollback');
 for(const [key,val] of [['SupplyVisionRadius',3],['AirdropIntervalHours',6],['RoadChestRandomExcludeLegendary',2]]){const bad=structuredClone(pkg);bad.data.MistConfig.find(r=>r.Key===key).Value=val;await assert.rejects(()=>db.query('update "GameDataCurrent" set data_json=$1',[JSON.stringify(bad)]),/MIST_CONFIG_INVALID/);}
 const old=structuredClone(pkg);old.data.MistConfig=old.data.MistConfig.filter(r=>!['SupplyVisionRadius','AirdropIntervalHours','RoadChestRandomExcludeLegendary'].includes(r.Key));await db.query('update "GameDataCurrent" set data_json=$1',[JSON.stringify(old)]);assert.equal((await one('select data_json from "GameDataCurrent"')).data_json.data.MistConfig.find(r=>r.Key==='AirdropIntervalHours').Value,12);
-await db.exec('set role anon');await assert.rejects(()=>db.query('select public.game_planning_mist498()'),/permission denied/);await db.close();console.log('498 planning: migration validation/carry-forward, current season, noon backfill, player preservation, repeat guard and ACL passed');
+await db.exec('set role anon');await assert.rejects(()=>db.query('select public.game_planning_mist498()'),/permission denied/);await db.exec('reset role');
+await db.exec(`update "GameDataCurrent" set version='20261119-051345-mistrules498'`);
+const before499=(await db.query('select * from mist_players465')).rows;
+await db.exec(readFileSync(new URL('../../tools/planning/publish_mist_capacity499.sql',import.meta.url),'utf8'));
+assert.deepEqual((await db.query('select * from mist_players465')).rows,before499);
+for(const key of ['EquipmentCapacity','GemCapacity','ChestCapacity']){
+ assert.equal((await one('select data_json from "GameDataCurrent"')).data_json.data.MistConfig.find(r=>r.Key===key).Value,20);
+ assert.equal((await one('select rules from mist_seasons465')).rules.planning.MistConfig.find(r=>r.Key===key).Value,20);
+}
+console.log('499: production + active season capacities, player preservation passed');
+await db.close();console.log('498 planning: migration validation/carry-forward, current season, noon backfill, player preservation, repeat guard and ACL passed');
