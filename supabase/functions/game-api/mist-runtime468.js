@@ -312,6 +312,12 @@ export async function reduceMist468(
       }
     }
   }
+  function clearRewardReceipts500(p) {
+    p.runtime.chestReveals471 = [];
+    delete p.runtime.supplyReceipt481;
+    delete p.runtime.resourceReceipt487;
+    delete p.runtime.roadChestReceipt492;
+  }
   function clearDead(p, byPlayer = false) {
     p.runtime.restoreEnergyOnRespawn484 = byPlayer;
     p.equipment = {};
@@ -321,7 +327,7 @@ export async function reduceMist468(
     p.hidden_until = null;
     p.protected_until = null;
     p.runtime.starter = null;
-    p.runtime.chestReveals471 = [];
+    clearRewardReceipts500(p);
     p.runtime.dead = true;
     w.flags = w.flags.filter((f) => f.owner_account !== p.account_id);
     w.cells = w.cells.filter(
@@ -741,6 +747,8 @@ export async function reduceMist468(
     const at = pos(p);
     if (action === "respawn") {
       if (!p.runtime.dead) fail("NOT_DEAD");
+      // Also discard receipts left by deaths before this fix; preserve cooldowns.
+      clearRewardReceipts500(p);
       spawn(p);
       if (p.runtime.restoreEnergyOnRespawn484) {
         p.energy = c("EnergyCap");
