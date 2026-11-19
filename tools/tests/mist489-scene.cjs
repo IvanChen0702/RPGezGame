@@ -15,6 +15,16 @@ try{for(const [view,width,height]of [['desktop',1440,900],['mobile',390,844],['m
  assert.equal(await p.evaluate(()=>JSON.stringify(mist465_.data)),before);assert.ok(await p.locator('.mist-map-scroll465').evaluate(el=>el.scrollTop>0));
  await p.getByRole('button',{name:'回到我的位置',exact:true}).click();
  await p.evaluate(()=>{mist465_.data.self.x=0;mist465_.data.self.y=0;mistDraw465_();mistCenter465_();});
+ // Returning from another tab or a newly mounted board centers the player automatically.
+ await p.evaluate(()=>setupMap489(16,14,14));
+ await p.evaluate(()=>{mist465_.data.visions487.push({kind:'supply',x:2,y:2,radius:2});mistVisions487_();});
+ await p.getByRole('button',{name:/補給站 · 共用視野/}).click();
+ const far=await p.locator('.mist-map-scroll465').evaluate(e=>e.scrollTop);
+ await p.evaluate(()=>mistDraw465_());await p.waitForTimeout(80);assert.equal(await p.locator('.mist-map-scroll465').evaluate(e=>e.scrollTop),far,'ordinary refresh preserves chosen public view');
+ await p.evaluate(()=>{mistTab465_('reports');mistTab465_('map');});await p.waitForTimeout(100);assert.ok(await p.locator('.mist-map-scroll465').evaluate(e=>e.scrollTop)>far,'tab return follows self');
+ await p.evaluate(()=>{document.querySelector('.mist-map-scroll465').scrollTop=0;document.getElementById('page').innerHTML='';mistDraw465_();});await p.waitForTimeout(100);assert.ok(await p.locator('.mist-map-scroll465').evaluate(e=>e.scrollTop)>far,'return from battle remount follows self');
+ const shade=await p.evaluate(()=>({edge:getComputedStyle(document.querySelector('.mist-board-frame479'),'::after').pointerEvents,wall:getComputedStyle(document.querySelector('.mist-room489'),'::after').pointerEvents}));assert.deepEqual(shade,{edge:'none',wall:'none'});
+ await p.screenshot({path:'/tmp/mist498-'+engine+'-'+width+'.png'});
  // Simulate a server refresh removing a flag: no stale prop is retained by the fog.
  await p.evaluate(()=>{mist465_.data.cells=mist465_.data.cells.filter(c=>c.x<2&&c.y<2);mist465_.data.visions487=[];mistDraw465_();});assert.equal(await p.locator('.mist-flag-label479').count(),0);
  // Largest supported world only filters bounded patches near visible cells.
