@@ -28480,7 +28480,24 @@ function townPresenceActor376(r,person,spot,time=performance.now()){
  townPet340_(actor,time,size,x,y,person.pet||null);
  townLabel376(c,x,y-height-5,[townTitle359_(person.titleId),person.nickname]);
 }
-function townNpcActor376(r,button){
+// v501: share the town clock and canvas on both layouts; only the quest glyph moves.
+function townQuestMarker501_(r,mark,x,bottom,time,reduce,id){
+ const text=mark?.textContent?.trim();if(!['!','?'].includes(text)||getComputedStyle(mark).display==='none')return;
+ const phase=((time+(id==='xi'?230:id==='kazama'?460:id==='yexian'?690:0))%1650)/1650;
+ let hop=0,sx=1,sy=1;
+ if(!reduce){
+  if(phase>=.08&&phase<.24){const t=(phase-.08)/.16;hop=1-(1-t)**3;}
+  else if(phase>=.24&&phase<.40){const t=(phase-.24)/.16;hop=1-t*t;}
+  else if(phase>=.40&&phase<.59){const t=(phase-.40)/.19;hop=.3*4*t*(1-t);}
+  if(phase>=.40&&phase<.49){const t=1-(phase-.40)/.09;sx+=.05*t;sy-=.06*t;}
+  else if(phase>=.59&&phase<.66){const t=1-(phase-.59)/.07;sx+=.02*t;sy-=.02*t;}
+ }
+ const c=r.ctx;c.save();c.translate(x,bottom-hop*(r.mobile?7:10));c.scale(sx,sy);
+ c.font='900 '+(r.mobile?28:35)+'px "Arial Black", system-ui, sans-serif';c.textAlign='center';c.textBaseline='alphabetic';c.lineJoin='round';
+ c.strokeStyle='#24170d';c.lineWidth=r.mobile?3.5:4;c.strokeText(text,0,0);
+ c.fillStyle='#ffdf4f';c.shadowColor='#b45c14';c.shadowOffsetY=2;c.shadowBlur=0;c.fillText(text,0,0);c.restore();
+}
+function townNpcActor376(r,button,time=0,reduce=false){
  if(!questTownSheet374?.complete||!questTownSheet374.naturalWidth)return;
  const id=button.dataset.npc368,frame=questNpcFrames374[id];if(!frame)return;
  const point=questPositions368[r.mobile?'mobile':'desktop'][id],size=townHeroSize359_(r),geometry=questNpcGeometry374(id,size),key=id+':'+r.dpr+':'+size;
@@ -28488,7 +28505,8 @@ function townNpcActor376(r,button){
  const c=r.ctx,x=point[0]*r.width,y=point[1]*r.height;c.fillStyle='#07110c88';c.beginPath();c.ellipse(x,y,size*.27,Math.max(3,size*.05),0,0,Math.PI*2);c.fill();c.imageSmoothingEnabled=false;c.save();
  if(!r.mobile&&button.matches(':hover,:focus-visible')){c.shadowColor='#ffda88';c.shadowBlur=2*r.dpr;for(const [dx,dy] of [[2,0],[-2,0],[0,2],[0,-2]]){c.shadowOffsetX=dx*r.dpr;c.shadowOffsetY=dy*r.dpr;c.drawImage(raster.canvas,x-raster.width/2,y-raster.height,raster.width,raster.height)}}
  c.restore();c.drawImage(raster.canvas,x-raster.width/2,y-raster.height,raster.width,raster.height);
- townLabel376(c,x,y-raster.height-5,[questNpcNames368[id]]);const mark=button.querySelector('.npc-mark368');if(mark&&getComputedStyle(mark).display!=='none'){c.save();c.font='bold 19px sans-serif';c.textAlign='center';c.fillStyle='#ffe380';c.strokeStyle='#493412';c.lineWidth=2;c.strokeText(mark.textContent,x,y-size-28);c.fillText(mark.textContent,x,y-size-28);c.restore();}
+ townLabel376(c,x,y-raster.height-5,[questNpcNames368[id]]);
+ townQuestMarker501_(r,button.querySelector('.npc-mark368'),x,y-raster.height-29,time,reduce,id);
 }
 // Rig the legs of the equipped sprite once per raster size; held items stay on the upper layer.
 function townRig397_(r,sprite,raster,size){
@@ -28579,7 +28597,7 @@ townPaint311_=function(r,time,walking){
  if(r.mobile&&r.destination){const target=r.destinations.find(d=>d.id===r.destination);if(target){c.strokeStyle='#ffe0a0';c.lineWidth=2;c.beginPath();c.ellipse(target.x*r.width,target.y*r.height,10,4,0,0,Math.PI*2);c.stroke();}}
  const members=townPresenceMembers358_().slice(0,r.mobile?3:6),slots=townLayout358_(r.mobile).people,actors=[{y:r.pos.y,draw:()=>townLocalActor376(r,time,walking,reduce)}];
  members.forEach((p,i)=>{if(slots[i])actors.push({y:slots[i].y,draw:()=>townPresenceActor376(r,p,slots[i],reduce?0:time)});});
- r.world.querySelectorAll('.quest-npc368').forEach(button=>{const p=questPositions368[r.mobile?'mobile':'desktop'][button.dataset.npc368];if(p)actors.push({y:p[1],draw:()=>townNpcActor376(r,button)});});
+ r.world.querySelectorAll('.quest-npc368').forEach(button=>{const p=questPositions368[r.mobile?'mobile':'desktop'][button.dataset.npc368];if(p)actors.push({y:p[1],draw:()=>townNpcActor376(r,button,time,reduce)});});
  for(const actor of townDepth376(actors))actor.draw();
 };
 const questLayersBase376=questTownLayers371;questTownLayers371=function(){
