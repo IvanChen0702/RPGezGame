@@ -480,8 +480,8 @@ const seriesHistory394_=new WeakMap();let seriesRetryBusy394_=false;
 function seriesOrigin394_(battle){const r=battle&&seriesHistory394_.get(battle);return r&&r.account===cloudMeta.accountId&&r.generation===characterSessionGeneration_?r:null;}
 function seriesRetryReady394_(b){return !!seriesOrigin394_(b)&&state.currentBattle===b&&(b.won||b.lost)&&!battleSeries391_&&!seriesRetryBusy394_&&!state.battleVisual?.busy&&!b.settling78&&(!b.ticket78||b.settled78);}
 function seriesRetryButton394_(b,action,label,baseClass=''){
- if(!seriesOrigin394_(b))return `<button${baseClass?' class="'+baseClass+'"':''} onclick="${action}">${label}</button>`;
- return `<button class="series-retry394" data-series-retry394="true" onclick="retryBattleSeries394_()" ${seriesRetryReady394_(b)?'':'disabled'}>10次連續戰鬥</button>`;
+ if(!seriesOrigin394_(b))return `<button class="battle-retry503 ${baseClass}" onclick="${action}">再次挑戰</button>`;
+ return `<button class="series-retry394 battle-retry503" data-series-retry394="true" title="再次進行 10 次連續戰鬥" onclick="retryBattleSeries394_()" ${seriesRetryReady394_(b)?'':'disabled'}>再次挑戰</button>`;
 }
 function paintSeriesRetry394_(){document.querySelectorAll('[data-series-retry394]').forEach(button=>{button.disabled=!seriesRetryReady394_(state.currentBattle);});}
 async function retryBattleSeries394_(){
@@ -8836,8 +8836,10 @@ html.desktop-ui body img.skill-art198 {
 @media(prefers-reduced-motion:reduce){.battle349 #prepareEnterBattleBtn.stage-start349{animation:none!important}.battle349 #prepareEnterBattleBtn.stage-start349::before,.battle349 #prepareEnterBattleBtn.stage-start349::after{animation:none!important;display:none!important}}
 }
 @layer navigation339 {
+html body #app #page button.battle-retry503{white-space:nowrap!important;word-break:keep-all!important;}
 /* This layer precedes the historical rules, so combat must override its own display:flex. */
-html.mobile-ui.mobile-battle34 body #app #mainNav {
+html.mobile-ui.mobile-battle34 body #app #mainNav,
+html.mobile-ui.mist-mode503 body #app #mainNav {
  display:none!important;height:0!important;min-height:0!important;max-height:0!important;
  flex:0 0 0!important;padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;
 }
@@ -17198,7 +17200,7 @@ function presentSettlement400_(){
  const layer=document.createElement('div');layer.className='result-layer400';
  layer.innerHTML='<section class="st-card'+(play?' st-enter':'')+'" data-result="'+mode+'" aria-label="戰鬥結算"><img class="st-seal" alt="" src="assets/images/ui/settlement/'+mode+'-crest.svg"><div class="st-heading"><h1>戰鬥'+(lost?'失敗':'勝利')+'</h1></div><p class="st-note">'+escapeHtml(subtitle)+seriesNote+'</p><div class="st-strip">'+details+'</div><div class="st-sheen" aria-hidden="true"></div><div class="st-motes" aria-hidden="true">'+motes+'</div></section>';
  stage.append(layer);dock.classList.add('result-actions400');
- dock.innerHTML='<nav class="st-bar'+(play?' st-enter':'')+'" data-result="'+mode+'" aria-label="結算操作"><button type="button" class="st-btn"><img alt="" src="assets/images/ui/settlement/prepare.svg">回到整備</button><button type="button" class="st-btn primary" '+(series?'data-series-retry394="true" title="再次開始 10 次連續戰鬥"':'')+'><img alt="" src="assets/images/ui/settlement/retry.svg">再次挑戰</button></nav>';
+ dock.innerHTML='<nav class="st-bar'+(play?' st-enter':'')+'" data-result="'+mode+'" aria-label="結算操作"><button type="button" class="st-btn"><img alt="" src="assets/images/ui/settlement/prepare.svg">回到整備</button><button type="button" class="st-btn primary battle-retry503" '+(series?'data-series-retry394="true" title="再次開始 10 次連續戰鬥"':'')+'><img alt="" src="assets/images/ui/settlement/retry.svg">再次挑戰</button></nav>';
  const [back,again]=dock.querySelectorAll('button');
  if(nextUnclearedAfterWin418_(b)!=null){
   const button=document.createElement('button');button.type='button';button.className='st-btn primary';button.textContent='挑戰下一層';button.dataset.nextFloor418='';button.hidden=!!battleSeries391_;
@@ -18092,6 +18094,7 @@ function applyViewMode_(){
   document.documentElement.classList.toggle('mobile-ui',viewMode_==='mobile');
   document.documentElement.classList.toggle('desktop-ui',viewMode_!=='mobile');
   document.documentElement.classList.toggle('mobile-battle34',['battle','arenaBattle'].includes(state.page));
+  document.documentElement.classList.toggle('mist-mode503',state.page==='mist');
 
 }
 function setViewMode_(mode){
@@ -21583,7 +21586,7 @@ function renderBattleLocal78_(){
       </div>
       <div class="action-detail" id="actionDetail">${battleFeedHtml46_()}</div>
       <div class="battle-actions-v2"><div class="battle-actions-title"><b>戰鬥指令</b><span>${b.won?'戰鬥結束':b.lost?'挑戰失敗':'選擇技能開始行動'}</span></div>
-      ${b.won?(b.dungeonBattle?`<div class="notice dungeon-win-notice">副本討伐成功！${b.dungeonDropped?`限定掉落：${escapeHtml(b.dungeonDropItemName||'')}`:'本次未掉落限定裝備。'}</div><div class="btn-grid"><button class="primary" onclick="afterWin('dungeon')">返回副本大廳</button>${seriesRetryButton394_(b,"afterWin('dungeonAgain')",'再次挑戰')}</div>`:`<div class="notice">戰鬥勝利。所有異常狀態已解除，HP 已完全恢復。</div><div class="btn-grid">${nextUnclearedAfterWin418_(b)!=null?`<button data-next-floor418 ${battleSeries391_?'hidden':''} id="nextStageBtn" class="primary" onclick="afterWin('next')">挑戰下一層</button>`:''}${seriesRetryButton394_(b,"afterWin('again')",`再次挑戰第 ${b.floor} 關`)}<button onclick="afterWin('shop')">回到整備頁面</button><button onclick="selectAfterWin92_()">其他關卡</button></div>`):
+      ${b.won?(b.dungeonBattle?`<div class="notice dungeon-win-notice">副本討伐成功！${b.dungeonDropped?`限定掉落：${escapeHtml(b.dungeonDropItemName||'')}`:'本次未掉落限定裝備。'}</div><div class="btn-grid"><button class="primary" onclick="afterWin('dungeon')">返回副本大廳</button>${seriesRetryButton394_(b,"afterWin('dungeonAgain')",'再次挑戰')}</div>`:`<div class="notice">戰鬥勝利。所有異常狀態已解除，HP 已完全恢復。</div><div class="btn-grid">${nextUnclearedAfterWin418_(b)!=null?`<button data-next-floor418 ${battleSeries391_?'hidden':''} id="nextStageBtn" class="primary" onclick="afterWin('next')">挑戰下一層</button>`:''}${seriesRetryButton394_(b,"afterWin('again')",'再次挑戰')}<button onclick="afterWin('shop')">回到整備頁面</button><button onclick="selectAfterWin92_()">其他關卡</button></div>`):
       b.lost?`<div class="notice">戰鬥失敗。請從失敗結算視窗查看戰鬥紀錄並返回整備。</div>`:
       `<div class="battle-command-grid">${passiveBattleCardHtml_()}${skills.map((sk,i)=>sk?skillButton(sk,i):`<button disabled>空技能欄</button>`).join('')}</div><div style="display:flex;gap:8px;margin-top:8px"><button class="skip-turn-btn" style="flex:1;margin-top:0" ${(v.busy||b.won||b.lost)?'disabled':''} onclick="skipPlayerTurn()">跳過回合</button><button class="danger" style="flex:1" ${(v.busy||b.won||b.lost)?'disabled':''} onclick="openRetreatConfirm_()">撤退</button></div><div class="battle-tools-v2"><div class="small">戰鬥道具</div><div class="btn-grid">${state.itemSlots.map((id,i)=>itemBattleButton(id,i)).join('')}</div></div>`}</div>
       <details class="battle-log-v2" open><summary>戰鬥紀錄</summary><div class="log" id="logBox">${battleFeedHtml46_()}</div></details>
