@@ -39,7 +39,7 @@ const fs=require('fs'),assert=require('assert/strict');
    await p.locator('.quick-option:visible .favorite-star').click();assert(await p.evaluate(()=>row509===document.querySelector('.quick-option:not([hidden])')));
    await p.locator('[aria-label="切換檢視方式"]').click();assert.equal(await p.locator('.mobile-equip-grid509').count(),1);await p.locator('[aria-label="排序方式"]').selectOption('level-desc');
    const dims=await p.locator('.quick-picker-card').evaluate(e=>({w:e.scrollWidth,cw:e.clientWidth,bottom:e.getBoundingClientRect().bottom}));assert(dims.w<=dims.cw+1&&dims.bottom<=height+1,JSON.stringify(dims));
-   await p.locator('.quick-option:visible .quick-option-actions button').click();assert.equal(await p.evaluate(()=>equipCalls504[0][0]),'item504-1');
+   await p.locator('.quick-option:visible .quick-option-actions button:visible,.quick-option:visible .picker-tile510:visible').click();assert.equal(await p.evaluate(()=>equipCalls504[0][0]),'item504-1');
    await p.evaluate(()=>openGemPicker_('item504-0',0));assert.equal(await p.locator('.picker401').count(),0);assert.equal(await p.locator('#gemPickerGrid').count(),1);
    await p.locator('[aria-label="排序方式"]').selectOption('name-desc');const name=await p.evaluate(()=>gemDisplayName(state.gems[3]));await p.locator('[aria-label="搜尋物品"]').fill(name);await p.locator('[aria-label="切換檢視方式"]').click();
    if(width===390)await p.screenshot({path:'/workspace/outputs/ui504/gem-picker-mobile.png'});
@@ -65,7 +65,7 @@ const fs=require('fs'),assert=require('assert/strict');
    await p.evaluate(()=>{hideItem404_();mistClosePrep474_(false);state.page='prepare';render();openPrepareEquipPicker('weapon');const e=document.querySelector('.pick-tile401[data-pick-index504="1"]');showItem404_(e,e.detailRow404_());});assert.equal(await p.locator('.mist-compare504').count(),0);
   }
   if(view==='mobile'){
-   await p.evaluate(()=>{mistClosePrep474_(false);mistEquipPicker469_('weapon')});assert.equal(await p.locator('.picker401').count(),0);await p.locator('[aria-label="搜尋物品"]').fill('測試武器乙');await p.locator('.quick-option:visible .quick-option-actions button').click();assert.equal(await p.evaluate(()=>discards504.at(-1).a),'equip');assert.equal(await p.evaluate(()=>discards504.at(-1).p.itemId),'item504-1');
+   await p.evaluate(()=>{mistClosePrep474_(false);mistEquipPicker469_('weapon')});assert.equal(await p.locator('.picker401').count(),0);await p.locator('[aria-label="搜尋物品"]').fill('測試武器乙');await p.locator('.quick-option:visible .quick-option-actions button:visible,.quick-option:visible .picker-tile510:visible').click();assert.equal(await p.evaluate(()=>discards504.at(-1).a),'equip');assert.equal(await p.evaluate(()=>discards504.at(-1).p.itemId),'item504-1');
    await p.evaluate(()=>{closeQuickPicker();mistGemPicker469_('wornWeapon')});await p.locator('.gem-pick-card').first().click();assert.equal(await p.evaluate(()=>discards504.at(-1).a),'gem/insert');const before=await p.evaluate(()=>discards504.length);await p.evaluate(()=>cloudMeta.accountId='changed509');await p.locator('.gem-pick-card').first().click();assert.equal(await p.evaluate(()=>discards504.length),before);assert.equal(await p.locator('#quickPicker').count(),0);
   }
   assert.deepEqual(errors,[]);console.log(engine,width,'picker filtering/layout/original IDs and Mist discard confirmation/account guard/comparison PASS');await p.close();

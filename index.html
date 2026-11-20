@@ -1,6 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+<style id="mobile-picker510">@layer mobilePicker510 {
+.mobile-picker509{z-index:2147481000!important}
+body:has(.mobile-picker509) :is(.gem-picker-float-tip,#prepareHoverTip){z-index:2147481100!important}
+body:has(.mobile-picker509) :is(#uiAlertOverlay,#uiConfirmOverlay){z-index:2147483500!important}
+.mobile-picker509 .mobile-filters509{grid-template-columns:minmax(0,1fr) minmax(108px,.65fr)!important}
+.mobile-picker509 .mobile-filters509 input{grid-column:1!important;grid-row:2!important}
+.mobile-picker509 .mobile-filters509 button{grid-column:2!important;grid-row:2!important;white-space:nowrap!important}
+.mobile-picker509 .mobile-filters509 small{grid-column:1/-1!important;font-size:10px!important;line-height:1.2!important}
+.mobile-picker509 :is(.quick-picker-list,.gem-picker-grid){display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-rows:max-content!important;align-content:start!important;gap:8px!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;flex:1 1 auto!important}
+.mobile-picker509 .mobile-picker-grid510{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-auto-rows:max-content!important;gap:6px!important;padding:3px!important}
+.mobile-picker509 .mobile-picker-grid510>.quick-option{display:block!important;aspect-ratio:1!important;min-width:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;background:none!important}
+.mobile-picker509 .mobile-picker-grid510>.quick-option>:not(.picker-tile510),.mobile-picker509 .picker-tile510,.mobile-picker509 .gem-pick-card>.tile-art204,.mobile-picker509 .gem-pick-card>.tile-name204{display:none!important}
+.mobile-picker509 .mobile-picker-grid510 :is(.cell402,.picker-tile510){display:block!important;position:relative!important;box-sizing:border-box!important;aspect-ratio:1!important;width:100%!important;height:auto!important;min-width:0!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;overflow:hidden!important}
+.mobile-picker509 .mobile-picker-grid510 .tile-art204{display:grid!important;position:absolute!important;inset:3px 3px 18px!important;width:auto!important;height:auto!important;place-items:center!important;transform:none!important}
+.mobile-picker509 .mobile-picker-grid510 .tile-art204 :is(img,svg){width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;margin:0!important}
+.mobile-picker509 .mobile-picker-grid510 .tile-name204{display:block!important;position:absolute!important;inset:auto 0 0!important;height:16px!important;line-height:16px!important;padding:1px!important;font-size:10px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.mobile-picker509 .mobile-picker-grid510 .picker-list-content510{display:none!important}
+.mobile-picker509 .gem-picker-list317>.gem-pick-card{display:block!important;position:relative!important;box-sizing:border-box!important;width:100%!important;height:auto!important;min-height:min-content!important;max-height:none!important;aspect-ratio:auto!important;overflow:visible!important;flex:none!important;padding:10px!important;margin:0!important;text-align:left!important}
+.mobile-picker509 .picker-list-content510{display:grid!important;gap:7px!important;width:100%!important;min-width:0!important}
+.mobile-picker509 .gem-list-head317{display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important}
+.mobile-picker509 .gem-list-head317 .gem-pick-visual{display:block!important;position:static!important;width:36px!important;height:36px!important;flex:0 0 36px!important;margin:0!important;transform:none!important}
+.mobile-picker509 .gem-list-head317 .gem-pick-visual :is(img,svg){width:100%!important;height:100%!important;object-fit:contain!important}
+.mobile-picker509 .gem-pick-name{white-space:normal!important;overflow-wrap:anywhere!important;font-size:14px!important;line-height:1.4!important}
+.mobile-picker509 .gem-details317{display:grid!important;gap:6px!important;min-width:0!important;height:auto!important;max-height:none!important;overflow:visible!important}
+.mobile-picker509 .gem-stats310{display:block!important;height:auto!important;min-height:0!important;overflow:visible!important;font-size:12px!important;line-height:1.5!important;white-space:normal!important}
+.mobile-picker509 .gem-effect310{display:block!important;box-sizing:border-box!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;padding:7px 8px!important;border:1px solid #ae86cc!important;border-radius:5px!important;background:linear-gradient(100deg,#35243f,#1c192a)!important;color:#ead8ff!important;font-size:12px!important;line-height:1.5!important;white-space:normal!important;overflow:visible!important}
+.mobile-picker509 :is(.gem-stats310,.gem-effect310)>span{display:block!important;position:static!important;width:auto!important;height:auto!important;white-space:normal!important;overflow-wrap:anywhere!important;transform:none!important;animation:none!important;font-size:inherit!important}
+.mobile-picker509 [hidden],.mobile-picker509 :is(.quick-picker-list,.gem-picker-grid)>[hidden]{display:none!important}
+@media(max-width:350px){.mobile-picker509 .mobile-picker-grid510{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+}</style>
+
 <style id="entry-locks508">@layer entryLocks508 {
 html body #app button[data-entry-locked508="true"],html body #app .battle349 .stage-start349:disabled{filter:grayscale(1)!important;opacity:.55!important;color:#b7b7b7!important;border-color:#666!important;box-shadow:none!important;text-shadow:none!important;cursor:not-allowed!important;animation:none!important}
 html body #app button[data-entry-locked508="true"]:is(:hover,:active){transform:none!important;box-shadow:none!important}
@@ -6770,28 +6801,28 @@ function openMobilePicker509_(spec){
  if(!gem)try{list=localStorage.getItem('rpg_view204_'+storage)!=='grid'}catch(_){}
  const key=v=>v?.id,unavailable=v=>spec.unavailable?spec.unavailable(v):!v?!current:gem?key(v)===current:!!spec.used?.(v)||key(v)===current;
  const nodes=values.map((v,i)=>{
-  if(gem){const t=document.createElement('template');t.innerHTML=gemPickerCardHtml_(v,i);return t.content.firstElementChild;}
+  if(gem){const t=document.createElement('template');t.innerHTML=gemPickerListCard317_(v,i);const node=t.content.firstElementChild;node.innerHTML='<span class="picker-list-content510">'+node.innerHTML+'</span><span class="tile-art204">'+objectArt202_(v,'gem')+'</span><span class="tile-name204">'+escapeHtml(gemDisplayName(v))+'</span>';return node;}
   const row=document.createElement('div');row.className='quick-option';row.dataset.pickIndex509=i;
   row.innerHTML=v?'<div class="quick-option-main"><span class="mobile-equip-art509">'+objectArt202_(v,'equipment')+'</span><div><span class="favorite-item-head">'+(spec.favorites!==false?favoriteStarHtml_(v):'')+'<b>'+rarityHtml(v)+'</b></span></div><div class="small">'+equipmentLevelText_(v)+'｜'+statText(enhancedStats(v))+'｜強化 +'+(v.enhance||0)+(v.sockets?'｜鑲孔 '+(v.gems||[]).filter(Boolean).length+'/'+v.sockets:'')+'</div></div><div class="quick-option-actions"><button type="button">'+(key(v)===current||spec.used?.(v)?'裝備中':'裝備')+'</button></div>':'<div class="quick-option-main"><b>卸下</b><div class="small">此欄位保持空白</div></div><div class="quick-option-actions"><button type="button">選擇</button></div>';
   if(v){row.classList.add('hold-info260');row._holdInfo260_=()=>prepareEquipTooltip_(v);row.onmouseenter=e=>prepareTooltipShow_(e,row._holdInfo260_());row.onmousemove=prepareTooltipMove_;row.onmouseleave=prepareTooltipHide_;}
-  row.querySelector('.quick-option-actions button').onclick=()=>choose(i);return row;
+  const tile=document.createElement('button');tile.type='button';tile.className='cell402 picker-tile510'+(v?' bag-equipment-fx484':'');tile.setAttribute('aria-label',v?v.name:'卸下');tile.innerHTML=v?equipmentTileBody208_(v,'',true):'<span class="tile-art204">−</span><span class="tile-name204">卸下</span>';tile.onclick=()=>choose(i);row.append(tile);row.querySelector('.quick-option-actions button').onclick=()=>choose(i);return row;
  });
  nodes.forEach(n=>grid.append(n));
- const sync=()=>{nodes.forEach((n,i)=>{(gem?n:n.querySelector('.quick-option-actions button')).disabled=busy||unavailable(values[i]);});close.disabled=busy;bar.querySelectorAll('button,input,select').forEach(n=>n.disabled=busy)};
+ const sync=()=>{nodes.forEach((n,i)=>{(gem?[n]:[...n.querySelectorAll('.quick-option-actions button,.picker-tile510')]).forEach(b=>b.disabled=busy||unavailable(values[i]));});close.disabled=busy;bar.querySelectorAll('button,input,select').forEach(n=>n.disabled=busy)};
  async function choose(i){const v=values[i];if(busy||unavailable(v))return;if(owner!==cloudMeta.accountId){cancel();return}busy=true;sync();try{await apply(v);}catch(e){if(ov.isConnected)ov.querySelector('[role=alert]').textContent=e.message||'操作未完成，請重試。';}finally{busy=false;if(ov.isConnected)sync();}}
  const search=values.map(v=>v?[v.name,gem?gemDisplayName(v):slotName(v.slot),pickerDetail401_(type,v).replace(/<[^>]*>/g,' ')].join(' ').toLocaleLowerCase():'');
  function refresh(){
   if(busy)return;hideGemPickerFloatTip_();prepareTooltipHide_();const query=input.value.trim().toLocaleLowerCase();
   const filtered=values.filter((v,i)=>v?(!query||search[i].includes(query))&&(rarity.value==='all'||(gem?gemResolved_(v)?.rarity:equipmentRarity280_(v))===rarity.value):!query&&rarity.value==='all');
   const sorted=[...filtered.filter(v=>!v),...inventorySorted_(filtered.filter(Boolean),type,sort.value)];nodes.forEach(n=>n.hidden=true);sorted.forEach(v=>{const n=nodes[values.indexOf(v)];n.hidden=false;grid.append(n)});
-  grid.classList.toggle('mobile-equip-grid509',!gem&&!list);grid.classList.toggle('gem-picker-list317',gem&&list);
-  toggle.textContent=list?'格子檢視':'條列檢視';toggle.setAttribute('aria-pressed',String(list));count.textContent=sorted.filter(Boolean).length+' 件';ov.querySelector('.mobile-picker-empty509').hidden=!!sorted.length;sync();if(gem)mountGemRows317_();
+  grid.classList.toggle('mobile-equip-grid509',!gem&&!list);grid.classList.toggle('gem-picker-list317',gem&&list);grid.classList.toggle('mobile-picker-grid510',!list);grid.classList.toggle('tiles402',!list);if(gem)nodes.forEach(n=>{n.classList.toggle('cell402',!list);n.classList.toggle('gem-pick-list317',list)});
+  toggle.textContent=list?'切換棋盤式':'切換條列式';toggle.setAttribute('aria-pressed',String(list));count.textContent=(list?'條列式':'棋盤式')+' · '+sorted.filter(Boolean).length+' 件';ov.querySelector('.mobile-picker-empty509').hidden=!!sorted.length;sync();if(gem)mountGemRows317_();
  }
  input.oninput=refresh;rarity.onchange=sort.onchange=refresh;
- toggle.onclick=()=>{if(busy)return;list=!list;try{localStorage.setItem('rpg_view204_'+storage,list?'list':'grid')}catch(_){}if(gem){if(gemPicker317_)gemPicker317_.mode=list?'list':'grid';nodes.forEach((n,i)=>{const t=document.createElement('template');t.innerHTML=gemPickerCardHtml_(values[i],i);const fresh=t.content.firstElementChild;n.className=fresh.className;n.innerHTML=fresh.innerHTML;});}refresh()};
+ toggle.onclick=()=>{if(busy)return;list=!list;try{localStorage.setItem('rpg_view204_'+storage,list?'list':'grid')}catch(_){}refresh()};
  function cancel(){if(busy)return;hideGemPickerFloatTip_();closeQuickPicker();if(trigger?.isConnected)trigger.focus({preventScroll:true})}
  close.onclick=cancel;ov.onclick=e=>{if(e.target===ov)cancel()};ov.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();cancel()}if(e.key==='Tab')petTrap298_(ov,e)};
- document.body.append(ov);if(gem)bindGemPickerInteractions_(null,null,choose);refresh();close.focus({preventScroll:true});
+ document.body.append(ov);if(gem)bindGemPickerInteractions_(null,null,choose);else decorateItemBorders_(grid);refresh();close.focus({preventScroll:true});
 }
 
 function pickerStats401_(stats){
@@ -27347,7 +27378,7 @@ function decorateModeHome232_(){
   const button=e.target.closest?.('button');if(!button||button.disabled||button.closest('#mainNav')||button.classList.contains('favorite-star')||viewMode_==='desktop'&&button.closest('.town-world311')||reduced())return;
   const rect=button.getBoundingClientRect(),r=document.createElement('span');r.className='ui-ripple';r.style.left=`${e.clientX-rect.left}px`;r.style.top=`${e.clientY-rect.top}px`;button.appendChild(r);setTimeout(()=>r.remove(),500);
  },{passive:true});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){const dialog=document.querySelector('#modal.open');if(dialog&&typeof closeModal==='function')closeModal();}},true);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('quickPicker')){const dialog=document.querySelector('#modal.open');if(dialog&&typeof closeModal==='function')closeModal();}},true);
  const page=document.getElementById('page');
  // Page replacement must not replay the old translateY(8px) reveal animation.
  const bar=document.getElementById('resourceBar');let previous={};
@@ -27407,7 +27438,15 @@ function petTraitText297(t){const label={hp:'HP',patk:'PATK',matk:'MATK',def:'DE
 function petCards297(){return `<div class="pet-summary297"><span>同行寵物提供能力並獲得通關經驗；競技場禁用。</span><b>經驗藥水 ×${Number(state.consumables?.petExpPotion||0)}</b></div><div class="pet-grid297">${(state.pets297||[]).map(p=>`<article class="pet-card297 ${state.equippedPet297===p.id?'selected':''}">${petImage297(p)}<b>${escapeHtml(petName297(p))}</b><span>Lv.${p.level} ${state.equippedPet297===p.id?'・同行中':''}</span><button onclick="openPet297('${escapeAttr(p.id)}')">管理</button><button onclick="petAction297('pet/equip',{petId:'${escapeAttr(p.id)}'})" ${petBusy297?'disabled':''}>${state.equippedPet297===p.id?'目前同行':'設為同行'}</button></article>`).join('')||'<p class="empty">尚未取得寵物，前往商店購買寵物蛋。</p>'}</div>`;}
 function openPetList297(){if(activeBattleNow())return toast('戰鬥中無法管理寵物。');petModal297={id:null,emotion:'idle'};petPaint297();}
 function openPet297(id){if(activeBattleNow())return toast('戰鬥中無法管理寵物。');petModal297={id,emotion:'idle'};petPaint297();}
-function closePet297(){if(petBusy297)return;document.getElementById('petDialog297')?.remove();petModal297=null;}
+let petReturnFrame510_=0,petReturnTimer510_=0;
+function restorePetViewport510_(){
+ cancelAnimationFrame(petReturnFrame510_);clearTimeout(petReturnTimer510_);
+ if(viewMode_!=='mobile')return;
+ const restore=()=>{if(viewMode_!=='mobile'||petModal297)return;syncMobileViewport431_();syncEquipment317_();};
+ // Re-measure after removing the overlay, then after the mobile keyboard settles.
+ petReturnFrame510_=requestAnimationFrame(restore);petReturnTimer510_=setTimeout(restore,350);
+}
+function closePet297(){if(petBusy297)return;document.getElementById('petDialog297')?.remove();petModal297=null;restorePetViewport510_();}
 function petTrainingInfo458_(pet){
  const stones=Number(state.stones||0),locks=pet?.traits?.filter(t=>t?.locked).length||0;
  const raw=petRows297(petData297(),'PetTrainingCosts').find(r=>Number(r.LockedCount)===locks)?.StoneCost;
