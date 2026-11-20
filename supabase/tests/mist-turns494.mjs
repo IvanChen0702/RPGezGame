@@ -14,12 +14,16 @@ assert.equal(r.defender.hp,8980); // 120 slash + 500 burning + 400 poison
 let events=r.events471;const cast=events.findIndex(e=>e.type==='cast');const dot=events.findIndex(e=>e.type==='log'&&e.text.includes('受到【燃燒】'));const enemy=events.findIndex(e=>e.type==='visual'&&e.actor==='defender'&&e.kind==='physical');
 assert.ok(cast<dot&&dot<enemy);assert.equal(r.attacker.status.poison.stacks,2);
 for(let i=0;i<3;i++)r=await c.turn(r,'skip');assert.equal(r.attacker.status.poison.stacks,2);assert.equal(r.defender.status.burning.stacks,1);
-// Regeneration from this cast runs after the enemy response, never before it.
+// Direct healing is immediate; regeneration first ticks at the NEXT own action.
 b=fresh();r=await c.turn(b,'healIII');const sk=c.templates.skills.healIII;
-assert.equal(r.attacker.regenTurns,sk.duration-1);
-const attackIndex=r.events471.findIndex(e=>e.type==='visual'&&e.actor==='defender'&&e.kind==='physical');
+assert.equal(r.attacker.regenTurns,sk.duration);
+assert.equal(r.attacker.hp,Math.min(10000,5000+Math.trunc(sk.value))-100);
+assert.ok(!r.events471.some(e=>e.type==='log'&&e.text.includes('持續恢復：')));
+r=await c.turn(r,'slash');
 const healIndex=r.events471.findIndex(e=>e.type==='log'&&e.text.includes('持續恢復：'));
-assert.ok(attackIndex<healIndex);assert.ok(r.events471[healIndex].frame.attacker.regenTurns===sk.duration-1);
+const castIndex=r.events471.findIndex(e=>e.type==='cast');
+assert.ok(healIndex>=0&&healIndex<castIndex);
+assert.equal(r.events471[healIndex].frame.attacker.regenTurns,sk.duration-1);
 // Every published timed status decrements in its phase; stack/trigger effects stay until consumed/cleansed.
 for(const row of data.StatusEffects){
  b=fresh();status(b,'attacker',row.StatusID,3);if(row.StatusID==='seal')b.attacker.status.seal.skill='healIII';
@@ -46,4 +50,4 @@ b=fresh();b.defender.ai=[];b.defender.stats.patk=0;status(b,'attacker','block',1
 // Identical retry input produces identical authoritative state/events. Resume contains all timing data.
 b=fresh();status(b,'attacker','poison',1);b.attacker.regen=100;b.attacker.regenTurns=2;
 assert.deepEqual(await c.turn(b,'skip'),await c.turn(structuredClone(b),'skip'));
-console.log('Mist 494: DOT order/rates/persistence, same-round regen, all published status timers, control/CD, seal/bleed, shields, retry determinism passed');
+console.log('Mist 494: DOT order/rates/persistence, next-own-turn regen, all published status timers, control/CD, seal/bleed, shields, retry determinism passed');

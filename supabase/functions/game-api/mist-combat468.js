@@ -44,7 +44,7 @@ export function createMistCombat468(data,random){
   // Normal battle's legacy stun/heal-block counters expire after the affected action.
   tickDebuffs494(x,['stun','heal_block']);
   const other=x===arenaBattle_.attacker?arenaBattle_.defender:arenaBattle_.attacker;
-  arenaTickProtection45_(other);arenaRegen_(other);
+  arenaTickProtection45_(other);
   other.gamblePct141=0;delete other.status.gamble_luck141;
   arenaRefreshConditionalStats_(x);arenaRefreshConditionalStats_(other);record471('state');
  }
@@ -965,7 +965,7 @@ async function useBalancedArena241_(actor,target,id,sk){
  if(kind==='healPercentRegen'){
   const got=fxArenaHeal_(actor,Math.max(0,Number(sk.value)||0));
   if(!(actor.status?.enhancement_lock?.turns>0)&&actor.hp>0){actor.regen=0;actor.regenRate241=Math.max(0,Number(sk.regen)||0);actor.regenTurns=turns;}
-  detail=`立即恢復 ${got} HP；每回合恢復最大 HP ${Math.round(Number(sk.regen)*100)}%，持續 ${turns} 回合。`;
+  detail=`立即恢復 ${got} HP；從下次自身回合開始恢復最大 HP ${Math.round(Number(sk.regen)*100)}%，持續 ${turns} 回合。`;
  }else if(kind==='adrenalineGuard')balancedArenaBuff241_(actor,'adrenaline241',sk,{patkRate:rate,damageReduction:Number(sk.value)||0});
  else if(kind==='manaAwareness'){
   balancedArenaBuff241_(actor,'manaAwareness241',sk,{matkRate:rate});const name=randomOtherCooldown241_(id,sk.value,actor);detail+=name?` 本次減少【${name}】的 CD。`:' 目前沒有其他冷卻中的技能。';
@@ -1065,6 +1065,7 @@ function applyStatusRows494_(rows){
 function arenaTurnStartStatus_(x){
  // Each call begins one actor turn; the defender opening and first response share the battle round number.
  netherShield141_(x);rollGems141_(x);
+ arenaRegen_(x);
  for(const entry of arenaEffectEntries46_(x)){
   const m=entry.key.match(/^turn_regen_maxhp_(\d+(?:\.\d+)?)$/);if(!m||x.hp<=0)continue;
   const raw=Math.max(1,Math.trunc(x.maxHp*Number(m[1])/100)),before=x.hp;

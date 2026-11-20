@@ -43,7 +43,7 @@ export function createMistCombat468(data,random){
   // Normal battle's legacy stun/heal-block counters expire after the affected action.
   tickDebuffs494(x,['stun','heal_block']);
   const other=x===arenaBattle_.attacker?arenaBattle_.defender:arenaBattle_.attacker;
-  arenaTickProtection45_(other);arenaRegen_(other);
+  arenaTickProtection45_(other);
   other.gamblePct141=0;delete other.status.gamble_luck141;
   arenaRefreshConditionalStats_(x);arenaRefreshConditionalStats_(other);record471('state');
  }
