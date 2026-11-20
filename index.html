@@ -9990,6 +9990,26 @@ html body #app #page .mist465.dock-mode504 .mist-score479{flex-wrap:wrap}.mist-d
 }
 
 </style>
+
+<style id="mist-ready506">@layer mistLayout466 {
+html.desktop-ui #mistPrep474.ready400{--warm:#dfc691;--rim:#776951;--panel:linear-gradient(138deg,#35383f,#26292f 48%,#202229)}
+html.desktop-ui #mistPrep474.ready400>.modal-box{width:min(968px,96vw)!important;height:auto!important;min-height:0!important;max-height:none!important}
+html.desktop-ui #mistPrep474.ready400 .mist-prep-heading474{justify-content:flex-start!important}
+html.desktop-ui #mistPrep474.ready400 .mist-preparation470{height:auto!important;padding:10px!important}
+html.desktop-ui #mistPrep474.ready400 .preparation-panels{display:grid!important;grid-template-columns:minmax(0,1.52fr) minmax(0,1fr)!important;grid-template-rows:auto 1fr!important;gap:10px 12px!important;overflow:visible!important;flex:none!important}
+html.desktop-ui #mistPrep474.ready400 .prepare-equip-area{height:auto!important;min-height:0!important}
+html.desktop-ui #mistPrep474.ready400 .prepare-equip-area>.panel{height:100%!important;min-height:0!important}
+html.desktop-ui #mistPrep474.ready400 .prepare-equip-area>.panel,html.desktop-ui #mistPrep474.ready400 .prepare-skills-area>.panel{background:var(--panel)!important;border-color:var(--rim)!important}
+html.desktop-ui #mistPrep474.ready400 .prepare-equip-area .section-title{display:flex!important;padding:8px!important;margin:0!important;border-bottom:1px solid #776951}
+html.desktop-ui #mistPrep474.ready400 .prepare-equip-area .loadout-row{display:block!important;padding:4px 8px!important}
+html.desktop-ui #mistPrep474.ready400 .paperdoll204{min-height:440px!important;height:440px!important;max-width:none!important;flex:1 0 auto!important}
+html.desktop-ui #mistPrep474.ready400 .prepare-skills-area>.panel{height:100%!important;min-height:0!important;padding:10px!important;box-sizing:border-box!important}
+html.desktop-ui #mistPrep474.ready400 .prepare-skills-area .small{grid-column:1/-1!important;font-size:11px!important;line-height:1.5!important}
+html.desktop-ui #mistPrep474.ready400 .mist-ability469{padding:10px!important;background:var(--panel)!important}
+html.desktop-ui #mistPrep474.ready400 .mist-ability-grid469>div{font-size:15px!important;padding:6px 0!important}
+html.desktop-ui #mistPrep474.ready400 .mist-ability-grid469 b{font-size:18px!important}
+html.desktop-ui #mistPrep474.ready400 .prepare-skills-area .skill-category497{white-space:nowrap!important}
+}</style>
 </head>
 <body>
 <style id="bootStyle279">
@@ -17146,8 +17166,8 @@ document.addEventListener('click',event=>{
 
 // Use the live equipment panel and picker buttons in the desktop ready room.
 function arrangeReady400_(content){
- const room=content.closest('#readyRoom24,#townWindow311');
- const enabled=viewMode_==='desktop'&&(room.id==='townWindow311'||['main','dungeon','worldboss','arena','relic','extreme'].includes(readyRoom24_?.kind));
+ const room=content.closest('#readyRoom24,#townWindow311,#mistPrep474');
+ const enabled=viewMode_==='desktop'&&(room.id==='townWindow311'||room.id==='mistPrep474'||['main','dungeon','worldboss','arena','relic','extreme'].includes(readyRoom24_?.kind));
  room.classList.toggle('ready400',enabled);
  if(!enabled)return;
  const board=content.querySelector('.paperdoll204'), panel=board?.parentElement;
@@ -17158,7 +17178,7 @@ function arrangeReady400_(content){
  content.querySelectorAll('.stat-talent-main').forEach(el=>{const hint=el.querySelector('.talent-detail-full49')?.textContent;if(hint)el.title=hint;});
  const skills=content.querySelector('.prepare-skills-area .panel');
  if(skills){
-  const title=skills.querySelector('h3');if(title)title.textContent='技能與道具';
+  const title=skills.querySelector('h3');if(title)title.textContent=room.id==='mistPrep474'?'目前技能':'技能與道具';
   for(const btn of skills.querySelectorAll(':scope > .quick-slot')){
    const item=btn.getAttribute('onclick')?.includes("'item'");
    btn.classList.toggle('item400',!!item);
@@ -21565,7 +21585,7 @@ let prepareBackground262_=null;
 function decoratePrepareBackground262_(board){
  if(!prepareBackground262_){const list=Object.entries(PIXEL_BACKGROUNDS203_).filter(([,src])=>typeof src==='string'&&src);if(!list.length)return;prepareBackground262_=list[Math.floor(Math.random()*list.length)];}
  board.dataset.background262=prepareBackground262_[0];
- const lit400=viewMode_==='desktop'&&!!board.closest('#readyRoom24,#townWindow311[data-route=prepare]');
+ const lit400=viewMode_==='desktop'&&!!board.closest('#readyRoom24,#townWindow311[data-route=prepare],#mistPrep474.ready400');
  const shade400=lit400?'radial-gradient(ellipse at 50% 33%,rgba(255,224,164,.10),rgba(12,13,18,.09) 50%,rgba(8,10,15,.58) 100%),linear-gradient(rgba(4,5,8,.22),rgba(4,5,8,.46))':'linear-gradient(rgba(4,5,8,.76),rgba(4,5,8,.82))';
  board.style.setProperty('background-image',shade400+',url('+JSON.stringify(prepareBackground262_[1])+')','important');
  board.style.setProperty('background-size','cover','important');board.style.setProperty('background-position','center','important');
@@ -32557,7 +32577,7 @@ let mistPrep474_=null;
 function mistHp474_(s){const hp=Math.max(0,Math.ceil(Number(s.hp)||0)),max=Math.max(1,Number(s.maxHp)||1),pct=Math.min(100,hp/max*100);return '<div class="mist-hp474" role="progressbar" aria-label="目前 HP" aria-valuemin="0" aria-valuemax="'+max+'" aria-valuenow="'+hp+'"><i style="width:'+pct+'%"></i><span>HP '+hp+' / '+max+'</span></div>';}
 function mistOpenPrep474_(pane='equip'){
  if(state.page!=='mist'||!mist465_.data?.self||mist465_.data.self.dead||mist465_.data.self.battleId)return;
- const next=['bag','skills','equip'].includes(pane)?pane:'equip';
+ const next=viewMode_==='desktop'&&pane==='skills'?'equip':['bag','skills','equip'].includes(pane)?pane:'equip';
  if(!mistPrep474_){const map=document.querySelector('.mist-map-scroll465');mistPrep474_={owner:cloudMeta.accountId,focus:document.activeElement,map:map?{x:map.scrollLeft,y:map.scrollTop}:null};}
  if(mistUi470_.pane!==next)document.querySelector('#mistPrep474 .preparation-panels')?.scrollTo(0,0);
  mistUi470_.pane=next;mistRefreshPrep474_();
@@ -32565,7 +32585,7 @@ function mistOpenPrep474_(pane='equip'){
 function mistClosePrep474_(restore=true){
  if(!mistPrep474_&&!document.getElementById('mistPrep474'))return;
  const old=mistPrep474_;mistPrep474_=null;prepareTooltipHide_();hideItem404_();closeEquipMenu206_();
- document.getElementById('mistPrep474')?.remove();document.querySelector('.mist465')?.removeAttribute('inert');
+ const host=document.getElementById('mistPrep474');host?.querySelector('.modal-box')?.fit406?.disconnect();host?.remove();document.querySelector('.mist465')?.removeAttribute('inert');
  if(restore){requestAnimationFrame(mistCenter465_);(old?.focus?.isConnected?old.focus:document.querySelector('.mist-actions469 button:last-child'))?.focus({preventScroll:true});void mistAutoChest471_();}
 }
 function mistRefreshPrep474_(){
@@ -32576,26 +32596,30 @@ function mistRefreshPrep474_(){
  if(!host){host=document.createElement('div');host.id='mistPrep474';host.className='ui-confirm-overlay';host.innerHTML='<section class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mistPrepTitle474"><header class="mist-prep-heading474"><h2 id="mistPrepTitle474">戰境整備</h2><button aria-label="關閉整備" onclick="mistClosePrep474_()">✕</button></header><div class="mist-prep-body474"></div><div class="mist-prep-error474" role="alert"></div></section>';document.getElementById('page').append(host);questTrap369(host,mistClosePrep474_);host.addEventListener('click',e=>{if(e.target===host)mistClosePrep474_();});}
  document.querySelector('.mist465')?.setAttribute('inert','');
  const map=document.querySelector('.mist-map-scroll465');if(map&&mistPrep474_.map){map.scrollLeft=mistPrep474_.map.x;map.scrollTop=mistPrep474_.map.y;}
- const signature=JSON.stringify([mistUi470_,d.equipment,d.inventory,d.pendingLoot,d.inventoryCapacity499,d.skills,d.ownedSkills,d.stats,d.self.hp,d.self.maxHp,mist465_.error,!!mist465_.loading,!!mist465_.pending,bagList402_]);
- if(host.dataset.signature===signature)return;
+ if(viewMode_==='desktop'&&mistUi470_.pane==='skills')mistUi470_.pane='equip';
+ const combined=viewMode_==='desktop'&&mistUi470_.pane==='equip';host.classList.toggle('ready400',combined);host.querySelector('.modal-box').classList.toggle('ready-sheet',combined);host.querySelector('.mist-prep-heading474').classList.toggle('sheet-heading',combined);
+ if(!combined){host.querySelector('.crest400')?.remove();const sheet=host.querySelector('.modal-box');sheet.fit406?.disconnect();delete sheet.fit406;sheet.style.removeProperty('--ready-fit406');}
+ const signature=JSON.stringify([viewMode_,mistUi470_,d.equipment,d.inventory,d.pendingLoot,d.inventoryCapacity499,d.skills,d.ownedSkills,d.stats,d.self.hp,d.self.maxHp,mist465_.error,!!mist465_.loading,!!mist465_.pending,bagList402_]);
+ if(host.dataset.signature===signature){if(combined)fitReady406_(host);return;}
  const scrolls=[...host.querySelectorAll('.preparation-panels,.tiles402')].map(n=>[n.classList.contains('tiles402')?'.tiles402':'.preparation-panels',n.scrollTop]);
  const key=JSON.stringify(d.equipment||{}),board=host.querySelector('.paperdoll204'),keep=host.dataset.equipment===key&&mistUi470_.pane==='equip'?board:null;
  host.querySelector('.mist-prep-body474').innerHTML=mistInventory468_();
  if(keep){const area=host.querySelector('.prepare-equip-area');if(area){area.querySelectorAll('.quick-slot-row').forEach(n=>n.remove());area.querySelector('.panel').append(keep);}}
  host.dataset.signature=signature;host.dataset.equipment=key;
  host.querySelector('.mist-prep-error474').innerHTML=escapeHtml(mist465_.error||'')+(mist465_.pending?'<button onclick="mistRetry465_()">重試本次操作</button>':'');
- decorateEquipViews205_(host);finishUi206_();decorateItemBorders_(host);
+ decorateEquipViews205_(host);finishUi206_();decorateItemBorders_(host);if(combined)arrangeReady400_(host.querySelector('.mist-preparation470'));
  queueMicrotask(()=>{mistPaint469_();for(const [selector,top]of scrolls){const node=host.querySelector(selector);if(node)node.scrollTop=top;}if(created)host.querySelector('[aria-label="關閉整備"]').focus({preventScroll:true});});
 }
 
+function mistSkills506_(){const d=mist465_.data;return '<section class="prepare-skills-area shared-arena-skills328"><div class="panel"><div class="section-title"><h3>目前技能</h3><span class="badge">點擊欄位調整</span></div>'+prepareSkillSlotButton('passive',0,'被動技',d.skills)+[0,1,2].map(i=>prepareSkillSlotButton('active',i,'主動技 '+(i+1),d.skills)).join('')+'<p class="small">使用已解鎖技能；戰境內可切換，禁止消耗品。</p></div></section>';}
 function mistInventory468_(){
  const d=mist465_.data;if(!d?.self)return mistStatus465_('參加賽季後可管理戰境整備。');if(d.self.dead)return mistRespawn468_();
- const pane=mistUi470_.pane,tabs=inventoryCategoryTabs397_([['bag','背包'],['skills','技能'],['equip','目前裝備＋能力值']],pane,'mistPane470_','戰境整備',false);
+ const desktop=viewMode_==='desktop',pane=desktop&&mistUi470_.pane==='skills'?'equip':mistUi470_.pane,tabs=inventoryCategoryTabs397_(desktop?[['bag','背包'],['equip','整備']]:[['bag','背包'],['skills','技能'],['equip','目前裝備＋能力值']],pane,'mistPane470_','戰境整備',false);
  let body='';
  if(pane==='bag')body=mistBag470_();
- else if(pane==='skills')body='<section class="prepare-skills-area shared-arena-skills328"><div class="panel"><div class="section-title"><h3>目前技能</h3><span class="badge">點擊欄位調整</span></div>'+prepareSkillSlotButton('passive',0,'被動技',d.skills)+[0,1,2].map(i=>prepareSkillSlotButton('active',i,'主動技 '+(i+1),d.skills)).join('')+'<p class="small">使用已解鎖技能；戰境內可切換，禁止消耗品。</p></div></section>';
+ else if(pane==='skills')body=mistSkills506_();
  else body='<section class="prepare-equip-area" data-equipment-source="mist"><div class="panel"><div class="section-title"><h3>戰境裝備配置</h3><button onclick="mistPane470_(\'bag\')">'+backpackIcon293_()+' 背包</button></div><div class="loadout-row"><span class="small">主動開戰時更新防守配置</span></div>'+mistSlots469_.map(([key,label])=>'<div class="quick-slot quick-slot-row"><span class="quick-slot-label">'+label+'</span></div>').join('')+'</div></section>';
- if(pane==='equip')body='<div class="mist-loadout474">'+body+mistStats469_()+'</div>';
+ if(pane==='equip')body=desktop?body+'<div class="prepare-ability-area">'+mistStats469_()+'</div>'+mistSkills506_():'<div class="mist-loadout474">'+body+mistStats469_()+'</div>';
  return '<section class="preparation-screen mist-preparation470">'+tabs+(d.pendingLoot?.length?'<button class="primary" onclick="mistUi470_.bag=\'pending\';mistPane470_(\'bag\')">待收戰利品 '+d.pendingLoot.length+' 件</button>':'')+'<div class="preparation-panels">'+body+'</div></section>';
 }
 function mistPane470_(pane){mistOpenPrep474_(pane==='ability'?'equip':pane);}
