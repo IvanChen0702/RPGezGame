@@ -23,9 +23,9 @@ const fs=require('fs'),assert=require('assert/strict');
   const baseline=await measure();
   for(let i=0;i<3;i++){
    await p.locator('.pet-manage301').click();await p.waitForTimeout(300);
-   // Simulate a stale keyboard-height measurement after the visual viewport has recovered.
+   // A stale keyboard measurement must never resize the game shell (v512).
    await p.evaluate(height=>{document.documentElement.style.setProperty('--mobile-height431',Math.floor(height*.5)+'px');syncEquipment317_()},height);await p.waitForTimeout(80);
-   const compressed=await measure();assert(compressed['.prepare-equip-area>.panel'].w<baseline['.prepare-equip-area>.panel'].w*.8);
+   const compressed=await measure();assert(Math.abs(compressed['.prepare-equip-area>.panel'].w-baseline['.prepare-equip-area>.panel'].w)<2,'keyboard height must not shrink the game shell');
    await p.locator('[aria-label="關閉寵物管理"]').click();await p.waitForTimeout(600);
    const restored=await measure();console.log(engine,'return',i,restored['.prepare-equip-area>.panel'].w,restored['#app'].h);
    assert(Math.abs(restored['#app'].h-height)<2,'outer viewport must recover');assert(Math.abs(restored['.prepare-equip-area>.panel'].w-baseline['.prepare-equip-area>.panel'].w)<2,'equipment scale must recover');assert(Math.abs(restored['#mainNav'].y-baseline['#mainNav'].y)<2,'nav must recover');

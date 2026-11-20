@@ -7786,7 +7786,7 @@ function syncEquipment317_(){
  if(typeof viewMode_==='undefined')return;
  if(typeof petDecorate297==='function')petDecorate297();
  const areas=viewMode_==='mobile'?[...document.querySelectorAll('#page[data-game-page="prepare"] .preparation-panels > .prepare-equip-area,#readyContent24 .preparation-panels > .prepare-equip-area')]:[];
- for(const [area,entry]of equipmentFits317_)if(!areas.includes(area)||!area.isConnected){entry.observer.disconnect();cancelAnimationFrame(entry.raf);if(entry.panel.isConnected)entry.panel.style.cssText=entry.original;area.classList.remove('equip-fit-area317');equipmentFits317_.delete(area);}
+ for(const [area,entry]of equipmentFits317_)if(!areas.includes(area)||!area.isConnected){entry.observer.disconnect();cancelAnimationFrame(entry.raf);if(entry.panel.isConnected)entry.panel.style.cssText=entry.original;if(entry.board512)entry.board512.style.removeProperty('grid-template-rows');area.classList.remove('equip-fit-area317');equipmentFits317_.delete(area);}
  for(const area of areas){
   const panel=area.querySelector(':scope > .panel');if(!panel)continue;
   let entry=equipmentFits317_.get(area);
@@ -7795,6 +7795,10 @@ function syncEquipment317_(){
    entry.measure=()=>{
     if(!area.isConnected)return;const w=area.clientWidth,h=area.clientHeight;if(!w||!h)return;
     for(const [k,v]of Object.entries({position:'absolute',left:'50%',top:'0',width:w+'px',height:'auto','min-height':'0','max-height':'none','max-width':'none','box-sizing':'border-box',margin:'0',overflow:'visible','transform-origin':'50% 0'}))if(panel.style.getPropertyValue(k)!==v)panel.style.setProperty(k,v,'important');
+    // v512: WebKit can retain auto grid row heights from the wider orientation.
+    // Derive the square rows from the current, unscaled column width before fitting.
+    const board=panel.querySelector('.paperdoll204');
+    if(board){const side=parseFloat(getComputedStyle(board).gridTemplateColumns);if(side>0){const rows=`repeat(4, ${side}px)`;if(board.style.getPropertyValue('grid-template-rows')!==rows)board.style.setProperty('grid-template-rows',rows,'important');entry.board512=board;}}
     if(typeof petButtonFit301_==='function')petButtonFit301_();
     const controls=[...panel.querySelectorAll('.avatar-choice220,.pet-manage301')];
     const natural=Math.max(panel.offsetHeight,...controls.map(n=>localBottom317_(n,panel)+8));
@@ -30722,7 +30726,9 @@ body:has(#seriesResult430) :is(#uiConfirmOverlay,#uiAlertOverlay){z-index:100050
 }</style>
 <style id="gift-viewport431">@layer desktopViewport421{
 html.mobile-ui,html.mobile-ui body{min-height:0!important;height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
-html.mobile-ui #app{position:fixed!important;left:0!important;right:0!important;top:var(--mobile-top431,0px)!important;bottom:auto!important;height:var(--mobile-height431,100dvh)!important;max-height:var(--mobile-height431,100dvh)!important;min-height:0!important;margin:0 auto!important}
+/* v512: keyboard/zoom visual viewport measurements must not shrink the game layout.
+   CSS dvh follows browser chrome/orientation without caching a keyboard height. */
+html.mobile-ui #app{position:fixed!important;left:0!important;right:0!important;top:0!important;bottom:auto!important;height:100vh!important;height:100dvh!important;max-height:100vh!important;max-height:100dvh!important;min-height:0!important;margin:0 auto!important}
 .gift-ui431.gift-overlay101{z-index:24000!important;padding:16px!important;background:#030811c9!important;backdrop-filter:blur(7px)!important}
 html.desktop-ui .gift-ui431.gift-overlay101{padding-top:var(--window-top421)!important;padding-bottom:8px!important}
 .gift-ui431 .gift-window101{width:min(1120px,100%)!important;max-width:1120px!important;max-height:calc(100dvh - 32px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important;border:1px solid var(--g431-accent)!important;border-radius:16px!important;background:var(--g431-bg)!important;color:#eee8dc!important;box-shadow:0 20px 70px #0009!important;font-family:'Microsoft JhengHei','PingFang TC',sans-serif!important}
@@ -30911,7 +30917,8 @@ async function giftOpenFixed431_(id){
 }
 const openGiftBase431_=openGiftbox101_;
 openGiftbox101_=function(id){return QUEST_EGGS368[id]?giftOpenFixed431_(id):openGiftBase431_(id)};
-// Keep only the outer app anchored. Nested inventories/dialogs retain their own scroll positions.
+// Visual viewport height is for temporary gift dialogs only; the game shell uses CSS dvh.
+// Nested inventories/dialogs retain their own scroll positions.
 var mobileViewportFrame431_=0;
 function syncMobileViewport431_(){
  mobileViewportFrame431_=0;if(!document.documentElement.classList.contains('mobile-ui')){document.documentElement.style.removeProperty('--mobile-height431');document.documentElement.style.removeProperty('--mobile-top431');return;}
