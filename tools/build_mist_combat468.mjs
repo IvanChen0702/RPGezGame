@@ -120,9 +120,9 @@ for (const n of [
   "resolvePlayerHealing_",
 ])
   overrides.set(n, `function ${n}(){throw Error('MIST_NON_ARENA_PATH:${n}');}`);
-// Mist follows the normal battle phase order, not arena's start-of-action DOT/regen.
+// DOT remains after the player's action; regeneration runs at each owner's turn start.
 const start494=defs.get("arenaTurnStartStatus_");
-overrides.set("arenaTurnStartStatus_",start494.slice(0,start494.indexOf(" const side="))+start494.slice(start494.indexOf(" for(const entry of arenaEffectEntries46_")));
+overrides.set("arenaTurnStartStatus_",start494.slice(0,start494.indexOf(" const side="))+" arenaRegen_(x);\n"+start494.slice(start494.indexOf(" for(const entry of arenaEffectEntries46_")));
 // Arena's legacy attack code has fixed defense/crit multipliers; use published status values in Mist.
 for(const name of ["arenaUseLegacy127_","fxEvent_"]){
  let src=defs.get(name).replaceAll("target.status.armor_break?.turns>0?.7:1", "target.status.armor_break?.turns>0?Number(statusDef_('armor_break').value):1").replaceAll("target.status?.armor_break?.turns>0?.7:1", "target.status?.armor_break?.turns>0?Number(statusDef_('armor_break').value):1");

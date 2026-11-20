@@ -10825,7 +10825,7 @@ function triCleanse117_(b,count=1){
  while(pool.length&&removed.length<count){const id=pool.splice(Math.floor(Math.random()*pool.length),1)[0];removeBattleStatus_('enemy',id);if(id==='weakness'){b.enemyPatkDownTurns=0;b.enemyPatkDownRate=0;}removed.push(statusDef_(id).name||id);}
  if(removed.length){log(`【淨化】清除 ${removed.join('、')} 全部層數。`);battleEffectText55_('enemy',`淨化：${removed.join('、')}`,'buff');triFx117_('cleanse');updateBattleNumbers();}return removed;
 }
-function triRegen117_(b){const x=triRow117_('tri_regen',b);if(!x)return;b.triRegenTurns117=Math.max(0,Math.trunc(x.duration));battleEffectText55_('enemy',`再生 ${b.triRegenTurns117}R`,'buff');updateBattleNumbers();}
+function triRegen117_(b){const x=triRow117_('tri_regen',b);if(!x)return;b.triRegenTurns117=Math.max(0,Math.trunc(x.duration));b.triRegenAppliedTurn502=b.turn;battleEffectText55_('enemy',`再生 ${b.triRegenTurns117}R`,'buff');updateBattleNumbers();}
 function triStatusRows117_(b,step,hit){return triRows117_(b).filter(x=>x.action==='tri_status'&&x.value===step&&(x.stacks===hit||x.stacks===0));}
 function triApplyHitStatuses117_(b,step,hit){
  if(b.playerHp<=0)return;
@@ -10886,12 +10886,16 @@ async function performTri117_(b,e){
  if(kind===109&&step===3&&b.playerHp>0&&b.enemyHp>0)orionNotice111_(b,'下一招：終幕・命定之死',`魔法攻擊 ${triRow117_('tri_cycle_fate_final',b)?.param1??3} 次，每擊回響 ${b.triPeak117}。`);
  updateBattleNumbers();return true;
 }
+function triStartRegen502_(b,e){
+ if(triKind117_(b)!==108||b.playerHp<=0||b.enemyHp<=0||b.triRegenAppliedTurn502===b.turn||b.triRegenTickTurn502===b.turn)return;
+ b.triRegenTickTurn502=b.turn;
+ if(b.triRegenTurns117>0){b.triRegenTurns117--;triHeal117_(b,e,e.hp*Math.max(0,triRow117_('tri_regen',b)?.param1??0),'再生');}
+}
 async function triEndEnemyTurn117_(b,e){
  const kind=triKind117_(b);if(!kind||b.triEndTurn117===b.turn||b.enemyHp<=0||b.playerHp<=0)return;
  b.triEndTurn117=b.turn;
  if(kind===107){const x=triRow117_('tri_aftershock',b);if(x){orionNotice111_(b,'雷鳴餘震',x.message);triFx117_('attack');await triHit117_(b,e,'magic',triStats117_(b,e).matk*x.param1,'雷鳴餘震');}}
  if(kind===108){
-  if(b.triRegenTurns117>0){b.triRegenTurns117--;triHeal117_(b,e,e.hp*Math.max(0,triRow117_('tri_regen',b)?.param1??0),'再生');}
   const x=triRow117_('tri_growth',b);if(x){b.triGrowth117+=Math.max(0,x.param1);battleEffectText55_('enemy',`物攻／魔攻 +${Math.round(b.triGrowth117*100)}%`,'buff');log(`【生生不息】基礎物攻與魔攻累計 +${Math.round(b.triGrowth117*100)}%。`);}
  }
  updateBattleNumbers();
@@ -11799,9 +11803,9 @@ async function useBalancedMain241_(id,sk,s){
  const b=state.currentBattle,turns=Math.max(1,Number(sk.duration)||2),rate=Number(sk.mult)||0;let detail=sk.desc;
  if(kind==='healPercentRegen'){
   const r=resolvePlayerHealing_(Number(sk.value)||0,s.hp,sk.name),buffs=ensureBattleBuffs();
-  if(!blockedEnhancement108_('regen')){buffs.regen=0;buffs.regenRate241=Math.max(0,Number(sk.regen)||0);buffs.regenTurns=turns;}
+  if(!blockedEnhancement108_('regen')){buffs.regen=0;buffs.regenRate241=Math.max(0,Number(sk.regen)||0);buffs.regenTurns=turns;buffs.regenAppliedTurn502=b.turn;}
   if(r.healed>0){playSfx('heal');healFx(document.getElementById('playerCombatant'));floatText(document.getElementById('playerFx'),`+${r.healed} HP`,'heal');}
-  detail=`立即恢復 ${r.healed} HP；每回合恢復最大 HP ${Math.round(Number(sk.regen)*100)}%，持續 ${turns} 回合。`;
+  detail=`立即恢復 ${r.healed} HP；從下次自身回合開始恢復最大 HP ${Math.round(Number(sk.regen)*100)}%，持續 ${turns} 回合。`;
  }else if(kind==='adrenalineGuard')balancedMainBuff241_('adrenaline241',sk,{patkRate:rate,damageReduction:Number(sk.value)||0});
  else if(kind==='manaAwareness'){
   balancedMainBuff241_('manaAwareness241',sk,{matkRate:rate});const name=randomOtherCooldown241_(id,sk.value);
@@ -11822,7 +11826,7 @@ async function useBalancedArena241_(actor,target,id,sk){
  if(kind==='healPercentRegen'){
   const got=fxArenaHeal_(actor,Math.max(0,Number(sk.value)||0));
   if(!(actor.status?.enhancement_lock?.turns>0)&&actor.hp>0){actor.regen=0;actor.regenRate241=Math.max(0,Number(sk.regen)||0);actor.regenTurns=turns;}
-  detail=`立即恢復 ${got} HP；每回合恢復最大 HP ${Math.round(Number(sk.regen)*100)}%，持續 ${turns} 回合。`;
+  detail=`立即恢復 ${got} HP；從下次自身回合開始恢復最大 HP ${Math.round(Number(sk.regen)*100)}%，持續 ${turns} 回合。`;
  }else if(kind==='adrenalineGuard')balancedArenaBuff241_(actor,'adrenaline241',sk,{patkRate:rate,damageReduction:Number(sk.value)||0});
  else if(kind==='manaAwareness'){
   balancedArenaBuff241_(actor,'manaAwareness241',sk,{matkRate:rate});const name=randomOtherCooldown241_(id,sk.value,actor);detail+=name?` 本次減少【${name}】的 CD。`:' 目前沒有其他冷卻中的技能。';
@@ -21995,6 +21999,13 @@ function tickPlayerBuffs(){
   if((buffs.patkTurns||0)>0&&--buffs.patkTurns<=0){buffs.patkTurns=0;buffs.patk=0;}if((buffs.matkTurns||0)>0&&--buffs.matkTurns<=0){buffs.matkTurns=0;buffs.matk=0;}if((buffs.defTurns||0)>0&&--buffs.defTurns<=0){buffs.defTurns=0;buffs.def=0;}if((buffs.omniTurns||0)>0&&--buffs.omniTurns<=0){buffs.omniTurns=0;buffs.patkRate=0;buffs.matkRate=0;buffs.crit=0;}
   for(const x of b.playerBuffEffects){if((x.turns||0)>0&&--x.turns<=0)log(`<span class="buff-end-text">【${escapeHtml(x.name||'增益')}】效果結束。</span>`);}b.playerBuffEffects=b.playerBuffEffects.filter(x=>(x.turns||0)>0);
   for(const sh of b.playerShields){if((sh.turns||0)>0&&(sh.hp||0)>0&&--sh.turns<=0)log(`<span class="buff-end-text">【${escapeHtml(sh.name||'護盾')}】持續時間結束。</span>`);}b.playerShields=b.playerShields.filter(x=>(x.turns||0)>0&&(x.hp||0)>0);b.magicShield={hp:0,max:0,turns:0,breakMatk:0,_migrated:true};
+}
+
+// Regeneration is an own-turn-start effect; never consume a tick when it is granted.
+function tickPlayerRegen502_(){
+ const b=state.currentBattle,buffs=ensureBattleBuffs();
+ if(!b||!buffs||b.won||b.lost||b.enemyHp<=0||b.playerHp<=0||buffs.regenAppliedTurn502===b.turn||b.regenTickTurn502===b.turn)return;
+ b.regenTickTurn502=b.turn;
   if((buffs.regenTurns||0)>0&&b.playerHp>0){const maxHp=battlePlayerStats().hp,r=resolvePlayerHealing_(Number(buffs.regenRate241)>0?Math.trunc(maxHp*buffs.regenRate241):Number(buffs.regen||0),maxHp,'持續恢復'),healed=r.healed;buffs.regenTurns--;updateBattleNumbers();if(healed>0){healFx(document.getElementById('playerCombatant'));floatText(document.getElementById('playerFx'),`+${healed} 持續恢復`,'heal');log(`【恢復術】持續恢復 ${healed} HP，剩餘 ${buffs.regenTurns} 回合。`);}else if(r.cursed)log(`【恢復術】持續恢復被詛咒反轉，剩餘 ${buffs.regenTurns} 回合。`);else log(r.blocked?`【禁療】阻止了持續恢復，剩餘 ${buffs.regenTurns} 回合。`:`【恢復術】持續恢復觸發，但 HP 已滿，剩餘 ${buffs.regenTurns} 回合。`);if(buffs.regenTurns<=0){buffs.regenTurns=0;buffs.regen=0;buffs.regenRate241=0;}}
 }
 
@@ -22713,11 +22724,11 @@ async function useSkill(i){
  }else if(await useBalancedMain241_(id,sk,s)){
  }else if(sk.kind==='heal'){
    const blocked=hasBattleStatus('player','heal_block'),cursed=hasBattleStatus('player','curse');
-   setBattleVisual('恢復術',blocked?`受到【禁療】影響，本次無法恢復 HP。`:cursed?`受到【詛咒】影響，本次恢復會轉為等量生命損失。`:`立即恢復 <strong>${sk.value} HP</strong>，並獲得每回合恢復 <strong>${sk.regen} HP</strong>、持續 <strong>${sk.duration} 回合</strong>。`,'player');
+   setBattleVisual('恢復術',blocked?`受到【禁療】影響，本次無法恢復 HP。`:cursed?`受到【詛咒】影響，本次恢復會轉為等量生命損失。`:`立即恢復 <strong>${sk.value} HP</strong>，並從下次自身回合開始恢復 <strong>${sk.regen} HP</strong>、持續 <strong>${sk.duration} 回合</strong>。`,'player');
    await wait(350);
    const r=resolvePlayerHealing_(sk.value,s.hp,`【${sk.name}】恢復`);
    if(r.healed>0)playSfx('heal');
-   const buffs=ensureBattleBuffs();if(!blockedEnhancement108_('regen')){buffs.regen=sk.regen;buffs.regenRate241=0;buffs.regenTurns=sk.duration;}
+   const buffs=ensureBattleBuffs();if(!blockedEnhancement108_('regen')){buffs.regen=sk.regen;buffs.regenRate241=0;buffs.regenTurns=sk.duration;buffs.regenAppliedTurn502=b.turn;}
    updateBattleNumbers(); if(r.healed>0)healFx(pc);
    if(r.blocked)floatText(document.getElementById('playerFx'),'禁療','status');
    else if(!r.cursed)floatText(document.getElementById('playerFx'),`+${r.healed} HP`,'heal');
@@ -22912,7 +22923,7 @@ function triBehaviorDescription119_Legacy286_(x){
   case 'tri_charge':return `【${name||'蓄能'}】每段命中+1層，最高${x.param2}層，每層基礎魔攻與防禦+${pct(x.param1)}；護盾吸收計入，持續傷害、反傷、未命中不計。`;
   case 'tri_growth':return `【${name||'生生不息'}】王回合結束，永久增加基礎物攻與魔攻各${pct(x.param1)}，採加算。`;
   case 'tri_shield_expiry':return `【${name||'生命餘暉'}】護盾自然到期，剩餘盾量${pct(x.param1)}轉回血；擊破不回血，受禁療影響。`;
-  case 'tri_regen':return `【${name||'再生'}】每次王回合末回復最大HP${pct(x.param1)}，共${x.duration}次；施放當回合算第一次，刷新不疊加，受禁療影響。`;
+  case 'tri_regen':return `【${name||'再生'}】從下次王回合開始回復最大HP${pct(x.param1)}，共${x.duration}次；施放當回合不觸發，刷新不疊加，受禁療影響。`;
   case 'tri_aftershock':return `【${name||'雷鳴餘震'}】王回合結束，當前魔攻×${pct(x.param1)}魔法傷害，不增加蓄能。`;
   default:return message||action;
  }
@@ -23769,6 +23780,7 @@ async function enemyTurnVisualLegacy130(){
  endRockPlayerTurn_(b);
  const pc=document.getElementById('playerCombatant'),ec=document.getElementById('enemyCombatant');
  setBattleVisual('敵人回合',`${e.name} 準備行動。`,'enemy');await wait(BATTLE_PRESENTATION471_.enemyLead);
+ triStartRegen502_(b,e);if(b.enemyHp<=0){await winBattle();return;}
 
  updateBossPhase_(b,e);
  reverseEnemyDotToHealing_(b,e);
@@ -24444,6 +24456,7 @@ async function finishEnemyAction134_(b,e){
    log(`世界 BOSS 挑戰已完成 ${b.worldBossMaxTurns||5} 回合，進行貢獻度結算。`);
    await settleWorldBossChallenge_('turn_limit');return;
  }
+ tickPlayerRegen502_();
  if(b.playerHp<=0)loseBattle();
  else if(!b.won&&!b.lost){applyTurnStartGemEffects_();updateBattleNumbers();}
 }
