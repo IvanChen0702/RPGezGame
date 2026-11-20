@@ -6757,6 +6757,43 @@ function pickerFilters504_(ov,spec,select,isBusy){
  refresh();
 }
 
+// Mobile keeps the original quick-option rows and gem cards with direct actions.
+function openMobilePicker509_(spec){
+ const {type,values,current,title,apply}=spec,gem=type==='gem',owner=cloudMeta.accountId,trigger=document.activeElement;
+ closeQuickPicker();prepareTooltipHide_();hideGemPickerFloatTip_();
+ const ov=document.createElement('div');ov.id='quickPicker';ov.className='quick-picker mobile-picker509';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label',title);
+ ov.innerHTML='<div class="quick-picker-card"><div class="between"><h3>'+escapeHtml(title)+'</h3><span class="badge">'+(gem?'寶石鑲嵌':'裝備管理')+'</span></div><div class="small">'+(gem?'點擊寶石直接鑲嵌，長按查看能力。':'點擊裝備按鈕直接更換，長按查看能力。')+'</div><div class="mobile-filters509"></div><div class="'+(gem?'gem-picker-grid':'quick-picker-list')+'"'+(gem?' id="gemPickerGrid"':'')+'></div><p class="mobile-picker-empty509" hidden>沒有符合篩選條件的項目</p><p class="mist-picker-error469" role="alert"></p><button class="quick-picker-close">關閉</button></div>';
+ const grid=ov.querySelector(gem?'.gem-picker-grid':'.quick-picker-list'),bar=ov.querySelector('.mobile-filters509'),close=ov.querySelector('.quick-picker-close');
+ bar.innerHTML='<select aria-label="稀有度篩選"><option value="all">全部稀有度</option>'+['一般','特殊','稀有','史詩','傳說'].map(x=>'<option>'+x+'</option>').join('')+'</select><select aria-label="排序方式">'+INVENTORY_SORT_OPTIONS_.map(([v,n])=>'<option value="'+v+'">'+n+'</option>').join('')+'</select><input type="search" aria-label="搜尋物品" placeholder="搜尋名稱、能力或效果"><button type="button" aria-label="切換檢視方式"></button><small aria-live="polite"></small>';
+ const [rarity,sort]=bar.querySelectorAll('select'),input=bar.querySelector('input'),toggle=bar.querySelector('button'),count=bar.querySelector('small');sort.value=inventorySort_;
+ const storage=gem?'gemPicker':'mobileEquipPicker509';let list=gem?viewPreference204_('gemPicker')==='list':true,busy=false;
+ if(!gem)try{list=localStorage.getItem('rpg_view204_'+storage)!=='grid'}catch(_){}
+ const key=v=>v?.id,unavailable=v=>spec.unavailable?spec.unavailable(v):!v?!current:gem?key(v)===current:!!spec.used?.(v)||key(v)===current;
+ const nodes=values.map((v,i)=>{
+  if(gem){const t=document.createElement('template');t.innerHTML=gemPickerCardHtml_(v,i);return t.content.firstElementChild;}
+  const row=document.createElement('div');row.className='quick-option';row.dataset.pickIndex509=i;
+  row.innerHTML=v?'<div class="quick-option-main"><span class="mobile-equip-art509">'+objectArt202_(v,'equipment')+'</span><div><span class="favorite-item-head">'+(spec.favorites!==false?favoriteStarHtml_(v):'')+'<b>'+rarityHtml(v)+'</b></span></div><div class="small">'+equipmentLevelText_(v)+'｜'+statText(enhancedStats(v))+'｜強化 +'+(v.enhance||0)+(v.sockets?'｜鑲孔 '+(v.gems||[]).filter(Boolean).length+'/'+v.sockets:'')+'</div></div><div class="quick-option-actions"><button type="button">'+(key(v)===current||spec.used?.(v)?'裝備中':'裝備')+'</button></div>':'<div class="quick-option-main"><b>卸下</b><div class="small">此欄位保持空白</div></div><div class="quick-option-actions"><button type="button">選擇</button></div>';
+  if(v){row.classList.add('hold-info260');row._holdInfo260_=()=>prepareEquipTooltip_(v);row.onmouseenter=e=>prepareTooltipShow_(e,row._holdInfo260_());row.onmousemove=prepareTooltipMove_;row.onmouseleave=prepareTooltipHide_;}
+  row.querySelector('.quick-option-actions button').onclick=()=>choose(i);return row;
+ });
+ nodes.forEach(n=>grid.append(n));
+ const sync=()=>{nodes.forEach((n,i)=>{(gem?n:n.querySelector('.quick-option-actions button')).disabled=busy||unavailable(values[i]);});close.disabled=busy;bar.querySelectorAll('button,input,select').forEach(n=>n.disabled=busy)};
+ async function choose(i){const v=values[i];if(busy||unavailable(v))return;if(owner!==cloudMeta.accountId){cancel();return}busy=true;sync();try{await apply(v);}catch(e){if(ov.isConnected)ov.querySelector('[role=alert]').textContent=e.message||'操作未完成，請重試。';}finally{busy=false;if(ov.isConnected)sync();}}
+ const search=values.map(v=>v?[v.name,gem?gemDisplayName(v):slotName(v.slot),pickerDetail401_(type,v).replace(/<[^>]*>/g,' ')].join(' ').toLocaleLowerCase():'');
+ function refresh(){
+  if(busy)return;hideGemPickerFloatTip_();prepareTooltipHide_();const query=input.value.trim().toLocaleLowerCase();
+  const filtered=values.filter((v,i)=>v?(!query||search[i].includes(query))&&(rarity.value==='all'||(gem?gemResolved_(v)?.rarity:equipmentRarity280_(v))===rarity.value):!query&&rarity.value==='all');
+  const sorted=[...filtered.filter(v=>!v),...inventorySorted_(filtered.filter(Boolean),type,sort.value)];nodes.forEach(n=>n.hidden=true);sorted.forEach(v=>{const n=nodes[values.indexOf(v)];n.hidden=false;grid.append(n)});
+  grid.classList.toggle('mobile-equip-grid509',!gem&&!list);grid.classList.toggle('gem-picker-list317',gem&&list);
+  toggle.textContent=list?'格子檢視':'條列檢視';toggle.setAttribute('aria-pressed',String(list));count.textContent=sorted.filter(Boolean).length+' 件';ov.querySelector('.mobile-picker-empty509').hidden=!!sorted.length;sync();if(gem)mountGemRows317_();
+ }
+ input.oninput=refresh;rarity.onchange=sort.onchange=refresh;
+ toggle.onclick=()=>{if(busy)return;list=!list;try{localStorage.setItem('rpg_view204_'+storage,list?'list':'grid')}catch(_){}if(gem){if(gemPicker317_)gemPicker317_.mode=list?'list':'grid';nodes.forEach((n,i)=>{const t=document.createElement('template');t.innerHTML=gemPickerCardHtml_(values[i],i);const fresh=t.content.firstElementChild;n.className=fresh.className;n.innerHTML=fresh.innerHTML;});}refresh()};
+ function cancel(){if(busy)return;hideGemPickerFloatTip_();closeQuickPicker();if(trigger?.isConnected)trigger.focus({preventScroll:true})}
+ close.onclick=cancel;ov.onclick=e=>{if(e.target===ov)cancel()};ov.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();cancel()}if(e.key==='Tab')petTrap298_(ov,e)};
+ document.body.append(ov);if(gem)bindGemPickerInteractions_(null,null,choose);refresh();close.focus({preventScroll:true});
+}
+
 function pickerStats401_(stats){
  const names=[['hp','HP'],['def','防禦'],['patk','物攻'],['matk','魔攻'],['crit','爆率'],['critDamage','爆傷']];
  return names.filter(([k])=>Number(stats?.[k])).map(([k,name])=>name+' '+(stats[k]>0?'+':'')+Number(stats[k])+(['crit','critDamage'].includes(k)?'%':'')).join('　')||'無基礎能力';
@@ -6769,6 +6806,7 @@ function pickerDetail401_(type,value){
  return row(type==='item'?'道具效果':'技能效果',skillDescHtml(s.desc||''))+(s.cd==null?'':row('冷卻時間',Number(s.cd)+' 回合'));
 }
 function openPicker401_(spec){
+ if(viewMode_==='mobile'&&['equipment','gem'].includes(spec.type))return openMobilePicker509_(spec);
  const {type,values,current,used,title,apply}=spec,owner=cloudMeta.accountId;
  closeQuickPicker();prepareTooltipHide_();const trigger=document.activeElement;
  const ov=document.createElement('div');ov.id='quickPicker';ov.className='quick-picker picker401';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label',title);
@@ -10014,6 +10052,12 @@ html.desktop-ui #mistPrep474.ready400 .mist-ability469{padding:10px!important;ba
 html.desktop-ui #mistPrep474.ready400 .mist-ability-grid469>div{font-size:15px!important;padding:6px 0!important}
 html.desktop-ui #mistPrep474.ready400 .mist-ability-grid469 b{font-size:18px!important}
 html.desktop-ui #mistPrep474.ready400 .prepare-skills-area .skill-category497{white-space:nowrap!important}
+}</style>
+<style id="mobile-picker509">@layer mistLayout466 {
+html.mobile-ui .mobile-picker509 .quick-picker-card{box-sizing:border-box;width:min(680px,94vw);max-height:88dvh;display:flex;flex-direction:column;overflow:hidden;padding:14px;gap:8px}
+.mobile-picker509 h3{margin:0}.mobile-filters509{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:none}.mobile-filters509 :is(select,input,button){box-sizing:border-box;min-width:0;width:100%;min-height:36px;font-size:12px;padding:6px}.mobile-filters509 input{grid-column:1/-1}.mobile-filters509 small{align-self:center;text-align:right}
+.mobile-picker509 :is(.quick-picker-list,.gem-picker-grid){min-height:0;overflow:auto;overscroll-behavior:contain;margin:0;flex:1 1 auto}.mobile-picker509 [hidden]{display:none!important}.mobile-picker509 .quick-picker-close{flex:none;margin-top:0}.mobile-picker509 .quick-option{padding:10px;gap:8px}.mobile-picker509 .quick-option-main{overflow-wrap:anywhere}.mobile-picker509 .quick-option-actions button{white-space:nowrap}.mobile-equip-art509{display:none}.mobile-equip-grid509{grid-template-columns:repeat(2,minmax(0,1fr))}.mobile-equip-grid509 .quick-option{flex-direction:column;align-items:stretch}.mobile-equip-grid509 .mobile-equip-art509{display:block;width:64px;height:64px;margin:auto}.mobile-equip-art509 :is(img,svg){width:100%;height:100%;object-fit:contain}.mobile-equip-grid509 .quick-option-actions button{width:100%}.mobile-picker509 .mist-picker-error469:empty{display:none}
+@media(max-height:480px){.mobile-filters509{grid-template-columns:1fr 1fr 1fr}.mobile-filters509 input{grid-column:auto}.mobile-picker509 .quick-picker-card{gap:4px!important}.mobile-picker509 .quick-picker-card>.small{display:none}}
 }</style>
 </head>
 <body>
@@ -25704,7 +25748,7 @@ function moveGemPickerFloatTip_(ev,card){
  if(y+r.height>vh-pad)y=Math.max(pad,vh-r.height-pad);
  tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px';
 }
-function bindGemPickerInteractions_(itemId,slot){
+function bindGemPickerInteractions_(itemId,slot,choose=null){
  const grid=document.getElementById('gemPickerGrid');if(!grid)return;
  let holdTimer=null,longPressed=false;
  const clearHold=()=>{if(holdTimer){clearTimeout(holdTimer);holdTimer=null;}};
@@ -25715,7 +25759,7 @@ function bindGemPickerInteractions_(itemId,slot){
    card.addEventListener('touchstart',ev=>{longPressed=false;clearHold();holdTimer=setTimeout(()=>{longPressed=true;grid.querySelectorAll('.gem-pick-card.touch-tip').forEach(x=>x.classList.remove('touch-tip'));card.classList.add('touch-tip');const t=ev.touches?.[0];showGemPickerFloatTip_(card,t||null);},430)},{passive:true});
    card.addEventListener('touchend',ev=>{clearHold();if(longPressed){ev.preventDefault();setTimeout(()=>{card.classList.remove('touch-tip');hideGemPickerFloatTip_();},1600);}});
    card.addEventListener('touchcancel',()=>{clearHold();hideGemPickerFloatTip_();});
-   card.addEventListener('click',ev=>{if(longPressed){ev.preventDefault();longPressed=false;return;}hideGemPickerFloatTip_();socketGemFromPicker_(itemId,slot,Number(card.dataset.gemIndex));});
+   card.addEventListener('click',ev=>{if(longPressed){ev.preventDefault();longPressed=false;return;}hideGemPickerFloatTip_();if(choose)choose(Number(card.dataset.gemIndex));else socketGemFromPicker_(itemId,slot,Number(card.dataset.gemIndex));});
  });
 }
 function openGemPicker_(itemId,slot){
@@ -32658,7 +32702,7 @@ function mistGemTarget470_(id){const d=mist465_.data;closeModal();openPicker401_
 function mistSkillPicker469_(kind,index){const d=mist465_.data,current=kind==='passive'?d.skills.passive:d.skills.active[index];openPrepareSkillPicker(kind,index,{type:kind,title:kind==='passive'?'選擇被動技能':'選擇主動技能 '+(index+1),values:[null,...d.ownedSkills.filter(id=>skillTemplates[id]?.type===kind&&skillTemplates[id]?.enabled!==false)],current,favorites:false,unavailable:id=>!mistCanAct465_()||id===current||kind==='active'&&id&&d.skills.active.some((x,i)=>i!==index&&x===id),apply:async id=>{await mistChooseSkill469_(kind,index,id);mistPickerError470_();}});document.getElementById('quickPicker').dataset.mist470='true';}
 function mistGemPicker469_(itemId){openPicker401_({type:'gem',title:'選擇戰境寶石',values:mist465_.data.inventory.gems,current:null,favorites:false,unavailable:()=>!mistCanAct465_(),apply:async x=>{await mistDo469_('gem/insert',{itemId,gemId:x.id});mistPickerError470_();}});document.getElementById('quickPicker').dataset.mist470='true';}
 function mistMarketDetail470_(row){marketSelected402_=row;mistModal469_(row.name,'<section class="detail402">'+itemHeader404_(row)+'<div class="info402">'+row.info+'</div><div class="trade402"><button class="primary" onclick="marketAction402_(this)">'+escapeHtml(row.label)+'</button>'+marketSecondaryButton504_(row)+'</div></section>');}
-function mistPickerError470_(){const card=document.querySelector('.picker401[data-mist470] .pick-card401');if(!card)return;let error=card.querySelector('[data-mist-error470]');if(!error){error=document.createElement('p');error.dataset.mistError470='';error.className='notice';error.setAttribute('role','alert');card.append(error);}error.textContent=mist465_.error;if(mist465_.pending){const retry=document.createElement('button');retry.textContent='重試同筆操作';retry.onclick=()=>mistRetry465_();error.append(retry);}}
+function mistPickerError470_(){const card=document.querySelector('#quickPicker[data-mist470] .pick-card401,#quickPicker[data-mist470] .quick-picker-card');if(!card)return;let error=card.querySelector('[data-mist-error470]');if(!error){error=document.createElement('p');error.dataset.mistError470='';error.className='notice';error.setAttribute('role','alert');card.append(error);}error.textContent=mist465_.error;if(mist465_.pending){const retry=document.createElement('button');retry.textContent='重試同筆操作';retry.onclick=()=>mistRetry465_();error.append(retry);}}
 function mistModal469_(title,html){closeQuickPicker();const modal=document.getElementById('modal');delete modal.dataset.mistBattleInfo495;delete modal.dataset.mistEncounter479;modal.dataset.mist470='true';document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=html+'<p class="mist-picker-error469" role="alert"></p>';modal.classList.add('open');}
 function mistItem469_(id,source='bag'){
  const d=mist465_.data,all=source==='pending'?d.pendingLoot:source==='equipped'?Object.values(d.equipment):Object.values(d.inventory).flat(),x=all.find(x=>x?.id===id);if(!x){toast('物品已更新，請重新選擇。');return;}
