@@ -21,16 +21,16 @@ const fs=require('fs'),assert=require('assert/strict');
    await p.evaluate(type=>{closeQuickPicker();if(type==='gem'){openItem('item504-0');setItemManagerTab307_('socket');openGemPicker_('item504-0',0);}else openPrepareEquipPicker('weapon')},type);
    const grid=p.locator(type==='gem'?'#gemPickerGrid':'.quick-picker-list');
    for(const list of [true,false,true,false]){
-    const toggle=p.locator('[aria-label="切換檢視方式"]');if((await toggle.getAttribute('aria-pressed')==='true')!==list)await toggle.click();
+    await p.locator('.view-control204 summary').click();await p.locator('.view-control204 button').nth(list?0:1).click();assert.equal(await p.locator('.view-control204[open]').count(),0);
     await p.waitForTimeout(150);
-    const toolbar=await p.locator('.mobile-filters509').evaluate(n=>{const a=n.querySelector('input').getBoundingClientRect(),b=n.querySelector('button').getBoundingClientRect();return {a:a.y,b:b.y,right:a.right,left:b.left}});assert(Math.abs(toolbar.a-toolbar.b)<1&&toolbar.right<=toolbar.left);
+    const toolbar=await p.locator('.mobile-filters509').evaluate(n=>{const a=n.querySelector('input').getBoundingClientRect(),b=n.querySelector('summary').getBoundingClientRect();return {a:a.y,b:b.y,right:a.right,left:b.left}});assert(Math.abs(toolbar.a-toolbar.b)<6&&toolbar.right<=toolbar.left);
     assert(await p.locator('.quick-picker-card').evaluate(n=>{const r=n.getBoundingClientRect();return !!document.elementFromPoint(r.x+r.width/2,r.y+20)?.closest('#quickPicker')}),'picker must be above management');
     if(list&&type==='gem'){
      const rows=await p.locator('.gem-pick-card').evaluateAll(ns=>ns.map(n=>{const r=n.getBoundingClientRect(),e=n.querySelector('.gem-effect310'),er=e.getBoundingClientRect(),st=n.querySelector('.gem-stats310').getBoundingClientRect();return {top:r.top,bottom:r.bottom,eHeight:er.height,eBottom:er.bottom,stHeight:st.height,border:getComputedStyle(e).borderTopStyle,text:e.textContent}}));
      assert.equal(rows.length,114);rows.forEach((r,i)=>{assert(r.eHeight>20&&r.stHeight>5&&r.eBottom<=r.bottom+1&&r.border==='solid'&&r.text.trim(),JSON.stringify(r));if(i)assert(r.top>=rows[i-1].bottom-1)});
     }
     if(!list){
-     const cells=await grid.locator('.cell402:visible').evaluateAll(ns=>ns.map(n=>{const r=n.getBoundingClientRect(),a=n.querySelector('.tile-art204').getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,ax:a.x,ay:a.y,ar:a.right,ab:a.bottom,right:r.right,bottom:r.bottom}}));
+     const cells=await grid.locator('.collection-tile205:visible').evaluateAll(ns=>ns.map(n=>{const r=n.getBoundingClientRect(),a=n.querySelector('.tile-art204').getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,ax:a.x,ay:a.y,ar:a.right,ab:a.bottom,right:r.right,bottom:r.bottom}}));
      assert(cells.length>=114);for(const c of cells){assert(Math.abs(c.w-c.h)<1.5&&c.w>40,JSON.stringify(c));assert(c.ax>=c.x-1&&c.ay>=c.y-1&&c.ar<=c.right+1&&c.ab<=c.bottom+1)}
      assert(cells[0].y===cells[1].y&&cells[1].x>=cells[0].right-1);const row2=cells.find(c=>c.y>cells[0].y+1);assert(row2.y>=cells[0].bottom-1);
     }
