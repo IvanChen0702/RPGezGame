@@ -1,5 +1,6 @@
 const {chromium,webkit}=require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const fs=require('fs'),assert=require('assert/strict');
+async function flipView(p){if(await p.locator('.mobile-picker509').count()){await p.locator('.mobile-picker509 .view-control204 summary').click();await p.locator('.mobile-picker509 .view-control204 button[aria-pressed=false]').click()}else await p.locator('[aria-label="切換檢視方式"]').click()}
 (async()=>{
  const data=JSON.parse(fs.readFileSync('supabase/tests/fixtures/mist468-planning.json'));
  const engine=process.env.BROWSER||'chromium',browser=await(engine==='webkit'?webkit.launch():chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']}));
@@ -23,7 +24,7 @@ const fs=require('fs'),assert=require('assert/strict');
   const expected504=await p.evaluate(r=>items504.filter(x=>equipmentRarity280_(x)===r).length,rarity504);assert.equal(await p.locator('.pick-grid401 button:visible').count(),expected504);
   await p.locator('[aria-label="稀有度篩選"]').selectOption('all');
   await p.locator('[aria-label="搜尋物品"]').fill('測試武器乙');assert.equal(await p.locator('.pick-grid401 button:visible').count(),1);
-  await p.locator('[aria-label="切換檢視方式"]').click();assert.equal(await p.locator('.pick-list504').count(),1);
+  await flipView(p);assert.equal(await p.locator('.pick-list504').count(),1);
   await p.locator('[aria-label="排序方式"]').selectOption('level-desc');
   const dims=await p.locator('.pick-card401').evaluate(e=>({w:e.scrollWidth,cw:e.clientWidth,h:e.getBoundingClientRect().height,bottom:e.getBoundingClientRect().bottom}));assert(dims.w<=dims.cw+1&&dims.bottom<=height+1,JSON.stringify(dims));
   await p.locator('.pick-card401 footer .primary').click();assert.equal(await p.evaluate(()=>equipCalls504[0][0]),'item504-1');
@@ -37,11 +38,11 @@ const fs=require('fs'),assert=require('assert/strict');
    await p.locator('[aria-label="搜尋物品"]').fill('測試武器乙');assert.equal(await p.locator('.quick-option:visible').count(),1);
    await p.evaluate(()=>{window.row509=document.querySelector('.quick-option:not([hidden])')});
    await p.locator('.quick-option:visible .favorite-star').click();assert(await p.evaluate(()=>row509===document.querySelector('.quick-option:not([hidden])')));
-   await p.locator('[aria-label="切換檢視方式"]').click();assert.equal(await p.locator('.mobile-equip-grid509').count(),1);await p.locator('[aria-label="排序方式"]').selectOption('level-desc');
+   await flipView(p);assert.equal(await p.locator('.mobile-equip-grid509').count(),1);await p.locator('[aria-label="排序方式"]').selectOption('level-desc');
    const dims=await p.locator('.quick-picker-card').evaluate(e=>({w:e.scrollWidth,cw:e.clientWidth,bottom:e.getBoundingClientRect().bottom}));assert(dims.w<=dims.cw+1&&dims.bottom<=height+1,JSON.stringify(dims));
    await p.locator('.quick-option:visible .quick-option-actions button:visible,.quick-option:visible .picker-tile510:visible').click();assert.equal(await p.evaluate(()=>equipCalls504[0][0]),'item504-1');
    await p.evaluate(()=>openGemPicker_('item504-0',0));assert.equal(await p.locator('.picker401').count(),0);assert.equal(await p.locator('#gemPickerGrid').count(),1);
-   await p.locator('[aria-label="排序方式"]').selectOption('name-desc');const name=await p.evaluate(()=>gemDisplayName(state.gems[3]));await p.locator('[aria-label="搜尋物品"]').fill(name);await p.locator('[aria-label="切換檢視方式"]').click();
+   await p.locator('[aria-label="排序方式"]').selectOption('name-desc');const name=await p.evaluate(()=>gemDisplayName(state.gems[3]));await p.locator('[aria-label="搜尋物品"]').fill(name);await flipView(p);
    if(width===390)await p.screenshot({path:'/workspace/outputs/ui504/gem-picker-mobile.png'});
    const gem=p.locator('.gem-pick-card:visible').first(),chosen=await gem.getAttribute('data-gem-index');await gem.evaluate(el=>{const e=new Event('touchstart',{bubbles:true});Object.defineProperty(e,'touches',{value:[{clientX:100,clientY:200}]});el.dispatchEvent(e)});await p.waitForTimeout(470);await gem.dispatchEvent('touchend',{});await gem.click();assert.equal(await p.evaluate(()=>equipCalls504.length),1,'long press must not socket');await gem.click();assert.equal(await p.evaluate(()=>equipCalls504.at(-1)[2]),Number(chosen));
    await p.evaluate(()=>openPrepareEquipPicker('weapon'));await p.locator('[aria-label="搜尋物品"]').fill('不存在的裝備XYZ');assert.equal(await p.locator('.quick-option:visible').count(),0);assert(await p.locator('.mobile-picker-empty509').isVisible());await p.evaluate(()=>closeQuickPicker());
