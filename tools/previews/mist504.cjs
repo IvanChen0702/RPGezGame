@@ -28,15 +28,13 @@ for(const [variant,view,width,height]of [['504','desktop',1440,960],['504','mobi
  document.querySelector('.mist-tag465').textContent='競技模式 · 介面設計預覽';
  },{data:JSON.parse(fs.readFileSync(root+'/supabase/tests/fixtures/mist468-planning.json')),view,variant});
 
- await p.addStyleTag({content:fs.readFileSync(root+'/tools/previews/mist504.css','utf8')});
- await p.addScriptTag({content:fs.readFileSync(root+'/tools/previews/mist504.js','utf8')});
- await p.evaluate(()=>{previewDock504();mistCenter465_();});
  await p.waitForTimeout(1300);await p.evaluate(()=>mistCenter465_());assert.deepEqual(errors,[]);
  const geometry=await p.evaluate(()=>{const h=document.querySelector('.mist-hp474').getBoundingClientRect(),e=document.querySelector('.mist-energy-track479').getBoundingClientRect(),hero=document.querySelector('.mist-cell465.self').getBoundingClientRect(),map=document.querySelector('.mist-map-scroll465').getBoundingClientRect();return {hp:h.height,energy:e.height,hpY:h.y,energyY:e.y,visible:hero.left>=map.left&&hero.right<=map.right&&hero.top>=map.top&&hero.bottom<=map.bottom}});
  assert.equal(geometry.hp,geometry.energy);assert(geometry.energyY>geometry.hpY);assert(geometry.visible);
  await p.screenshot({path:out+'/controls-'+view+'.png'});
  const a=await p.locator('.mist-dock504').boundingBox();await p.locator('.mist-map-scroll465').evaluate(e=>e.scrollTop+=100);const b=await p.locator('.mist-dock504').boundingBox();assert.equal(a.y,b.y);
- for(const state of ['defeat','respawn']){await p.evaluate(state=>previewRecovery504(state),state);await p.screenshot({path:out+'/'+state+'-'+view+'.png'});}
+ await p.evaluate(()=>{mist465_.data.self.dead=true;mist465_.data.reports=[{id:'preview504',result:'death',unread:true,title:'遭遇 霧行者',description:'你被霧行者擊敗。',time:'2026-11-20T03:05:00Z',position:{x:7,y:2}}];mistDraw465_();void mistDeathDialog504_(mist465_.data.reports[0]);});
+ await p.screenshot({path:out+'/defeat-'+view+'.png'});await p.evaluate(()=>mistCloseDeath504_(null));await p.screenshot({path:out+'/respawn-'+view+'.png'});
  console.log(view,'controls, defeat and respawn previews saved; dock stays fixed');await p.close();
 }
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});
