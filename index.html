@@ -32732,12 +32732,29 @@ function mistInventory468_(){
 function mistPane470_(pane){mistOpenPrep474_(pane==='ability'?'equip':pane);}
 function mistBagCategory470_(tab){mistUi470_.bag=tab;marketKey402_=null;bagQuery402_='';mistRefreshPrep474_();}
 function mistBagFilter470_(slot){mistUi470_.slot=slot;mistRefreshPrep474_();}
+function mistLootFull513_(item){
+ const kind=item.kind==='equipment'?'equipment':item.kind==='gem'?'gems':'chests';
+ return (mist465_.data?.inventory?.[kind]?.length||0)>=mistCapacity500_(kind);
+}
+async function mistTakeLoot513_(id){
+ if(!mistCanAct465_())return;
+ const item=mist465_.data?.pendingLoot?.find(x=>x.id===id);if(!item)return;
+ if(mistLootFull513_(item)){toast('背包已滿，請先騰出空格。');return;}
+ await mistDo469_('loot/take',{itemId:id});
+}
 function mistBag470_(){
  const d=mist465_.data,tab=['equipment','gems','pending'].includes(mistUi470_.bag)?mistUi470_.bag:'equipment',pending=tab==='pending',gem=tab==='gems';
  const entries=[['equipment','gear','裝備'],['gems','gem','寶石'],...(d.pendingLoot?.length?[['pending','wallet','戰利品']]:[])];
  const rail=marketRail402_(entries,tab,'mistBagCategory470_');
  const items=(pending?d.pendingLoot:d.inventory?.[tab]||[]).filter(x=>tab!=='equipment'||mistUi470_.slot==='all'||x.slot===mistUi470_.slot);
- const rows=items.map(x=>({...x.kind==='chest'?{key:x.id,name:x.name,art:'<img src="'+mistChestArt479_(x)+'" alt="">',kind:'戰境寶箱',info:'<p>開啟後取得戰境專用裝備，不能攜出。</p>'}:asGear402_(x,x.kind==='gem'),label:pending?'收取／丟棄':x.kind==='chest'?'開啟寶箱':x.kind==='gem'?'鑲嵌寶石':'管理裝備',act:()=>mistItem469_(x.id,pending?'pending':'bag'),secondary504:x.kind==='equipment'?()=>mistDiscard468_(pending?'loot/discard':'discard',x.id,'equipment'):null}));
+ const rows=items.map(x=>{
+  const full=pending&&mistLootFull513_(x);
+  return {...x.kind==='chest'?{key:x.id,name:x.name,art:'<img src="'+mistChestArt479_(x)+'" alt="">',kind:'戰境寶箱',info:'<p>開啟後取得戰境專用裝備，不能攜出。</p>'}:asGear402_(x,x.kind==='gem'),
+   label:pending?'收取':x.kind==='chest'?'開啟寶箱':x.kind==='gem'?'鑲嵌寶石':'管理裝備',
+   disabled:pending&&(!mistCanAct465_()||full),condition493:full?'<p class="notice" role="status">背包已滿，請先騰出空格。</p>':'',
+   act:pending?()=>mistTakeLoot513_(x.id):()=>mistItem469_(x.id,'bag'),
+   secondary504:pending||x.kind==='equipment'?()=>mistDiscard468_(pending?'loot/discard':'discard',x.id,'equipment'):null};
+ });
  const capacity=mistCapacity500_(gem?'gems':'equipment');
  return (pending&&items.length?'<p class="notice" role="status">整備物品空間不足，尚有 '+items.length+' 件戰利品待整理。請先騰出空格再收取，或丟棄不需要的物品；全部處理完才能移動。</p>':'')+bag402_({minSlots:pending?20:capacity,title:'戰境整備 · '+(pending?items.length+' 件待收取':(d.inventory?.[tab]?.length||0)+' / '+capacity+' 格'),rail,rows,filters:(tab==='equipment'?filter402_(mistUi470_.slot,marketCats402_.slice(0,-1),'mistBagFilter470_'):'')+'<input class="find402" type="search" aria-label="搜尋背包物品" placeholder="搜尋名稱、能力或效果" oninput="filterBag402_(this.value)"><button onclick="changeBagLayout402_()">'+(bagList402_?'棋盤':'條列')+'</button>',empty:'尚未取得這類戰境物品。'});
 }
@@ -32749,7 +32766,7 @@ function mistEquipPicker469_(slot){
 function mistGemTarget470_(id){const d=mist465_.data;closeModal();openPicker401_({type:'equipment',title:'選擇要鑲嵌的裝備',values:[...d.inventory.equipment,...Object.values(d.equipment)].filter(Boolean),current:null,favorites:false,unavailable:x=>!mistCanAct465_()||!!x.gems?.[0],apply:async it=>{await mistDo469_('gem/insert',{itemId:it.id,gemId:id});mistPickerError470_();}});document.getElementById('quickPicker').dataset.mist470='true';}
 function mistSkillPicker469_(kind,index){const d=mist465_.data,current=kind==='passive'?d.skills.passive:d.skills.active[index];openPrepareSkillPicker(kind,index,{type:kind,title:kind==='passive'?'選擇被動技能':'選擇主動技能 '+(index+1),values:[null,...d.ownedSkills.filter(id=>skillTemplates[id]?.type===kind&&skillTemplates[id]?.enabled!==false)],current,favorites:false,unavailable:id=>!mistCanAct465_()||id===current||kind==='active'&&id&&d.skills.active.some((x,i)=>i!==index&&x===id),apply:async id=>{await mistChooseSkill469_(kind,index,id);mistPickerError470_();}});document.getElementById('quickPicker').dataset.mist470='true';}
 function mistGemPicker469_(itemId){openPicker401_({type:'gem',title:'選擇戰境寶石',values:mist465_.data.inventory.gems,current:null,favorites:false,unavailable:()=>!mistCanAct465_(),apply:async x=>{await mistDo469_('gem/insert',{itemId,gemId:x.id});mistPickerError470_();}});document.getElementById('quickPicker').dataset.mist470='true';}
-function mistMarketDetail470_(row){marketSelected402_=row;mistModal469_(row.name,'<section class="detail402">'+itemHeader404_(row)+'<div class="info402">'+row.info+'</div><div class="trade402"><button class="primary" onclick="marketAction402_(this)">'+escapeHtml(row.label)+'</button>'+marketSecondaryButton504_(row)+'</div></section>');}
+function mistMarketDetail470_(row){marketSelected402_=row;mistModal469_(row.name,'<section class="detail402">'+itemHeader404_(row)+'<div class="info402">'+row.info+'</div><div class="trade402">'+(row.condition493||'')+'<button class="primary" '+(row.disabled?'disabled':'')+' onclick="marketAction402_(this)">'+escapeHtml(row.label)+'</button>'+marketSecondaryButton504_(row)+'</div></section>');}
 function mistPickerError470_(){const card=document.querySelector('#quickPicker[data-mist470] .pick-card401,#quickPicker[data-mist470] .quick-picker-card');if(!card)return;let error=card.querySelector('[data-mist-error470]');if(!error){error=document.createElement('p');error.dataset.mistError470='';error.className='notice';error.setAttribute('role','alert');card.append(error);}error.textContent=mist465_.error;if(mist465_.pending){const retry=document.createElement('button');retry.textContent='重試同筆操作';retry.onclick=()=>mistRetry465_();error.append(retry);}}
 function mistModal469_(title,html){closeQuickPicker();const modal=document.getElementById('modal');delete modal.dataset.mistBattleInfo495;delete modal.dataset.mistEncounter479;modal.dataset.mist470='true';document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=html+'<p class="mist-picker-error469" role="alert"></p>';modal.classList.add('open');}
 function mistItem469_(id,source='bag'){
