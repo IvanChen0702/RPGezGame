@@ -32935,7 +32935,7 @@ function mistInventory468_(){
  let body='';
  if(pane==='bag')body=mistBag470_();
  else if(pane==='skills')body=mistSkills506_();
- else body='<section class="prepare-equip-area" data-equipment-source="mist"><div class="panel"><div class="section-title"><h3>戰境裝備配置</h3><button onclick="mistPane470_(\'bag\')">'+backpackIcon293_()+' 背包</button></div><div class="loadout-row"><span class="small">主動開戰時更新防守配置</span></div>'+mistSlots469_.map(([key,label])=>'<div class="quick-slot quick-slot-row"><span class="quick-slot-label">'+label+'</span></div>').join('')+'</div></section>';
+ else body='<section class="prepare-equip-area" data-equipment-source="mist"><div class="panel"><div class="section-title"><h3>戰境裝備配置</h3></div><div class="loadout-row"><span class="small">主動開戰時更新防守配置</span></div>'+mistSlots469_.map(([key,label])=>'<div class="quick-slot quick-slot-row"><span class="quick-slot-label">'+label+'</span></div>').join('')+'</div></section>';
  if(pane==='equip')body=desktop?body+'<div class="prepare-ability-area">'+mistStats469_()+'</div>'+mistSkills506_():'<div class="mist-loadout474">'+body+mistStats469_()+'</div>';
  return '<section class="preparation-screen mist-preparation470">'+tabs+(d.pendingLoot?.length?'<button class="primary" onclick="mistUi470_.bag=\'pending\';mistPane470_(\'bag\')">待收戰利品 '+d.pendingLoot.length+' 件</button>':'')+'<div class="preparation-panels">'+body+'</div></section>';
 }
