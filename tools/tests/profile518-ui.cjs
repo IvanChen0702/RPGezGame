@@ -18,11 +18,12 @@ await p.evaluate(({data,view})=>{
 await p.screenshot({path:`/workspace/outputs/profile518/town-${width}.png`});
 const header=await p.locator('.topbar').boundingBox();assert.equal(Math.round(header.height),44);assert.equal(await p.locator('.player-account518').count(),1);
 await p.locator('.player-account518').click();await p.screenshot({path:`/workspace/outputs/profile518/account-${width}.png`});assert.equal(await p.locator('.account-avatars518 button').count(),12);
+const accountRect=await p.locator('.account-window518').boundingBox();
 const measure=await p.locator('.account-window518').evaluate(e=>({w:e.clientWidth,scroll:e.scrollWidth,h:e.getBoundingClientRect().height}));assert(measure.scroll<=measure.w+1);assert(measure.h<=height-18);
 await p.getByRole('button',{name:'更換稱號',exact:true}).click();assert(await p.locator('#modal.open').isVisible());assert(await p.evaluate(()=>Number(getComputedStyle(document.getElementById('modal')).zIndex)>Number(getComputedStyle(document.getElementById('accountOverlay')).zIndex)));await p.evaluate(()=>closeModal());
 await p.locator('[data-account-avatar518="3"]').click();assert.equal(await p.evaluate(()=>writes518.length),0,'avatar change must remain draft');
 await p.locator('.account-window518 footer button').first().click();assert.equal(await p.evaluate(()=>avatarCurrent314_()),1,'cancel preserves avatar');
-await p.evaluate(()=>openAccountPanel());await p.locator('[data-account-avatar518="3"]').click();await p.locator('.account-window518 footer .primary').click();await p.waitForTimeout(100);assert.equal(await p.evaluate(()=>avatarCurrent314_()),3);assert.equal(await p.evaluate(()=>writes518.length),1);assert.match(await p.locator('#accountMessage').textContent(),/已儲存/);
+await p.evaluate(()=>openAccountPanel());await p.locator('[data-account-avatar518="3"]').click();await p.locator('.account-window518 footer .primary').click();await p.waitForTimeout(100);assert.equal(await p.evaluate(()=>avatarCurrent314_()),3);assert.equal(await p.evaluate(()=>writes518.length),1);assert.match(await p.locator('#accountMessage').textContent(),/已儲存/);assert.deepEqual(await p.locator('.account-window518').boundingBox(),accountRect,'save message must not move/resize account dialog');
 await p.evaluate(()=>{ensureTransactionCloudMatch_=async()=>({revision:1});apiPostRevisionMutation_=async(a,b)=>{writes518.push({action:a,nickname:b.nickname});return {ok:true,nickname:b.nickname}};reloadVerifiedTransactionSave_=async(s,page,label,data)=>{state.nickname=data.nickname};saveCloudMeta=()=>{};});
 await p.locator('#nicknameChangeInput').fill('新玩家名稱');await p.locator('[data-account-avatar518="4"]').click();
 await p.evaluate(()=>{window.goodApi518=apiPost;apiPost=async(a,b)=>{if(a==='profile/avatar/set')throw Error('測試斷線');return goodApi518(a,b)};});
@@ -30,8 +31,15 @@ await p.locator('.account-window518 footer .primary').click();await p.waitForTim
 await p.evaluate(()=>apiPost=goodApi518);await p.locator('.account-window518 footer .primary').click();await p.waitForTimeout(80);assert.equal(await p.evaluate(()=>avatarCurrent314_()),4);assert.equal(await p.evaluate(()=>writes518.filter(x=>x.action==='profile/nickname').length),1);
 await p.locator('.account-window518 footer button').first().click();if(view==='mobile')await p.locator('.town-person358').first().click();else await p.locator('.town-person358').first().evaluate(el=>el.click());await p.waitForTimeout(800);
 await p.screenshot({path:`/workspace/outputs/profile518/public-${width}.png`});assert.equal(await p.locator('.profile-equip518').count(),8);assert.equal(await p.locator('.profile-skill518').count(),4);assert.match(await p.locator('.profile-stats518').textContent(),/5,091/);assert.equal(await p.locator('.profile-hero518 canvas').first().getAttribute('data-avatar-sex220'),'female');
-await p.locator('.profile-equip518').first().click();assert(await p.locator('.profile-detail518').isVisible());await p.locator('.profile-detail-close518').click();
+const publicRect=await p.locator('.town-profile518 .profile-window518').boundingBox();
+await p.locator('.profile-equip518').first().click();assert(await p.locator('.profile-detail518').isVisible());assert.deepEqual(await p.locator('.town-profile518 .profile-window518').boundingBox(),publicRect,'equipment detail must not move/resize dialog');await p.locator('.profile-detail-close518').click();assert.deepEqual(await p.locator('.town-profile518 .profile-window518').boundingBox(),publicRect,'closing detail must preserve dialog bounds');
 await p.locator('.profile-skill518').last().click();assert(await p.locator('.profile-detail518').isVisible());await p.keyboard.press('Escape');assert.equal(await p.locator('.town-profile518').count(),0);
+// Loading and response content use the same shell geometry.
+await p.evaluate(()=>{window.currentApi519=apiPost;apiPost=()=>new Promise(r=>window.resolveProfile519=r);presence358_.selected=person518.id;openTownProfile518_(person518)});
+const loadingRect=await p.locator('.town-profile518 .profile-window518').boundingBox();
+await p.evaluate(()=>resolveProfile519({ok:true,profile:public518}));await p.waitForTimeout(100);
+assert.deepEqual(await p.locator('.town-profile518 .profile-window518').boundingBox(),loadingRect,'loading completion must not move/resize dialog');
+await p.evaluate(()=>{closeTownPerson358_();apiPost=currentApi519});
 // An old response must not reopen a closed dialog.
 await p.evaluate(()=>{apiPost=()=>new Promise(r=>window.late518=r);presence358_.selected=person518.id;openTownProfile518_(person518);closeTownPerson358_();late518({ok:true,profile:public518});});await p.waitForTimeout(50);assert.equal(await p.locator('.town-profile518').count(),0);
 await p.evaluate(()=>{state.nickname='這是十六個字的超級長玩家名稱測試';state.gold=123456789012;renderTop()});assert.equal(Math.round((await p.locator('.topbar').boundingBox()).height),44);assert(await p.locator('.player-account518').evaluate(e=>e.scrollWidth<=e.clientWidth+1));

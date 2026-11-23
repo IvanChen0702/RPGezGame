@@ -40,6 +40,9 @@ html.mobile-ui #resourceBar .player-gold518 strong{font-size:12px!important}
 html.mobile-ui #resourceBar .player-gold518 :is(img,svg,canvas){width:17px!important;height:17px!important;max-width:17px!important;max-height:17px!important}
 html.mobile-ui #app>.topbar #townReturn396{display:none!important}
 /* Independent dialogs keep scroll/focus local; no inherited preparation transforms. */
+/* v519: content updates must not resize/recenter the dialog shell. */
+.profile-window518{height:min(760px,calc(100dvh - 36px))!important}
+.account-window518{height:min(600px,calc(100dvh - 36px))!important}
 .profile-overlay518{position:fixed!important;inset:0!important;z-index:2147481200!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;background:#02090dc9!important;backdrop-filter:blur(4px)!important;box-sizing:border-box!important;color:#e6ddc9!important;font-family:inherit!important;touch-action:auto!important}
 .profile-window518{display:flex!important;flex-direction:column!important;width:min(960px,100%)!important;max-width:100%!important;max-height:calc(100dvh - 36px)!important;border:1px solid #987a47!important;border-radius:8px!important;background:linear-gradient(130deg,#211c14,#141c22)!important;box-shadow:0 14px 60px #0009!important;overflow:hidden!important;padding:0!important;margin:0!important;transform:none!important;zoom:1!important;box-sizing:border-box!important;font-size:14px!important;line-height:1.5!important}
 .profile-window518 *{box-sizing:border-box!important}
@@ -51,7 +54,7 @@ html.mobile-ui #app>.topbar #townReturn396{display:none!important}
 .profile-window518>header>button{min-width:32px!important;padding:0 8px!important;font-size:22px!important}
 .profile-window518 .primary{background:linear-gradient(#6d542b,#49381e)!important;border-color:#b39352!important;color:#ffe3a5!important}
 .profile-window518 .danger{background:#2c1d1b!important;border-color:#824541!important;color:#efa49a!important}
-.profile-scroll518{overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;padding:20px!important;overscroll-behavior:contain!important;touch-action:pan-y!important;flex:1!important}
+.profile-scroll518{scrollbar-gutter:stable!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;padding:20px!important;overscroll-behavior:contain!important;touch-action:pan-y!important;flex:1!important}
 .profile-window518>footer{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important;padding:10px 20px!important;border-top:1px solid #665337!important;background:#171610!important;flex:none!important}
 .profile-window518>footer>span{margin-right:auto!important;color:#ada18a!important;font-size:11px!important}
 .profile-identity518{display:flex!important;align-items:center!important;gap:14px!important;border-bottom:1px solid #695536!important;padding-bottom:16px!important;margin-bottom:20px!important;min-width:0!important}
@@ -107,7 +110,7 @@ html.mobile-ui #app>.topbar #townReturn396{display:none!important}
 .account-window518 .account-version206{font-size:9px!important;padding:3px 0!important;min-height:20px!important;background:none!important;border:0!important;color:#8e8778!important;margin-top:5px!important}
 .profile-window518 [hidden]{display:none!important}
 html.mobile-ui .profile-overlay518{padding:10px!important}
-html.mobile-ui .profile-window518{max-height:calc(100dvh - 20px)!important;font-size:13px!important}
+html.mobile-ui .profile-window518{height:calc(100dvh - 20px)!important;max-height:calc(100dvh - 20px)!important;font-size:13px!important}
 html.mobile-ui .profile-window518>header{padding:10px 14px!important}
 html.mobile-ui .profile-window518 h2{font-size:16px!important}
 html.mobile-ui .profile-scroll518{padding:14px!important}
