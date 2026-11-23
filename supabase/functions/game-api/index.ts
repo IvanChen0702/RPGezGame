@@ -5520,11 +5520,23 @@ for(const it of state.inventory||[]){const t=itemTemplates[it.template];if(t)it.
 state.base={hp:cfgNum('BaseHP',100),def:cfgNum('BaseDEF',0),patk:cfgNum('BasePATK',10),matk:cfgNum('BaseMATK',10),crit:cfgNum('BaseCrit',15),critDamage:cfgNum('BaseCritDamage',100),...state.base};const computed=petStat297(totalStats(),save);for(const v of Object.values(computed))if(!Number.isFinite(v)||Math.abs(v)>Number.MAX_SAFE_INTEGER)throw Error('CHARACTER_STATE_INVALID');return {stats:computed,petHealing297:petSum297(save,'healing'),keys:fxMainKeys_(),equipped:equippedItems().map(it=>({...it,...resolveItemTemplateStats_(it),gems:(it.gems||[]).map(g=>g?resolveGemTemplateData_(g):null)})),skills:{active:(state.equippedSkills||[]).filter(Boolean).map(id=>({id,name:skillTemplates[id]?.name||id})),passive:(state.passive||[]).filter(Boolean).map(id=>({id,name:skillTemplates[id]?.name||id}))},skillTemplates};
 }
 
+// Public town profile: explicit projections only. Never return inventory, IDs or save JSON.
+export function publicProfile518(save, rules, presence, avatarId) {
+ const result=secureStats78(save,rules);
+ const number=v=>Number.isFinite(Number(v))?Number(v):0;
+ const stats=Object.fromEntries(['hp','patk','matk','def','crit','critDamage'].map(k=>[k,number(result.stats[k])]));
+ const gem=g=>g?{template:String(g.template||''),name:String(g.name||''),rarity:String(g.rarity||''),level:number(g.level),effect:String(g.effect||''),stats:Object.fromEntries(Object.entries(g.stats||{}).filter(([,v])=>Number.isFinite(v)))}:null;
+ const equipment=result.equipped.slice(0,8).map(it=>({template:String(it.template||''),name:String(it.name||''),slot:String(it.slot||''),rarity:String(it.rarity||''),enhance:number(it.enhance),sockets:number(it.sockets),effect:String(it.effect||''),stats:Object.fromEntries(Object.entries(it.stats||{}).filter(([,v])=>Number.isFinite(v))),gems:(it.gems||[]).slice(0,10).map(gem)}));
+ const companion=(save.pets297||[]).find(p=>p.id===save.equippedPet297);
+ const skills=[...result.skills.passive,...result.skills.active].slice(0,12).map(s=>({id:String(s.id),type:result.skillTemplates[s.id]?.type==='passive'?'passive':'active'}));
+ return {id:presence.presence_id,nickname:String(save.nickname||presence.nickname||'冒險者'),level:number(save.level),titleId:String(save.equippedTitle||'beginner'),avatarId:Math.max(1,Math.min(12,Number(avatarId)||1)),appearance:{sex:presence.sex==='female'?'female':'male',equipment},stats,skills,maxCleared:Number(save.mainProgressEpoch)===411?Math.max(0,number(save.maxCleared)):0,pet:companion?{species:String(companion.species),level:number(companion.level)}:null};
+}
+
 // v446: only audited read paths bypass the legacy cross-player mutation lease.
 // v453: full dependency audit and response-parity tests; writes remain serialized.
 const readOnlyActions453 = new Set(['arena/ranking','arena/revenge/list','arena/reports','worldboss/ranking','auction/my-sales']);
 const readActions446 = new Set(['battle/status', 'quest/status', 'chaos/catalog', ...readOnlyActions453]);
-const traceActions446 = new Set(['health','leaderboard','data/version','data/bootstrap','profile/avatar/get','profile/avatar/set','profile/nickname','save/get','save/set','auction/list','auction/create','auction/cancel','auction/buy','auction/my-sales','auction/claim','battle/status','battle/cancel','battle/start','battle/finish','worldboss/status','worldboss/ranking','worldboss/reward/check','worldboss/start','worldboss/submit','worldboss/chest/open','redeem/claim','login-gift/status','login-gift/checkin','login-gift/ack','mist/status','mist/join','mist/respawn','mist/move','mist/flag','mist/unflag','mist/hide','mist/chest/open','mist/chest/confirm','mist/loot/take','mist/loot/discard','mist/equip','mist/unequip','mist/discard','mist/gem/insert','mist/gem/remove','mist/skills','mist/forge','mist/supply','mist/resource/claim','mist/road-chest/open','mist/reports/read','mist/battle/start','mist/battle/turn','mist/battle/leave','mist/reward/claim','achievement/claim','arena/status','arena/defense/upload','arena/matches','arena/battle/start','arena/battle/submit','arena/revenge/list','arena/reports','arena/ranking','arena/reward/claim','quest/status','quest/activity','quest/openEgg','quest/seen','quest/accept','quest/claim','chaos/catalog','chaos/open','system/tick','pet/buy','pet/equip','pet/lock','pet/meta','pet/open','pet/potion','pet/recover-buy','pet/release','pet/train','extreme/status','extreme/start','extreme/progress','extreme/claim','relic/status','relic/start','relic/equip','relic/battle','relic/progress','relic/victory','relic/death','relic/choose','relic/reveal','relic/advance','relic/camp','relic/retreat']);
+const traceActions446 = new Set(['health','leaderboard','data/version','data/bootstrap','profile/public','profile/avatar/get','profile/avatar/set','profile/nickname','save/get','save/set','auction/list','auction/create','auction/cancel','auction/buy','auction/my-sales','auction/claim','battle/status','battle/cancel','battle/start','battle/finish','worldboss/status','worldboss/ranking','worldboss/reward/check','worldboss/start','worldboss/submit','worldboss/chest/open','redeem/claim','login-gift/status','login-gift/checkin','login-gift/ack','mist/status','mist/join','mist/respawn','mist/move','mist/flag','mist/unflag','mist/hide','mist/chest/open','mist/chest/confirm','mist/loot/take','mist/loot/discard','mist/equip','mist/unequip','mist/discard','mist/gem/insert','mist/gem/remove','mist/skills','mist/forge','mist/supply','mist/resource/claim','mist/road-chest/open','mist/reports/read','mist/battle/start','mist/battle/turn','mist/battle/leave','mist/reward/claim','achievement/claim','arena/status','arena/defense/upload','arena/matches','arena/battle/start','arena/battle/submit','arena/revenge/list','arena/reports','arena/ranking','arena/reward/claim','quest/status','quest/activity','quest/openEgg','quest/seen','quest/accept','quest/claim','chaos/catalog','chaos/open','system/tick','pet/buy','pet/equip','pet/lock','pet/meta','pet/open','pet/potion','pet/recover-buy','pet/release','pet/train','extreme/status','extreme/start','extreme/progress','extreme/claim','relic/status','relic/start','relic/equip','relic/battle','relic/progress','relic/victory','relic/death','relic/choose','relic/reveal','relic/advance','relic/camp','relic/retreat']);
 const activeRequests446 = new Map();
 export function makeGameApi(env,fetcher=fetch){return async req=>{
  const owner=crypto.randomUUID(),started=Date.now();
@@ -5565,6 +5577,27 @@ export function makeGameApi(env,fetcher=fetch){return async req=>{
    const accounts=await remote('/rest/v1/Accounts?account_id=eq.'+encodeURIComponent(accountId)+'&select=disabled');
    if(accounts.length!==1||accounts[0].disabled)return reply(403,{ok:false,error:'ACCOUNT_DISABLED'});
    actor={accountId};body.sessionToken=token;
+  }
+  // Authenticated read through a public presence UUID. No save writes or global lease.
+  if(body.action==='profile/public'){
+   if(!actor)return reply(401,{ok:false,error:'UNAUTHORIZED'});
+   const id=String(body.presenceId||'');
+   if(!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id))return reply(400,{ok:false,error:'PROFILE_ID_INVALID'});
+   const online=await remote('/rest/v1/game_presence358?presence_id=eq.'+encodeURIComponent(id)+'&last_seen=gte.'+encodeURIComponent(new Date(Date.now()-180000).toISOString())+'&select=auth_user_id,presence_id,nickname,avatar_id,visual&limit=1');
+   if(online.length!==1)return reply(404,{ok:false,error:'PROFILE_NOT_AVAILABLE'});
+   const links=await remote('/rest/v1/game_identity_links?auth_user_id=eq.'+encodeURIComponent(online[0].auth_user_id)+'&select=legacy_account_id');
+   if(links.length!==1)return reply(404,{ok:false,error:'PROFILE_NOT_AVAILABLE'});
+   const target=encodeURIComponent(links[0].legacy_account_id);
+   const accounts=await remote('/rest/v1/Accounts?account_id=eq.'+target+'&select=disabled');
+   if(accounts.length!==1||accounts[0].disabled)return reply(404,{ok:false,error:'PROFILE_NOT_AVAILABLE'});
+   const [saves,plans,avatars,looks]=await Promise.all([
+    remote('/rest/v1/PlayerSaves?account_id=eq.'+target+'&select=save_json&limit=1'),
+    remote('/rest/v1/GameDataCurrent?channel=eq.production&select=data_json'),
+    remote('/rest/v1/game_player_profiles325?account_id=eq.'+target+'&select=avatar_id&limit=1'),
+    remote('/rest/v1/game_avatar_preferences294?account_id=eq.'+target+'&select=sex&limit=1')
+   ]);
+   if(saves.length!==1||!saves[0].save_json||!plans[0]?.data_json?.data)return reply(404,{ok:false,error:'PROFILE_NOT_AVAILABLE'});
+   return reply(200,{ok:true,profile:publicProfile518(saves[0].save_json,plans[0].data_json.data,{...online[0],sex:looks[0]?.sex||(String(online[0].visual).startsWith('hero_female_')?'female':'male')},avatars[0]?.avatar_id||online[0].avatar_id)});
   }
   // v325: an independent cosmetic profile; never writes PlayerSaves or arena points.
   if(body.action==='profile/avatar/get'||body.action==='profile/avatar/set'){

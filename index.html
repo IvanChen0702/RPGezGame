@@ -1,6 +1,134 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+<style id="profile518">@layer profile518 {
+/* C banner: same 44px bar on both platforms, one shared account action. */
+body:has(#accountOverlay.profile-overlay518) :is(#modal.open,#uiConfirmOverlay,#uiAlertOverlay){z-index:2147482000!important}
+#app>.topbar{display:flex!important;flex-direction:row!important;align-items:center!important;flex-wrap:nowrap!important;height:44px!important;min-height:44px!important;max-height:44px!important;padding:0 7px!important;gap:8px!important;box-sizing:border-box!important;overflow:hidden!important}
+#resourceBar.resources{display:flex!important;align-items:center!important;gap:12px!important;flex:1!important;min-width:0!important;width:auto!important;height:42px!important;max-height:42px!important;overflow:hidden!important;padding:0!important;margin:0!important}
+#resourceBar .player-account518{display:flex!important;align-items:center!important;gap:9px!important;width:300px!important;max-width:100%!important;min-width:0!important;height:42px!important;min-height:42px!important;flex:0 1 300px!important;padding:2px 5px!important;text-align:left!important;background:transparent!important;border:0!important;border-radius:4px!important;color:#f1dfb9!important;box-shadow:none!important;line-height:1.2!important;overflow:hidden!important}
+#resourceBar .player-account518:hover,#resourceBar .player-account518:focus-visible{background:#ceb06a15!important;outline:1px solid #ac8b48!important;outline-offset:-2px!important}
+#resourceBar .player-ring518{position:relative!important;display:block!important;width:34px!important;height:34px!important;padding:2px!important;flex:0 0 34px!important;border-radius:50%!important;background:conic-gradient(#8ad7ac 0 var(--exp518),#343f38 var(--exp518) 100%)!important;box-shadow:0 0 0 1px #6e5937!important}
+#resourceBar .player-face518{position:relative!important;display:block!important;width:30px!important;height:30px!important;border:1px solid #181b16!important;border-radius:50%!important;overflow:hidden!important}
+#resourceBar .player-face518 .avatar-art314{position:static!important;inset:auto!important;width:100%!important;height:100%!important;max-width:100%!important;border-radius:50%!important;transform:none!important}
+#resourceBar .player-ring518 small{position:absolute!important;bottom:-2px!important;left:0!important;right:0!important;line-height:10px!important;height:10px!important;text-align:center!important;font-size:8px!important;font-weight:700!important;background:#1c3328!important;color:#eef6da!important;border:1px solid #738061!important;border-radius:3px!important}
+#resourceBar .player-identity518{display:flex!important;flex-direction:column!important;gap:2px!important;flex:1!important;min-width:0!important}
+#resourceBar .player-label518{font-size:13px!important;font-weight:700!important;color:#f7e6bc!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;line-height:15px!important}
+#resourceBar .player-sub518{display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important;height:18px!important;overflow:hidden!important}
+#resourceBar .player-sub518>b{font-size:10px!important;color:#8ed0dd!important;flex:none!important;line-height:14px!important}
+#resourceBar .player-sub518 .title-badge{height:17px!important;min-height:17px!important;max-height:17px!important;min-width:0!important;max-width:138px!important;width:138px!important;padding:0 5px!important;font-size:9px!important;line-height:15px!important;overflow:hidden!important;flex:0 1 138px!important;box-sizing:border-box!important}
+#resourceBar .player-sub518 .title-badge *{font-size:inherit!important;line-height:inherit!important}
+#resourceBar .player-chevron518{color:#d3b675!important;font-size:16px!important;flex:none!important}
+#resourceBar .player-gold518{display:flex!important;align-items:center!important;gap:5px!important;flex:none!important;font-size:12px!important;white-space:nowrap!important;color:#d6be8b!important}
+#resourceBar .player-gold518 strong{font-size:15px!important;color:#edc56b!important}
+#resourceBar .player-gold518 :is(img,svg,canvas){width:20px!important;height:20px!important;max-width:20px!important;max-height:20px!important;object-fit:contain!important;flex:none!important}
+#resourceBar .player-gold518 .coin-art208{width:20px!important;height:20px!important;display:inline-flex!important}
+#app>.topbar>.actions{display:flex!important;flex:none!important;width:auto!important;height:32px!important;gap:7px!important;align-items:center!important;margin:0!important;padding:0!important}
+#app>.topbar .hamburger24{width:30px!important;min-width:30px!important;height:30px!important;min-height:30px!important;max-height:30px!important;padding:6px!important;gap:4px!important}
+#app>.topbar .hamburger24 i{width:16px!important;height:2px!important}
+#app>.topbar #townReturn396{min-height:30px!important;padding:5px 10px!important;font-size:12px!important;white-space:nowrap!important}
+html.mobile-ui #app>.topbar{padding:0 5px!important;gap:4px!important}
+html.mobile-ui #resourceBar.resources{gap:4px!important}
+html.mobile-ui #resourceBar .player-account518{flex:1!important;width:auto!important;padding:2px!important;gap:6px!important}
+html.mobile-ui #resourceBar .player-label518{font-size:12px!important}
+html.mobile-ui #resourceBar .player-sub518{gap:4px!important}
+html.mobile-ui #resourceBar .player-sub518 .title-badge{max-width:112px!important}
+html.mobile-ui #resourceBar .player-chevron518{display:none!important}
+html.mobile-ui #resourceBar .player-gold518{gap:2px!important}
+html.mobile-ui #resourceBar .player-gold518>span{display:none!important}
+html.mobile-ui #resourceBar .player-gold518 strong{font-size:12px!important}
+html.mobile-ui #resourceBar .player-gold518 :is(img,svg,canvas){width:17px!important;height:17px!important;max-width:17px!important;max-height:17px!important}
+html.mobile-ui #app>.topbar #townReturn396{display:none!important}
+/* Independent dialogs keep scroll/focus local; no inherited preparation transforms. */
+.profile-overlay518{position:fixed!important;inset:0!important;z-index:2147481200!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;background:#02090dc9!important;backdrop-filter:blur(4px)!important;box-sizing:border-box!important;color:#e6ddc9!important;font-family:inherit!important;touch-action:auto!important}
+.profile-window518{display:flex!important;flex-direction:column!important;width:min(960px,100%)!important;max-width:100%!important;max-height:calc(100dvh - 36px)!important;border:1px solid #987a47!important;border-radius:8px!important;background:linear-gradient(130deg,#211c14,#141c22)!important;box-shadow:0 14px 60px #0009!important;overflow:hidden!important;padding:0!important;margin:0!important;transform:none!important;zoom:1!important;box-sizing:border-box!important;font-size:14px!important;line-height:1.5!important}
+.profile-window518 *{box-sizing:border-box!important}
+.profile-window518>header{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;padding:12px 20px!important;background:linear-gradient(110deg,#323438,#20262a)!important;border-bottom:1px solid #7b653e!important;flex:none!important}
+.profile-window518 h2{font-size:18px!important;margin:0!important;color:#ebd19b!important}
+.profile-window518 h3,.profile-window518 label{font-size:15px!important;color:#e0c17e!important;margin:0 0 12px!important;display:block!important;font-weight:700!important}
+.profile-window518 button{font-family:inherit!important;font-size:13px!important;line-height:1.4!important;min-height:32px!important;padding:7px 14px!important;border:1px solid #79613d!important;border-radius:4px!important;background:#272117!important;color:#ecd5aa!important;white-space:nowrap!important;box-shadow:none!important;cursor:pointer!important;touch-action:manipulation!important}
+.profile-window518 button:disabled{opacity:.45!important;cursor:default!important}
+.profile-window518>header>button{min-width:32px!important;padding:0 8px!important;font-size:22px!important}
+.profile-window518 .primary{background:linear-gradient(#6d542b,#49381e)!important;border-color:#b39352!important;color:#ffe3a5!important}
+.profile-window518 .danger{background:#2c1d1b!important;border-color:#824541!important;color:#efa49a!important}
+.profile-scroll518{overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;padding:20px!important;overscroll-behavior:contain!important;touch-action:pan-y!important;flex:1!important}
+.profile-window518>footer{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important;padding:10px 20px!important;border-top:1px solid #665337!important;background:#171610!important;flex:none!important}
+.profile-window518>footer>span{margin-right:auto!important;color:#ada18a!important;font-size:11px!important}
+.profile-identity518{display:flex!important;align-items:center!important;gap:14px!important;border-bottom:1px solid #695536!important;padding-bottom:16px!important;margin-bottom:20px!important;min-width:0!important}
+.profile-avatar518{display:block!important;width:60px!important;height:60px!important;border:1px solid #a98743!important;border-radius:5px!important;overflow:hidden!important;flex:none!important}
+.profile-identity518>div{min-width:0!important;flex:1!important}
+.profile-identity518 h3{font-size:24px!important;color:#f4deb0!important;margin:3px 0 6px!important;overflow-wrap:anywhere!important}
+.profile-identity518 small{font-size:12px!important;color:#8cd2df!important}
+.profile-identity518 .title-badge{font-size:12px!important;height:24px!important;min-height:24px!important;max-width:180px!important}
+.profile-online518{font-size:11px!important;color:#87cba5!important;white-space:nowrap!important}
+.profile-overview518{display:grid!important;grid-template-columns:215px 1fr!important;gap:24px!important;margin-bottom:20px!important}
+.profile-stage518{height:220px!important;background:linear-gradient(#0002,#03090ee6),url('assets/images/backgrounds/battle/mobile/main07.webp') center/cover!important;border:1px solid #725a35!important;border-radius:6px!important;position:relative!important;overflow:hidden!important}
+.profile-hero518{position:relative!important;width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.profile-hero518>canvas:not(.paperdoll-weapon250){height:100%!important;width:auto!important;max-height:100%!important;object-fit:contain!important;image-rendering:pixelated!important}
+.profile-stage518>small{position:absolute!important;bottom:8px!important;left:0!important;right:0!important;text-align:center!important;font-size:10px!important;color:#b6a57d!important}
+.profile-stats518{display:grid!important;grid-template-columns:1fr 1fr!important;gap:0 20px!important}
+.profile-stats518>div{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:6px 0!important;border-bottom:1px solid #ffffff12!important;font-size:13px!important;color:#c2b8a1!important;gap:8px!important}
+.profile-stats518 b{font-size:18px!important;color:#f0e2be!important;font-variant-numeric:tabular-nums!important}
+.profile-record518{display:flex!important;gap:12px!important;justify-content:space-between!important;border-top:1px solid #625135!important;margin-top:15px!important;padding-top:12px!important}
+.profile-record518 small{display:block!important;color:#a59980!important;font-size:10px!important;margin-bottom:5px!important}
+.profile-record518 b{font-size:12px!important;color:#ddcea8!important}
+.profile-window518 section>h3{border-bottom:1px solid #655436!important;padding-bottom:8px!important}
+.profile-equipment518{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:8px!important;margin-bottom:20px!important}
+.profile-window518 .profile-equip518{display:flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;min-width:0!important;background:none!important;border:0!important;padding:0!important;white-space:normal!important}
+.profile-item518{position:relative!important;display:block!important;width:62px!important;height:62px!important;border:1px solid #bd9444!important;border-radius:5px!important;overflow:hidden!important;background:radial-gradient(#263745,#061019)!important;font-size:22px!important;line-height:60px!important;color:#76684e!important}
+.profile-item518>span,.profile-item518 img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;margin:0!important}
+.profile-item518>small{position:absolute!important;top:0!important;right:3px!important;font-size:10px!important;line-height:14px!important;color:#ffda70!important;text-shadow:0 1px #000!important}
+.profile-equip518>small{font-size:10px!important;color:#a99b80!important}
+.profile-equip518>b{font-size:11px!important;color:#e1c47e!important;font-weight:500!important;overflow-wrap:anywhere!important}
+.profile-skills518{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+.profile-window518 .profile-skill518{display:flex!important;align-items:center!important;text-align:left!important;gap:8px!important;min-width:0!important;background:none!important;border:0!important;padding:0!important;white-space:normal!important}
+.profile-skill518>span:first-child{display:block!important;width:40px!important;height:40px!important;flex:none!important;border:1px solid #9b7b3c!important;background:#0b151b!important;overflow:hidden!important}
+.profile-skill518>span:first-child :is(span,img){display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}
+.profile-skill518 small{display:block!important;color:#8bbcc8!important;font-size:9px!important}
+.profile-skill518 b{display:block!important;font-size:12px!important;color:#e4d9bd!important}
+.profile-skill518 .skill-category179{font-size:9px!important}
+.profile-detail518{margin-top:18px!important;padding:14px!important;border:1px solid #78623e!important;background:#0d1519!important;border-radius:5px!important;position:relative!important}
+.profile-detail518[hidden]{display:none!important}
+.profile-detail-close518{float:right!important}
+.account-window518{width:min(760px,100%)!important}
+.account-columns518{display:grid!important;grid-template-columns:1fr 1fr!important;gap:28px!important}
+.account-avatars518{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+.profile-window518 .account-avatars518 button{padding:3px!important;border:1px solid #5b503e!important;min-width:0!important;position:relative!important;background:#0d171d!important}
+.profile-window518 .account-avatars518 button[aria-pressed=true]{border:2px solid #e3b95d!important;padding:2px!important;box-shadow:0 0 8px #c89a2730!important}
+.account-avatars518 button>span:last-child:not(.avatar-art314){display:none!important;position:absolute!important;bottom:0!important;right:0!important;background:#c6a050!important;color:#15100a!important;font-size:12px!important;line-height:14px!important;width:17px!important}
+.account-avatars518 button[aria-pressed=true]>span:last-child{display:block!important}
+.account-window518 input{width:100%!important;height:44px!important;background:#0b1115!important;border:1px solid #78613b!important;border-radius:5px!important;color:#eee0bf!important;font-size:16px!important;padding:9px 12px!important;font-family:inherit!important}
+.profile-note518{color:#a5a292!important;font-size:11px!important;line-height:1.8!important;margin:8px 0 0!important}
+.account-status518{margin-top:22px!important;padding-top:15px!important;border-top:1px solid #695638!important}
+.account-status518 p{display:flex!important;justify-content:space-between!important;font-size:12px!important;color:#aa9e86!important}
+.account-status518 b{font-weight:500!important;color:#8bc6a2!important}
+.account-status518 button{margin:8px 6px 0 0!important}
+.account-window518 #accountMessage{font-size:12px!important;margin-top:10px!important;overflow-wrap:anywhere!important}
+.account-window518 .account-version206{font-size:9px!important;padding:3px 0!important;min-height:20px!important;background:none!important;border:0!important;color:#8e8778!important;margin-top:5px!important}
+.profile-window518 [hidden]{display:none!important}
+html.mobile-ui .profile-overlay518{padding:10px!important}
+html.mobile-ui .profile-window518{max-height:calc(100dvh - 20px)!important;font-size:13px!important}
+html.mobile-ui .profile-window518>header{padding:10px 14px!important}
+html.mobile-ui .profile-window518 h2{font-size:16px!important}
+html.mobile-ui .profile-scroll518{padding:14px!important}
+html.mobile-ui .profile-identity518{gap:10px!important;margin-bottom:16px!important;padding-bottom:14px!important}
+html.mobile-ui .profile-identity518 h3{font-size:20px!important}
+html.mobile-ui .profile-avatar518{width:48px!important;height:48px!important}
+html.mobile-ui .profile-online518{font-size:10px!important}
+html.mobile-ui .profile-overview518{grid-template-columns:1fr!important;gap:14px!important}
+html.mobile-ui .profile-stage518{height:170px!important}
+html.mobile-ui .profile-stats518{gap:0 14px!important}
+html.mobile-ui .profile-stats518>div{font-size:12px!important}
+html.mobile-ui .profile-stats518 b{font-size:16px!important}
+html.mobile-ui .profile-equipment518{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px 6px!important}
+html.mobile-ui .profile-item518{width:54px!important;height:54px!important;line-height:52px!important}
+html.mobile-ui .profile-skills518{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.mobile-ui .profile-window518>footer{padding:10px 14px!important}
+html.mobile-ui .account-columns518{grid-template-columns:1fr!important;gap:20px!important}
+html.mobile-ui .account-avatars518{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:6px!important}
+html.mobile-ui .account-window518 input{height:40px!important;font-size:14px!important}
+
+}</style>
 <style id="mobile-picker510">@layer mobilePicker510 {
 .mobile-picker509{z-index:2147481000!important}
 body:has(.mobile-picker509) :is(.gem-picker-float-tip,#prepareHoverTip){z-index:2147481100!important}
@@ -7188,7 +7316,7 @@ function flatIcon313_(name){
  return `<svg class="flat-icon313" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name]||paths.diamond}</svg>`;
 }
 function townCanAct311_(){
- return state.page==='town'&&!loginRequiredActive_()&&!activeBattleNow()&&!(typeof arenaBattle_!=='undefined'&&arenaBattle_&&!arenaBattle_.finished)&&!document.querySelector('#questReward369,#questJournal369,#questOverlay368,#inventoryOverlay293,#townWindow311,.modal.open,.quick-picker,#gameMenu24,#loginGiftOverlay278,#accountOverlay,#avatarOverlay314');
+ return state.page==='town'&&!loginRequiredActive_()&&!activeBattleNow()&&!(typeof arenaBattle_!=='undefined'&&arenaBattle_&&!arenaBattle_.finished)&&!document.querySelector('#questReward369,#questJournal369,#questOverlay368,#inventoryOverlay293,#townWindow311,.modal.open,.quick-picker,#gameMenu24,#loginGiftOverlay278,#accountOverlay,#avatarOverlay314,.town-profile518');
 }
 let townShortcutsOpen359_=true;
 function townQuickMarkup359_(claimed){
@@ -7601,12 +7729,11 @@ function townPresencePaint358_(r){
 }
 function openTownPerson358_(id){
  if(!townCanAct311_())return;const person=townPresenceMembers358_().find(x=>x.id===id),root=document.querySelector('#page .town311');if(!person||!root)return;closeTownPerson358_(false);presence358_.selected=id;
- const card=document.createElement('section');card.className='town-person-card358';card.setAttribute('role','dialog');card.setAttribute('aria-label','玩家資訊');card.innerHTML='<button type="button" class="person-close358" aria-label="關閉玩家資訊">×</button><div class="person-avatar358"></div><div><b></b><p class="person-level358"></p><p class="person-title358"></p></div>';
- card.querySelector('.person-avatar358').innerHTML=avatarArt314_(person.avatarId);card.querySelector('b').textContent=person.nickname;card.querySelector('.person-level358').textContent='Lv.'+person.level;card.querySelector('.person-title358').innerHTML=titleBadgeHtml_(person.titleId);card.querySelector('button').onclick=()=>closeTownPerson358_();root.appendChild(card);townPresenceDecorate358_();card.querySelector('button').focus({preventScroll:true});
+ void openTownProfile518_(person);townPresenceDecorate358_();
 }
 function townPersonPosition358_(){const root=document.querySelector('#page .town311'),card=root?.querySelector('.town-person-card358'),button=root?.querySelector('[data-presence-id358="'+presence358_.selected+'"]');if(!card||!button)return;const a=root.getBoundingClientRect(),b=button.getBoundingClientRect(),w=card.offsetWidth,h=card.offsetHeight;const x=Math.max(10,Math.min(a.width-w-10,b.left-a.left+b.width/2-w/2));let y=b.top-a.top-h-10;if(y<10)y=b.bottom-a.top+8;y=Math.max(10,Math.min(a.height-h-10,y));card.style.left=x+'px';card.style.top=y+'px';}
-function closeTownPerson358_(restore=true){const id=presence358_.selected;presence358_.selected=null;document.querySelectorAll('.town-person-card358').forEach(x=>x.remove());document.querySelectorAll('.town-person358.selected358').forEach(x=>x.classList.remove('selected358'));if(restore&&id)document.querySelector('[data-presence-id358="'+id+'"]')?.focus({preventScroll:true});}
-document.addEventListener('click',e=>{if(presence358_.selected&&!e.target.closest('.town-person358,.town-person-card358'))closeTownPerson358_(false);});
+function closeTownPerson358_(restore=true){const id=presence358_.selected;presence358_.selected=null;document.querySelectorAll('.town-person-card358,.town-profile518').forEach(x=>{x.querySelectorAll('canvas').forEach(c=>stopPaperdoll240_(c));x.remove();});document.querySelectorAll('.town-person358.selected358').forEach(x=>x.classList.remove('selected358'));if(restore&&id)document.querySelector('[data-presence-id358="'+id+'"]')?.focus({preventScroll:true});}
+document.addEventListener('click',e=>{if(presence358_.selected&&!e.target.closest('.town-person358,.town-person-card358,.town-profile518'))closeTownPerson358_(false);});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&presence358_.selected){e.preventDefault();closeTownPerson358_();}});
 document.addEventListener('visibilitychange',presenceSync358_);window.addEventListener('pageshow',presenceSync358_);window.addEventListener('pagehide',()=>{clearTimeout(presence358_.timer);presence358_.timer=0;});window.addEventListener('DOMContentLoaded',presenceSync358_);
 
@@ -7647,7 +7774,7 @@ function avatarArt314_(id){
 function avatarLocked407_(){return titleChangeBlocked249_();}
 function avatarHeader314_(){return `<button type="button" class="town-avatar311 avatar-button314" onclick="openAvatarPicker314_()" aria-label="更換冒險者頭像" aria-haspopup="dialog" title="更換頭像">${avatarArt314_(avatarCurrent314_())}</button>`;}
 function avatarSyncHeader314_(){
- const button=document.querySelector('#resourceBar .avatar-button314');if(!button)return;
+ const button=document.querySelector('#resourceBar .player-face518,#resourceBar .avatar-button314');if(!button)return;
  const art=button.querySelector('.avatar-art314'),html=avatarArt314_(avatarCurrent314_());
  if(art)art.outerHTML=html;else button.insertAdjacentHTML('afterbegin',html);
  // Level/EXP overlays belong to the mobile avatar control; preserve them.
@@ -10117,7 +10244,7 @@ function titleScene335_(theme){
 /* Match the coin box to the displayed number's actual font size on every layout. */
 function syncBannerCoin333_(){
  if(syncBannerCoin333_.pending)return;syncBannerCoin333_.pending=true;
- requestAnimationFrame(()=>{syncBannerCoin333_.pending=false;const bar=document.querySelector('#resourceBar .banner-currency'),number=bar?.querySelector('strong');if(!number)return;
+ requestAnimationFrame(()=>{syncBannerCoin333_.pending=false;const bar=document.querySelector('#resourceBar .player-gold518,#resourceBar .banner-currency'),number=bar?.querySelector('strong');if(!number)return;
   const coin=bar.querySelector('.coin-art208');if(coin)coin.setAttribute('viewBox','295 319 662 642'); // Visible alpha>24 bounds plus 12px safety padding.
   const font=Number.parseFloat(getComputedStyle(number).fontSize);if(!(font>0))return;const size=(Math.round(font*1.2*100)/100)+'px';if(bar.style.getPropertyValue('--coin-size333')!==size)bar.style.setProperty('--coin-size333',size);
  });
@@ -13344,7 +13471,10 @@ function enforceLoginRequired_(){
   document.body.classList.add('login-required-lock');
   openAccountPanel(guestActive396_()?'register':'login',true);
 }
+let accountDraft518_=null;
 function openAccountPanel(mode='login',forced=false){
+  if(accountDraft518_?.busy)return;
+  if(isCloudLoggedIn())return accountEditor518_();
   document.getElementById('accountOverlay')?.remove();
   const logged=isCloudLoggedIn(), guest=guestActive396_();
   if(guest)mode='register';
@@ -13373,6 +13503,9 @@ function switchAccountMode(mode){
   const btn=document.getElementById('accountSubmitBtn');if(btn)btn.textContent=accountMode==='register'?(guestActive396_()?'帶著進度註冊':'建立新帳號'):'登入';
 }
 async function closeAccountPanel(){
+  if(accountDraft518_?.busy)return;
+  const oldDraft518=accountDraft518_;accountDraft518_=null;
+  if(oldDraft518?.focus?.isConnected)oldDraft518.focus.focus({preventScroll:true});
   if(accountSubmitPending_&&!isCloudLoggedIn())return;
   if(loginRequiredActive_()){
     enforceLoginRequired_();
@@ -18795,14 +18928,86 @@ function mobilePlayerBanner331_(pct,max,needed){
   const gold=goldNumber331_(state.gold),goldSize=Math.max(7,Math.min(12,156/gold.length));
   return `${avatar}<span class="banner-identity331"><span class="player-name" title="${escapeAttr(accountDisplayName())}">${escapeHtml(accountDisplayName())}</span><button class="player-title-button" onclick="openTitleSelector_()" title="更換稱號">${titleBadgeHtml_(state.equippedTitle)}</button></span><span class="banner-currency" style="--gold-font331:${goldSize}px" title="金幣 ${gold}" aria-label="金幣 ${gold}">${coinArt208_()}<strong>${gold}</strong></span>`;
 }
+
+// v518: shared account editor, compact C banner and public town profile B.
+
+function playerBanner518_(pct,max,needed){
+ const exp=max?'MAX':Math.floor(pct)+'%',gold=goldNumber331_(state.gold);
+ return `<button type="button" class="player-account518" onclick="openAccountPanel()" aria-haspopup="dialog" aria-label="${escapeAttr(accountDisplayName())}，等級 ${state.level}，經驗 ${exp}，開啟帳號" title="EXP ${max?'MAX':state.exp+' / '+needed}"><span class="player-ring518" style="--exp518:${pct}%"><span class="player-face518">${avatarArt314_(avatarCurrent314_())}</span><small>${exp}</small></span><span class="player-identity518"><span class="player-label518">${escapeHtml(accountDisplayName())}</span><span class="player-sub518"><b>Lv.${state.level}</b>${titleBadgeHtml_(state.equippedTitle)}</span></span><span class="player-chevron518" aria-hidden="true">›</span></button><span class="player-gold518" title="金幣 ${gold}">${coinArt208_()}<span>金幣</span><strong>${gold}</strong></span>`;
+}
+function accountEditor518_(){
+ if(accountDraft518_?.busy)return;
+ document.getElementById('accountOverlay')?.remove();
+ const root=document.createElement('div');root.id='accountOverlay';root.className='profile-overlay518';
+ const locked=avatarLocked407_(),draft={owner:avatarOwnerKey314_(),generation:characterSessionContext_().generation,avatar:avatarCurrent314_(),busy:false,root,focus:document.activeElement};accountDraft518_=draft;
+ root.innerHTML=`<section class="profile-window518 account-window518" role="dialog" aria-modal="true" aria-labelledby="accountTitle518"><header><h2 id="accountTitle518">玩家帳號</h2><button type="button" onclick="closeAccountPanel()" aria-label="關閉帳號">×</button></header><div class="profile-scroll518"><div class="profile-identity518"><span class="profile-avatar518">${avatarArt314_(draft.avatar)}</span><div><small>Lv.${state.level}</small><h3>${escapeHtml(accountDisplayName())}</h3>${titleBadgeHtml_(state.equippedTitle)}</div><span class="profile-online518">● 已登入</span></div><div class="account-columns518"><section><h3>選擇頭像</h3><div class="account-avatars518">${avatarPortraits314_.map(p=>`<button type="button" data-account-avatar518="${p.id}" aria-label="頭像 ${p.id}" aria-pressed="${p.id===draft.avatar}" ${locked?'disabled':''} onclick="accountAvatar518_(${p.id})">${avatarArt314_(p.id)}<span aria-hidden="true">✓</span></button>`).join('')}</div></section><section><label for="nicknameChangeInput">玩家名稱</label><input id="nicknameChangeInput" maxlength="16" value="${escapeAttr(accountDisplayName())}" ${locked?'disabled':''}><p class="profile-note518">最多 16 個字。儲存後更新遊戲內顯示名稱。</p><div class="account-status518"><h3>帳號狀態</h3><p>登入方式 <b>雲端帳號</b></p><button type="button" onclick="openTitleSelector_()" ${locked?'disabled':''}>更換稱號</button><button type="button" class="danger" onclick="logoutCloud()">登出帳號</button><button type="button" data-diagnostic206 ${diagnosticsEnabled206_?'':'hidden'} onclick="showCloudSaveDiagnostic_(lastCloudSaveError_||new Error('目前沒有記錄到同步錯誤'))">同步診斷</button></div></section></div><div id="accountStatus" class="account-status" role="status"></div><div id="accountMessage" role="status" aria-live="polite">${locked?'戰鬥或結算進行中，暫時無法修改個人資料。':''}</div><button type="button" class="account-version206" onclick="adminVersionTap_()">遊戲版本 v11.38.518</button></div><footer><button type="button" onclick="closeAccountPanel()">取消</button><button type="button" class="primary" onclick="saveAccount518_()" ${locked?'disabled':''}>儲存變更</button></footer></section>`;
+ document.body.append(root);root.addEventListener('click',e=>{if(e.target===root)closeAccountPanel();});profileFocus518_(root,()=>closeAccountPanel());updateAccountStatus();
+}
+function accountAvatar518_(id){const d=accountDraft518_;if(!d||d.busy||avatarLocked407_()||!avatarValid314_(id))return;d.avatar=id;d.root.querySelector('.profile-avatar518').innerHTML=avatarArt314_(id);d.root.querySelectorAll('[data-account-avatar518]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.accountAvatar518)===id)));}
+async function saveAccount518_(){
+ const d=accountDraft518_;if(!d||d.busy||avatarLocked407_())return;
+ const same=()=>accountDraft518_===d&&d.root.isConnected&&d.owner===avatarOwnerKey314_()&&d.generation===characterSessionContext_().generation;
+ if(!same())return;
+ const nickname=d.root.querySelector('#nicknameChangeInput').value.trim();
+ if(!nickname||nickname.length>16||/[<>\r\n\t]/.test(nickname)){setAccountMessage('名稱需為 1～16 個字，不能包含換行或 < >。','error');return;}
+ if(!beginServerMutation_('修改個人資料')){setAccountMessage('其他操作正在處理，請稍候。','error');return;}
+ d.busy=true;let savedName=false,savedAvatar=false,entry=null;const controls=[...d.root.querySelectorAll('button,input')].map(el=>[el,el.disabled]);controls.forEach(([el])=>el.disabled=true);setAccountMessage('儲存中…');
+ try{
+  if(nickname!==accountDisplayName()){
+   const pre=await ensureTransactionCloudMatch_('修改暱稱');if(!same())return;
+   const data=await apiPostRevisionMutation_('profile/nickname',{sessionToken:cloudMeta.sessionToken,nickname,expectedSaveRevision:pre.revision});if(!same())return;
+   await reloadVerifiedTransactionSave_(state,state.page,'修改暱稱',data);if(!same())return;
+   cloudMeta.nickname=state.nickname;saveCloudMeta();save(true);savedName=true;
+  }
+  if(d.avatar!==avatarCurrent314_()){
+   entry=avatarCloudEntry325_();entry.sequence++;avatarChanging325_=entry;
+   const data=await apiPost('profile/avatar/set',{avatarId:d.avatar},{silentLoading:true,maxRetry:0});
+   if(!same()||!avatarCloudOwner325_(entry))return;
+   if(!avatarCloudValidReply325_(data))throw Error('頭像儲存未確認，請重試。');
+   entry.loaded=true;entry.nextRetry=0;avatarApplyCloud325_(data.avatarId);savedAvatar=true;
+  }
+  if(!same())return;renderTop();d.root.querySelector('.profile-identity518 h3').textContent=accountDisplayName();setAccountMessage('個人資料已儲存。','ok');presence358_.next=0;presenceSync358_();
+ }catch(err){if(same()){if(savedName||savedAvatar)renderTop();setAccountMessage((savedName?'名稱已儲存；':'')+(savedAvatar?'頭像已儲存；':'')+'其餘變更未完成：'+(err?.message||'請稍後重試。'),'error');}}
+ finally{if(avatarChanging325_===entry)avatarChanging325_=null;d.busy=false;controls.forEach(([el,disabled])=>{if(el.isConnected)el.disabled=disabled;});endServerMutation_();}
+}
+function profileFocus518_(root,close){
+ root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return;}if(e.key!=='Tab')return;const nodes=[...root.querySelectorAll('button:not(:disabled),input:not(:disabled),[tabindex="0"]')].filter(n=>n.getClientRects().length);if(!nodes.length)return;const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
+ root.querySelector('button')?.focus({preventScroll:true});
+}
+async function openTownProfile518_(person){
+ const root=document.createElement('div');root.className='profile-overlay518 town-profile518';root.innerHTML=`<section class="profile-window518" role="dialog" aria-modal="true" aria-labelledby="publicTitle518"><header><h2 id="publicTitle518">冒險者資料</h2><button type="button" onclick="closeTownPerson358_()" aria-label="關閉玩家資料">×</button></header><div class="profile-scroll518"><div class="profile-identity518"><span class="profile-avatar518">${avatarArt314_(person.avatarId)}</span><div><small>Lv.${person.level}</small><h3>${escapeHtml(person.nickname)}</h3>${titleBadgeHtml_(person.titleId)}</div></div><p role="status">讀取玩家資料中…</p></div><footer><span>目前出戰配裝與能力</span><button type="button" onclick="closeTownPerson358_()">關閉資料</button></footer></section>`;document.body.append(root);root.addEventListener('click',e=>{if(e.target===root)closeTownPerson358_();});profileFocus518_(root,closeTownPerson358_);
+ const owner=presenceOwner358_();
+ try{
+  const data=await apiPost('profile/public',{presenceId:person.id},{silentLoading:true,maxRetry:0});
+  if(!root.isConnected||presence358_.selected!==person.id||owner!==presenceOwner358_())return;
+  if(!data?.ok||data.profile?.id!==person.id||!Array.isArray(data.profile?.appearance?.equipment)||!data.profile.stats)throw Error('PROFILE_INVALID');
+  const p=data.profile;root.profile518=p;const s=p.stats,fmt=n=>Number(n||0).toLocaleString('zh-TW');
+  const stats=[['最大 HP',s.hp],['物理攻擊',s.patk],['魔法攻擊',s.matk],['防禦',s.def],['爆擊率',s.crit,'%'],['爆擊傷害',s.critDamage,'%']].map(([name,value,suffix])=>`<div><span>${name}</span><b>${fmt(value)}${suffix||''}</b></div>`).join('');
+  const pet=p.pet?(petSpecies297(p.pet)?.Name||p.pet.species)+' Lv.'+p.pet.level:'未攜帶';
+  const items=p.appearance.equipment;const slots=['head','armor','weapon','special','ring','ring','ring','ring'];let ring=0;
+  const eq=slots.map(slot=>{const it=slot==='ring'?items.filter(x=>x.slot==='ring')[ring++]:items.find(x=>x.slot===slot);const i=items.indexOf(it);return `<button type="button" class="profile-equip518" ${it?`onclick="profileDetail518_(this,'equipment',${i})"`:'disabled'}><span class="profile-item518">${it?objectArt202_(it,'equipment'):'＋'}${it&&it.enhance?'<small>+'+Number(it.enhance)+'</small>':''}</span><small>${slotName(slot)}</small><b>${it?escapeHtml(it.name||itemTemplates[it.template]?.name||it.template):'未裝備'}</b></button>`;}).join('');
+  const skills=(p.skills||[]).map((sk,i)=>`<button type="button" class="profile-skill518" onclick="profileDetail518_(this,'skill',${i})"><span>${skillArt198_(sk.id)}</span><span><small>${sk.type==='passive'?'被動技能':'主動技能'}</small><b>${escapeHtml(skillName(sk.id))}</b>${skillCategoryBadge179_(sk.id)}</span></button>`).join('');
+  root.querySelector('.profile-scroll518').innerHTML=`<div class="profile-identity518"><span class="profile-avatar518">${avatarArt314_(p.avatarId)}</span><div><small>Lv.${p.level}</small><h3>${escapeHtml(p.nickname)}</h3>${titleBadgeHtml_(p.titleId)}</div><span class="profile-online518">● 城鎮玩家</span></div><div class="profile-overview518"><div class="profile-stage518"><div class="profile-hero518"><canvas width="256" height="384"></canvas></div><small>目前出戰形象</small></div><div><h3>角色能力</h3><div class="profile-stats518">${stats}</div><div class="profile-record518"><div><small>主線進度</small><b>第 ${Math.min(50,p.maxCleared)} 層</b></div><div><small>挑戰進度</small><b>${p.maxCleared>50?'第 '+p.maxCleared+' 關':'未通關'}</b></div><div><small>同行寵物</small><b>${escapeHtml(pet)}</b></div></div></div></div><section><h3>目前裝備</h3><div class="profile-equipment518">${eq}</div></section><section><h3>出戰技能</h3><div class="profile-skills518">${skills||'<p>未裝備技能</p>'}</div></section><section class="profile-detail518" hidden></section>`;
+  drawPaperdoll204_(root.querySelector('canvas'),p.appearance);
+ }catch(_){if(root.isConnected&&owner===presenceOwner358_()){root.querySelector('.profile-scroll518').insertAdjacentHTML('beforeend','<p class="profile-error518">暫時無法取得資料，玩家可能已離線。請關閉後重試。</p>');root.querySelector('[role="status"]')?.remove();}}
+}
+function profileDetail518_(el,type,index){
+ const root=el.closest('.town-profile518'),p=root?.profile518,box=root?.querySelector('.profile-detail518');if(!p||!box)return;
+ const it=type==='equipment'?p.appearance.equipment[index]:p.skills[index];if(!it)return;
+ const content=type==='equipment'?gearTip404_(it):`<h3>${escapeHtml(skillName(it.id))}</h3>${skillCategoryBadge179_(it.id)}${skillDescHtml(skillTemplates[it.id]?.desc||'')}`;
+ box.innerHTML='<button type="button" class="profile-detail-close518" aria-label="關閉詳細說明">×</button>'+content;box.hidden=false;box.querySelector('button').onclick=()=>{box.hidden=true;el.focus({preventScroll:true});};box.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+
 function renderTop(){
   avatarSyncOwner314_();
   updateAnnouncementDots108_();
   const max=state.level>=maxPlayerLevel_(),needed=Math.max(1,expNeeded(state.level)),pct=max?100:Math.max(0,Math.min(100,Number(state.exp||0)/needed*100));
   const bar=document.getElementById('resourceBar');bar.className='resources player-summary';
-  const markup=viewMode_==='mobile'?mobilePlayerBanner331_(pct,max,needed):`${avatarHeader314_()}<span class="banner-level" title="EXP ${max?'MAX':`${state.exp} / ${needed}`}">Lv.<strong>${state.level}</strong><span class="banner-exp-track" role="progressbar" aria-label="經驗值" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i><small class="banner-exp-percent">${Math.floor(pct)}%</small></span></span><span class="player-name" title="${escapeAttr(accountDisplayName())}">${escapeHtml(accountDisplayName())}</span><button class="player-title-button" onclick="openTitleSelector_()" title="更換稱號">${titleBadgeHtml_(state.equippedTitle)}</button><span class="banner-currency" title="金幣 ${goldNumber331_(state.gold)}">${coinArt208_()}金幣 <strong>${goldNumber331_(state.gold)}</strong></span>`;
+  const markup=playerBanner518_(pct,max,needed);
   // Keep stable avatar/title DOM and animation phase when switching pages.
   if(bar.bannerMarkup330_!==markup){bar.innerHTML=markup;bar.bannerMarkup330_=markup;}
+  const accountTitle518=document.querySelector('#accountOverlay.profile-overlay518 .profile-identity518 .title-badge');if(accountTitle518&&accountTitle518.outerHTML!==titleBadgeHtml_(state.equippedTitle))accountTitle518.outerHTML=titleBadgeHtml_(state.equippedTitle);
   syncBannerCoin333_();updateAccountStatus();updateManualSaveButton_();
 }
 
@@ -32938,5 +33143,6 @@ html body #app #page .mist465 .mist-entry-side465{max-width:300px!important}
 
 }
 </style>
+
 </body>
 </html>
