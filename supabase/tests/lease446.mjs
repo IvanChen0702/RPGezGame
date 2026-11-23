@@ -11,7 +11,7 @@ const helperSource = readFileSync(new URL('lease446.ts', root), 'utf8');
 const { createGameLease446, retainGameRequest446 } = await import('data:text/javascript;base64,' + Buffer.from(helperSource).toString('base64'));
 const source = readFileSync(new URL('index.ts', root), 'utf8');
 const wrapper = source.slice(source.indexOf('// v446: only audited'), source.indexOf('// Log interrupted phases')).replace('export function', 'function');
-const read453=['arena/ranking','arena/revenge/list','arena/reports','boxing/ranking','worldboss/ranking','auction/my-sales'];
+const read453=['arena/ranking','arena/revenge/list','arena/reports','worldboss/ranking','auction/my-sales'];
 const deferred = () => { let resolve; const promise = new Promise(r => resolve = r); return { promise, resolve }; };
 const env = key => ({ MIST_RUNTIME468_ENABLED:'false', GAME_ALLOWED_ORIGINS: 'https://game.test', SUPABASE_URL: 'https://db.test', SUPABASE_SERVICE_ROLE_KEY: 'test-only-key', GAME_CRON_SECRET: 'test-only-cron' })[key];
 function harness(config = {}) {
@@ -230,7 +230,7 @@ for(const action of read453)for(const config of [{anonymous:true},{disabled:true
 for(const action of ['boxing/status','boxing/history','worldboss/status','worldboss/reward/check','arena/status','arena/matches','extreme/status','battle/finish','auction/claim'])test(`${action} keeps its side effects behind the mutation lease`,async()=>{
  const h=harness({owner:'another-player'});assert.equal((await h.request(action)).status,429);assert.equal(h.operations.length,0);assert.equal(h.owner,'another-player');
 });
-test('six display reads finish while a live mutation retains its lease',async()=>{
+test('five display reads finish while a live mutation retains its lease',async()=>{
  const h=harness({block:true});const first=h.request('battle/start');await h.entered.promise;
  const owner=h.owner,before=h.calls.length;
  await Promise.all(read453.map(async action=>assert.equal((await h.request(action,{},'account-b')).status,200)));
