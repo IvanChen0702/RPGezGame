@@ -330,9 +330,10 @@ g.RPG411=Object.freeze({epoch,enabled,cfg,validate,describe,compile,relicScale,m
 .desktop-ui .achievement-card .achievement-progress{height:3px!important;margin:10px 0 3px!important;border:0!important}
 .desktop-ui .achievement-card .achievement-reward-row94{margin-top:7px!important;padding:3px 0 0!important;border:0!important;background:none!important}
 .desktop-ui .achievement-card .achievement-reward-row94 button:disabled{background:none!important;border:0!important;color:#adaeaa!important;box-shadow:none!important}
-.desktop-ui #townWindow311[data-route=achievements] .town-window311{width:min(940px,96vw)!important;height:auto!important;min-height:0!important;max-height:92dvh!important}
-.desktop-ui #townWindow311[data-route=achievements] :is(#page,.viewport-screen,.achievement-panel94){height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}
-.desktop-ui #townWindow311[data-route=achievements] .achievement-grid{flex:0 1 auto!important;height:auto!important;min-height:0!important;max-height:max(100px,calc(92dvh - 226px))!important;box-sizing:border-box!important;overflow:auto!important}
+/* v523: category changes only resize the scrollable list contents, never the window. */
+#townWindow311[data-route=achievements] .town-window311{width:min(940px,100%)!important;height:min(760px,calc(100dvh - 24px))!important;min-height:0!important;max-height:100%!important;overflow:hidden!important}
+#townWindow311[data-route=achievements] :is(#page,.viewport-screen,.achievement-panel94){display:flex!important;flex-direction:column!important;flex:1 1 0%!important;height:0!important;min-height:0!important;max-height:none!important;overflow:hidden!important}
+#townWindow311[data-route=achievements] .achievement-grid{flex:1 1 0%!important;height:0!important;min-height:0!important;max-height:none!important;box-sizing:border-box!important;overflow:auto!important;scrollbar-gutter:stable!important;overscroll-behavior:contain!important}
 .desktop-ui .quest-journal-actions369{position:sticky!important;bottom:0!important;z-index:1!important;display:flex!important;gap:8px!important;padding:8px 0 5px!important;background:linear-gradient(0deg,#242c2e 75%,#242c2e00)!important}
 }</style><style>@layer modes406{
 .desktop-ui .ready400 .ready-sheet{zoom:var(--ready-fit406,1)!important;height:auto!important;max-height:none!important;min-height:0!important;flex:0 0 auto!important;overflow:visible!important}
